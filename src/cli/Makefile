@@ -26,30 +26,40 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-all:
+include ../build/make.h
 
-MODULE_LIST = .
+CLIS_CODE_DIR = $(CODE_DIR)/cli
+CLIS_INC_DIR =  $(CLIS_CODE_DIR)/ -I$(COMMON_INC)
+CLIS_SRCC_DIR = $(CLIS_CODE_DIR)/src
 
-LIBRARY = libcparser.a
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cparser.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cparser_token.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cparser_token_tbl.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cparser_io_unix.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cparser_fsm.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cparser_line.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cparser_tree.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/login.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/user_mgmt.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cli_main.c
+CLIS_SRCS += $(CLIS_SRCC_DIR)/cli_action.c
 
-ifeq ("$(OUTDIR)", "")
-OUTDIR = .
-endif
+CFLAGS += -I$(CLIS_INC_DIR)
 
-DIR_LIST = $(patsubst %,%.PHONY,$(MODULE_LIST) $(BIN_LIST) $(LIB_LIST))
+CLI_OBJ = $(CLIS_SRCS:.c=.o)
 
-CLEAN_LIST = $(patsubst %,%.PHONY_CLEAN,$(MODULE_LIST))
+all: PARSE_TREE $(CLI_OBJ) cli.o
 
-$(DIR_LIST):
-	@echo "MAKE $(basename $@)"
-	$(MAKE) PLATFORM=$(PLATFORM) MODULE=$(basename $@) DEBUG="$(DEBUG)" LIBRARY=$(LIBRARY) -C $(basename $@)/src all
+PARSE_TREE:
+	echo $(CLI_OBJ)
+	$(CLIS_CODE_DIR)/scripts/mk_parser.py $(CLI_FLAGS) $(CLIS_SRCC_DIR)/cmd.cli
+	mv $(CLIS_CODE_DIR)/cparser_tree.c $(CLIS_SRCC_DIR)/cparser_tree.c
+	mv $(CLIS_CODE_DIR)/cparser_tree.h $(CLIS_SRCC_DIR)/cparser_tree.h
 
-$(CLEAN_LIST):
-	@echo "CLEAN $(basename $@)"
-	$(MAKE) PLATFORM=$(PLATFORM) MODULE=$(basename $@) DEBUG="$(DEBUG)" LIBRARY=$(LIBRARY) -C $(basename $@)/src clean
-
-bin: $(DIR_LIST)
-
-all: bin $(TEST_LIST)
-
-clean: $(CLEAN_LIST)
+$(CLIS_OBJ) : %.o : %.c Makefile
+	echo "SASI"
+	$(CC) -c $(CFLAGS) $< -o $@
+cli.o: $(CLIS_OBJ)
+	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/cli.o $(CLIS_SRCC_DIR)/*.o
+clean:
+	rm -f $(CLIS_SRCC_DIR)/*.o $(FINAL_OBJ)/cli.o  $(CLIS_SRCC_DIR)/cparser_tree.*
