@@ -51,7 +51,6 @@ CLI_OBJ = $(CLIS_SRCS:.c=.o)
 all: PARSE_TREE $(CLI_OBJ) cli.o
 
 PARSE_TREE:
-	echo $(CLI_OBJ)
 	$(CLIS_CODE_DIR)/scripts/mk_parser.py $(CLI_FLAGS) $(CLIS_SRCC_DIR)/cmd.cli
 	mv $(CLIS_CODE_DIR)/cparser_tree.c $(CLIS_SRCC_DIR)/cparser_tree.c
 	mv $(CLIS_CODE_DIR)/cparser_tree.h $(CLIS_SRCC_DIR)/cparser_tree.h
