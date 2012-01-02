@@ -22,14 +22,14 @@
     along with SDPOS.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include "defines.h"
 
+#include "common_types.h"
 /** A MAC address structure (6 bytes) */
 typedef struct mac_struct
 {
   u8 v[6];
 } 
-_packed_attribute_ mac_t;
+__attribute__ ((__packed__)) mac_t;
 
 /** An IP address structure (4 bytes) */
 typedef union ip_union
@@ -38,14 +38,8 @@ typedef union ip_union
   //u16 w[2];
   u8  v[4];
 } 
-_packed_attribute_ ip_t;
+__attribute__ ((__packed__)) ip_t;
 
-
-/** @returns fail if MAC / PHY initialization error. */
-extern retcode network_stack_init(void);
-
-/** Block the caller until link is established to external network. */
-extern void network_wait_linked(void);
 
 #include "ip.h"
 #include "mac.h"

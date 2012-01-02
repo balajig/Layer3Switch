@@ -24,7 +24,7 @@
 
 
 
-#include "defines.h"
+#include "common_types.h"
 #include "ip.h"
 
 typedef u16 udp_port_t;

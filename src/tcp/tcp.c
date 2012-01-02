@@ -93,7 +93,7 @@ typedef struct tcp_header_struct
   u16 window;
   u16 checksum;
   u16 urgent_pointer;
-} _packed_attribute_ tcp_header_t;
+} __attribute__ ((__packed__)) tcp_header_t;
 
 
 typedef struct tcp_options_struct
@@ -103,7 +103,7 @@ typedef struct tcp_options_struct
   u8  length;
   /* First word of options */
   u16 w1;
-} _packed_attribute_ tcp_options_t;
+} __attribute__ ((__packed__)) tcp_options_t;
 
 /* Pseudo header as defined by rfc 793 */
 typedef struct pseudo_header_struct
@@ -113,7 +113,7 @@ typedef struct pseudo_header_struct
   u8   zero;
   u8   protocol;
   u16  length;
-} _packed_attribute_ pseudo_header_t;
+} __attribute__ ((__packed__)) pseudo_header_t;
 
 /* List of possible tcp states */
 typedef enum tcp_state_enum

@@ -11,6 +11,10 @@
 #include <linux/ip.h>
 #include <arpa/inet.h>
 
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+
 #define MAX_PORT_NAME 8
 
 #define ETH_ALEN        6               /* Octets in one ethernet addr   */

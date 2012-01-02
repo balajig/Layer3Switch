@@ -50,7 +50,7 @@ typedef struct udp_header_struct
   udp_port_t destination_port;
   u16        length;
   u16        checksum;
-} _packed_attribute_ udp_header_t;
+} __attribute__ ((__packed__)) udp_header_t;
 
 /* Pseudo header as defined by rfc 793. */
 typedef struct pseudo_header_struct
@@ -60,7 +60,7 @@ typedef struct pseudo_header_struct
   u8   zero;
   u8   protocol;
   u16  length;
-} _packed_attribute_ pseudo_header_t;
+} __attribute__ ((__packed__)) pseudo_header_t;
 
 
 
@@ -310,4 +310,3 @@ static udp_socket_t find_matching_socket(udp_header_t *h,
   }
   return partial_match;
 }
-
