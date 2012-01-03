@@ -218,6 +218,50 @@ typedef char PORTLIST [MAX_PORTS / MAX_BITS_PER_BYTE];
 #define MAX_VLAN_BITS 12
 #define MAX_VLAN_IDS  (1 << MAX_VLAN_BITS) 
 
+#define	IN_CLASSA(a)		((((in_addr_t)(a)) & 0x80000000) == 0)
+#define	IN_CLASSA_NET		0xff000000
+#define	IN_CLASSA_NSHIFT	24
+#define	IN_CLASSA_HOST		(0xffffffff & ~IN_CLASSA_NET)
+#define	IN_CLASSA_MAX		128
+
+#define	IN_CLASSB(a)		((((in_addr_t)(a)) & 0xc0000000) == 0x80000000)
+#define	IN_CLASSB_NET		0xffff0000
+#define	IN_CLASSB_NSHIFT	16
+#define	IN_CLASSB_HOST		(0xffffffff & ~IN_CLASSB_NET)
+#define	IN_CLASSB_MAX		65536
+
+#define	IN_CLASSC(a)		((((in_addr_t)(a)) & 0xe0000000) == 0xc0000000)
+#define	IN_CLASSC_NET		0xffffff00
+#define	IN_CLASSC_NSHIFT	8
+#define	IN_CLASSC_HOST		(0xffffffff & ~IN_CLASSC_NET)
+
+#define	IN_CLASSD(a)		((((in_addr_t)(a)) & 0xf0000000) == 0xe0000000)
+#define	IN_MULTICAST(a)		IN_CLASSD(a)
+
+#define	IN_EXPERIMENTAL(a)	((((in_addr_t)(a)) & 0xe0000000) == 0xe0000000)
+#define	IN_BADCLASS(a)		((((in_addr_t)(a)) & 0xf0000000) == 0xf0000000)
+
+/* Address to accept any incoming messages.  */
+#define	INADDR_ANY		((in_addr_t) 0x00000000)
+/* Address to send to all hosts.  */
+#define	INADDR_BROADCAST	((in_addr_t) 0xffffffff)
+/* Address indicating an error return.  */
+#define	INADDR_NONE		((in_addr_t) 0xffffffff)
+
+/* Network number for local host loopback.  */
+#define	IN_LOOPBACKNET		127
+/* Address to loopback in software to local host.  */
+#ifndef INADDR_LOOPBACK
+# define INADDR_LOOPBACK	((in_addr_t) 0x7f000001) /* Inet 127.0.0.1.  */
+#endif
+
+/* Defines for Multicast INADDR.  */
+#define INADDR_UNSPEC_GROUP	((in_addr_t) 0xe0000000) /* 224.0.0.0 */
+#define INADDR_ALLHOSTS_GROUP	((in_addr_t) 0xe0000001) /* 224.0.0.1 */
+#define INADDR_ALLRTRS_GROUP    ((in_addr_t) 0xe0000002) /* 224.0.0.2 */
+#define INADDR_MAX_LOCAL_GROUP  ((in_addr_t) 0xe00000ff) /* 224.0.0.255 */
+
+
 enum ROWSTATUS  {
 	ROW_STATE_CREATE_WAIT = 5
 };

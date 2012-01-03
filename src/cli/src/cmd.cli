@@ -25,6 +25,9 @@ show interface
 //Displays IP Information
 show ip interface
 
+//Displays IP Information
+show ip route
+
 // Enable privileged mode
 enable privileged-mode
 

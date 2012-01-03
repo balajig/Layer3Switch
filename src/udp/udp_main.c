@@ -31,7 +31,7 @@ int udp_init (void)
 	return 0;
 }
 
-unsigned long udp_open (const char *protocol_name, int family, uint16_t local_port, uint16_t remote_port, uint32_t remote_ip)
+unsigned long udp_open (int family, uint16_t local_port, uint16_t remote_port, uint32_t remote_ip)
 {
 	udpctrlblk_t *new = NULL;
 
@@ -62,9 +62,9 @@ unsigned long udp_open (const char *protocol_name, int family, uint16_t local_po
 	return (unsigned long)new;
 }
 
-int udp_close (unsigned long sockblk)
+int udp_close (unsigned long udpblk)
 {
-	udpctrlblk_t * p = (udpctrlblk_t *)sockblk;
+	udpctrlblk_t * p = (udpctrlblk_t *)udpblk;
 
 	if (!p)
 		return -1;
@@ -77,9 +77,9 @@ int udp_close (unsigned long sockblk)
 	
 }
 
-int sock_v4bind (unsigned long sockblk, uint32_t ipaddr, uint16_t local_port)
+int udp_v4bind (unsigned long udpblk, uint32_t ipaddr, uint16_t local_port)
 {
-	udpctrlblk_t * p = (udpctrlblk_t *)sockblk;
+	udpctrlblk_t * p = (udpctrlblk_t *)udpblk;
 
 	if (!p)
 		return -1;
@@ -90,13 +90,32 @@ int sock_v4bind (unsigned long sockblk, uint32_t ipaddr, uint16_t local_port)
 	return 0;
 }
 
-int sock_queue_packet ()
+int udp_queue_packet (unsigned long udpblk , uint8_t *buf)
 {
+	udpctrlblk_t * p = (udpctrlblk_t *)udpblk;
+	udp_socket_queue_t  *qbuf = NULL;
+
+	if (!p)
+		return -1;
+
+	qbuf = malloc (sizeof(udp_socket_queue_t));
+
+	if (!qbuf)
+		return -1;
+
+	INIT_LIST_HEAD (&qbuf->nbuf);
+	qbuf->buf = buf;
+
+	list_add_tail (&qbuf->nbuf, &p->queue);
+
+	EvtSnd (&p->evt, UDP_PKT_RX_ON_SOCK);
+
+	return 0;
 }
 
-int sock_recvfrom (unsigned long sockblk, uint8_t **data, size_t datalen)
+int udp_recvfrom (unsigned long udpblk, uint8_t **data, size_t datalen)
 {
-	udpctrlblk_t * p = (udpctrlblk_t *)sockblk;
+	udpctrlblk_t * p = (udpctrlblk_t *)udpblk;
 	udp_socket_queue_t  *qbuf = NULL;
 
 	if (!p)
@@ -105,23 +124,28 @@ int sock_recvfrom (unsigned long sockblk, uint8_t **data, size_t datalen)
 	while (1) {
 
 		int event = 0;
+		if (list_empty (&p->queue)) {
+			EvtRx (&p->evt, &event, UDP_PKT_RX_ON_SOCK);
+			if ((event & UDP_PKT_RX_ON_SOCK))
+				goto udp_packet;
 
-		EvtRx (&p->evt, &event, UDP_PKT_RX_ON_SOCK);
-
-		if (event & UDP_PKT_RX_ON_SOCK) {
-			if (!list_empty (&p->queue)) {
-				qbuf = list_first_entry (&p->queue, udp_socket_queue_t, nbuf);
-				if (!qbuf)
-					return -1;
-				*data = qbuf->buf;
-				break;
-			}
+		}
+udp_packet:
+		if (!list_empty (&p->queue)) {
+			qbuf = list_first_entry (&p->queue, udp_socket_queue_t, nbuf);
+			if (!qbuf)
+				return -1;
+			*data = qbuf->buf;
+			list_del (&qbuf->nbuf);
+			free (qbuf);
+			break;
 		}
 	}
 
 	return 0;
 }
 
-int sock_sendto (unsigned long sockblk, uint8_t *data, size_t datalen, uint32_t to_addr, uint16_t to_port)
+int udp_sendto (unsigned long udpblk, uint8_t *data, size_t datalen, uint32_t to_addr, uint16_t to_port)
 {
+	return 0;
 }

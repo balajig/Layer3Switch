@@ -18,10 +18,25 @@ typedef struct ifentry {
         uint32_t  ifOutErrors;    
 	struct stp_port_entry *pstp_info;
         MACADDRESS ifPhysAddress;  
-}__attribute__ ((__packed__))port_t;
+        unsigned long in_bytes;
+        unsigned long in_packets;
+        unsigned long in_mcast_pkts;
+        unsigned long in_errors;
+        unsigned long in_discards;
+        unsigned long in_unknown_protos;
 
-extern port_t port_cdb[];
+        unsigned long out_bytes;
+        unsigned long out_packets;
+        unsigned long out_mcast_pkts; 
+        unsigned long out_errors;
+        unsigned long out_discards;
+        unsigned long out_collisions;
 
+}__attribute__ ((__packed__))if_t;
+
+extern if_t port_cdb[];
+
+#define   IF_INFO(port)             &port_cdb[port - 1]
 #define   IF_INDEX(port)            port_cdb[port - 1].ifIndex
 #define   IF_DESCR(port)            port_cdb[port - 1].ifDescr
 #define   IF_TYPE(port)             port_cdb[port - 1].ifType
