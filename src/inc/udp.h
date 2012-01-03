@@ -27,7 +27,6 @@
 #include "common_types.h"
 #include "ip.h"
 
-typedef u16 udp_port_t;
 typedef iostream_t udp_socket_t;
 
 #define INVALID_UDP_SOCKET      INVALID_IOSTREAM

@@ -21,6 +21,7 @@ LIBS_SRCS += $(LIBS_SRCC_DIR)/mem_main.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/tsk_lnx.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/tsk_main.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/tsk_util.c
+LIBS_SRCS += $(LIBS_SRCC_DIR)/event.c
 
 
 CFLAGS += -I$(LIBS_INC_DIR)

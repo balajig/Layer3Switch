@@ -5,6 +5,15 @@
 #define _LIB_PROTO_H
 #include "task.h"
 #include "hashlib.h"
+
+typedef struct event_block 
+{
+	int32_t         event;
+	tskmtx_t        evt_mtx;
+	tskcnd_t        evt_cnd;
+}EVT_T;
+
+
 /*TASK*/
 retval_t task_create (const char tskname[], int tsk_prio, int sched_alg, int stk_size,
 	              void *(*start_routine) (void *), void (*exit_routine) (),
@@ -72,4 +81,11 @@ uint32_t ip_2_uint32 (uint8_t *ipaddress, int byte_order);
 void uint32_2_ipstring (uint32_t ipAddress, uint8_t *addr);
 
 void send_packet (void *buf, uint16_t port, int len);
+
+
+/*EVENT Layer*/
+int EventInit (EVT_T *p);
+int EvtRx (EVT_T *evt, int *pevent, int event);
+void EvtSnd (EVT_T *evt, int event);
+
 #endif

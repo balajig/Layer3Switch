@@ -10,21 +10,26 @@
 
 #include "list.h"
 
-struct udp_data
-{
-	void *buf;
-	struct list_head next;
-};
+#define SOCKET_QUEUE_SIZE       8
+
+typedef struct _udp_socket_queue_t {
+	void            *buf;
+	struct  list_head nbuf;
+} udp_socket_queue_t;
+
 
 typedef struct udp_ctrl_blk 
 {
 	struct list_head   next;
-	struct list_head   sock_pkt_hd;
-	uint32_t           ipaddr;
-	uint32_t           ripaddr;
+	struct list_head   queue;
+	EVT_T              evt;
 	int32_t            sock;
-	uint32_t	   family;
-	uint16_t           sport;
-	uint16_t           dport;
+	uint32_t           udpEndpointLocalAddress;
+	uint32_t           udpEndpointRemoteAddress;
+	uint32_t	   udpEndpointLocalAddressType;
+	uint32_t	   udpEndpointRemoteAddressType;
+	uint16_t           udpEndpointLocalPort;
+	uint16_t           udpEndpointRemotePort;
+	unsigned char   count;
 }udpctrlblk_t;
 

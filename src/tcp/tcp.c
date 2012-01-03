@@ -1758,5 +1758,3 @@ retcode tcp_cmde_infos(void)
   return ok;
 }
 #endif
-
-
