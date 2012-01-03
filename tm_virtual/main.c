@@ -81,7 +81,7 @@ int show_vlinks (char *args[], int count)
 			fprintf (stdout, "%d  [inst %d]p%-d <-----> p%-d[inst %d] "
                                  "Up , Packets : %u\n", 
                                  i, vnode->inst[0].inst, vnode->inst[0].port, 
-				 vnode->inst[1].inst, vnode->inst[1].port, 
+				 vnode->inst[1].port, vnode->inst[1].inst, 
                                  vnode->pkt_count);
 			i++;
 	}
