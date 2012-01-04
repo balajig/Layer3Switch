@@ -9,6 +9,7 @@ HAL_CODE_DIR = $(CODE_DIR)/platform/hal
 
 PLAT_LINUX_SRCS += $(PLAT_LINUX_SRCC_DIR)/if.c
 PLAT_LINUX_SRCS += $(PLAT_LINUX_SRCC_DIR)/main_lnx.c
+PLAT_LINUX_SRCS += $(PLAT_LINUX_SRCC_DIR)/port.c
 PLAT_LINUX_SRCS += $(PLAT_LINUX_SRCC_DIR)/../../hal/hal_cli.c
 
 
@@ -21,7 +22,7 @@ all: $(PLAT_OBJ) linux.o
 $(PLAT_LINUX_OBJ) : %.o : %.c Makefile
 	$(CC) -c $(CFLAGS) $< -o $@
 linux.o: $(PLAT_LINUX_OBJ)
-	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/linux.o $(PLAT_LINUX_SRCC_DIR)/*.o $(HAL_CODE_DIR)/*.o
+	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/../linux_obj/linux.o $(PLAT_LINUX_SRCC_DIR)/*.o $(HAL_CODE_DIR)/*.o
 
 clean:
-	rm -f $(PLAT_LINUX_SRCC_DIR)/*.o $(FINAL_OBJ)/linux.o $(HAL_CODE_DIR)/*.o
+	rm -f $(PLAT_LINUX_SRCC_DIR)/*.o $(FINAL_OBJ)/../linux_obj/linux.o $(HAL_CODE_DIR)/*.o

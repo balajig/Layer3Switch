@@ -41,9 +41,10 @@ ROUTE:
 
 
 SWITCH:  lib BRIDGE STP PLATFORM CLI PORT GDD  RSTP VLAN IPV4 VRRP UDP ROUTE
-	gcc -o Switch.exe obj/*.o -lpthread -lrt
+	gcc -o Switch.exe obj/*.o $(PLATFORM_EXE)_obj/*.o -lpthread -lrt
 
 clean: clean-custom
+	$(RM) obj/*.o
 	make clean -C $(CODE_DIR)/bridge
 	make clean -C $(CODE_DIR)/bridge/stp
 	make clean -C $(CODE_DIR)/cli

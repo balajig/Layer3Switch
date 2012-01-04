@@ -8,27 +8,23 @@
  *
  */
 
+#include "common_types.h"
+#include "ifmgmt.h"
 #include "nt.h"
 #include <sys/ioctl.h>
 
 #define _PATH_PROCNET_DEV "/proc/net/dev"
 
 
-LIST_HEAD(if_hd);
-
-static struct if_info *add_if_info(char *name)
+static int fetch_and_update_if_info (if_t *ife);
+static int idx = 1;
+static if_t *add_if_info(char *name)
 {
-    struct if_info * new = calloc (1, sizeof (struct if_info));
+    strncpy(IF_DESCR(idx), name, IFNAMSIZ);
 
-    if (!new) {
-	return NULL;
-    }
+   fetch_and_update_if_info (IF_INFO(idx));
 
-    strncpy(new->if_name, name, IFNAMSIZ);
-
-    list_add_tail (&new->nxt_if, &if_hd);
-
-    return new;
+    return IF_INFO(idx);
 }
 static char *get_name(char *name, char *p)
 {
@@ -88,9 +84,6 @@ static int if_readconf(void)
 
 	ifr = ifc.ifc_req;
 	for (n = 0; n < ifc.ifc_len; n += sizeof(struct ifreq), ifr++) {
-		/*Ignore loopback interface*/
-		if (!strncmp (ifr->ifr_name, "lo", strlen ("lo")))
-			continue;
 		add_if_info(ifr->ifr_name);
 	}
 	err = 0;
@@ -105,7 +98,7 @@ static int if_readlist_proc(char *target)
 	static int proc_read;
 	FILE *fh;
 	char buf[512];
-	struct if_info *ife;
+	if_t *ife;
 	int err;
 
 	if (proc_read)
@@ -127,6 +120,7 @@ static int if_readlist_proc(char *target)
 		char *s, name[IFNAMSIZ];
 		s = get_name(name, buf);
 		ife = add_if_info(name);
+		idx++;
 		if (target && !strcmp(target,name))
 			break;
 	}
@@ -140,7 +134,7 @@ static int if_readlist_proc(char *target)
 	return err;
 }
 
-static int if_readlist(void)
+int if_readlist(void)
 {
 	int err = if_readlist_proc (NULL);
 	if (err < 0)
@@ -148,10 +142,10 @@ static int if_readlist(void)
 	return err;
 }
 
-static int fetch_and_update_if_info (struct if_info *ife)
+static int fetch_and_update_if_info (if_t *ife)
 {
 	struct ifreq ifr;
-	char *ifname = ife->if_name; 
+	char *ifname = ife->ifDescr; 
 	int  fd = socket(AF_INET, SOCK_DGRAM, 0);
 
 	if (fd < 0)
@@ -159,125 +153,52 @@ static int fetch_and_update_if_info (struct if_info *ife)
 
 	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
 
+	if (ioctl(fd, SIOCGIFINDEX, (char *)&ifr) == 0)
+		ife->ifIndex = ifr.ifr_ifindex;
+
+	if (ioctl(fd, SIOCGIFMTU, (char *)&ifr) == 0)
+		ife->ifMtu = ifr.ifr_mtu;
+
+
 	if (ioctl(fd, SIOCGIFADDR, (char *)&ifr) == 0) {
-
+		struct ifreq ifr_tmp;
 		struct sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
-		ife->ipv4_address.s_addr = sin->sin_addr.s_addr;
+		struct sockaddr_in *mask = (struct sockaddr_in *)&ifr_tmp.ifr_addr;
 
+		strncpy(ifr_tmp.ifr_name, ifname, sizeof(ifr.ifr_name));
 
-		if (ioctl(fd, SIOCGIFNETMASK, &ifr) == 0) {
-			struct sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
-			ife->ipv4_netmask.s_addr = sin->sin_addr.s_addr;
+		if (ioctl(fd, SIOCGIFNETMASK, &ifr_tmp) == 0) {
+			//ife->ipv4_netmask.s_addr = mask->sin_addr.s_addr;
+			;
 		} 
+		if (!set_ip_address (idx, sin->sin_addr.s_addr,  mask->sin_addr.s_addr))
+		{
+			uint8_t addr[4];
+			uint32_2_ipstring (sin->sin_addr.s_addr, &addr);
+			route_add_if (addr, ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx));
+		}
 
 	}  	
 
-	if (ioctl(fd, SIOCGIFINDEX, (char *)&ifr) == 0)
-		ife->if_idx = ifr.ifr_ifindex;
-
 	if (ioctl(fd, SIOCGIFFLAGS, &ifr) == 0)  {
-		ife->admin_state = ifr.ifr_flags & IFF_UP;
-		ife->oper_state  = ifr.ifr_flags & IFF_RUNNING;
+		ife->ifAdminStatus = (ifr.ifr_flags & IFF_UP)? IF_UP: IF_DOWN;
+		ife->ifOperStatus  = (ifr.ifr_flags & IFF_RUNNING)?IF_UP:IF_DOWN;
 	} 
 
 	close(fd);
 
 	return 0;
-#if 0
-
-	if (errno == ENODEV) { 
-	    errmsg = ("Device not found"); 
-	} else { 
-	    errmsg = strerror(errno); 
-	}
-
-  	fprintf(stderr, ("%s: error fetching interface information: %s\n"),
-		ife->if_name, errmsg);
-#endif
-	return -1;
 }
 
 int read_interfaces (void)
 {
-	struct if_info    *p = NULL;
-	struct list_head  *head = &if_hd;
-
+	if_t    *p = NULL;
 	if (if_readlist () < 0)
 		return -1;
-
-	list_for_each_entry (p, head, nxt_if) {
-		if (fetch_and_update_if_info (p) < 0)
-			return -1;
-	}
-
 	return 0;
 }
 
-struct if_info * get_next_if_info (struct if_info *p)
-{
-	struct list_head *nxt = NULL;
-	struct if_info *nxtif = NULL;
-
-	if (!p) {
-		/*if p is NULL , get the first entry in the list*/
-		nxt = &if_hd;
-		if (!list_empty (nxt)) {
-			nxtif = list_first_entry (nxt, struct if_info, nxt_if);
-		}
-
-	} else {
-		nxt = &p->nxt_if;
-		if (nxt->next != &if_hd)
-			nxtif = list_entry (nxt->next, struct if_info, nxt_if);
-	}
-
-	return nxtif;
-}
-
-struct if_info * get_if (void *key, uint8_t key_type)
-{
-	struct if_info    *p = NULL;
-	struct list_head  *head = &if_hd;
-	struct if_info    key_data;
-
-	memset (&key_data, 0, sizeof(key_data));
-
-	switch (key_type) {
-		case GET_IF_BY_NAME:
-			strcpy (key_data.if_name, (char *)key);
-			break;
-		case GET_IF_BY_IPADDR:
-			key_data.ipv4_address.s_addr = (uint32_t)key;
-			break;
-		case GET_IF_BY_IFINDEX:
-			key_data.if_idx = (int32_t)key;
-			break;
-		default:
-			fprintf (stderr, "Invalid Search Type\n");
-			return NULL;
-	}
-
-	list_for_each_entry (p, head, nxt_if) {
-		switch (key_type) {
-			case GET_IF_BY_NAME:
-				if (!strcmp (key_data.if_name, p->if_name))
-					return p;
-				break;
-			case GET_IF_BY_IPADDR:
-				if (key_data.ipv4_address.s_addr == p->ipv4_address.s_addr)
-					return p;
-				break;
-			case GET_IF_BY_IFINDEX:
-				if (key_data.if_idx == p->if_idx)
-					return p;
-				break;
-		}
-	}
-
-	return NULL;
-}
-
-int make_if_up (struct if_info *p)
+int make_if_up (if_t *p)
 {
 	struct ifreq ifr;
 	int  fd = -1;
@@ -293,7 +214,7 @@ int make_if_up (struct if_info *p)
 
 	memset (&ifr, 0, sizeof(ifr));
 
-	strncpy(ifr.ifr_name, p->if_name, sizeof(ifr.ifr_name));
+	strncpy(ifr.ifr_name, p->ifDescr, sizeof(ifr.ifr_name));
 
 	ifr.ifr_flags |= IFF_UP;
 	ifr.ifr_flags |= IFF_RUNNING;
@@ -304,46 +225,9 @@ int make_if_up (struct if_info *p)
 
 	/*Read and update the interface states*/
 	if (ioctl(fd, SIOCGIFFLAGS, &ifr) == 0)  {
-		p->admin_state = ifr.ifr_flags & IFF_UP;
-		p->oper_state  = ifr.ifr_flags & IFF_RUNNING;
+		p->ifAdminStatus = (ifr.ifr_flags & IFF_UP)? IF_UP: IF_DOWN;
+		p->ifOperStatus  = (ifr.ifr_flags & IFF_RUNNING)?IF_UP:IF_DOWN;
 	}
 
 	return 0;
-}
-
-/*Following routines just to verify the database*/
-void display_interface_info (void)
-{
-	struct if_info    *p = NULL;
-	struct list_head  *head = &if_hd;
-
-	fprintf  (stderr, "\nIf_name     If_Index      If_addess        If_netmask      If_adminstate    If_operstate\n");
-	fprintf (stderr,   "-------     --------      ----------        ----------      -------------    ------------\n");
-
-	list_for_each_entry (p, head, nxt_if) {
-		fprintf (stderr, "%-10s   %-10d    %-15s    %-15s     %-10s   %-10s\n", p->if_name, p->if_idx, inet_ntoa(p->ipv4_address), inet_ntoa(p->ipv4_netmask), 
-				(p->admin_state & IFF_UP)?"UP": "DOWN", (p->oper_state & IFF_RUNNING)?"UP":"DOWN");
-	}
-}
-
-void test_get_if ()
-{
-	struct if_info    *p = get_if ((void *)"eth0", GET_IF_BY_NAME);
-
-	fprintf  (stderr, "\nIf_name     If_Index      If_addess        If_netmask      If_adminstate    If_operstate\n");
-	fprintf (stderr,   "-------     --------      ----------        ----------      -------------    ------------\n");
-
-	if (p) {
-		printf ("%-10s   %-10d   %-10s   %-10s  %10s   %10s\n", p->if_name, p->if_idx, inet_ntoa(p->ipv4_address), inet_ntoa(p->ipv4_netmask), 
-				(p->admin_state & IFF_UP)?"UP": "DOWN", (p->oper_state & IFF_RUNNING)?"UP":"DOWN");
-	}
-
-	if ((p = get_if ((void *)3, GET_IF_BY_IFINDEX))) {
-		printf ("%-10s   %-10d   %-10s   %-10s  %10s   %10s\n", p->if_name, p->if_idx, inet_ntoa(p->ipv4_address), inet_ntoa(p->ipv4_netmask), 
-				(p->admin_state & IFF_UP)?"UP": "DOWN", (p->oper_state & IFF_RUNNING)?"UP":"DOWN");
-	}
-	if ((p = get_if ((void *)5, GET_IF_BY_IFINDEX))) {
-		printf ("%-10s   %-10d   %-10s   %-10s  %10s   %10s\n", p->if_name, p->if_idx, inet_ntoa(p->ipv4_address), inet_ntoa(p->ipv4_netmask), 
-				(p->admin_state & IFF_UP)?"UP": "DOWN", (p->oper_state & IFF_RUNNING)?"UP":"DOWN");
-	}
 }

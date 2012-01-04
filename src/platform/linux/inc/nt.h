@@ -33,22 +33,8 @@ enum GET_IF {
 	GET_IF_BY_IFINDEX
 };
 
-
-struct if_info {
-	struct list_head nxt_if;
-	char		if_name[IFNAMSIZ];
-	struct in_addr	ipv4_netmask;
-	struct in_addr	ipv4_address;
-	int		sock_fd;
-	int		if_idx;
-	int		admin_state;	/*IFF_UP or IFF_DOWN*/
-	int		oper_state;   /*IFF_RUNNING*/
-	int 		flags;
-};
-
-
-struct if_info * get_next_if_info (struct if_info *p);
-int make_if_up (struct if_info *p);
+if_t * get_next_if_info (if_t *p);
+int make_if_up (if_t *p);
 void display_interface_info (void);
 int  read_interfaces (void);
 int rtnl_init(void);
@@ -60,7 +46,7 @@ int check_ns_state (void);
 int resolve_hostname (const char *hostname);
 int ping_setup (void);
 int try_to_resolve_host (void);
-struct if_info * get_if (void *key, uint8_t key_type);
+if_t * get_if (void *key, uint8_t key_type);
 
 
 #endif  /* NT_H */

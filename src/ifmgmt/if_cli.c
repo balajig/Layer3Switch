@@ -84,20 +84,4 @@ int cli_set_port_disable (void)
 	return 0;
 }
 
-int cli_show_interfaces (int port)
-{
-	int idx = -1;
 
-	const char *state[]  = {"UNKNWN", "UP", "DOWN"};
-
-	printf (" Port    Name     MTU    Type    Admin    Oper   LastChange\n");
-	printf (" ----   -----    -----  ------   ------  -----   ----------\n");
-	while (++idx < MAX_PORTS) {
-		printf (" %-3d    %-6s   %-5d   %-6s  %-4s    %-4s        %-4d\n",
-		port_cdb[idx].ifIndex + 1, port_cdb[idx].ifDescr,
-		port_cdb[idx].ifMtu, "ETH", state[port_cdb[idx].ifAdminStatus],
-		state[port_cdb[idx].ifOperStatus], port_cdb[idx].ifLastChange);
-	}
-
-	return 0;
-}

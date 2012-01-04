@@ -12,6 +12,7 @@ SIM_OBJ_DIR = $(SIM_CODE_DIR)/obj
 SIM_OBJS += $(SIM_OBJ_DIR)/main_sim.o
 SIM_OBJS += $(SIM_OBJ_DIR)/tm_virtl.o
 SIM_OBJS += $(SIM_OBJ_DIR)/hal_cli.o
+SIM_OBJS += $(SIM_OBJ_DIR)/port.o
 
 all: all-before  obj $(SIM_OBJS) sim.o all-after
 
@@ -19,7 +20,7 @@ obj:
 	mkdir -p ${SIM_OBJ_DIR}
 
 clean: clean-custom
-	$(RM) $(SIM_OBJ_DIR)/*.o $(FINAL_OBJ)/sim.o
+	$(RM) $(SIM_OBJ_DIR)/*.o $(FINAL_OBJ)/../sim_obj/sim.o
 
 $(SIM_OBJ_DIR)/main_sim.o: $(SIM_SRCC_DIR)/main_sim.c
 	$(CC) -c $(COMPILATION_SWITCH) $(SIM_SRCC_DIR)/main_sim.c -o $(SIM_OBJ_DIR)/main_sim.o $(CFLAGS) -I$(SIM_INC_DIR)
@@ -27,9 +28,12 @@ $(SIM_OBJ_DIR)/main_sim.o: $(SIM_SRCC_DIR)/main_sim.c
 $(SIM_OBJ_DIR)/tm_virtl.o: $(SIM_SRCC_DIR)/tm_virtl.c
 	$(CC) -c $(COMPILATION_SWITCH) $(SIM_SRCC_DIR)/tm_virtl.c -o $(SIM_OBJ_DIR)/tm_virtl.o $(CFLAGS) -I$(SIM_INC_DIR)
 
+$(SIM_OBJ_DIR)/port.o: $(SIM_SRCC_DIR)/port.c
+	$(CC) -c $(COMPILATION_SWITCH) $(SIM_SRCC_DIR)/port.c -o $(SIM_OBJ_DIR)/port.o $(CFLAGS) -I$(SIM_INC_DIR)
+
 $(SIM_OBJ_DIR)/hal_cli.o: $(HAL_CODE_DIR)/hal_cli.c
 	$(CC) -c $(COMPILATION_SWITCH) $(HAL_CODE_DIR)/hal_cli.c -o $(SIM_OBJ_DIR)/hal_cli.o $(CFLAGS) -I$(SIM_INC_DIR)
 
 
 sim.o: $(SIM_OBJS)
-	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/sim.o $(SIM_OBJS)
+	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/../sim_obj/sim.o $(SIM_OBJS)

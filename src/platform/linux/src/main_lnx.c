@@ -58,9 +58,9 @@ int main (int argc, char **argv)
 
 	spawn_pkt_processing_task ();
 
-	port_init ();
-
 	ip_init ();
+
+	port_init ();
 
 	bridge_init ();
 
