@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <getopt.h>
 #include "common_types.h"
+#include "ifmgmt.h"
 #include "cli.h"
 
 int parse_cmdline (int argc, char *argv[]);
@@ -83,11 +84,10 @@ int main (int argc, char **argv)
 int read_port_mac_address (int port, uint8_t *p) 
 {
 	int i = 0;
-	while (i < 5) {
-		p[i] = switch_mac[i];
+	while (i < 6) {
+		p[i] = port_cdb[port - 1].ifPhysAddress.addr[i];
 		i++;
 	}
-	p[5] = (uint8_t)port + 1;
 	return 0;
 }
 

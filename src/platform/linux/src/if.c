@@ -178,9 +178,11 @@ static int fetch_and_update_if_info (if_t *ife)
 		} 
 		if (!set_ip_address (idx, sin->sin_addr.s_addr,  mask->sin_addr.s_addr))
 		{
-			uint8_t addr[4];
-			uint32_2_ipstring (sin->sin_addr.s_addr, &addr);
-			route_add_if (addr, ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx));
+			if(strncmp (ifname, "lo", strlen ("lo"))) {
+				uint8_t addr[4];
+				uint32_2_ipstring (sin->sin_addr.s_addr, &addr);
+				route_add_if (addr, ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx));
+			}
 		}
 
 	}  	
@@ -189,6 +191,15 @@ static int fetch_and_update_if_info (if_t *ife)
 		ife->ifAdminStatus = (ifr.ifr_flags & IFF_UP)? IF_UP: IF_DOWN;
 		ife->ifOperStatus  = (ifr.ifr_flags & IFF_RUNNING)?IF_UP:IF_DOWN;
 	} 
+
+	if (ioctl (fd, SIOCGIFHWADDR, &ifr) == 0) {
+		unsigned char  *p = ifr.ifr_hwaddr.sa_data;
+		int i = 0;
+		while (i < 6) {
+			ife->ifPhysAddress.addr[i] = p[i];
+			i++;
+		}
+	}
 
 	close(fd);
 
