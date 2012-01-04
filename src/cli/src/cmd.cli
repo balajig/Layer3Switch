@@ -31,6 +31,9 @@ show ip route
 // Enable privileged mode
 enable privileged-mode
 
+// Run the configuration script
+run-script <STRING:filename>
+
 //configuration mode
 configure terminal
 
@@ -106,7 +109,7 @@ spanning-tree rstp ethernet <INT:portnum> admin-pt2pt
 //Configures default gateway
 ip default-gateway <IPV4ADDR:addr>
 
-//Configures default gateway
+//Configures Routing entry
 ip route <IPV4ADDR:network> <IPV4ADDR:mask> <IPV4ADDR:gateway>
 
 #endsubmode

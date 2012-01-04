@@ -156,7 +156,7 @@ cparser_is_user_input (cparser_t *parser, int *do_echo)
     return 0;
 }
 
-static void
+void
 cparser_record_command (cparser_t *parser, cparser_result_t rc)
 {
     assert(parser);

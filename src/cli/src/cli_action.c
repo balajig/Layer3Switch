@@ -127,3 +127,27 @@ cparser_cmd_enter_privileged_mode (cparser_t *parser, char *buf, int buf_size)
     }
     return CPARSER_OK;
 }
+
+cparser_result_t cparser_cmd_run_script_filename(cparser_context_t *context, char **filename_ptr)
+{
+	FILE  *fp = fopen  (*filename_ptr, "r");
+	int    c = 0;
+	int do_echo = 0;
+
+	if (!fp) {
+		printf ("Unable to open file :  %s\n", *filename_ptr);
+		return CPARSER_NOT_OK;
+	}
+
+	/* Reset FSM states and advance to the next line */
+	cparser_record_command(context->parser, CPARSER_OK);
+	cparser_fsm_reset(context->parser);
+	if (!cparser_is_user_input(context->parser, &do_echo)) {
+		cparser_print_prompt(context->parser);
+	}
+	cparser_line_advance(context->parser);	
+	while ((c = fgetc (fp)) != EOF) {
+        	cparser_input (context->parser, c, CPARSER_CHAR_REGULAR);
+	}
+	return CPARSER_OK;
+}
