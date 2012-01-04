@@ -32,7 +32,7 @@ int vlan_spanning_tree_enable_on_vlan (int vlan_id, int mode)
 			debug_vlan ("Unable to enable STP on vlan %d\n", vlan_id);
 			return -1;
 		}
-		for (i = 1; i <= MAX_PORTS ; i++) {
+		for (i = 1; i <= get_max_ports () ; i++) {
 			int res = 0;
 			IS_PORT_SET_PORT_LIST (p->egress_ports, i,res)
 			if (res) {
@@ -55,7 +55,7 @@ int vlan_spanning_tree_enable_on_vlan (int vlan_id, int mode)
 			return -1;
 		}	
 
-		for (i = 1; i <= MAX_PORTS ; i++) {
+		for (i = 1; i <= get_max_ports () ; i++) {
 			int res = 0;
 			IS_PORT_SET_PORT_LIST (p->egress_ports, i,res);
 			if (res) {
@@ -103,7 +103,7 @@ int vlan_spanning_tree_disable_on_vlan (int vlan_id, int mode)
 			int i = 0;
 			p->stp_enabled = 1;
 			p->stp_mode = MODE_STP;
-			for (i = 1; i <= MAX_PORTS ; i++) {
+			for (i = 1; i <= get_max_ports () ; i++) {
 				int res = 0;
 				IS_PORT_SET_PORT_LIST (p->egress_ports, i,res);
 				if (res) {

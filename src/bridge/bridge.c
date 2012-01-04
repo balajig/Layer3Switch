@@ -35,13 +35,13 @@ int bridge_init (void)
 
 void bridge_base_init (void)
 {
-	int i = MAX_PORTS;
+	int i = get_max_ports ();
 	int j = 0;
 
 	for (j = 0; j < 6; j++)
 	  this_bridge.addr.addr[j] = switch_mac[j];
 
-	this_bridge.nports = MAX_PORTS;
+	this_bridge.nports = get_max_ports ();
 	this_bridge.bridge_type = 1; /*Currently Un-known?*/
 
 	while (i-- < 0) {

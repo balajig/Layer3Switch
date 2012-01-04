@@ -10,7 +10,7 @@ if_t port_cdb[MAX_PORTS];
 
 int port_init (void)
 {
-	int idx = MAX_PORTS;
+	int idx = get_max_ports ();
 
 	while (idx--) {
 		port_cdb[idx].ifIndex = idx;
@@ -61,7 +61,7 @@ int cli_show_interfaces (int port)
 
 	printf (" Port    Name     MTU    Type    Admin    Oper   LastChange\n");
 	printf (" ----   -----    -----  ------   ------  -----   ----------\n");
-	while (++idx < MAX_PORTS) {
+	while (++idx < get_max_ports ()) {
 		printf (" %-3d    %-6s   %-5d   %-6s  %-4s    %-4s        %-4d\n",
 		port_cdb[idx].ifIndex + 1, port_cdb[idx].ifDescr,
 		port_cdb[idx].ifMtu, "ETH", state[port_cdb[idx].ifAdminStatus],
@@ -69,4 +69,9 @@ int cli_show_interfaces (int port)
 	}
 
 	return 0;
+}
+
+int get_max_ports (void)
+{
+        return MAX_PORTS;
 }

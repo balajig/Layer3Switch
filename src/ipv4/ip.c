@@ -22,7 +22,7 @@ int init_ip_interface_table (void)
 
 	memset (ip_port, 0, sizeof (ip_port));
 	
-	while (i < MAX_PORTS) 
+	while (i < get_max_ports ()) 
 	{
 		ip_port[i].IfIndex = i + 1;
 		i++;

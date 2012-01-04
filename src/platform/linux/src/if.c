@@ -18,6 +18,11 @@
 
 static int fetch_and_update_if_info (if_t *ife);
 static int idx = 1;
+
+int get_max_ports (void)
+{
+	return idx - 1;
+}
 static if_t *add_if_info(char *name)
 {
     strncpy(IF_DESCR(idx), name, IFNAMSIZ);

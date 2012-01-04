@@ -36,7 +36,7 @@ cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
 cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context)
 {
 	int i = 0;
-	while (i < MAX_PORTS) {
+	while (i < get_max_ports ()) {
 		if (ip_port[i].Status) {
 			const char *State[2] = {"UP", "DOWN"};
 			uint8_t addr[4];

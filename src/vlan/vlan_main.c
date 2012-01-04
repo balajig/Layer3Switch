@@ -42,7 +42,7 @@ int vlan_create_default_vlan (int vlan_id)
 		return -1;
 	}
 
-	for (i = 0; i < MAX_PORTS ; i++) {
+	for (i = 0; i < get_max_ports () ; i++) {
 		vlan_add_port (vlan_id, i + 1,TAGGED);
 	}
 
