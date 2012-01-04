@@ -277,15 +277,17 @@ int  cli_show_ip_route (void)
 {
 	route_t *r;
 
-        printf ("Destination              Gateway            Iface\n");
-	printf ("-----------              ---------        --------\n");
+        printf ("%-20s    %-16s      %-10s\n", "Destination", "Gateway","Iface");
+	printf ("%-20s    %-16s      %-10s\n","-----------","---------","--------");
 
 	for (r=route; r; r=r->next) {
+		uint8_t  network[20];
+		uint8_t  gateway[16];
 		if (!r->netif)
 			continue;
-		printf ("%d.%d.%d.%d/%d             %d.%d.%d.%d        `%10s\n",
-			r->netaddr[0], r->netaddr[1], r->netaddr[2], r->netaddr[3], r->masklen,
-			r->gateway[0],r->gateway[1],r->gateway[2],r->gateway[3], r->netif->ifDescr);
+		sprintf (network, "%d.%d.%d.%d/%d", r->netaddr[0], r->netaddr[1], r->netaddr[2], r->netaddr[3], r->masklen);
+		sprintf (gateway, "%d.%d.%d.%d",  r->gateway[0],r->gateway[1],r->gateway[2],r->gateway[3]);
+		printf ("%-20s    %-16s      %-10s\n", network,gateway,r->netif->ifDescr);
 	}
 	return 0;
 }

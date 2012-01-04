@@ -155,4 +155,3 @@ int netmask_str2prefix_str (const char *net_str, const char *mask_str, char *pre
 
 	return 1;
 }
-

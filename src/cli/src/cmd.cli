@@ -106,6 +106,9 @@ spanning-tree rstp ethernet <INT:portnum> admin-pt2pt
 //Configures default gateway
 ip default-gateway <IPV4ADDR:addr>
 
+//Configures default gateway
+ip route <IPV4ADDR:network> <IPV4ADDR:mask> <IPV4ADDR:gateway>
+
 #endsubmode
 
 //Changes to the exec mode
