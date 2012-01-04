@@ -6,6 +6,7 @@ include make.h
 
 lib:
 	mkdir -p obj
+	mkdir -p $(PLATFORM_EXE)_obj/
 BRIDGE:
 	make -C $(CODE_DIR)/bridge
 STP:
@@ -45,6 +46,7 @@ SWITCH:  lib BRIDGE STP PLATFORM CLI PORT GDD  RSTP VLAN IPV4 VRRP UDP ROUTE
 
 clean: clean-custom
 	$(RM) obj/*.o
+	$(RM) -rf $(PLATFORM_EXE)_obj/  obj/
 	make clean -C $(CODE_DIR)/bridge
 	make clean -C $(CODE_DIR)/bridge/stp
 	make clean -C $(CODE_DIR)/cli
