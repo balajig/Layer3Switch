@@ -1,6 +1,6 @@
 typedef struct ifentry {
         int32_t   ifIndex;
-        uint8_t   ifDescr[MAX_PORT_NAME];          
+        char      ifDescr[MAX_PORT_NAME];          
         int32_t   ifType;
         int32_t   ifMtu;   
         int32_t   ifSpeed;

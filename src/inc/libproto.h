@@ -79,6 +79,11 @@ int sync_unlock (sync_lock_t *slock);
 
 uint32_t ip_2_uint32 (uint8_t *ipaddress, int byte_order);
 void uint32_2_ipstring (uint32_t ipAddress, uint8_t *addr);
+u_char ip_masklen (uint32_t netmask);
+void masklen2ip (int masklen, uint32_t *netmask);
+uint32_t ipv4_network_addr (uint32_t hostaddr, int masklen);
+in_addr_t ipv4_broadcast_addr (in_addr_t hostaddr, int masklen);
+int netmask_str2prefix_str (const char *net_str, const char *mask_str, char *prefix_str);
 
 void send_packet (void *buf, uint16_t port, int len);
 

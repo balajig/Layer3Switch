@@ -5,6 +5,7 @@
 int stp_send_event (int event, int port, int vlanid);
 int port_init (void);
 void send_interface_enable_or_disable (int port , int state);
+int cli_show_interfaces (int port);
 
 if_t port_cdb[MAX_PORTS];
 

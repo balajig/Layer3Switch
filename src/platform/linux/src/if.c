@@ -16,7 +16,11 @@
 #define _PATH_PROCNET_DEV "/proc/net/dev"
 
 
+int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask);
 static int fetch_and_update_if_info (if_t *ife);
+int route_add_if (unsigned char *ipaddr, unsigned char masklen, if_t *netif);
+int read_interfaces (void);
+
 static int idx = 1;
 
 int get_max_ports (void)
@@ -79,7 +83,7 @@ static int if_readconf(void)
 			perror("SIOCGIFCONF");
 			goto out;
 		}
-		if (ifc.ifc_len == sizeof(struct ifreq) * numreqs) {
+		if (ifc.ifc_len == (int)(sizeof(struct ifreq) * numreqs)) {
 			/* assume it overflowed and try again */
 			numreqs += 10;
 			continue;
@@ -139,7 +143,7 @@ static int if_readlist_proc(char *target)
 	return err;
 }
 
-int if_readlist(void)
+static int if_readlist(void)
 {
 	int err = if_readlist_proc (NULL);
 	if (err < 0)
@@ -180,7 +184,7 @@ static int fetch_and_update_if_info (if_t *ife)
 		{
 			if(strncmp (ifname, "lo", strlen ("lo"))) {
 				uint8_t addr[4];
-				uint32_2_ipstring (sin->sin_addr.s_addr, &addr);
+				uint32_2_ipstring (sin->sin_addr.s_addr, addr);
 				route_add_if (addr, ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx));
 			}
 		}
@@ -193,7 +197,7 @@ static int fetch_and_update_if_info (if_t *ife)
 	} 
 
 	if (ioctl (fd, SIOCGIFHWADDR, &ifr) == 0) {
-		unsigned char  *p = ifr.ifr_hwaddr.sa_data;
+		unsigned char  *p = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 		int i = 0;
 		while (i < 6) {
 			ife->ifPhysAddress.addr[i] = p[i];
@@ -208,7 +212,6 @@ static int fetch_and_update_if_info (if_t *ife)
 
 int read_interfaces (void)
 {
-	if_t    *p = NULL;
 	if (if_readlist () < 0)
 		return -1;
 	return 0;

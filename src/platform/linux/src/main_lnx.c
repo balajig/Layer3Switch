@@ -93,8 +93,10 @@ int read_port_mac_address (int port, uint8_t *p)
 
 int spawn_pkt_processing_task (void)
 {
+	return 0;
 }
 
-send_packet ()
+
+void send_packet (void *buf, uint16_t port, int len)
 {
 }
