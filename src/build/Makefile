@@ -1,6 +1,6 @@
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before lib CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP IPV4 VRRP UDP LIB PLATFORM SWITCH all-after
+all: all-before lib CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP IPV4 VRRP UDP RTM LIB PLATFORM SWITCH all-after
 
 include make.h
 
@@ -39,6 +39,9 @@ UDP:
 	make -C $(CODE_DIR)/udp
 ROUTE:
 	make -C $(CODE_DIR)/route
+RTM:
+#	make -C $(CODE_DIR)/rtm
+
 
 
 SWITCH:  lib BRIDGE STP PLATFORM CLI PORT GDD  RSTP VLAN IPV4 VRRP UDP ROUTE
@@ -61,3 +64,4 @@ clean: clean-custom
 	make clean -C $(CODE_DIR)/vrrp
 	make clean -C $(CODE_DIR)/udp
 	make clean -C $(CODE_DIR)/route
+	make clean -C $(CODE_DIR)/rtm
