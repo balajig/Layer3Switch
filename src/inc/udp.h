@@ -1,65 +1,171 @@
-#ifndef UDP_H
-#define UDP_H
+/*
+ * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
+ * All rights reserved. 
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission. 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ * OF SUCH DAMAGE.
+ *
+ * This file is part of the lwIP TCP/IP stack.
+ * 
+ * Author: Adam Dunkels <adam@sics.se>
+ *
+ */
+#ifndef __LWIP_UDP_H__
+#define __LWIP_UDP_H__
 
-/** @file UDP.h
- *  @brief User Datagram Protocol layer
+#include "opt.h"
 
-    Copyright 2007-2008 j. Arzi.
+#if LWIP_UDP /* don't build if not configured for use in lwipopts.h */
 
-    This file is part of SDPOS.
-
-    SDPOS is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    SDPOS is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with SDPOS.  If not, see <http://www.gnu.org/licenses/>.
- **/
-
-
-
-#include "common_types.h"
+#include "pbuf.h"
+#include "netif.h"
+#include "ip_addr.h"
 #include "ip.h"
 
-typedef iostream_t udp_socket_t;
-
-#define INVALID_UDP_SOCKET      INVALID_IOSTREAM
-#define INVALID_UDP_PORT        (0ul)
-
-
-/** @brief UDP layer initialization.
-    This function should be called once before udp layer usage. */
-extern void udp_init(void);
-
-/** @brief Allocate a new UDP socket with specified port parameters.
- *         Remote node parameter is optional and should be
- *         specified only in case the caller wants to send data immediatly.
- *         Otherwise, this field (ip address of remote node) will be completed
- *         by udp layer on first packet reception on this socket.
- *  @param[in] remote_node Remote node info such as MAC and IP
- *  address. If NULL, broadcast node address is set.
- *  @param[in] remote_port Remote port to which to talk to.
- *  If INVALID_UDP_SOCKET, local port is opened for Listen.
- *  @param[in] local_port  A valid port number.
- *  @returns On success: A UDP socket handle that can be used 
- *			 for subsequent UDP API calls.
- *			 The handle can be uses as an iostream (gputc, ggetc, gprintf, etc.).
- *	     On failure: INVALID_UDP_SOCKET */
-extern udp_socket_t udp_open(udp_port_t local_port,
-                             ip_t      *remote_node,
-                             udp_port_t remote_port);
-
-/** @brief Close previously opened UDP socket.
-    Given socket is marked as available for future communications. */
-extern void udp_close(udp_socket_t s);
-
-/** @brief Handler called by IP stack */
-extern void udp_process(ip_t remote, ip_t local_ip, u16 len);
-
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+#define UDP_HLEN 8
+
+/* Fields are (of course) in network byte order. */
+#ifdef PACK_STRUCT_USE_INCLUDES
+#  include "arch/bpstruct.h"
+#endif
+PACK_STRUCT_BEGIN
+struct udp_hdr {
+  PACK_STRUCT_FIELD(u16_t src);
+  PACK_STRUCT_FIELD(u16_t dest);  /* src/dest UDP ports */
+  PACK_STRUCT_FIELD(u16_t len);
+  PACK_STRUCT_FIELD(u16_t chksum);
+} PACK_STRUCT_STRUCT;
+PACK_STRUCT_END
+#ifdef PACK_STRUCT_USE_INCLUDES
+#  include "arch/epstruct.h"
+#endif
+
+#define UDP_FLAGS_NOCHKSUM       0x01U
+#define UDP_FLAGS_UDPLITE        0x02U
+#define UDP_FLAGS_CONNECTED      0x04U
+#define UDP_FLAGS_MULTICAST_LOOP 0x08U
+
+struct udp_pcb;
+
+/** Function prototype for udp pcb receive callback functions
+ * addr and port are in same byte order as in the pcb
+ * The callback is responsible for freeing the pbuf
+ * if it's not used any more.
+ *
+ * ATTENTION: Be aware that 'addr' points into the pbuf 'p' so freeing this pbuf
+ *            makes 'addr' invalid, too.
+ *
+ * @param arg user supplied argument (udp_pcb.recv_arg)
+ * @param pcb the udp_pcb which received data
+ * @param p the packet buffer that was received
+ * @param addr the remote IP address from which the packet was received
+ * @param port the remote port from which the packet was received
+ */
+typedef void (*udp_recv_fn)(void *arg, struct udp_pcb *pcb, struct pbuf *p,
+    ip_addr_t *addr, u16_t port);
+
+
+struct udp_pcb {
+/* Common members of all PCB types */
+  IP_PCB;
+
+/* Protocol specific PCB members */
+
+  struct udp_pcb *next;
+
+  u8_t flags;
+  /** ports are in host byte order */
+  u16_t local_port, remote_port;
+
+#if LWIP_IGMP
+  /** outgoing network interface for multicast packets */
+  ip_addr_t multicast_ip;
+#endif /* LWIP_IGMP */
+
+#if LWIP_UDPLITE
+  /** used for UDP_LITE only */
+  u16_t chksum_len_rx, chksum_len_tx;
+#endif /* LWIP_UDPLITE */
+
+  /** receive callback function */
+  udp_recv_fn recv;
+  /** user-supplied argument for the recv callback */
+  void *recv_arg;  
+};
+/* udp_pcbs export for exernal reference (e.g. SNMP agent) */
+extern struct udp_pcb *udp_pcbs;
+
+/* The following functions is the application layer interface to the
+   UDP code. */
+struct udp_pcb * udp_new        (void);
+void             udp_remove     (struct udp_pcb *pcb);
+err_t            udp_bind       (struct udp_pcb *pcb, ip_addr_t *ipaddr,
+                                 u16_t port);
+err_t            udp_connect    (struct udp_pcb *pcb, ip_addr_t *ipaddr,
+                                 u16_t port);
+void             udp_disconnect (struct udp_pcb *pcb);
+void             udp_recv       (struct udp_pcb *pcb, udp_recv_fn recv,
+                                 void *recv_arg);
+err_t            udp_sendto_if  (struct udp_pcb *pcb, struct pbuf *p,
+                                 ip_addr_t *dst_ip, u16_t dst_port,
+                                 struct netif *netif);
+err_t            udp_sendto     (struct udp_pcb *pcb, struct pbuf *p,
+                                 ip_addr_t *dst_ip, u16_t dst_port);
+err_t            udp_send       (struct udp_pcb *pcb, struct pbuf *p);
+
+#if LWIP_CHECKSUM_ON_COPY
+err_t            udp_sendto_if_chksum(struct udp_pcb *pcb, struct pbuf *p,
+                                 ip_addr_t *dst_ip, u16_t dst_port,
+                                 struct netif *netif, u8_t have_chksum,
+                                 u16_t chksum);
+err_t            udp_sendto_chksum(struct udp_pcb *pcb, struct pbuf *p,
+                                 ip_addr_t *dst_ip, u16_t dst_port,
+                                 u8_t have_chksum, u16_t chksum);
+err_t            udp_send_chksum(struct udp_pcb *pcb, struct pbuf *p,
+                                 u8_t have_chksum, u16_t chksum);
+#endif /* LWIP_CHECKSUM_ON_COPY */
+
+#define          udp_flags(pcb) ((pcb)->flags)
+#define          udp_setflags(pcb, f)  ((pcb)->flags = (f))
+
+/* The following functions are the lower layer interface to UDP. */
+void             udp_input      (struct pbuf *p, struct netif *inp);
+
+#define udp_init() /* Compatibility define, not init needed. */
+
+#if UDP_DEBUG
+void udp_debug_print(struct udp_hdr *udphdr);
+#else
+#define udp_debug_print(udphdr)
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* LWIP_UDP */
+
+#endif /* __LWIP_UDP_H__ */
