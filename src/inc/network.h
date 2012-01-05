@@ -41,7 +41,7 @@ typedef union ip_union
 __attribute__ ((__packed__)) ip_t;
 
 
-#include "ip.h"
+#include "ip_hdr.h"
 #include "mac.h"
 
 #if (USE_UDP == 1)

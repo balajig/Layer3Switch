@@ -38,7 +38,7 @@
 #include "pbuf.h"
 #include "netif.h"
 #include "ip_addr.h"
-#include "ip.h"
+#include "ip_hdr.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -42,7 +42,7 @@
 #include "pbuf.h"
 #include "ip_addr.h"
 #include "netif.h"
-#include "ip.h"
+#include "ip_hdr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +58,7 @@ extern "C" {
 PACK_STRUCT_BEGIN
 struct eth_addr {
   PACK_STRUCT_FIELD(u8_t addr[ETHARP_HWADDR_LEN]);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
@@ -67,17 +67,6 @@ PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/bpstruct.h"
 #endif
-PACK_STRUCT_BEGIN
-/** Ethernet header */
-struct eth_hdr {
-#if ETH_PAD_SIZE
-  PACK_STRUCT_FIELD(u8_t padding[ETH_PAD_SIZE]);
-#endif
-  PACK_STRUCT_FIELD(struct eth_addr dest);
-  PACK_STRUCT_FIELD(struct eth_addr src);
-  PACK_STRUCT_FIELD(u16_t type);
-} PACK_STRUCT_STRUCT;
-PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
 #endif
@@ -96,7 +85,7 @@ PACK_STRUCT_BEGIN
 struct eth_vlan_hdr {
   PACK_STRUCT_FIELD(u16_t prio_vid);
   PACK_STRUCT_FIELD(u16_t tpid);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
@@ -122,7 +111,7 @@ struct etharp_hdr {
   PACK_STRUCT_FIELD(struct ip_addr2 sipaddr);
   PACK_STRUCT_FIELD(struct eth_addr dhwaddr);
   PACK_STRUCT_FIELD(struct ip_addr2 dipaddr);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"

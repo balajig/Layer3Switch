@@ -39,7 +39,7 @@
 #include "sys.h"
 #include "mem.h"
 #include "pbuf.h"
-#include "ip.h"
+#include "ip_hdr.h"
 #include "icmp.h"
 #include "err.h"
 

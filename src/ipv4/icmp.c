@@ -40,12 +40,12 @@
    is not implemented. */
 
 #include "opt.h"
-
+#define LWIP_ICMP 1
 #if LWIP_ICMP                    /* don't build if not configured for use in lwipopts.h */
 
 #include "icmp.h"
 #include "inet_chksum.h"
-#include "ip.h"
+#include "ip_hdr.h"
 #include "def.h"
 #include "stats.h"
 #include "snmp.h"
@@ -62,6 +62,10 @@
 /* The amount of data from the original packet to return in a dest-unreachable */
 #define ICMP_DEST_UNREACH_DATASIZE 8
 
+extern ip_addr_t           current_iphdr_dest;
+extern ip_addr_t           current_iphdr_src;
+#define ip_current_dest_addr() (&current_iphdr_dest)
+#define ip_current_src_addr()  (&current_iphdr_src)
 static void         icmp_send_response (struct pbuf *p, u8_t type, u8_t code);
 
 /**

@@ -48,7 +48,6 @@
 #include "netif.h"
 #include "raw.h"
 #include "stats.h"
-#include "arch/perf.h"
 
 #include <string.h>
 

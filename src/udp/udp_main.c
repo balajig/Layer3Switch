@@ -144,8 +144,9 @@ udp_packet:
 
 	return 0;
 }
-
+#if 0
 int udp_sendto (unsigned long udpblk, uint8_t *data, size_t datalen, uint32_t to_addr, uint16_t to_port)
 {
 	return 0;
 }
+#endif

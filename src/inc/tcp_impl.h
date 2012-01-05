@@ -40,7 +40,7 @@
 #include "sys.h"
 #include "mem.h"
 #include "pbuf.h"
-#include "ip.h"
+#include "ip_hdr.h"
 #include "icmp.h"
 #include "err.h"
 
@@ -164,7 +164,7 @@ struct tcp_hdr {
   PACK_STRUCT_FIELD(u16_t wnd);
   PACK_STRUCT_FIELD(u16_t chksum);
   PACK_STRUCT_FIELD(u16_t urgp);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"

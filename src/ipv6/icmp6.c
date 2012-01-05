@@ -39,7 +39,7 @@
 
 #include "icmp.h"
 #include "inet.h"
-#include "ip.h"
+#include "ip_hdr.h"
 #include "def.h"
 #include "stats.h"
 

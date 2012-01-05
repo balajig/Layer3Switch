@@ -40,7 +40,7 @@
 
 #include "def.h"
 #include "mem.h"
-#include "ip.h"
+#include "ip_hdr.h"
 #include "inet.h"
 #include "netif.h"
 #include "icmp.h"
@@ -139,7 +139,6 @@ ip_forward (struct pbuf *p, struct ip_hdr *iphdr)
     IP_STATS_INC (ip.fw);
     IP_STATS_INC (ip.xmit);
 
-    PERF_STOP ("ip_forward");
 
     netif->output (netif, p, (struct ip_addr *) &(iphdr->dest));
 }
@@ -251,7 +250,6 @@ ip_input (struct pbuf *p, struct netif *inp)
             IP_STATS_INC (ip.proterr);
             IP_STATS_INC (ip.drop);
     }
-    PERF_STOP ("ip_input");
 }
 
 /* ip_output_if:
@@ -318,7 +316,6 @@ ip_output_if (struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
     ip_debug_print (p);
 #endif /* IP_DEBUG */
 
-    PERF_STOP ("ip_output_if");
     return netif->output (netif, p, dest);
 }
 

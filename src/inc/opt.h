@@ -38,6 +38,16 @@
 #ifndef __LWIP_OPT_H__
 #define __LWIP_OPT_H__
 
+#include "common_types.h"
+
+typedef uint8_t u8_t;
+typedef int8_t s8_t;
+typedef uint16_t u16_t;
+typedef int16_t  s16_t;
+typedef uint32_t u32_t;
+typedef int32_t s32_t;
+typedef char mem_ptr_t;
+
 /*
  * Include user defined options first. Anything not defined in these files
  * will be set to standard values. Override anything you dont like!
@@ -64,7 +74,7 @@
  * use lwIP facilities.
  */
 #ifndef NO_SYS
-#define NO_SYS                          0
+#define NO_SYS                          1
 #endif
 
 /**
@@ -120,7 +130,7 @@
  *    2 byte alignment -> #define MEM_ALIGNMENT 2
  */
 #ifndef MEM_ALIGNMENT
-#define MEM_ALIGNMENT                   1
+#define MEM_ALIGNMENT                   4
 #endif
 
 /**
@@ -239,7 +249,7 @@
  * (requires the LWIP_UDP option)
  */
 #ifndef MEMP_NUM_UDP_PCB
-#define MEMP_NUM_UDP_PCB                4
+#define MEMP_NUM_UDP_PCB                8
 #endif
 
 /**

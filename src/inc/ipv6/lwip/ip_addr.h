@@ -46,7 +46,7 @@ extern "C" {
 PACK_STRUCT_BEGIN
  struct ip_addr {
   PACK_STRUCT_FIELD(u32_t addr[4]);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
@@ -62,7 +62,7 @@ PACK_STRUCT_END
 PACK_STRUCT_BEGIN
 struct ip_addr2 {
   PACK_STRUCT_FIELD(u16_t addrw[2]);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"

@@ -4,31 +4,21 @@
 include ../build/make.h
 
 IPV4_CODE_DIR = $(CODE_DIR)/ipv4
-IPV4_INC_DIR =  $(IPV4_CODE_DIR)/inc -I$(COMMON_INC)
+IPV4_INC_DIR =  $(IPV4_CODE_DIR)/ -I$(COMMON_INC)
 IPV4_SRCC_DIR = $(IPV4_CODE_DIR)
-IPV4_OBJ_DIR = $(IPV4_CODE_DIR)/obj
 
+CFLAGS += -I$(IPV4_INC_DIR)
 
-IPV4_OBJS += $(IPV4_OBJ_DIR)/ip.o
-IPV4_OBJS += $(IPV4_OBJ_DIR)/ip_conf.o
-IPV4_OBJS += $(IPV4_OBJ_DIR)/ip_cli.o
+IPV4_SRCS = $(wildcard *.c)
 
-all: all-before  obj $(IPV4_OBJS) tm_ip.o all-after
+RTM_OBJ = $(IPV4_SRCS:.c=.o)
 
-obj:
-	mkdir -p ${IPV4_OBJ_DIR}
+all: $(RTM_OBJ) ipv4.o
 
-clean: clean-custom
-	$(RM) $(IPV4_OBJ_DIR)/*.o $(FINAL_OBJ)/tm_ip.o
+$(IPV4_OBJ)/%.o : %.c Makefile
+	$(CC) -c $(CFLAGS) $< -o $@
+ipv4.o: $(IPV4_OBJ)
+	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/ipv4.o $(IPV4_SRCC_DIR)/*.o
 
-$(IPV4_OBJ_DIR)/ip.o: $(IPV4_SRCC_DIR)/ip.c
-	$(CC) -c $(COMPILATION_SWITCH) $(IPV4_SRCC_DIR)/ip.c -o $(IPV4_OBJ_DIR)/ip.o $(CFLAGS) -I$(IPV4_INC_DIR)
-
-$(IPV4_OBJ_DIR)/ip_conf.o: $(IPV4_SRCC_DIR)/ip_conf.c
-	$(CC) -c $(COMPILATION_SWITCH) $(IPV4_SRCC_DIR)/ip_conf.c -o $(IPV4_OBJ_DIR)/ip_conf.o $(CFLAGS) -I$(IPV4_INC_DIR)
-
-$(IPV4_OBJ_DIR)/ip_cli.o: $(IPV4_SRCC_DIR)/ip_cli.c
-	$(CC) -c $(COMPILATION_SWITCH) $(IPV4_SRCC_DIR)/ip_cli.c -o $(IPV4_OBJ_DIR)/ip_cli.o $(CFLAGS) -I$(IPV4_INC_DIR)
-
-tm_ip.o: $(IPV4_OBJS)
-	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/tm_ip.o $(IPV4_OBJS)
+clean:
+	rm -f *.o $(FINAL_OBJ)/ipv4.o

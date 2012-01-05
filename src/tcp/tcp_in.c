@@ -483,7 +483,6 @@ tcp_input (struct pbuf *p, struct netif *inp)
     }
 
     LWIP_ASSERT ("tcp_input: tcp_pcbs_sane()", tcp_pcbs_sane ());
-    PERF_STOP ("tcp_input");
 }
 
 /**

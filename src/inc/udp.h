@@ -39,7 +39,7 @@
 #include "pbuf.h"
 #include "netif.h"
 #include "ip_addr.h"
-#include "ip.h"
+#include "ip_hdr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +57,7 @@ struct udp_hdr {
   PACK_STRUCT_FIELD(u16_t dest);  /* src/dest UDP ports */
   PACK_STRUCT_FIELD(u16_t len);
   PACK_STRUCT_FIELD(u16_t chksum);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"

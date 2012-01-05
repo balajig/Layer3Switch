@@ -53,7 +53,7 @@ struct ip_addr {
 PACK_STRUCT_BEGIN
 struct ip_addr_packed {
   PACK_STRUCT_FIELD(u32_t addr);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
@@ -74,7 +74,7 @@ typedef struct ip_addr_packed ip_addr_p_t;
 PACK_STRUCT_BEGIN
 struct ip_addr2 {
   PACK_STRUCT_FIELD(u16_t addrw[2]);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"

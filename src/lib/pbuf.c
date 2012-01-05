@@ -69,7 +69,6 @@
 #include "memp.h"
 #include "pbuf.h"
 #include "sys.h"
-#include "arch/perf.h"
 #if TCP_QUEUE_OOSEQ
 #include "tcp_impl.h"
 #endif
@@ -668,8 +667,6 @@ pbuf_free (struct pbuf * p)
     }
     LWIP_DEBUGF (PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_free(%p)\n", (void *) p));
 
-    PERF_START;
-
     LWIP_ASSERT ("pbuf_free: sane type",
                  p->type == PBUF_RAM || p->type == PBUF_ROM ||
                  p->type == PBUF_REF || p->type == PBUF_POOL);
@@ -741,7 +738,6 @@ pbuf_free (struct pbuf * p)
             p = NULL;
         }
     }
-    PERF_STOP ("pbuf_free");
     /* return number of de-allocated pbufs */
     return count;
 }

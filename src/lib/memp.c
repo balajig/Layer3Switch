@@ -174,6 +174,7 @@ static u8_t         memp_memory[MEM_ALIGNMENT - 1
     ];
 
 #endif /* MEMP_SEPARATE_POOLS */
+struct stats_       lwip_stats;
 
 #if MEMP_SANITY_CHECK
 /**

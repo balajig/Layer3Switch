@@ -38,7 +38,7 @@
 
 #include "pbuf.h"
 #include "def.h"
-#include "ip.h"
+#include "ip_hdr.h"
 #include "ip_addr.h"
 
 #ifdef __cplusplus

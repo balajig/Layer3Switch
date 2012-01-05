@@ -58,7 +58,6 @@
 #include "icmp.h"
 #include "stats.h"
 #include "snmp.h"
-#include "arch/perf.h"
 #include "dhcp.h"
 
 #include <string.h>
@@ -90,7 +89,7 @@ udp_input (struct pbuf *p, struct netif *inp)
     u8_t                local_match;
     u8_t                broadcast;
 
-    PERF_START;
+    //PERF_START;
 
     UDP_STATS_INC (udp.recv);
 
@@ -421,8 +420,8 @@ udp_input (struct pbuf *p, struct netif *inp)
     {
         pbuf_free (p);
     }
-  end:
-    PERF_STOP ("udp_input");
+end:
+	return ;
 }
 
 /**

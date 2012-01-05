@@ -39,7 +39,7 @@
  */
 
 #include "opt.h"
-#include "ip.h"
+#include "ip_hdr.h"
 #include "def.h"
 #include "mem.h"
 #include "ip_frag.h"
@@ -54,9 +54,10 @@
 #include "dhcp.h"
 #include "autoip.h"
 #include "stats.h"
-#include "arch/perf.h"
 
 #include <string.h>
+struct netif       *netif_list;
+struct netif       *netif_default;
 
 /** Set this to 0 in the rare case of wanting to call an extra function to
  * generate the IP checksum (in contrast to calculating it on-the-fly). */
@@ -240,7 +241,6 @@ ip_forward (struct pbuf *p, struct ip_hdr *iphdr, struct netif *inp)
     IP_STATS_INC (ip.xmit);
     snmp_inc_ipforwdatagrams ();
 
-    PERF_STOP ("ip_forward");
     /* transmit pbuf on chosen interface */
     netif->output (netif, p, &current_iphdr_dest);
     return;
@@ -592,7 +592,7 @@ ip_input (struct pbuf * p, struct netif * inp)
 #if LWIP_TCP
             case IP_PROTO_TCP:
                 snmp_inc_ipindelivers ();
-                tcp_input (p, inp);
+                //tcp_input (p, inp);
                 break;
 #endif /* LWIP_TCP */
 #if LWIP_ICMP

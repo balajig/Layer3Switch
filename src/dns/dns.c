@@ -136,7 +136,7 @@ PACK_STRUCT_BEGIN
     PACK_STRUCT_FIELD (u16_t numanswers);
     PACK_STRUCT_FIELD (u16_t numauthrr);
     PACK_STRUCT_FIELD (u16_t numextrarr);
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #include "arch/epstruct.h"

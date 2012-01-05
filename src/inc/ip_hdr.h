@@ -109,9 +109,6 @@ struct ip_pcb {
 #define SOF_INHERITED   (SOF_REUSEADDR|SOF_KEEPALIVE|SOF_LINGER/*|SOF_DEBUG|SOF_DONTROUTE|SOF_OOBINLINE*/)
 
 
-#ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
-#endif
 PACK_STRUCT_BEGIN
 struct ip_hdr {
   /* version / header length / type of service */
@@ -135,7 +132,7 @@ struct ip_hdr {
   /* source and destination IP addresses */
   PACK_STRUCT_FIELD(ip_addr_p_t src);
   PACK_STRUCT_FIELD(ip_addr_p_t dest); 
-} PACK_STRUCT_STRUCT;
+} ;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
