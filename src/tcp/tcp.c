@@ -732,7 +732,7 @@ tcp_connect (struct tcp_pcb * pcb, ip_addr_t * ipaddr, u16_t port,
     if (ip_addr_isany (&(pcb->local_ip)))
     {
         /* no local IP address set, yet. */
-        struct netif       *netif = ip_route (&(pcb->remote_ip));
+        struct interface       *netif = ip_route (&(pcb->remote_ip));
         if (netif == NULL)
         {
             /* Don't even try to send a SYN packet if we have no route
@@ -1649,7 +1649,7 @@ u16_t
 tcp_eff_send_mss (u16_t sendmss, ip_addr_t * addr)
 {
     u16_t               mss_s;
-    struct netif       *outif;
+    struct interface       *outif;
 
     outif = ip_route (addr);
     if ((outif != NULL) && (outif->mtu != 0))

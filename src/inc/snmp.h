@@ -42,7 +42,7 @@ extern "C" {
 #include "ip_addr.h"
 
 struct udp_pcb;
-struct netif;
+struct interface;
 
 /**
  * @see RFC1213, "MIB-II, 6. Definitions"
@@ -109,20 +109,20 @@ void snmp_set_sysname(u8_t *ocstr, u8_t *ocstrlen);
 void snmp_set_syslocation(u8_t *ocstr, u8_t *ocstrlen);
 
 /* network interface */
-void snmp_add_ifinoctets(struct netif *ni, u32_t value); 
-void snmp_inc_ifinucastpkts(struct netif *ni);
-void snmp_inc_ifinnucastpkts(struct netif *ni);
-void snmp_inc_ifindiscards(struct netif *ni);
-void snmp_add_ifoutoctets(struct netif *ni, u32_t value);
-void snmp_inc_ifoutucastpkts(struct netif *ni);
-void snmp_inc_ifoutnucastpkts(struct netif *ni);
-void snmp_inc_ifoutdiscards(struct netif *ni);
+void snmp_add_ifinoctets(struct interface *ni, u32_t value); 
+void snmp_inc_ifinucastpkts(struct interface *ni);
+void snmp_inc_ifinnucastpkts(struct interface *ni);
+void snmp_inc_ifindiscards(struct interface *ni);
+void snmp_add_ifoutoctets(struct interface *ni, u32_t value);
+void snmp_inc_ifoutucastpkts(struct interface *ni);
+void snmp_inc_ifoutnucastpkts(struct interface *ni);
+void snmp_inc_ifoutdiscards(struct interface *ni);
 void snmp_inc_iflist(void);
 void snmp_dec_iflist(void);
 
 /* ARP (for atTable and ipNetToMediaTable) */
-void snmp_insert_arpidx_tree(struct netif *ni, ip_addr_t *ip);
-void snmp_delete_arpidx_tree(struct netif *ni, ip_addr_t *ip);
+void snmp_insert_arpidx_tree(struct interface *ni, ip_addr_t *ip);
+void snmp_delete_arpidx_tree(struct interface *ni, ip_addr_t *ip);
 
 /* IP */
 void snmp_inc_ipinreceives(void);
@@ -142,10 +142,10 @@ void snmp_inc_ipfragoks(void);
 void snmp_inc_ipfragfails(void);
 void snmp_inc_ipfragcreates(void);
 void snmp_inc_iproutingdiscards(void);
-void snmp_insert_ipaddridx_tree(struct netif *ni);
-void snmp_delete_ipaddridx_tree(struct netif *ni);
-void snmp_insert_iprteidx_tree(u8_t dflt, struct netif *ni);
-void snmp_delete_iprteidx_tree(u8_t dflt, struct netif *ni);
+void snmp_insert_ipaddridx_tree(struct interface *ni);
+void snmp_delete_ipaddridx_tree(struct interface *ni);
+void snmp_insert_iprteidx_tree(u8_t dflt, struct interface *ni);
+void snmp_delete_iprteidx_tree(u8_t dflt, struct interface *ni);
 
 /* ICMP */
 void snmp_inc_icmpinmsgs(void);

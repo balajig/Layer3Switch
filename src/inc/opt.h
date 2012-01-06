@@ -1113,7 +1113,7 @@ typedef char mem_ptr_t;
 
 /**
  * LWIP_NETIF_HWADDRHINT==1: Cache link-layer-address hints (e.g. table
- * indices) in struct netif. TCP and UDP can make use of this to prevent
+ * indices) in struct interface. TCP and UDP can make use of this to prevent
  * scanning the ARP table for every sent packet. While this is faster for big
  * ARP tables or many concurrent connections, it might be counterproductive
  * if you have a tiny ARP table or if there never are concurrent connections.

@@ -32,7 +32,7 @@ int port_init (void)
 		port_cdb[idx].ifOutDiscards = 0;
 		port_cdb[idx].ifOutErrors = 0;
 		port_cdb[idx].pstp_info = NULL;
-		read_port_mac_address (idx, &port_cdb[idx].ifPhysAddress.addr[0]); 
+		read_port_mac_address (idx, &port_cdb[idx].ifPhysAddress[0]); 
 	}
 	return 0;
 }
@@ -50,7 +50,7 @@ int get_port_oper_state (uint32_t port)
 
 int get_port_mac_address (uint32_t port, uint8_t *mac)
 {
-	memcpy (mac, port_cdb[port-1].ifPhysAddress.addr, 6);
+	memcpy (mac, port_cdb[port-1].ifPhysAddress, 6);
 	return 0;
 }
 

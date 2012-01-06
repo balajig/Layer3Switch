@@ -44,7 +44,7 @@
 #include "stats.h"
 
 void
-icmp_input (struct pbuf *p, struct netif *inp)
+icmp_input (struct pbuf *p, struct interface *inp)
 {
     u8_t                type;
     struct icmp_echo_hdr *iecho;

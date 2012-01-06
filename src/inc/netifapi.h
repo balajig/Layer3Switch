@@ -41,15 +41,15 @@
 extern "C" {
 #endif
 
-typedef void (*netifapi_void_fn)(struct netif *netif);
-typedef err_t (*netifapi_errt_fn)(struct netif *netif);
+typedef void (*netifapi_void_fn)(struct interface *netif);
+typedef err_t (*netifapi_errt_fn)(struct interface *netif);
 
-struct netifapi_msg_msg {
+struct interfaceapi_msg_msg {
 #if !LWIP_TCPIP_CORE_LOCKING
   sys_sem_t sem;
 #endif /* !LWIP_TCPIP_CORE_LOCKING */
   err_t err;
-  struct netif *netif;
+  struct interface *netif;
   union {
     struct {
       ip_addr_t *ipaddr;
@@ -66,14 +66,14 @@ struct netifapi_msg_msg {
   } msg;
 };
 
-struct netifapi_msg {
-  void (* function)(struct netifapi_msg_msg *msg);
-  struct netifapi_msg_msg msg;
+struct interfaceapi_msg {
+  void (* function)(struct interfaceapi_msg_msg *msg);
+  struct interfaceapi_msg_msg msg;
 };
 
 
 /* API for application */
-err_t netifapi_netif_add       ( struct netif *netif,
+err_t netifapi_netif_add       ( struct interface *netif,
                                  ip_addr_t *ipaddr,
                                  ip_addr_t *netmask,
                                  ip_addr_t *gw,
@@ -81,12 +81,12 @@ err_t netifapi_netif_add       ( struct netif *netif,
                                  netif_init_fn init,
                                  netif_input_fn input);
 
-err_t netifapi_netif_set_addr  ( struct netif *netif,
+err_t netifapi_netif_set_addr  ( struct interface *netif,
                                  ip_addr_t *ipaddr,
                                  ip_addr_t *netmask,
                                  ip_addr_t *gw );
 
-err_t netifapi_netif_common    ( struct netif *netif,
+err_t netifapi_netif_common    ( struct interface *netif,
                                  netifapi_void_fn voidfunc,
                                  netifapi_errt_fn errtfunc);
 

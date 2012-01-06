@@ -86,7 +86,7 @@ err_t            raw_sendto     (struct raw_pcb *pcb, struct pbuf *p, ip_addr_t 
 err_t            raw_send       (struct raw_pcb *pcb, struct pbuf *p);
 
 /* The following functions are the lower layer interface to RAW. */
-u8_t             raw_input      (struct pbuf *p, struct netif *inp);
+u8_t             raw_input      (struct pbuf *p, struct interface *inp);
 #define raw_init() /* Compatibility define, not init needed. */
 
 #ifdef __cplusplus

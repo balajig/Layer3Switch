@@ -1,9 +1,9 @@
 #ifndef _IFMGMT_H
 #define _IFMGMT_H
-struct netif;
+struct interface;
 #include "netif.h"
-struct netif {
-  	struct netif *next;
+struct interface {
+  	struct interface *next;
         int32_t   ifIndex;
         char      ifDescr[MAX_PORT_NAME];          
         int32_t   ifType;
@@ -22,7 +22,6 @@ struct netif {
         uint32_t  ifOutDiscards;   
         uint32_t  ifOutErrors;    
 	struct stp_port_entry *pstp_info;
-        MACADDRESS ifPhysAddress;  
         unsigned long in_bytes;
         unsigned long in_packets;
         unsigned long in_mcast_pkts;
@@ -80,10 +79,10 @@ struct netif {
 #endif /* LWIP_NETIF_HOSTNAME */
 	/** maximum transfer unit (in bytes) */
 	u16_t mtu;
-	/** number of bytes used in hwaddr */
-	u8_t hwaddr_len;
+	/** number of bytes used in ifPhysAddress */
+	u8_t ifPhysAddress_len;
 	/** link level hardware address of this interface */
-	u8_t hwaddr[NETIF_MAX_HWADDR_LEN];
+	u8_t ifPhysAddress[NETIF_MAX_HWADDR_LEN];
 	/** flags (see NETIF_FLAG_ above) */
 	u8_t flags;
 	/** descriptive abbreviation */
@@ -125,7 +124,7 @@ struct netif {
 #endif /* ENABLE_LOOPBACK */
 }__attribute__ ((__packed__));
 
-typedef struct netif if_t;
+typedef struct interface if_t;
 
 extern if_t port_cdb[];
 

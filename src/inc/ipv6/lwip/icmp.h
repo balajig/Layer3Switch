@@ -63,7 +63,7 @@ enum icmp_te_type {
   ICMP_TE_FRAG = 1     /* fragment reassembly time exceeded */
 };
 
-void icmp_input(struct pbuf *p, struct netif *inp);
+void icmp_input(struct pbuf *p, struct interface *inp);
 
 void icmp_dest_unreach(struct pbuf *p, enum icmp_dur_type t);
 void icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t);

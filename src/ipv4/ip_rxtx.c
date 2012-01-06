@@ -96,7 +96,7 @@
  * The interface that provided the packet for the current callback
  * invocation.
  */
-struct netif       *current_netif;
+struct interface       *current_netif;
 
 /**
  * Header of the input packet currently being processed.
@@ -119,10 +119,10 @@ static u16_t        ip_id;
  * @param dest the destination IP address for which to find the route
  * @return the netif on which to send to reach dest
  */
-struct netif       *
+struct interface       *
 ip_route (ip_addr_t * dest)
 {
-	struct netif *p = route_lookup (dest->addr);
+	struct interface *p = route_lookup (dest->addr);
 
 	if (!p)
 	{
@@ -148,9 +148,9 @@ ip_route (ip_addr_t * dest)
  * @param inp the netif on which this packet was received
  */
 static void
-ip_forward (struct pbuf *p, struct ip_hdr *iphdr, struct netif *inp)
+ip_forward (struct pbuf *p, struct ip_hdr *iphdr, struct interface *inp)
 {
-    struct netif       *netif;
+    struct interface       *netif;
 
     PERF_START;
 
@@ -248,10 +248,10 @@ ip_forward (struct pbuf *p, struct ip_hdr *iphdr, struct netif *inp)
  *         processed, but currently always returns ERR_OK)
  */
 err_t
-ip_input (struct pbuf * p, struct netif * inp)
+ip_input (struct pbuf * p, struct interface * inp)
 {
     struct ip_hdr      *iphdr;
-    struct netif       *netif;
+    struct interface       *netif;
     u16_t               iphdr_hlen;
     u16_t               iphdr_len;
 #if IP_ACCEPT_LINK_LAYER_ADDRESSING
@@ -640,7 +640,7 @@ ip_input (struct pbuf * p, struct netif * inp)
  */
 err_t
 ip_output_if (struct pbuf * p, ip_addr_t * src, ip_addr_t * dest,
-              u8_t ttl, u8_t tos, u8_t proto, struct netif * netif)
+              u8_t ttl, u8_t tos, u8_t proto, struct interface * netif)
 {
 #if IP_OPTIONS_SEND
     return ip_output_if_opt (p, src, dest, ttl, tos, proto, netif, NULL, 0);
@@ -654,7 +654,7 @@ ip_output_if (struct pbuf * p, ip_addr_t * src, ip_addr_t * dest,
  */
 err_t
 ip_output_if_opt (struct pbuf * p, ip_addr_t * src, ip_addr_t * dest,
-                  u8_t ttl, u8_t tos, u8_t proto, struct netif * netif,
+                  u8_t ttl, u8_t tos, u8_t proto, struct interface * netif,
                   void *ip_options, u16_t optlen)
 {
 #endif /* IP_OPTIONS_SEND */
@@ -837,7 +837,7 @@ err_t
 ip_output (struct pbuf * p, ip_addr_t * src, ip_addr_t * dest,
            u8_t ttl, u8_t tos, u8_t proto)
 {
-    struct netif       *netif;
+    struct interface       *netif;
 
     /* pbufs passed to IP must have a ref-count of 1 as their payload pointer
        gets altered as the packet is passed down the stack */
@@ -879,7 +879,7 @@ err_t
 ip_output_hinted (struct pbuf * p, ip_addr_t * src, ip_addr_t * dest,
                   u8_t ttl, u8_t tos, u8_t proto, u8_t * addr_hint)
 {
-    struct netif       *netif;
+    struct interface       *netif;
     err_t               err;
 
     /* pbufs passed to IP must have a ref-count of 1 as their payload pointer

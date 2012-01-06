@@ -68,10 +68,10 @@ ip_init (void)
  * the network interface equals the masked IP address given to the function.
  */
 
-struct netif       *
+struct interface       *
 ip_route (struct ip_addr *dest)
 {
-    struct netif       *netif;
+    struct interface       *netif;
 
     for (netif = netif_list; netif != NULL; netif = netif->next)
     {
@@ -94,7 +94,7 @@ ip_route (struct ip_addr *dest)
 static void
 ip_forward (struct pbuf *p, struct ip_hdr *iphdr)
 {
-    struct netif       *netif;
+    struct interface       *netif;
 
     PERF_START;
 
@@ -154,10 +154,10 @@ ip_forward (struct pbuf *p, struct ip_hdr *iphdr)
  */
 
 void
-ip_input (struct pbuf *p, struct netif *inp)
+ip_input (struct pbuf *p, struct interface *inp)
 {
     struct ip_hdr      *iphdr;
-    struct netif       *netif;
+    struct interface       *netif;
 
     PERF_START;
 
@@ -261,7 +261,7 @@ ip_input (struct pbuf *p, struct netif *inp)
 
 err_t
 ip_output_if (struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
-              u8_t ttl, u8_t proto, struct netif *netif)
+              u8_t ttl, u8_t proto, struct interface *netif)
 {
     struct ip_hdr      *iphdr;
 
@@ -329,7 +329,7 @@ err_t
 ip_output (struct pbuf * p, struct ip_addr * src, struct ip_addr * dest,
            u8_t ttl, u8_t proto)
 {
-    struct netif       *netif;
+    struct interface       *netif;
     if ((netif = ip_route (dest)) == NULL)
     {
         LWIP_DEBUGF (IP_DEBUG,
@@ -346,7 +346,7 @@ err_t
 ip_output_hinted (struct pbuf * p, struct ip_addr * src, struct ip_addr * dest,
                   u8_t ttl, u8_t tos, u8_t proto, u8_t * addr_hint)
 {
-    struct netif       *netif;
+    struct interface       *netif;
     err_t               err;
 
     if ((netif = ip_route (dest)) == NULL)

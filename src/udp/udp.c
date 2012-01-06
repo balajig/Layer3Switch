@@ -79,7 +79,7 @@ struct udp_pcb     *udp_pcbs;
  *
  */
 void
-udp_input (struct pbuf *p, struct netif *inp)
+udp_input (struct pbuf *p, struct interface *inp)
 {
     struct udp_hdr     *udphdr;
     struct udp_pcb     *pcb, *prev;
@@ -493,7 +493,7 @@ udp_sendto_chksum (struct udp_pcb * pcb, struct pbuf * p, ip_addr_t * dst_ip,
                    u16_t dst_port, u8_t have_chksum, u16_t chksum)
 {
 #endif /* LWIP_CHECKSUM_ON_COPY */
-    struct netif       *netif;
+    struct interface       *netif;
 
     LWIP_DEBUGF (UDP_DEBUG | LWIP_DBG_TRACE, ("udp_send\n"));
 
@@ -545,7 +545,7 @@ udp_sendto_chksum (struct udp_pcb * pcb, struct pbuf * p, ip_addr_t * dst_ip,
  */
 err_t
 udp_sendto_if (struct udp_pcb * pcb, struct pbuf * p,
-               ip_addr_t * dst_ip, u16_t dst_port, struct netif * netif)
+               ip_addr_t * dst_ip, u16_t dst_port, struct interface * netif)
 {
 #if LWIP_CHECKSUM_ON_COPY
     return udp_sendto_if_chksum (pcb, p, dst_ip, dst_port, netif, 0, 0);
@@ -554,7 +554,7 @@ udp_sendto_if (struct udp_pcb * pcb, struct pbuf * p,
 /** Same as udp_sendto_if(), but with checksum */
 err_t
 udp_sendto_if_chksum (struct udp_pcb * pcb, struct pbuf * p, ip_addr_t * dst_ip,
-                      u16_t dst_port, struct netif * netif, u8_t have_chksum,
+                      u16_t dst_port, struct interface * netif, u8_t have_chksum,
                       u16_t chksum)
 {
 #endif /* LWIP_CHECKSUM_ON_COPY */
@@ -962,7 +962,7 @@ udp_connect (struct udp_pcb * pcb, ip_addr_t * ipaddr, u16_t port)
     /* Nail down local IP for netconn_addr()/getsockname() */
     if (ip_addr_isany (&pcb->local_ip) && !ip_addr_isany (&pcb->remote_ip))
     {
-        struct netif       *netif;
+        struct interface       *netif;
 
         if ((netif = ip_route (&(pcb->remote_ip))) == NULL)
         {

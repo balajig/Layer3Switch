@@ -105,26 +105,26 @@ PACK_STRUCT_END
 #  include "arch/epstruct.h"
 #endif
 
-void dhcp_set_struct(struct netif *netif, struct dhcp *dhcp);
+void dhcp_set_struct(struct interface *netif, struct dhcp *dhcp);
 /** Remove a struct dhcp previously set to the netif using dhcp_set_struct() */
 #define dhcp_remove_struct(netif) do { (netif)->dhcp = NULL; } while(0)
-void dhcp_cleanup(struct netif *netif);
+void dhcp_cleanup(struct interface *netif);
 /** start DHCP configuration */
-err_t dhcp_start(struct netif *netif);
+err_t dhcp_start(struct interface *netif);
 /** enforce early lease renewal (not needed normally)*/
-err_t dhcp_renew(struct netif *netif);
+err_t dhcp_renew(struct interface *netif);
 /** release the DHCP lease, usually called before dhcp_stop()*/
-err_t dhcp_release(struct netif *netif);
+err_t dhcp_release(struct interface *netif);
 /** stop DHCP configuration */
-void dhcp_stop(struct netif *netif);
+void dhcp_stop(struct interface *netif);
 /** inform server of our manual IP address */
-void dhcp_inform(struct netif *netif);
+void dhcp_inform(struct interface *netif);
 /** Handle a possible change in the network configuration */
-void dhcp_network_changed(struct netif *netif);
+void dhcp_network_changed(struct interface *netif);
 
 /** if enabled, check whether the offered IP address is not in use, using ARP */
 #if DHCP_DOES_ARP_CHECK
-void dhcp_arp_reply(struct netif *netif, ip_addr_t *addr);
+void dhcp_arp_reply(struct interface *netif, ip_addr_t *addr);
 #endif
 
 /** to be called every minute */

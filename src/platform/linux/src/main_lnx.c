@@ -85,7 +85,7 @@ int read_port_mac_address (int port, uint8_t *p)
 {
 	int i = 0;
 	while (i < 6) {
-		p[i] = port_cdb[port - 1].ifPhysAddress.addr[i];
+		p[i] = port_cdb[port - 1].ifPhysAddress[i];
 		i++;
 	}
 	return 0;

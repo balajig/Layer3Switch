@@ -52,7 +52,7 @@ const ip_addr_t     ip_addr_broadcast = { IPADDR_BROADCAST };
  * @return returns non-zero if the address is a broadcast address
  */
 u8_t
-ip4_addr_isbroadcast (u32_t addr, const struct netif *netif)
+ip4_addr_isbroadcast (u32_t addr, const struct interface *netif)
 {
     ip_addr_t           ipaddr;
     ip4_addr_set_u32 (&ipaddr, addr);

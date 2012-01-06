@@ -133,7 +133,7 @@ PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #include "arch/epstruct.h"
 #endif
-static struct igmp_group *igmp_lookup_group (struct netif *ifp,
+static struct igmp_group *igmp_lookup_group (struct interface *ifp,
                                              ip_addr_t * addr);
 static err_t        igmp_remove_group (struct igmp_group *group);
 static void         igmp_timeout (struct igmp_group *group);
@@ -142,7 +142,7 @@ static void         igmp_stop_timer (struct igmp_group *group);
 static void         igmp_delaying_member (struct igmp_group *group,
                                           u8_t maxresp);
 static err_t        igmp_ip_output_if (struct pbuf *p, ip_addr_t * src,
-                                       ip_addr_t * dest, struct netif *netif);
+                                       ip_addr_t * dest, struct interface *netif);
 static void         igmp_send (struct igmp_group *group, u8_t type);
 
 static struct igmp_group *igmp_group_list;
@@ -191,7 +191,7 @@ igmp_dump_group_list ()
  * @param netif network interface on which start IGMP processing
  */
 err_t
-igmp_start (struct netif *netif)
+igmp_start (struct interface *netif)
 {
     struct igmp_group  *group;
 
@@ -226,7 +226,7 @@ igmp_start (struct netif *netif)
  * @param netif network interface on which stop IGMP processing
  */
 err_t
-igmp_stop (struct netif * netif)
+igmp_stop (struct interface * netif)
 {
     struct igmp_group  *group = igmp_group_list;
     struct igmp_group  *prev = NULL;
@@ -278,7 +278,7 @@ igmp_stop (struct netif * netif)
  * @param netif network interface on which report IGMP memberships
  */
 void
-igmp_report_groups (struct netif *netif)
+igmp_report_groups (struct interface *netif)
 {
     struct igmp_group  *group = igmp_group_list;
 
@@ -305,7 +305,7 @@ igmp_report_groups (struct netif *netif)
  *         NULL if the group wasn't found.
  */
 struct igmp_group  *
-igmp_lookfor_group (struct netif *ifp, ip_addr_t * addr)
+igmp_lookfor_group (struct interface *ifp, ip_addr_t * addr)
 {
     struct igmp_group  *group = igmp_group_list;
 
@@ -334,7 +334,7 @@ igmp_lookfor_group (struct netif *ifp, ip_addr_t * addr)
  *         NULL on memory error.
  */
 struct igmp_group  *
-igmp_lookup_group (struct netif *ifp, ip_addr_t * addr)
+igmp_lookup_group (struct interface *ifp, ip_addr_t * addr)
 {
     struct igmp_group  *group = igmp_group_list;
 
@@ -417,7 +417,7 @@ igmp_remove_group (struct igmp_group *group)
  * @param dest destination ip address of the igmp packet
  */
 void
-igmp_input (struct pbuf *p, struct netif *inp, ip_addr_t * dest)
+igmp_input (struct pbuf *p, struct interface *inp, ip_addr_t * dest)
 {
     struct ip_hdr      *iphdr;
     struct igmp_msg    *igmp;
@@ -587,7 +587,7 @@ igmp_joingroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
 {
     err_t               err = ERR_VAL;    /* no matching interface */
     struct igmp_group  *group;
-    struct netif       *netif;
+    struct interface       *netif;
 
     /* make sure it is multicast address */
     LWIP_ERROR ("igmp_joingroup: attempt to join non-multicast address",
@@ -678,7 +678,7 @@ igmp_leavegroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
 {
     err_t               err = ERR_VAL;    /* no matching interface */
     struct igmp_group  *group;
-    struct netif       *netif;
+    struct interface       *netif;
 
     /* make sure it is multicast address */
     LWIP_ERROR ("igmp_leavegroup: attempt to leave non-multicast address",
@@ -874,7 +874,7 @@ igmp_delaying_member (struct igmp_group *group, u8_t maxresp)
  */
 static              err_t
 igmp_ip_output_if (struct pbuf *p, ip_addr_t * src, ip_addr_t * dest,
-                   struct netif *netif)
+                   struct interface *netif)
 {
     /* This is the "router alert" option */
     u16_t               ra[2];

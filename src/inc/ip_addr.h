@@ -81,7 +81,7 @@ PACK_STRUCT_END
 #endif
 
 /* Forward declaration to not include netif.h */
-struct netif;
+struct interface;
 
 extern const ip_addr_t ip_addr_any;
 extern const ip_addr_t ip_addr_broadcast;
@@ -200,7 +200,7 @@ extern const ip_addr_t ip_addr_broadcast;
 #define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr == IPADDR_ANY)
 
 #define ip_addr_isbroadcast(ipaddr, netif) ip4_addr_isbroadcast((ipaddr)->addr, (netif))
-u8_t ip4_addr_isbroadcast(u32_t addr, const struct netif *netif);
+u8_t ip4_addr_isbroadcast(u32_t addr, const struct interface *netif);
 
 #define ip_addr_netmask_valid(netmask) ip4_addr_netmask_valid((netmask)->addr)
 u8_t ip4_addr_netmask_valid(u32_t netmask);

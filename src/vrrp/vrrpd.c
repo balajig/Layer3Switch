@@ -18,7 +18,7 @@ int ip_id = 0;	/* to have my own ip_id creates collision with kernel ip->id
 		** fragmented (they are non routable and small) */
 		/* WORK: this packet isnt routed, i can check the outgoing MTU
 		** to warn the user only if the outoing mtu is too small */
-static char vrrp_hwaddr[6];	// WORK: lame hardcoded for ethernet
+static char vrrp_ifPhysAddress[6];	// WORK: lame hardcoded for ethernet
 
 /****************************************************************
  NAME	: in_csum				00/05/10 20:12:20
@@ -58,11 +58,11 @@ static u_short in_csum( u_short *addr, int len, u_short csum)
 
 
 /****************************************************************
- NAME	: rcvhwaddr_op				00/02/08 06:51:32
+ NAME	: rcvifPhysAddress_op				00/02/08 06:51:32
  AIM	:
  REMARK	:
 ****************************************************************/
-static int rcvhwaddr_op( char *ifname, char *addr, int addrlen, int addF )
+static int rcvifPhysAddress_op( char *ifname, char *addr, int addrlen, int addF )
 {
 }
 
@@ -218,7 +218,7 @@ static void vrrp_build_dlt( vrrp_rt *vsrv, char *buffer, int buflen )
 	eth->ether_dhost[4]	= (INADDR_VRRP_GROUP >>  8) & 0xFF;
 	eth->ether_dhost[5]	=  INADDR_VRRP_GROUP        & 0xFF;
 	/* source address --rfc2338.7.3 */
-	memcpy( eth->ether_shost, vrrp_hwaddr, sizeof(vrrp_hwaddr));
+	memcpy( eth->ether_shost, vrrp_ifPhysAddress, sizeof(vrrp_ifPhysAddress));
 	/* type */
 	eth->ether_type		= htons( ETHERTYPE_IP );
 }
@@ -468,16 +468,16 @@ struct m_arphdr
 	struct ether_header 	*eth	= (struct ether_header *)buf;
 	struct m_arphdr	*arph = (struct m_arphdr *)(buf+vrrp_dlt_len(vsrv));
 #if 0
-	char	*hwaddr	= vAddrF ? vrrp_hwaddr : vsrv->hwaddr;
+	char	*ifPhysAddress	= vAddrF ? vrrp_ifPhysAddress : vsrv->ifPhysAddress;
 #else
 
-	char	*hwaddr	= NULL;
+	char	*ifPhysAddress	= NULL;
 #endif
 	int	hwlen	= ETH_ALEN;
 
 	/* hardcoded for ethernet */
 	memset( eth->ether_dhost, 0xFF, ETH_ALEN );
-	memcpy( eth->ether_shost, hwaddr, hwlen );
+	memcpy( eth->ether_shost, ifPhysAddress, hwlen );
 	eth->ether_type	= htons(ETHERTYPE_ARP);
 
 	/* build the arp payload */
@@ -487,7 +487,7 @@ struct m_arphdr
 	arph->ar_hln	= 6;
 	arph->ar_pln	= 4;
 	arph->ar_op	= htons(ARPOP_REQUEST);
-	memcpy( arph->__ar_sha, hwaddr, hwlen );
+	memcpy( arph->__ar_sha, ifPhysAddress, hwlen );
 	addr = htonl(addr);
 	memcpy( arph->__ar_sip, &addr, sizeof(addr) );
 	memcpy( arph->__ar_tip, &addr, sizeof(addr) );
@@ -506,8 +506,8 @@ static void state_goto_master( vrrp_rt *vsrv )
 #if 0
 	/* set the VRRP MAC address -- rfc2338.7.3 */
 	if( !vsrv->no_vmac ){
-		hwaddr_set( vif->ifname, vrrp_hwaddr, sizeof(vrrp_hwaddr) );
-		rcvhwaddr_op( vif->ifname, vif->hwaddr, sizeof(vif->hwaddr), 1);
+		ifPhysAddress_set( vif->ifname, vrrp_ifPhysAddress, sizeof(vrrp_ifPhysAddress) );
+		rcvifPhysAddress_op( vif->ifname, vif->ifPhysAddress, sizeof(vif->ifPhysAddress), 1);
 	}
 #endif
 	/* add the ip addresses */
@@ -534,8 +534,8 @@ static void state_leave_master( vrrp_rt *vsrv, int advF )
 #if 0
 	/* restore the original MAC addresses */
 	if( !vsrv->no_vmac ){
-		hwaddr_set( vif->ifname, vif->hwaddr, sizeof(vif->hwaddr) );
-		rcvhwaddr_op( vif->ifname, vif->hwaddr, sizeof(vif->hwaddr), 0);
+		ifPhysAddress_set( vif->ifname, vif->ifPhysAddress, sizeof(vif->ifPhysAddress) );
+		rcvifPhysAddress_op( vif->ifname, vif->ifPhysAddress, sizeof(vif->ifPhysAddress), 0);
 	}
 #endif
 	/* remove the ip addresses */

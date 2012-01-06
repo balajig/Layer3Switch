@@ -54,7 +54,7 @@ typedef struct {	/* rfc2338.5.1 */
 typedef struct {	/* parameters per interface -- rfc2338.6.1.1 */
 #if 0
 	uint32_t	ipaddr;		/* the address of the interface */
-	char		hwaddr[6];	/* WORK: lame hardcoded for ethernet !!!! */
+	char		ifPhysAddress[6];	/* WORK: lame hardcoded for ethernet !!!! */
 	char		*ifname;	/* the device name for this ipaddr */
 #endif
 } vrrp_if;

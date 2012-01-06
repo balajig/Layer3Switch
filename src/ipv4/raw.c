@@ -72,7 +72,7 @@ static struct raw_pcb *raw_pcbs;
  *
  */
 u8_t
-raw_input (struct pbuf *p, struct netif *inp)
+raw_input (struct pbuf *p, struct interface *inp)
 {
     struct raw_pcb     *pcb, *prev;
     struct ip_hdr      *iphdr;
@@ -209,7 +209,7 @@ err_t
 raw_sendto (struct raw_pcb *pcb, struct pbuf *p, ip_addr_t * ipaddr)
 {
     err_t               err;
-    struct netif       *netif;
+    struct interface       *netif;
     ip_addr_t          *src_ip;
     struct pbuf        *q;        /* q will be sent down the stack */
 

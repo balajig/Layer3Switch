@@ -50,7 +50,7 @@ int get_port_oper_state (uint32_t port)
 
 int get_port_mac_address (uint32_t port, uint8_t *mac)
 {
-	memcpy (mac, port_cdb[port-1].ifPhysAddress.addr, 6);
+	memcpy (mac, port_cdb[port-1].ifPhysAddress, 6);
 	return 0;
 }
 

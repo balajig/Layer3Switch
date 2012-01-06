@@ -93,22 +93,22 @@ struct autoip
 void autoip_init(void);
 
 /** Set a struct autoip allocated by the application to work with */
-void autoip_set_struct(struct netif *netif, struct autoip *autoip);
+void autoip_set_struct(struct interface *netif, struct autoip *autoip);
 
 /** Start AutoIP client */
-err_t autoip_start(struct netif *netif);
+err_t autoip_start(struct interface *netif);
 
 /** Stop AutoIP client */
-err_t autoip_stop(struct netif *netif);
+err_t autoip_stop(struct interface *netif);
 
 /** Handles every incoming ARP Packet, called by etharp_arp_input */
-void autoip_arp_reply(struct netif *netif, struct etharp_hdr *hdr);
+void autoip_arp_reply(struct interface *netif, struct etharp_hdr *hdr);
 
 /** Has to be called in loop every AUTOIP_TMR_INTERVAL milliseconds */
 void autoip_tmr(void);
 
 /** Handle a possible change in the network configuration */
-void autoip_network_changed(struct netif *netif);
+void autoip_network_changed(struct interface *netif);
 
 #ifdef __cplusplus
 }

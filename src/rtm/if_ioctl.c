@@ -177,7 +177,7 @@ if_get_index (struct interface *ifp)
 
 #ifdef SIOCGIFHWADDR
 static int
-if_get_hwaddr (struct interface *ifp)
+if_get_ifPhysAddress (struct interface *ifp)
 {
   int ret;
   struct ifreq ifreq;
@@ -192,7 +192,7 @@ if_get_hwaddr (struct interface *ifp)
     ifp->hw_addr_len = 0;
   else
     {
-      memcpy (ifp->hw_addr, ifreq.ifr_hwaddr.sa_data, 6);
+      memcpy (ifp->hw_addr, ifreq.ifr_ifPhysAddress.sa_data, 6);
 
       for (i = 0; i < 6; i++)
 	if (ifp->hw_addr[i] != 0)
@@ -429,7 +429,7 @@ interface_info_ioctl ()
     {
       if_get_index (ifp);
 #ifdef SIOCGIFHWADDR
-      if_get_hwaddr (ifp);
+      if_get_ifPhysAddress (ifp);
 #endif /* SIOCGIFHWADDR */
       if_get_flags (ifp);
 #ifndef HAVE_GETIFADDRS

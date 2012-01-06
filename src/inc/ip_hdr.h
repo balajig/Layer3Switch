@@ -157,7 +157,7 @@ PACK_STRUCT_END
 #define IPH_CHKSUM_SET(hdr, chksum) (hdr)->_chksum = (chksum)
 
 /** The interface that provided the packet for the current callback invocation. */
-extern struct netif *current_netif;
+extern struct interface *current_netif;
 /** Header of the input packet currently being processed. */
 extern const struct ip_hdr *current_header;
 /** Source IP address of current_header */
@@ -166,20 +166,20 @@ extern ip_addr_t current_iphdr_src;
 extern ip_addr_t current_iphdr_dest;
 
 #define ip_init() /* Compatibility define, not init needed. */
-struct netif *ip_route(ip_addr_t *dest);
-err_t ip_input(struct pbuf *p, struct netif *inp);
+struct interface *ip_route(ip_addr_t *dest);
+err_t ip_input(struct pbuf *p, struct interface *inp);
 err_t ip_output(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto);
 err_t ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto,
-       struct netif *netif);
+       struct interface *netif);
 #if LWIP_NETIF_HWADDRHINT
 err_t ip_output_hinted(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, u8_t *addr_hint);
 #endif /* LWIP_NETIF_HWADDRHINT */
 #if IP_OPTIONS_SEND
 err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
-       u8_t ttl, u8_t tos, u8_t proto, struct netif *netif, void *ip_options,
+       u8_t ttl, u8_t tos, u8_t proto, struct interface *netif, void *ip_options,
        u16_t optlen);
 #endif /* IP_OPTIONS_SEND */
 /** Get the interface that received the current packet.

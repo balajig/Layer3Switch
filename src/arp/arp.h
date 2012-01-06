@@ -29,9 +29,9 @@ struct arp_hdr
 	unsigned short proto;            // Protocol type
 	unsigned short _hwlen_protolen;  // Protocol address length
 	unsigned short opcode;           // Opcode
-	MACHDR         shwaddr;         // Source hardware address
+	MACHDR         sifPhysAddress;         // Source hardware address
 	struct ip_addr sipaddr;          // Source protocol address
-	MACHDR         dhwaddr;         // Target hardware address
+	MACHDR         difPhysAddress;         // Target hardware address
 	struct ip_addr dipaddr;          // Target protocol address
 };
 

@@ -102,9 +102,9 @@ void ip_init(void);
 
 #include "netif.h"
 
-struct netif *ip_route(struct ip_addr *dest);
+struct interface *ip_route(struct ip_addr *dest);
 
-void ip_input(struct pbuf *p, struct netif *inp);
+void ip_input(struct pbuf *p, struct interface *inp);
 
 /* source and destination addresses in network byte order, please */
 err_t ip_output(struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
@@ -112,7 +112,7 @@ err_t ip_output(struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
 
 err_t ip_output_if(struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
       u8_t ttl, u8_t proto,
-      struct netif *netif);
+      struct interface *netif);
 
 #define ip_current_netif() NULL
 #define ip_current_header() NULL

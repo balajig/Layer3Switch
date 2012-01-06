@@ -200,7 +200,7 @@ static int fetch_and_update_if_info (if_t *ife)
 		unsigned char  *p = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 		int i = 0;
 		while (i < 6) {
-			ife->ifPhysAddress.addr[i] = p[i];
+			ife->ifPhysAddress[i] = p[i];
 			i++;
 		}
 	}

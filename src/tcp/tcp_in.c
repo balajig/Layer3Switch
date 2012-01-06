@@ -89,7 +89,7 @@ static err_t        tcp_timewait_input (struct tcp_pcb *pcb);
  * @param inp network interface on which this segment was received
  */
 void
-tcp_input (struct pbuf *p, struct netif *inp)
+tcp_input (struct pbuf *p, struct interface *inp)
 {
     struct tcp_pcb     *pcb, *prev;
     struct tcp_pcb_listen *lpcb;

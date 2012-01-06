@@ -1192,7 +1192,7 @@ static void
 tcp_output_segment (struct tcp_seg *seg, struct tcp_pcb *pcb)
 {
     u16_t               len;
-    struct netif       *netif;
+    struct interface       *netif;
     u32_t              *opts;
 
   /** @bug Exclude retransmitted segments from this count. */
