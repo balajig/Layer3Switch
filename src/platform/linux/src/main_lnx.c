@@ -53,27 +53,7 @@ int main (int argc, char **argv)
 
 	switch_mac[5] = atoi (argv[1]);
 
-	tmlib_init ();
-
-	cli_init ("OpenSwitch");
-
-	spawn_pkt_processing_task ();
-
-	ip_init ();
-
-	port_init ();
-
-	bridge_init ();
-
-	vrrp_init ();
-
-	dhcp_init ();
-
-        install_cmd_handler ("uptime", "Displays the uptime", show_uptime, NULL, USER_EXEC_MODE);
-
-	start_cli_task ();
-
-	init_task_cpu_usage_moniter_timer ();
+	layer3switch_init ();
 
 	while (1) {
 		sleep (-1);

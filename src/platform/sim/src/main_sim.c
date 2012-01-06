@@ -20,7 +20,7 @@
 #include "cli.h"
 
 int parse_cmdline (int argc, char *argv[]);
-int tmlib_init (void);
+int lib_init (void);
 int cli_init (const char *prmt);
 int spawn_pkt_processing_task (void);
 int port_init (void);
@@ -54,27 +54,7 @@ int main (int argc, char **argv)
 
 	switch_mac[5] = atoi (argv[1]);
 
-	tmlib_init ();
-
-	cli_init ("OpenSwitch");
-
-	spawn_pkt_processing_task ();
-
-	port_init ();
-
-	ip_init ();
-
-	bridge_init ();
-
-	vrrp_init ();
-
-	dhcp_init ();
-
-        install_cmd_handler ("uptime", "Displays the uptime", show_uptime, NULL, USER_EXEC_MODE);
-
-	start_cli_task ();
-
-	init_task_cpu_usage_moniter_timer ();
+	layer3switch_init ();
 
 	while (1) {
 		sleep (-1);

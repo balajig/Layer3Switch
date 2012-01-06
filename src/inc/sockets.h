@@ -46,7 +46,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#if 0
 /* members are in network byte order */
 struct sockaddr_in {
   u8_t sin_len;
@@ -65,7 +65,6 @@ struct sockaddr {
 #ifndef socklen_t
 #  define socklen_t u32_t
 #endif
-
 /* Socket protocol types (TCP/UDP/RAW) */
 #define SOCK_STREAM     1
 #define SOCK_DGRAM      2
@@ -373,4 +372,5 @@ int lwip_fcntl(int s, int cmd, int val);
 
 #endif /* LWIP_SOCKET */
 
+#endif
 #endif /* __LWIP_SOCKETS_H__ */

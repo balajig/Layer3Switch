@@ -30,7 +30,7 @@
  *         Simon Goldschmidt
  *
  */
-#ifndef __LWIP_TIMERS_H__
+#ifdef __LWIP_TIMERS_H__
 #define __LWIP_TIMERS_H__
 
 #include "opt.h"

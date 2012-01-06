@@ -61,6 +61,7 @@
 
 #include <string.h>
 
+struct stats_       lwip_stats;
 #if !MEMP_MEM_MALLOC            /* don't build if not configured for use in lwipopts.h */
 
 struct memp
@@ -174,7 +175,6 @@ static u8_t         memp_memory[MEM_ALIGNMENT - 1
     ];
 
 #endif /* MEMP_SEPARATE_POOLS */
-struct stats_       lwip_stats;
 
 #if MEMP_SANITY_CHECK
 /**
