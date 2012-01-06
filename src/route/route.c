@@ -152,7 +152,7 @@ int  route_add_gateway (unsigned char *ipaddr, unsigned char masklen, unsigned c
 
 	/* Network interface is unknown yet.
 	 * Find it now. */
-	r->netif = route_lookup (gateway, 0, 0);
+	r->netif = route_lookup_internal (gateway, 0, 0);
 	if (! r->netif)
 		return -1;
 
@@ -165,7 +165,45 @@ int  route_add_gateway (unsigned char *ipaddr, unsigned char masklen, unsigned c
  * Search the network interface and gateway address to forward the packet.
  * Return also the IP adress of the interface,
  */
-if_t *route_lookup (unsigned char *ipaddr, unsigned char **gateway, unsigned char **if_ipaddr)
+if_t *route_lookup (uint32_t ip)
+{
+	route_t *r, *best;
+	unsigned char ipaddr[4];
+
+ 	uint32_2_ipstring (ntohl(ip), ipaddr);
+
+	best = 0;
+	for (r=route; r; r=r->next) {
+		/* Search through all records. */
+		if (! r->netif)
+			continue;
+
+		/* Compare addresses using mask. */
+		if (! route_match (r, ipaddr))
+			continue;
+
+		/* Select the longest mask. */
+		if (best && best->masklen >= r->masklen)
+			continue;
+
+		best = r;
+		/* debug_printf ("route match: %d.%d.%d.%d with %d.%d.%d.%d / %d\n",
+			ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
+			r->ipaddr[0], r->ipaddr[1], r->ipaddr[2], r->ipaddr[3],
+			r->masklen); */
+	}
+
+	if (! best)
+		return 0;
+
+	return best->netif;
+}
+
+/*
+ * Search the network interface and gateway address to forward the packet.
+ * Return also the IP adress of the interface,
+ */
+if_t *route_lookup_internal (unsigned char *ipaddr, unsigned char **gateway, unsigned char **if_ipaddr)
 {
 	route_t *r, *best;
 

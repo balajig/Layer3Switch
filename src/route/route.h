@@ -14,7 +14,8 @@ typedef struct _route_t {
 	unsigned char	masklen;
 } route_t;
 
-if_t *route_lookup (unsigned char *ipaddr, unsigned char **gateway, unsigned char **if_ipaddr);
+if_t *route_lookup (uint32_t ip);
+if_t *route_lookup_internal (unsigned char *ipaddr, unsigned char **gateway, unsigned char **if_ipaddr);
 if_t *route_lookup_self (unsigned char *ipaddr, unsigned char *broadcast);
 unsigned char *route_lookup_ipaddr (unsigned char *ipaddr, if_t *);
 

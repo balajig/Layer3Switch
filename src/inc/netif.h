@@ -40,6 +40,7 @@
 
 #include "ip_addr.h"
 
+
 #include "def.h"
 #include "pbuf.h"
 #if LWIP_DHCP
@@ -133,98 +134,6 @@ typedef err_t (*netif_igmp_mac_filter_fn)(struct netif *netif,
 /** Generic data structure used for all lwIP network interfaces.
  *  The following fields should be filled in by the initialization
  *  function for the device driver: hwaddr_len, hwaddr[], mtu, flags */
-struct netif {
-  /** pointer to next in linked list */
-  struct netif *next;
-
-  /** IP address configuration in network byte order */
-  ip_addr_t ip_addr;
-  ip_addr_t netmask;
-  ip_addr_t gw;
-
-  /** This function is called by the network device driver
-   *  to pass a packet up the TCP/IP stack. */
-  netif_input_fn input;
-  /** This function is called by the IP module when it wants
-   *  to send a packet on the interface. This function typically
-   *  first resolves the hardware address, then sends the packet. */
-  netif_output_fn output;
-  /** This function is called by the ARP module when it wants
-   *  to send a packet on the interface. This function outputs
-   *  the pbuf as-is on the link medium. */
-  netif_linkoutput_fn linkoutput;
-#if LWIP_NETIF_STATUS_CALLBACK
-  /** This function is called when the netif state is set to up or down
-   */
-  netif_status_callback_fn status_callback;
-#endif /* LWIP_NETIF_STATUS_CALLBACK */
-#if LWIP_NETIF_LINK_CALLBACK
-  /** This function is called when the netif link is set to up or down
-   */
-  netif_status_callback_fn link_callback;
-#endif /* LWIP_NETIF_LINK_CALLBACK */
-  /** This field can be set by the device driver and could point
-   *  to state information for the device. */
-  void *state;
-#if LWIP_DHCP
-  /** the DHCP client state information for this netif */
-  struct dhcp *dhcp;
-#endif /* LWIP_DHCP */
-#if LWIP_AUTOIP
-  /** the AutoIP client state information for this netif */
-  struct autoip *autoip;
-#endif
-#if LWIP_NETIF_HOSTNAME
-  /* the hostname for this netif, NULL is a valid value */
-  char*  hostname;
-#endif /* LWIP_NETIF_HOSTNAME */
-  /** maximum transfer unit (in bytes) */
-  u16_t mtu;
-  /** number of bytes used in hwaddr */
-  u8_t hwaddr_len;
-  /** link level hardware address of this interface */
-  u8_t hwaddr[NETIF_MAX_HWADDR_LEN];
-  /** flags (see NETIF_FLAG_ above) */
-  u8_t flags;
-  /** descriptive abbreviation */
-  char name[2];
-  /** number of this interface */
-  u8_t num;
-#if LWIP_SNMP
-  /** link type (from "snmp_ifType" enum from snmp.h) */
-  u8_t link_type;
-  /** (estimate) link speed */
-  u32_t link_speed;
-  /** timestamp at last change made (up/down) */
-  u32_t ts;
-  /** counters */
-  u32_t ifinoctets;
-  u32_t ifinucastpkts;
-  u32_t ifinnucastpkts;
-  u32_t ifindiscards;
-  u32_t ifoutoctets;
-  u32_t ifoutucastpkts;
-  u32_t ifoutnucastpkts;
-  u32_t ifoutdiscards;
-#endif /* LWIP_SNMP */
-#if LWIP_IGMP
-  /** This function could be called to add or delete a entry in the multicast
-      filter table of the ethernet MAC.*/
-  netif_igmp_mac_filter_fn igmp_mac_filter;
-#endif /* LWIP_IGMP */
-#if LWIP_NETIF_HWADDRHINT
-  u8_t *addr_hint;
-#endif /* LWIP_NETIF_HWADDRHINT */
-#if ENABLE_LOOPBACK
-  /* List of packets to be queued for ourselves. */
-  struct pbuf *loop_first;
-  struct pbuf *loop_last;
-#if LWIP_LOOPBACK_MAX_PBUFS
-  u16_t loop_cnt_current;
-#endif /* LWIP_LOOPBACK_MAX_PBUFS */
-#endif /* ENABLE_LOOPBACK */
-};
-
 #if LWIP_SNMP
 #define NETIF_INIT_SNMP(netif, type, speed) \
   /* use "snmp_ifType" enum from snmp.h for "type", snmp_ifType_ethernet_csmacd by example */ \
@@ -311,5 +220,7 @@ void netif_poll_all(void);
 #ifdef __cplusplus
 }
 #endif
+
+#include "ifmgmt.h"
 
 #endif /* __LWIP_NETIF_H__ */

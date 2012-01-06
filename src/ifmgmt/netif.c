@@ -72,9 +72,6 @@
 #define NETIF_LINK_CALLBACK(n)
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
-struct netif       *netif_list;
-struct netif       *netif_default;
-
 #if LWIP_HAVE_LOOPIF
 static struct netif loop_netif;
 

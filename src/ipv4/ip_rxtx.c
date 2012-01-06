@@ -56,8 +56,6 @@
 #include "stats.h"
 
 #include <string.h>
-struct netif       *netif_list;
-struct netif       *netif_default;
 
 /** Set this to 0 in the rare case of wanting to call an extra function to
  * generate the IP checksum (in contrast to calculating it on-the-fly). */
@@ -124,33 +122,19 @@ static u16_t        ip_id;
 struct netif       *
 ip_route (ip_addr_t * dest)
 {
-    struct netif       *netif;
+	struct netif *p = route_lookup (dest->addr);
 
-    /* iterate through netifs */
-    for (netif = netif_list; netif != NULL; netif = netif->next)
-    {
-        /* network mask matches? */
-        if (netif_is_up (netif))
-        {
-            if (ip_addr_netcmp (dest, &(netif->ip_addr), &(netif->netmask)))
-            {
-                /* return netif on which to forward IP packet */
-                return netif;
-            }
-        }
-    }
-    if ((netif_default == NULL) || (!netif_is_up (netif_default)))
-    {
-        LWIP_DEBUGF (IP_DEBUG | LWIP_DBG_LEVEL_SERIOUS,
-                     ("ip_route: No route to %" U16_F ".%" U16_F ".%" U16_F ".%"
-                      U16_F "\n", ip4_addr1_16 (dest), ip4_addr2_16 (dest),
-                      ip4_addr3_16 (dest), ip4_addr4_16 (dest)));
-        IP_STATS_INC (ip.rterr);
-        snmp_inc_ipoutnoroutes ();
-        return NULL;
-    }
-    /* no matching netif found, use default netif */
-    return netif_default;
+	if (!p)
+	{
+		LWIP_DEBUGF (IP_DEBUG | LWIP_DBG_LEVEL_SERIOUS,
+				("ip_route: No route to %" U16_F ".%" U16_F ".%" U16_F ".%"
+				 U16_F "\n", ip4_addr1_16 (dest), ip4_addr2_16 (dest),
+				 ip4_addr3_16 (dest), ip4_addr4_16 (dest)));
+		IP_STATS_INC (ip.rterr);
+		snmp_inc_ipoutnoroutes ();
+		return NULL;
+	}
+	return p;
 }
 
 #if IP_FORWARD
@@ -366,9 +350,9 @@ ip_input (struct pbuf * p, struct netif * inp)
 #endif /* LWIP_IGMP */
     {
         /* start trying with inp. if that's not acceptable, start walking the
-           list of configured netifs.
-           'first' is used as a boolean to mark whether we started walking the list */
-        int                 first = 1;
+           list of configured netifs.*/
+	int 	            tports = get_max_ports ();
+	int                 port = 1;
         netif = inp;
         do
         {
@@ -417,21 +401,14 @@ ip_input (struct pbuf * p, struct netif * inp)
                 }
 #endif /* LWIP_AUTOIP */
             }
-            if (first)
-            {
-                first = 0;
-                netif = netif_list;
-            }
-            else
-            {
-                netif = netif->next;
-            }
+	    netif = IF_INFO(port);
             if (netif == inp)
             {
-                netif = netif->next;
+                netif = IF_INFO (port + 1);
             }
+            port++;
         }
-        while (netif != NULL);
+        while (port <= tports);
     }
 
 #if IP_ACCEPT_LINK_LAYER_ADDRESSING

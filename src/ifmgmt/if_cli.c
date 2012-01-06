@@ -83,5 +83,3 @@ int cli_set_port_disable (void)
 
 	return 0;
 }
-
-
