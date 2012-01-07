@@ -588,6 +588,9 @@ igmp_joingroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
     err_t               err = ERR_VAL;    /* no matching interface */
     struct igmp_group  *group;
     struct interface       *netif;
+    int 	            tports = get_max_ports ();
+    int                      port = 1;
+
 
     /* make sure it is multicast address */
     LWIP_ERROR ("igmp_joingroup: attempt to join non-multicast address",
@@ -598,9 +601,9 @@ igmp_joingroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
         );
 
     /* loop through netif's */
-    netif = if_list;
-    while (netif != NULL)
+    while (port <= tports);
     {
+	netif = IF_INFO(port);
         /* Should we join this interface ? */
         if ((netif->flags & NETIF_FLAG_IGMP)
             &&
@@ -660,7 +663,7 @@ igmp_joingroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
             }
         }
         /* proceed to next network interface */
-        netif = netif->next;
+	port++;
     }
 
     return err;
@@ -679,6 +682,8 @@ igmp_leavegroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
     err_t               err = ERR_VAL;    /* no matching interface */
     struct igmp_group  *group;
     struct interface       *netif;
+    int 	            tports = get_max_ports ();
+    int                      port = 1;
 
     /* make sure it is multicast address */
     LWIP_ERROR ("igmp_leavegroup: attempt to leave non-multicast address",
@@ -689,9 +694,10 @@ igmp_leavegroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
         );
 
     /* loop through netif's */
-    netif = if_list;
-    while (netif != NULL)
+    while (port <= tports);
     {
+	netif = IF_INFO(port);
+
         /* Should we leave this interface ? */
         if ((netif->flags & NETIF_FLAG_IGMP)
             &&
@@ -755,7 +761,7 @@ igmp_leavegroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
             }
         }
         /* proceed to next network interface */
-        netif = netif->next;
+	port++;
     }
 
     return err;
@@ -822,7 +828,7 @@ igmp_start_timer (struct igmp_group *group, u8_t max_time)
         max_time = 1;
     }
     /* ensure the random value is > 0 */
-    group->timer = (LWIP_RAND () % (max_time - 1)) + 1;
+    group->timer = (rand () % (max_time - 1)) + 1;
 }
 
 /**

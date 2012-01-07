@@ -62,7 +62,6 @@ extern "C" {
 #define LWIP_VERSION   (LWIP_VERSION_MAJOR << 24   | LWIP_VERSION_MINOR << 16 | \
                         LWIP_VERSION_REVISION << 8 | LWIP_VERSION_RC)
 
-#include "init.h"
 #include "stats.h"
 #include "sys.h"
 #include "mem.h"
@@ -70,7 +69,7 @@ extern "C" {
 #include "pbuf.h"
 #include "netif.h"
 #include "sockets.h"
-//#include "ip.h"
+#include "ip_hdr.h"
 #include "raw.h"
 #include "udp.h"
 #include "tcp_impl.h"
