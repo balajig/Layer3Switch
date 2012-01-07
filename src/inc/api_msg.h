@@ -102,7 +102,7 @@ struct api_msg_msg {
     /** used for do_join_leave_group */
     struct {
       ip_addr_t *multiaddr;
-      ip_addr_t *netif_addr;
+      ip_addr_t *if_addr;
       enum netconn_igmp join_or_leave;
     } jl;
 #endif /* LWIP_IGMP */

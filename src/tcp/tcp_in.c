@@ -54,7 +54,6 @@
 #include "inet_chksum.h"
 #include "stats.h"
 #include "snmp.h"
-#include "arch/perf.h"
 
 /* These variables are global to all functions involved in the input
    processing of TCP segments. They are set by the tcp_input()
@@ -99,8 +98,6 @@ tcp_input (struct pbuf *p, struct interface *inp)
 #endif /* SO_REUSE */
     u8_t                hdrlen;
     err_t               err;
-
-    PERF_START;
 
     TCP_STATS_INC (tcp.recv);
     snmp_inc_tcpinsegs ();

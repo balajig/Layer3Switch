@@ -243,7 +243,7 @@ void noleafs_set_value(struct obj_def *od, u16_t len, void *value);
 void snmp_oidtoip(s32_t *ident, ip_addr_t *ip);
 void snmp_iptooid(ip_addr_t *ip, s32_t *ident);
 void snmp_ifindextonetif(s32_t ifindex, struct interface **netif);
-void snmp_netiftoifindex(struct interface *netif, s32_t *ifidx);
+void snmp_iftoifindex(struct interface *netif, s32_t *ifidx);
 
 struct mib_list_node* snmp_mib_ln_alloc(s32_t id);
 void snmp_mib_ln_free(struct mib_list_node *ln);

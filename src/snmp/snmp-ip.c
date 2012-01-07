@@ -151,7 +151,7 @@ asn_t *snmp_get_ipRoutingDiscards (snmp_t *snmp, ...)
  * Find the interface with the given IP address.
  */
 static route_t *
-find_netif_by_addr (ip_t *ip, unsigned long addr)
+find_if_by_addr (ip_t *ip, unsigned long addr)
 {
 	route_t *u;
 
@@ -167,7 +167,7 @@ find_netif_by_addr (ip_t *ip, unsigned long addr)
  * Store the found IP address into `addr'.
  */
 static route_t *
-find_first_netif_by_addr (ip_t *ip, unsigned long *addr)
+find_first_if_by_addr (ip_t *ip, unsigned long *addr)
 {
 	route_t *u, *found;
 	unsigned long found_addr, a;
@@ -195,7 +195,7 @@ find_first_netif_by_addr (ip_t *ip, unsigned long *addr)
  * Store the found IP address into `addr'.
  */
 static route_t *
-find_next_netif_by_addr (ip_t *ip, unsigned long *addr)
+find_next_if_by_addr (ip_t *ip, unsigned long *addr)
 {
 	route_t *u, *found;
 	unsigned long found_addr, a;
@@ -223,7 +223,7 @@ find_next_netif_by_addr (ip_t *ip, unsigned long *addr)
  * Compute the interface index, starting from 1.
  */
 static unsigned
-get_netif_index (ip_t *ip, route_t *target)
+get_if_index (ip_t *ip, route_t *target)
 {
 	route_t *r;
 	unsigned count;
@@ -252,7 +252,7 @@ get_route_mask (ip_t *ip, route_t *u)
 
 asn_t *snmp_get_ipAdEntAddr (snmp_t *snmp, unsigned long addr, ...)
 {
-	if (! find_netif_by_addr (snmp->ip, addr))
+	if (! find_if_by_addr (snmp->ip, addr))
 		return 0;
 	return asn_make_int (snmp->pool, addr, ASN_IP_ADDRESS);
 }
@@ -261,8 +261,8 @@ asn_t *snmp_next_ipAdEntAddr (snmp_t *snmp, bool_t nextflag, unsigned long *addr
 {
 	route_t *u;
 
-	u = nextflag ? find_next_netif_by_addr (snmp->ip, addr) :
-		find_first_netif_by_addr (snmp->ip, addr);
+	u = nextflag ? find_next_if_by_addr (snmp->ip, addr) :
+		find_first_if_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, *addr, ASN_IP_ADDRESS);
@@ -272,10 +272,10 @@ asn_t *snmp_get_ipAdEntIfIndex (snmp_t *snmp, unsigned long addr, ...)
 {
 	route_t *u;
 
-	u = find_netif_by_addr (snmp->ip, addr);
+	u = find_if_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
-	return asn_make_int (snmp->pool, get_netif_index (snmp->ip, u),
+	return asn_make_int (snmp->pool, get_if_index (snmp->ip, u),
 		ASN_INTEGER);
 }
 
@@ -283,11 +283,11 @@ asn_t *snmp_next_ipAdEntIfIndex (snmp_t *snmp, bool_t nextflag, unsigned long *a
 {
 	route_t *u;
 
-	u = nextflag ? find_next_netif_by_addr (snmp->ip, addr) :
-		find_first_netif_by_addr (snmp->ip, addr);
+	u = nextflag ? find_next_if_by_addr (snmp->ip, addr) :
+		find_first_if_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
-	return asn_make_int (snmp->pool, get_netif_index (snmp->ip, u),
+	return asn_make_int (snmp->pool, get_if_index (snmp->ip, u),
 		ASN_INTEGER);
 }
 
@@ -295,7 +295,7 @@ asn_t *snmp_get_ipAdEntNetMask (snmp_t *snmp, unsigned long addr, ...)
 {
 	route_t *u;
 
-	u = find_netif_by_addr (snmp->ip, addr);
+	u = find_if_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, get_route_mask (snmp->ip, u),
@@ -306,8 +306,8 @@ asn_t *snmp_next_ipAdEntNetMask (snmp_t *snmp, bool_t nextflag, unsigned long *a
 {
 	route_t *u;
 
-	u = nextflag ? find_next_netif_by_addr (snmp->ip, addr) :
-		find_first_netif_by_addr (snmp->ip, addr);
+	u = nextflag ? find_next_if_by_addr (snmp->ip, addr) :
+		find_first_if_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, get_route_mask (snmp->ip, u),
@@ -316,7 +316,7 @@ asn_t *snmp_next_ipAdEntNetMask (snmp_t *snmp, bool_t nextflag, unsigned long *a
 
 asn_t *snmp_get_ipAdEntBcastAddr (snmp_t *snmp, unsigned long addr, ...)
 {
-	if (! find_netif_by_addr (snmp->ip, addr))
+	if (! find_if_by_addr (snmp->ip, addr))
 		return 0;
 	/* Our broadcast addresses always end up with 1. */
 	return asn_make_int (snmp->pool, 1, ASN_INTEGER);
@@ -326,8 +326,8 @@ asn_t *snmp_next_ipAdEntBcastAddr (snmp_t *snmp, bool_t nextflag, unsigned long 
 {
 	route_t *u;
 
-	u = nextflag ? find_next_netif_by_addr (snmp->ip, addr) :
-		find_first_netif_by_addr (snmp->ip, addr);
+	u = nextflag ? find_next_if_by_addr (snmp->ip, addr) :
+		find_first_if_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, 1, ASN_INTEGER);
@@ -335,7 +335,7 @@ asn_t *snmp_next_ipAdEntBcastAddr (snmp_t *snmp, bool_t nextflag, unsigned long 
 
 asn_t *snmp_get_ipAdEntReasmMaxSize (snmp_t *snmp, unsigned long addr, ...)
 {
-	if (! find_netif_by_addr (snmp->ip, addr))
+	if (! find_if_by_addr (snmp->ip, addr))
 		return 0;
 	return asn_make_int (snmp->pool, IP_MAXPACKET, ASN_INTEGER);
 }
@@ -344,8 +344,8 @@ asn_t *snmp_next_ipAdEntReasmMaxSize (snmp_t *snmp, bool_t nextflag, unsigned lo
 {
 	route_t *u;
 
-	u = nextflag ? find_next_netif_by_addr (snmp->ip, addr) :
-		find_first_netif_by_addr (snmp->ip, addr);
+	u = nextflag ? find_next_if_by_addr (snmp->ip, addr) :
+		find_first_if_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, IP_MAXPACKET, ASN_INTEGER);
@@ -527,7 +527,7 @@ small_uint_t
 snmp_set_ipRouteNextHop (snmp_t *snmp, asn_t *val, unsigned long addr, ...)
 {
 	route_t *u;
-	netif_t *netif;
+	if_t *netif;
 	unsigned char ipaddr [4];
 
 	u = find_route_by_addr (snmp->ip, addr);
@@ -671,12 +671,12 @@ snmp_set_ipRouteMetric5 (snmp_t *snmp, asn_t *val, unsigned long addr, ...)
  * Given the netif pointer, compute the interface index, starting from 1.
  */
 static unsigned
-get_netif_index_by_netif (ip_t *ip, netif_t *target)
+get_if_index_by_if (ip_t *ip, if_t *target)
 {
 	route_t *r;
 	unsigned count;
 
-/*debug_printf ("find_netif_index_by_netif %s\n", target->name);*/
+/*debug_printf ("find_if_index_by_if %s\n", target->name);*/
 	count = 0;
 	for (r=ip->route; r; r=r->next) {
 		/* Count all interface records. */
@@ -696,7 +696,7 @@ asn_t *snmp_get_ipRouteIfIndex (snmp_t *snmp, unsigned long addr, ...)
 	u = find_route_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
-	return asn_make_int (snmp->pool, get_netif_index_by_netif (snmp->ip, u->netif),
+	return asn_make_int (snmp->pool, get_if_index_by_if (snmp->ip, u->netif),
 		ASN_INTEGER);
 }
 
@@ -708,7 +708,7 @@ asn_t *snmp_next_ipRouteIfIndex (snmp_t *snmp, bool_t nextflag, unsigned long *a
 		find_first_route_by_addr (snmp->ip, addr);
 	if (! u)
 		return 0;
-	return asn_make_int (snmp->pool, get_netif_index_by_netif (snmp->ip, u->netif),
+	return asn_make_int (snmp->pool, get_if_index_by_if (snmp->ip, u->netif),
 		ASN_INTEGER);
 }
 
@@ -802,7 +802,7 @@ asn_t *snmp_next_ipRouteInfo (snmp_t *snmp, bool_t nextflag, unsigned long *addr
 	return asn_make_oid (snmp->pool, ".0.0");
 }
 
-extern netif_t *find_netif (route_t *tab, unsigned nif);
+extern if_t *find_if (route_t *tab, unsigned nif);
 
 /*
  * Find the ARP record with the given IP address.
@@ -811,12 +811,12 @@ static arp_entry_t *
 find_arp_by_addr (ip_t *ip, unsigned nif, unsigned long addr)
 {
 	arp_entry_t *e;
-	netif_t *netif;
+	if_t *netif;
 	arp_t *arp = ip->arp;
 
 	if (! arp)
 		return 0;
-	netif = find_netif (ip->route, nif);
+	netif = find_if (ip->route, nif);
 	if (! netif)
 		return 0;
 	for (e=arp->table; e<arp->table+arp->size; ++e)
@@ -848,7 +848,7 @@ find_first_arp_by_addr (ip_t *ip, unsigned *nif, unsigned long *addr)
 			continue;
 
 		a = LONG (e->ipaddr);
-		n = get_netif_index_by_netif (ip, e->netif);
+		n = get_if_index_by_if (ip, e->netif);
 		if (! found || n < found_nif ||
 		    (n == found_nif && a < found_addr)) {
 			found = e;
@@ -884,7 +884,7 @@ find_next_arp_by_addr (ip_t *ip, unsigned *nif, unsigned long *addr)
 		if (! e->netif)
 			continue;
 
-		n = get_netif_index_by_netif (ip, e->netif);
+		n = get_if_index_by_if (ip, e->netif);
 		if (n < *nif)
 			continue;
 
@@ -911,7 +911,7 @@ asn_t *snmp_get_ipNetToMediaIfIndex (snmp_t *snmp, unsigned nif, unsigned long a
 	e = find_arp_by_addr (snmp->ip, nif, addr);
 	if (! e)
 		return 0;
-	return asn_make_int (snmp->pool, get_netif_index_by_netif (snmp->ip, e->netif),
+	return asn_make_int (snmp->pool, get_if_index_by_if (snmp->ip, e->netif),
 		ASN_INTEGER);
 }
 
@@ -923,7 +923,7 @@ asn_t *snmp_next_ipNetToMediaIfIndex (snmp_t *snmp, bool_t nextflag, unsigned *n
 		find_first_arp_by_addr (snmp->ip, nif, addr);
 	if (! e)
 		return 0;
-	return asn_make_int (snmp->pool, get_netif_index_by_netif (snmp->ip, e->netif),
+	return asn_make_int (snmp->pool, get_if_index_by_if (snmp->ip, e->netif),
 		ASN_INTEGER);
 }
 

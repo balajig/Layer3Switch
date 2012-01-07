@@ -61,14 +61,14 @@ extern sys_mutex_t lock_tcpip_core;
 #define UNLOCK_TCPIP_CORE()   sys_mutex_unlock(&lock_tcpip_core)
 #define TCPIP_APIMSG(m)       tcpip_apimsg_lock(m)
 #define TCPIP_APIMSG_ACK(m)
-#define TCPIP_NETIFAPI(m)     tcpip_netifapi_lock(m)
+#define TCPIP_NETIFAPI(m)     tcpip_ifapi_lock(m)
 #define TCPIP_NETIFAPI_ACK(m)
 #else /* LWIP_TCPIP_CORE_LOCKING */
 #define LOCK_TCPIP_CORE()
 #define UNLOCK_TCPIP_CORE()
 #define TCPIP_APIMSG(m)       tcpip_apimsg(m)
 #define TCPIP_APIMSG_ACK(m)   sys_sem_signal(&m->conn->op_completed)
-#define TCPIP_NETIFAPI(m)     tcpip_netifapi(m)
+#define TCPIP_NETIFAPI(m)     tcpip_ifapi(m)
 #define TCPIP_NETIFAPI_ACK(m) sys_sem_signal(&m->sem)
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
@@ -89,9 +89,9 @@ err_t tcpip_apimsg_lock(struct api_msg *apimsg);
 err_t tcpip_input(struct pbuf *p, struct interface *inp);
 
 #if LWIP_NETIF_API
-err_t tcpip_netifapi(struct interfaceapi_msg *netifapimsg);
+err_t tcpip_ifapi(struct interfaceapi_msg *netifapimsg);
 #if LWIP_TCPIP_CORE_LOCKING
-err_t tcpip_netifapi_lock(struct interfaceapi_msg *netifapimsg);
+err_t tcpip_ifapi_lock(struct interfaceapi_msg *netifapimsg);
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 #endif /* LWIP_NETIF_API */
 

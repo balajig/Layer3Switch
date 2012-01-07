@@ -689,7 +689,7 @@ static void stp_send_bpdu(struct stp_port_entry *p,  const unsigned char *data,
 	uint8_t * pkt = NULL;
 	uint8_t  smac[6];
 
-	int size = sizeof (MACHDR) + sizeof(ETHHDR);
+	int size = sizeof (MACHDR) + sizeof(LLCHDR);
 
 	pkt = tm_malloc (size + length); 
 
@@ -703,7 +703,7 @@ static void stp_send_bpdu(struct stp_port_entry *p,  const unsigned char *data,
 
 	get_port_mac_address (p->port_no, smac);
 
-	llc_mac_hdr_init (pkt, br_group_address, smac, 0x4, length + sizeof(ETHHDR));
+	llc_mac_hdr_init (pkt, br_group_address, smac, 0x4, length + sizeof(LLCHDR));
 
 	memcpy(pkt + size, data, length);
 

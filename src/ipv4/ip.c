@@ -44,7 +44,7 @@ int ip_init (void)
  */
 static void
 ip_forward (ip_t *ip, buf_t *p, unsigned char *gateway, if_t *netif,
-	unsigned char *netif_ipaddr)
+	unsigned char *if_ipaddr)
 {
 	ip_hdr_t *iphdr = (ip_hdr_t*) p->payload;
 
@@ -72,7 +72,7 @@ ip_forward (ip_t *ip, buf_t *p, unsigned char *gateway, if_t *netif,
 	/* Forwarding packet to netif. */
 	if (! gateway)
 		gateway = iphdr->dest;
-	netif_output (netif, p, gateway, netif_ipaddr);
+	if_output (netif, p, gateway, if_ipaddr);
 	++ip->forw_datagrams;
 }
 
@@ -134,10 +134,10 @@ ip_input (ip_t *ip, buf_t *p, if_t *inp)
 		if (! netif) {
 			/* Packet not for us, route or discard */
 			if (ip->forwarding && ! broadcast) {
-				unsigned char *netif_ipaddr, *gateway;
+				unsigned char *if_ipaddr, *gateway;
 
 				netif = route_lookup (ip, iphdr->dest,
-					&gateway, &netif_ipaddr);
+					&gateway, &if_ipaddr);
 				if (! gateway)
 					gateway = iphdr->dest;
 
@@ -145,7 +145,7 @@ ip_input (ip_t *ip, buf_t *p, if_t *inp)
 				 * network interface on which they arrived. */
 				if (netif && netif != inp)
 					ip_forward (ip, p, gateway, netif,
-						netif_ipaddr);
+						if_ipaddr);
 				else
 					buf_free (p);
 			} else {
@@ -250,12 +250,12 @@ proto_unreach:
  * gateway	- IP address of gateway
  * netif	- outgoing interface. If NULL, the routing table is searched
  *		  for an interface, using destination address as a key
- * netif_ipaddr	- IP address of outgoing interface (when netif is not NULL)
+ * if_ipaddr	- IP address of outgoing interface (when netif is not NULL)
  */
 bool_t
-ip_output_netif (ip_t *ip, buf_t *p, unsigned char *dest, unsigned char *src,
+ip_output_if (ip_t *ip, buf_t *p, unsigned char *dest, unsigned char *src,
 	small_uint_t proto, unsigned char *gateway, if_t *netif,
-	unsigned char *netif_ipaddr)
+	unsigned char *if_ipaddr)
 {
 	ip_hdr_t *iphdr;
 	unsigned short chksum;
@@ -263,7 +263,7 @@ ip_output_netif (ip_t *ip, buf_t *p, unsigned char *dest, unsigned char *src,
 	++ip->out_requests;
 	if (! buf_add_header (p, IP_HLEN)) {
 		/* Not enough room for IP header. */
-		/*debug_printf ("ip_output_netif: no space for header\n");*/
+		/*debug_printf ("ip_output_if: no space for header\n");*/
 		++ip->out_discards;
 		buf_free (p);
 		return 0;
@@ -286,7 +286,7 @@ ip_output_netif (ip_t *ip, buf_t *p, unsigned char *dest, unsigned char *src,
 	iphdr->id_l = ip->id;
 
 	memcpy (iphdr->dest, dest, 4);
-	memcpy (iphdr->src, src ? src : netif_ipaddr, 4);
+	memcpy (iphdr->src, src ? src : if_ipaddr, 4);
 
 	iphdr->chksum_h = 0;
 	iphdr->chksum_l = 0;
@@ -304,7 +304,7 @@ ip_output_netif (ip_t *ip, buf_t *p, unsigned char *dest, unsigned char *src,
 
 	if (! gateway)
 		gateway = dest;
-	return netif_output (netif, p, dest, netif_ipaddr);
+	return if_output (netif, p, dest, if_ipaddr);
 }
 
 /*
@@ -315,10 +315,10 @@ ip_output (ip_t *ip, buf_t *p, unsigned char *dest, unsigned char *src,
 	small_uint_t proto)
 {
 	if_t *netif;
-	unsigned char *gateway, *netif_ipaddr;
+	unsigned char *gateway, *if_ipaddr;
 
 	/* Find the outgoing network interface. */
-	netif = route_lookup (ip, dest, &gateway, &netif_ipaddr);
+	netif = route_lookup (ip, dest, &gateway, &if_ipaddr);
 	if (! netif) {
 		/* No route to host. */
 		/*debug_printf ("ip_output: no route to host %d.%d.%d.%d\n",
@@ -328,8 +328,8 @@ ip_output (ip_t *ip, buf_t *p, unsigned char *dest, unsigned char *src,
 		buf_free (p);
 		return 0;
 	}
-	return ip_output_netif (ip, p, dest, src, proto, gateway, netif,
-		netif_ipaddr);
+	return ip_output_if (ip, p, dest, src, proto, gateway, netif,
+		if_ipaddr);
 }
 
 

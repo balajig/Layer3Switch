@@ -126,7 +126,7 @@ typedef struct stp_bpdu {
  * Params common for the CONF and TC BPDU*
  * ***************************************/
   MACHDR   mac_hdr;
-  ETHHDR   eth_hdr;
+  LLCHDR   eth_hdr;
   uint16_t protocol;
   uint8_t  version;
   uint8_t  type;

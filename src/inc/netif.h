@@ -100,14 +100,14 @@ extern "C" {
  *
  * @param netif The netif to initialize
  */
-typedef err_t (*netif_init_fn)(struct interface *netif);
+typedef err_t (*if_init_fn)(struct interface *netif);
 /** Function prototype for netif->input functions. This function is saved as 'input'
  * callback function in the netif struct. Call it when a packet has been received.
  *
  * @param p The received packet, copied into a pbuf
  * @param inp The netif which received the packet
  */
-typedef err_t (*netif_input_fn)(struct pbuf *p, struct interface *inp);
+typedef err_t (*if_input_fn)(struct pbuf *p, struct interface *inp);
 /** Function prototype for netif->output functions. Called by lwIP when a packet
  * shall be sent. For ethernet netif, set this to 'etharp_output' and set
  * 'linkoutput'.
@@ -116,7 +116,7 @@ typedef err_t (*netif_input_fn)(struct pbuf *p, struct interface *inp);
  * @param p The packet to send (p->payload points to IP header)
  * @param ipaddr The IP address to which the packet shall be sent
  */
-typedef err_t (*netif_output_fn)(struct interface *netif, struct pbuf *p,
+typedef err_t (*if_output_fn)(struct interface *netif, struct pbuf *p,
        ip_addr_t *ipaddr);
 /** Function prototype for netif->linkoutput functions. Only used for ethernet
  * netifs. This function is called by ARP when a packet shall be sent.
@@ -124,11 +124,11 @@ typedef err_t (*netif_output_fn)(struct interface *netif, struct pbuf *p,
  * @param netif The netif which shall send a packet
  * @param p The packet to send (raw ethernet packet)
  */
-typedef err_t (*netif_linkoutput_fn)(struct interface *netif, struct pbuf *p);
+typedef err_t (*if_linkoutput_fn)(struct interface *netif, struct pbuf *p);
 /** Function prototype for netif status- or link-callback functions. */
-typedef void (*netif_status_callback_fn)(struct interface *netif);
+typedef void (*if_status_callback_fn)(struct interface *netif);
 /** Function prototype for netif igmp_mac_filter functions */
-typedef err_t (*netif_igmp_mac_filter_fn)(struct interface *netif,
+typedef err_t (*if_igmp_mac_filter_fn)(struct interface *netif,
        ip_addr_t *group, u8_t action);
 
 /** Generic data structure used for all lwIP network interfaces.
@@ -155,65 +155,65 @@ typedef err_t (*netif_igmp_mac_filter_fn)(struct interface *netif,
 
 
 /** The list of network interfaces. */
-extern struct interface *netif_list;
+extern struct interface *if_list;
 /** The default network interface. */
-extern struct interface *netif_default;
+extern struct interface *if_default;
 
-void netif_init(void);
+void if_init(void);
 
-struct interface *netif_add(struct interface *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
-      ip_addr_t *gw, void *state, netif_init_fn init, netif_input_fn input);
+struct interface *if_add(struct interface *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
+      ip_addr_t *gw, void *state, if_init_fn init, if_input_fn input);
 
 void
-netif_set_addr(struct interface *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
+if_set_addr(struct interface *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
       ip_addr_t *gw);
-void netif_remove(struct interface * netif);
+void if_remove(struct interface * netif);
 
 /* Returns a network interface given its name. The name is of the form
    "et0", where the first two letters are the "name" field in the
    netif structure, and the digit is in the num field in the same
    structure. */
-struct interface *netif_find(char *name);
+struct interface *if_find(char *name);
 
-void netif_set_default(struct interface *netif);
+void if_set_default(struct interface *netif);
 
-void netif_set_ipaddr(struct interface *netif, ip_addr_t *ipaddr);
-void netif_set_netmask(struct interface *netif, ip_addr_t *netmask);
-void netif_set_gw(struct interface *netif, ip_addr_t *gw);
+void if_set_ipaddr(struct interface *netif, ip_addr_t *ipaddr);
+void if_set_netmask(struct interface *netif, ip_addr_t *netmask);
+void if_set_gw(struct interface *netif, ip_addr_t *gw);
 
-void netif_set_up(struct interface *netif);
-void netif_set_down(struct interface *netif);
+void if_set_up(struct interface *netif);
+void if_set_down(struct interface *netif);
 /** Ask if an interface is up */
-#define netif_is_up(netif) (((netif)->flags & NETIF_FLAG_UP) ? (u8_t)1 : (u8_t)0)
+#define if_is_up(netif) (((netif)->flags & NETIF_FLAG_UP) ? (u8_t)1 : (u8_t)0)
 
 #if LWIP_NETIF_STATUS_CALLBACK
-void netif_set_status_callback(struct interface *netif, netif_status_callback_fn status_callback);
+void if_set_status_callback(struct interface *netif, if_status_callback_fn status_callback);
 #endif /* LWIP_NETIF_STATUS_CALLBACK */
 
-void netif_set_link_up(struct interface *netif);
-void netif_set_link_down(struct interface *netif);
+void if_set_link_up(struct interface *netif);
+void if_set_link_down(struct interface *netif);
 /** Ask if a link is up */ 
-#define netif_is_link_up(netif) (((netif)->flags & NETIF_FLAG_LINK_UP) ? (u8_t)1 : (u8_t)0)
+#define if_is_link_up(netif) (((netif)->flags & NETIF_FLAG_LINK_UP) ? (u8_t)1 : (u8_t)0)
 
 #if LWIP_NETIF_LINK_CALLBACK
-void netif_set_link_callback(struct interface *netif, netif_status_callback_fn link_callback);
+void if_set_link_callback(struct interface *netif, if_status_callback_fn link_callback);
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
 #if LWIP_NETIF_HOSTNAME
-#define netif_set_hostname(netif, name) do { if((netif) != NULL) { (netif)->hostname = name; }}while(0)
-#define netif_get_hostname(netif) (((netif) != NULL) ? ((netif)->hostname) : NULL)
+#define if_set_hostname(netif, name) do { if((netif) != NULL) { (netif)->hostname = name; }}while(0)
+#define if_get_hostname(netif) (((netif) != NULL) ? ((netif)->hostname) : NULL)
 #endif /* LWIP_NETIF_HOSTNAME */
 
 #if LWIP_IGMP
-#define netif_set_igmp_mac_filter(netif, function) do { if((netif) != NULL) { (netif)->igmp_mac_filter = function; }}while(0)
-#define netif_get_igmp_mac_filter(netif) (((netif) != NULL) ? ((netif)->igmp_mac_filter) : NULL)
+#define if_set_igmp_mac_filter(netif, function) do { if((netif) != NULL) { (netif)->igmp_mac_filter = function; }}while(0)
+#define if_get_igmp_mac_filter(netif) (((netif) != NULL) ? ((netif)->igmp_mac_filter) : NULL)
 #endif /* LWIP_IGMP */
 
 #if ENABLE_LOOPBACK
-err_t netif_loop_output(struct interface *netif, struct pbuf *p, ip_addr_t *dest_ip);
-void netif_poll(struct interface *netif);
+err_t if_loop_output(struct interface *netif, struct pbuf *p, ip_addr_t *dest_ip);
+void if_poll(struct interface *netif);
 #if !LWIP_NETIF_LOOPBACK_MULTITHREADING
-void netif_poll_all(void);
+void if_poll_all(void);
 #endif /* !LWIP_NETIF_LOOPBACK_MULTITHREADING */
 #endif /* ENABLE_LOOPBACK */
 

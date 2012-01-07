@@ -96,7 +96,7 @@
  * The interface that provided the packet for the current callback
  * invocation.
  */
-struct interface       *current_netif;
+struct interface       *current_if;
 
 /**
  * Header of the input packet currently being processed.
@@ -151,8 +151,6 @@ static void
 ip_forward (struct pbuf *p, struct ip_hdr *iphdr, struct interface *inp)
 {
     struct interface       *netif;
-
-    PERF_START;
 
     /* RFC3927 2.7: do not forward link-local addresses */
     if (ip_addr_islinklocal (&current_iphdr_dest))
@@ -373,7 +371,7 @@ ip_input (struct pbuf * p, struct interface * inp)
                                                                        netmask)));
 
             /* interface is up and configured? */
-            if ((netif_is_up (netif)) && (!ip_addr_isany (&(netif->ip_addr))))
+            if ((if_is_up (netif)) && (!ip_addr_isany (&(netif->ip_addr))))
             {
                 /* unicast to this interface address? */
                 if (ip_addr_cmp (&current_iphdr_dest, &(netif->ip_addr)) ||
@@ -546,7 +544,7 @@ ip_input (struct pbuf * p, struct interface * inp)
                  ("ip_input: p->len %" U16_F " p->tot_len %" U16_F "\n", p->len,
                   p->tot_len));
 
-    current_netif = inp;
+    current_if = inp;
     current_header = iphdr;
 
 #if LWIP_RAW
@@ -605,7 +603,7 @@ ip_input (struct pbuf * p, struct interface * inp)
         }
     }
 
-    current_netif = NULL;
+    current_if = NULL;
     current_header = NULL;
     ip_addr_set_any (&current_iphdr_src);
     ip_addr_set_any (&current_iphdr_dest);
@@ -794,13 +792,13 @@ ip_output_if_opt (struct pbuf * p, ip_addr_t * src, ip_addr_t * dest,
     if (ip_addr_cmp (dest, &netif->ip_addr))
     {
         /* Packet to self, enqueue it for loopback */
-        LWIP_DEBUGF (IP_DEBUG, ("netif_loop_output()"));
-        return netif_loop_output (netif, p, dest);
+        LWIP_DEBUGF (IP_DEBUG, ("if_loop_output()"));
+        return if_loop_output (netif, p, dest);
     }
 #if LWIP_IGMP
     if ((p->flags & PBUF_FLAG_MCASTLOOP) != 0)
     {
-        netif_loop_output (netif, p, dest);
+        if_loop_output (netif, p, dest);
     }
 #endif /* LWIP_IGMP */
 #endif /* ENABLE_LOOPBACK */

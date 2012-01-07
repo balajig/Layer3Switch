@@ -114,7 +114,7 @@ err_t ip_output_if(struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
       u8_t ttl, u8_t proto,
       struct interface *netif);
 
-#define ip_current_netif() NULL
+#define ip_current_if() NULL
 #define ip_current_header() NULL
 
 #if IP_DEBUG

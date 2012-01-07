@@ -1,6 +1,6 @@
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before lib INIT CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP IPV4 VRRP UDP RTM LIB PLATFORM SWITCH all-after
+all: all-before lib INIT CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP ARP IPV4 VRRP TCP UDP RTM LIB PLATFORM SWITCH all-after
 
 include make.h
 
@@ -43,10 +43,16 @@ ROUTE:
 	make -C $(CODE_DIR)/route
 RTM:
 #	make -C $(CODE_DIR)/rtm
+TCP:
+	make -C $(CODE_DIR)/tcp
+ARP:
+	make -C $(CODE_DIR)/arp
 
 
 
-SWITCH:  lib BRIDGE STP PLATFORM CLI PORT GDD  RSTP VLAN IPV4 VRRP UDP ROUTE INIT
+
+
+SWITCH:  lib BRIDGE STP PLATFORM CLI PORT GDD  RSTP VLAN IPV4 VRRP TCP UDP ROUTE INIT ARP
 	gcc -o Switch.exe obj/*.o $(PLATFORM_EXE)_obj/*.o -lpthread -lrt
 
 clean: clean-custom
@@ -68,3 +74,5 @@ clean: clean-custom
 	make clean -C $(CODE_DIR)/route
 	make clean -C $(CODE_DIR)/rtm
 	make clean -C $(CODE_DIR)/init
+	make clean -C $(CODE_DIR)/tcp
+	make clean -C $(CODE_DIR)/arp

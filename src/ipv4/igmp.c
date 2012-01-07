@@ -598,7 +598,7 @@ igmp_joingroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
         );
 
     /* loop through netif's */
-    netif = netif_list;
+    netif = if_list;
     while (netif != NULL)
     {
         /* Should we join this interface ? */
@@ -689,7 +689,7 @@ igmp_leavegroup (ip_addr_t * ifaddr, ip_addr_t * groupaddr)
         );
 
     /* loop through netif's */
-    netif = netif_list;
+    netif = if_list;
     while (netif != NULL)
     {
         /* Should we leave this interface ? */

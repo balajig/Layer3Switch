@@ -29,8 +29,8 @@ snmp_get_ifNumber (snmp_t *snmp, ...)
  * Find the network interface with the given number,
  * starting from 1.
  */
-netif_t *
-find_netif (route_t *tab, unsigned nif)
+if_t *
+find_if (route_t *tab, unsigned nif)
 {
 	route_t *r;
 
@@ -46,7 +46,7 @@ find_netif (route_t *tab, unsigned nif)
 asn_t *
 snmp_get_ifIndex (snmp_t *snmp, unsigned nif, ...)
 {
-	if (! find_netif (snmp->ip->route, nif))
+	if (! find_if (snmp->ip->route, nif))
 		return 0;
 	return asn_make_int (snmp->pool, nif, ASN_INTEGER);
 }
@@ -58,7 +58,7 @@ snmp_next_ifIndex (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 		++*nif;
 	else
 		*nif = 1;
-	if (! find_netif (snmp->ip->route, *nif))
+	if (! find_if (snmp->ip->route, *nif))
 		return 0;
 	return asn_make_int (snmp->pool, *nif, ASN_INTEGER);
 }
@@ -66,7 +66,7 @@ snmp_next_ifIndex (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifDescr (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_string_flash (snmp->pool, u->name);
@@ -75,13 +75,13 @@ snmp_get_ifDescr (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifDescr (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_string_flash (snmp->pool, u->name);
@@ -90,7 +90,7 @@ snmp_next_ifDescr (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifType (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->type, ASN_INTEGER);
@@ -99,13 +99,13 @@ snmp_get_ifType (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifType (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->type, ASN_INTEGER);
@@ -114,7 +114,7 @@ snmp_next_ifType (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifSpecific (snmp_t *snmp, unsigned nif, ...)
 {
-	if (! find_netif (snmp->ip->route, nif))
+	if (! find_if (snmp->ip->route, nif))
 		return 0;
 	return asn_make_oid (snmp->pool, ".0.0");
 }
@@ -126,7 +126,7 @@ snmp_next_ifSpecific (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 		++*nif;
 	else
 		*nif = 1;
-	if (! find_netif (snmp->ip->route, *nif))
+	if (! find_if (snmp->ip->route, *nif))
 		return 0;
 	return asn_make_oid (snmp->pool, ".0.0");
 }
@@ -134,7 +134,7 @@ snmp_next_ifSpecific (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifPhysAddress (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 
 	if (! u)
 		return 0;
@@ -146,13 +146,13 @@ snmp_get_ifPhysAddress (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifPhysAddress (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	if (! u->arp)
@@ -163,7 +163,7 @@ snmp_next_ifPhysAddress (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifSpeed (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->bps, ASN_GAUGE);
@@ -172,13 +172,13 @@ snmp_get_ifSpeed (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifSpeed (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->bps, ASN_GAUGE);
@@ -187,7 +187,7 @@ snmp_next_ifSpeed (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifLastChange (snmp_t *snmp, unsigned nif, ...)
 {
-	if (! find_netif (snmp->ip->route, nif))
+	if (! find_if (snmp->ip->route, nif))
 		return 0;
 	return asn_make_int (snmp->pool, 0, ASN_TIME_TICKS);
 }
@@ -199,7 +199,7 @@ snmp_next_ifLastChange (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 		++*nif;
 	else
 		*nif = 1;
-	if (! find_netif (snmp->ip->route, *nif))
+	if (! find_if (snmp->ip->route, *nif))
 		return 0;
 	return asn_make_int (snmp->pool, 0, ASN_TIME_TICKS);
 }
@@ -207,7 +207,7 @@ snmp_next_ifLastChange (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifMtu (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->mtu, ASN_INTEGER);
@@ -216,13 +216,13 @@ snmp_get_ifMtu (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifMtu (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->mtu, ASN_INTEGER);
@@ -231,7 +231,7 @@ snmp_next_ifMtu (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifAdminStatus (snmp_t *snmp, unsigned nif, ...)
 {
-	if (! find_netif (snmp->ip->route, nif))
+	if (! find_if (snmp->ip->route, nif))
 		return 0;
 	return asn_make_int (snmp->pool, SNMP_IFS_UP, ASN_INTEGER);
 }
@@ -243,7 +243,7 @@ snmp_next_ifAdminStatus (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 		++*nif;
 	else
 		*nif = 1;
-	if (! find_netif (snmp->ip->route, *nif))
+	if (! find_if (snmp->ip->route, *nif))
 		return 0;
 	return asn_make_int (snmp->pool, SNMP_IFS_UP, ASN_INTEGER);
 }
@@ -251,7 +251,7 @@ snmp_next_ifAdminStatus (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifOperStatus (snmp_t *snmp, unsigned nif, ...)
 {
-	if (! find_netif (snmp->ip->route, nif))
+	if (! find_if (snmp->ip->route, nif))
 		return 0;
 	return asn_make_int (snmp->pool, SNMP_IFS_UP, ASN_INTEGER);
 }
@@ -263,7 +263,7 @@ snmp_next_ifOperStatus (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 		++*nif;
 	else
 		*nif = 1;
-	if (! find_netif (snmp->ip->route, *nif))
+	if (! find_if (snmp->ip->route, *nif))
 		return 0;
 	return asn_make_int (snmp->pool, SNMP_IFS_UP, ASN_INTEGER);
 }
@@ -271,7 +271,7 @@ snmp_next_ifOperStatus (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifInOctets (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_bytes, ASN_COUNTER);
@@ -280,13 +280,13 @@ snmp_get_ifInOctets (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifInOctets (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_bytes, ASN_COUNTER);
@@ -295,7 +295,7 @@ snmp_next_ifInOctets (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifInUcastPkts (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_packets - u->in_mcast_pkts, ASN_COUNTER);
@@ -304,13 +304,13 @@ snmp_get_ifInUcastPkts (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifInUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_packets - u->in_mcast_pkts, ASN_COUNTER);
@@ -319,7 +319,7 @@ snmp_next_ifInUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifInNUcastPkts (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_mcast_pkts, ASN_COUNTER);
@@ -328,13 +328,13 @@ snmp_get_ifInNUcastPkts (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifInNUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_mcast_pkts, ASN_COUNTER);
@@ -343,7 +343,7 @@ snmp_next_ifInNUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifInDiscards (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_discards, ASN_COUNTER);
@@ -352,13 +352,13 @@ snmp_get_ifInDiscards (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifInDiscards (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_discards, ASN_COUNTER);
@@ -367,7 +367,7 @@ snmp_next_ifInDiscards (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifInErrors (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_errors, ASN_COUNTER);
@@ -376,13 +376,13 @@ snmp_get_ifInErrors (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifInErrors (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_errors, ASN_COUNTER);
@@ -391,7 +391,7 @@ snmp_next_ifInErrors (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifInUnknownProtos (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_unknown_protos, ASN_COUNTER);
@@ -400,13 +400,13 @@ snmp_get_ifInUnknownProtos (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifInUnknownProtos (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->in_unknown_protos, ASN_COUNTER);
@@ -415,7 +415,7 @@ snmp_next_ifInUnknownProtos (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifOutOctets (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_bytes, ASN_COUNTER);
@@ -424,13 +424,13 @@ snmp_get_ifOutOctets (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifOutOctets (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_bytes, ASN_COUNTER);
@@ -439,7 +439,7 @@ snmp_next_ifOutOctets (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifOutUcastPkts (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_packets - u->out_mcast_pkts, ASN_COUNTER);
@@ -448,13 +448,13 @@ snmp_get_ifOutUcastPkts (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifOutUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_packets - u->out_mcast_pkts, ASN_COUNTER);
@@ -463,7 +463,7 @@ snmp_next_ifOutUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifOutNUcastPkts (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_mcast_pkts, ASN_COUNTER);
@@ -472,13 +472,13 @@ snmp_get_ifOutNUcastPkts (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifOutNUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_mcast_pkts, ASN_COUNTER);
@@ -487,7 +487,7 @@ snmp_next_ifOutNUcastPkts (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifOutDiscards (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_discards, ASN_COUNTER);
@@ -496,13 +496,13 @@ snmp_get_ifOutDiscards (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifOutDiscards (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_discards, ASN_COUNTER);
@@ -511,7 +511,7 @@ snmp_next_ifOutDiscards (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifOutErrors (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_errors, ASN_COUNTER);
@@ -520,13 +520,13 @@ snmp_get_ifOutErrors (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifOutErrors (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_errors, ASN_COUNTER);
@@ -535,7 +535,7 @@ snmp_next_ifOutErrors (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 asn_t *
 snmp_get_ifOutQLen (snmp_t *snmp, unsigned nif, ...)
 {
-	netif_t *u = find_netif (snmp->ip->route, nif);
+	if_t *u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_qlen, ASN_GAUGE);
@@ -544,13 +544,13 @@ snmp_get_ifOutQLen (snmp_t *snmp, unsigned nif, ...)
 asn_t *
 snmp_next_ifOutQLen (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
 	if (nextflag)
 		++*nif;
 	else
 		*nif = 1;
-	u = find_netif (snmp->ip->route, *nif);
+	u = find_if (snmp->ip->route, *nif);
 	if (! u)
 		return 0;
 	return asn_make_int (snmp->pool, u->out_qlen, ASN_GAUGE);
@@ -559,9 +559,9 @@ snmp_next_ifOutQLen (snmp_t *snmp, bool_t nextflag, unsigned *nif, ...)
 small_uint_t
 snmp_set_ifAdminStatus (snmp_t *snmp, asn_t *val, unsigned nif, ...)
 {
-	netif_t *u;
+	if_t *u;
 
-	u = find_netif (snmp->ip->route, nif);
+	u = find_if (snmp->ip->route, nif);
 	if (! u)
 		return SNMP_NO_SUCH_NAME;
 	if (val->type != ASN_INTEGER)

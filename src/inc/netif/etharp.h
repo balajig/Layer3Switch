@@ -67,6 +67,17 @@ PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/bpstruct.h"
 #endif
+PACK_STRUCT_BEGIN
+/** Ethernet header */
+struct eth_hdr {
+#if ETH_PAD_SIZE
+  PACK_STRUCT_FIELD(u8_t padding[ETH_PAD_SIZE]);
+#endif
+  PACK_STRUCT_FIELD(struct eth_addr dest);
+  PACK_STRUCT_FIELD(struct eth_addr src);
+  PACK_STRUCT_FIELD(u16_t type);
+};
+PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
 #endif
@@ -201,10 +212,10 @@ err_t ethernet_input(struct pbuf *p, struct interface *netif);
 
 extern const struct eth_addr ethbroadcast, ethzero;
 
-#endif /* LWIP_ARP || LWIP_ETHERNET */
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 
 #endif /* __NETIF_ARP_H__ */

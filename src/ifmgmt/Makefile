@@ -10,6 +10,7 @@ INTERF_OBJ_DIR = $(INTERF_CODE_DIR)/obj
 
 
 INTERF_OBJS += $(INTERF_OBJ_DIR)/if_cli.o
+INTERF_OBJS += $(INTERF_OBJ_DIR)/if.o
 
 all: all-before  obj $(INTERF_OBJS) tm_port.o all-after
 
@@ -21,5 +22,9 @@ clean: clean-custom
 
 $(INTERF_OBJ_DIR)/if_cli.o: $(INTERF_SRCC_DIR)/if_cli.c
 	$(CC) -c $(COMPILATION_SWITCH) $(INTERF_SRCC_DIR)/if_cli.c -o $(INTERF_OBJ_DIR)/if_cli.o $(CFLAGS) -I$(INTERF_INC_DIR)
+
+$(INTERF_OBJ_DIR)/if.o: $(INTERF_SRCC_DIR)/if.c
+	$(CC) -c $(COMPILATION_SWITCH) $(INTERF_SRCC_DIR)/if.c -o $(INTERF_OBJ_DIR)/if.o $(CFLAGS) -I$(INTERF_INC_DIR)
+
 tm_port.o: $(INTERF_OBJS)
 	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/tm_port.o $(INTERF_OBJS)

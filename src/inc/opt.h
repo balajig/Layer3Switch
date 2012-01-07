@@ -495,7 +495,7 @@ typedef char mem_ptr_t;
  * entries (using etharp_add_static_entry/etharp_remove_static_entry).
  */
 #ifndef ETHARP_SUPPORT_STATIC_ENTRIES
-#define ETHARP_SUPPORT_STATIC_ENTRIES   0
+#define ETHARP_SUPPORT_STATIC_ENTRIES   1
 #endif
 
 
@@ -510,7 +510,7 @@ typedef char mem_ptr_t;
  * interface, define this to 0.
  */
 #ifndef IP_FORWARD
-#define IP_FORWARD                      0
+#define IP_FORWARD                      1
 #endif
 
 /**
@@ -664,7 +664,7 @@ typedef char mem_ptr_t;
  * LWIP_DHCP==1: Enable DHCP module.
  */
 #ifndef LWIP_DHCP
-#define LWIP_DHCP                       0
+#define LWIP_DHCP                       1
 #endif
 
 /**
@@ -683,7 +683,7 @@ typedef char mem_ptr_t;
  * LWIP_AUTOIP==1: Enable AUTOIP module.
  */
 #ifndef LWIP_AUTOIP
-#define LWIP_AUTOIP                     0
+#define LWIP_AUTOIP                     1
 #endif
 
 /**
@@ -1148,7 +1148,7 @@ typedef char mem_ptr_t;
  *       multithreaded environment like tcpip.c. In this case, netif->input()
  *       is called directly.
  *    LWIP_NETIF_LOOPBACK_MULTITHREADING==0: Indicates a polling (or NO_SYS) setup.
- *       The packets are put on a list and netif_poll() must be called in
+ *       The packets are put on a list and if_poll() must be called in
  *       the main application loop.
  */
 #ifndef LWIP_NETIF_LOOPBACK_MULTITHREADING

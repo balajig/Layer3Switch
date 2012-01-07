@@ -43,24 +43,24 @@ struct interface {
 
 	/** This function is called by the network device driver
 	 *  to pass a packet up the TCP/IP stack. */
-	netif_input_fn input;
+	if_input_fn input;
 	/** This function is called by the IP module when it wants
 	 *  to send a packet on the interface. This function typically
 	 *  first resolves the hardware address, then sends the packet. */
-	netif_output_fn output;
+	if_output_fn output;
 	/** This function is called by the ARP module when it wants
 	 *  to send a packet on the interface. This function outputs
 	 *  the pbuf as-is on the link medium. */
-	netif_linkoutput_fn linkoutput;
+	if_linkoutput_fn linkoutput;
 #if LWIP_NETIF_STATUS_CALLBACK
 	/** This function is called when the netif state is set to up or down
 	*/
-	netif_status_callback_fn status_callback;
+	if_status_callback_fn status_callback;
 #endif /* LWIP_NETIF_STATUS_CALLBACK */
 #if LWIP_NETIF_LINK_CALLBACK
 	/** This function is called when the netif link is set to up or down
 	*/
-	netif_status_callback_fn link_callback;
+	if_status_callback_fn link_callback;
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 	/** This field can be set by the device driver and could point
 	 *  to state information for the device. */
@@ -109,7 +109,7 @@ struct interface {
 #if LWIP_IGMP
 	/** This function could be called to add or delete a entry in the multicast
 	  filter table of the ethernet MAC.*/
-	netif_igmp_mac_filter_fn igmp_mac_filter;
+	if_igmp_mac_filter_fn igmp_mac_filter;
 #endif /* LWIP_IGMP */
 #if LWIP_NETIF_HWADDRHINT
 	u8_t *addr_hint;

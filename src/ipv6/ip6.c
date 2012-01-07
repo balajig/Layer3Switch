@@ -73,7 +73,7 @@ ip_route (struct ip_addr *dest)
 {
     struct interface       *netif;
 
-    for (netif = netif_list; netif != NULL; netif = netif->next)
+    for (netif = if_list; netif != NULL; netif = netif->next)
     {
         if (ip_addr_netcmp (dest, &(netif->ip_addr), &(netif->netmask)))
         {
@@ -81,7 +81,7 @@ ip_route (struct ip_addr *dest)
         }
     }
 
-    return netif_default;
+    return if_default;
 }
 
 /* ip_forward:
@@ -184,7 +184,7 @@ ip_input (struct pbuf *p, struct interface *inp)
     }
 
     /* is this packet for us? */
-    for (netif = netif_list; netif != NULL; netif = netif->next)
+    for (netif = if_list; netif != NULL; netif = netif->next)
     {
 #if IP_DEBUG
         LWIP_DEBUGF (IP_DEBUG, ("ip_input: iphdr->dest "));

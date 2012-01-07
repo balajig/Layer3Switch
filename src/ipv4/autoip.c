@@ -54,7 +54,7 @@
  *   Possible values are 1000, 500, 333, 250, 200, 166, 142, 125, 111, 100 ....
  *
  * Without DHCP:
- * - Call autoip_start() after netif_add().
+ * - Call autoip_start() after if_add().
  * 
  * With DHCP:
  * - define LWIP_DHCP_AUTOIP_COOP 1 in your lwipopts.h.
@@ -290,12 +290,12 @@ autoip_bind (struct interface *netif)
     IP4_ADDR (&sn_mask, 255, 255, 0, 0);
     IP4_ADDR (&gw_addr, 0, 0, 0, 0);
 
-    netif_set_ipaddr (netif, &autoip->llipaddr);
-    netif_set_netmask (netif, &sn_mask);
-    netif_set_gw (netif, &gw_addr);
+    if_set_ipaddr (netif, &autoip->llipaddr);
+    if_set_netmask (netif, &sn_mask);
+    if_set_gw (netif, &gw_addr);
 
     /* bring the interface up */
-    netif_set_up (netif);
+    if_set_up (netif);
 
     return ERR_OK;
 }
@@ -311,9 +311,9 @@ autoip_start (struct interface * netif)
     struct autoip      *autoip = netif->autoip;
     err_t               result = ERR_OK;
 
-    if (netif_is_up (netif))
+    if (if_is_up (netif))
     {
-        netif_set_down (netif);
+        if_set_down (netif);
     }
 
     /* Set IP-Address, Netmask and Gateway to 0 to make sure that
@@ -404,7 +404,7 @@ autoip_network_changed (struct interface *netif)
 {
     if (netif->autoip && netif->autoip->state != AUTOIP_STATE_OFF)
     {
-        netif_set_down (netif);
+        if_set_down (netif);
         autoip_start_probing (netif);
     }
 }
@@ -418,7 +418,7 @@ err_t
 autoip_stop (struct interface *netif)
 {
     netif->autoip->state = AUTOIP_STATE_OFF;
-    netif_set_down (netif);
+    if_set_down (netif);
     return ERR_OK;
 }
 
@@ -428,10 +428,14 @@ autoip_stop (struct interface *netif)
 void
 autoip_tmr ()
 {
-    struct interface       *netif = netif_list;
+    struct interface       *netif = NULL;
+    int 	            tports = get_max_ports ();
+    int                      port = 1;
+
     /* loop through netif's */
-    while (netif != NULL)
+    while (port <= tports);
     {
+	netif = IF_INFO(port);
         /* only act on AutoIP configured interfaces */
         if (netif->autoip != NULL)
         {
@@ -503,7 +507,7 @@ autoip_tmr ()
                             /* We are here the first time, so we waited ANNOUNCE_WAIT seconds
                              * Now we can bind to an IP address and use it.
                              *
-                             * autoip_bind calls netif_set_up. This triggers a gratuitous ARP
+                             * autoip_bind calls if_set_up. This triggers a gratuitous ARP
                              * which counts as an announcement.
                              */
                             autoip_bind (netif);
@@ -542,7 +546,7 @@ autoip_tmr ()
             }
         }
         /* proceed to next network interface */
-        netif = netif->next;
+	port++;
     }
 }
 

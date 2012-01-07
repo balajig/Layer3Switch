@@ -157,7 +157,7 @@ PACK_STRUCT_END
 #define IPH_CHKSUM_SET(hdr, chksum) (hdr)->_chksum = (chksum)
 
 /** The interface that provided the packet for the current callback invocation. */
-extern struct interface *current_netif;
+extern struct interface *current_if;
 /** Header of the input packet currently being processed. */
 extern const struct ip_hdr *current_header;
 /** Source IP address of current_header */
@@ -185,7 +185,7 @@ err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
 /** Get the interface that received the current packet.
  * This function must only be called from a receive callback (udp_recv,
  * raw_recv, tcp_accept). It will return NULL otherwise. */
-#define ip_current_netif()  (current_netif)
+#define ip_current_if()  (current_if)
 /** Get the IP header of the current packet.
  * This function must only be called from a receive callback (udp_recv,
  * raw_recv, tcp_accept). It will return NULL otherwise. */

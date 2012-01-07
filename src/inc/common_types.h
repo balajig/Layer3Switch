@@ -144,7 +144,6 @@ struct ether_header
   u_int16_t ether_type;                 /* packet type ID field */
 } __attribute__ ((__packed__));
 
-
 typedef struct bridge_id
 {       
         uint16_t   prio;
@@ -184,11 +183,11 @@ typedef struct mac_hdr {
   uint16_t  len8023;
 } MACHDR;
 
-typedef struct eth_hdr {
+typedef struct llc_hdr {
   uint8_t   dsap;
   uint8_t   ssap;
   uint8_t   llc;
-} ETHHDR;
+}LLCHDR;
 
 typedef enum {
   P2P_FORCE_TRUE,
