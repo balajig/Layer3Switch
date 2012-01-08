@@ -77,8 +77,6 @@ struct interface {
 	/* the hostname for this netif, NULL is a valid value */
 	char*  hostname;
 #endif /* LWIP_NETIF_HOSTNAME */
-	/** maximum transfer unit (in bytes) */
-	u16_t mtu;
 	/** number of bytes used in ifPhysAddress */
 	u8_t ifPhysAddress_len;
 	/** link level hardware address of this interface */

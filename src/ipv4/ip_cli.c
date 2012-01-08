@@ -35,18 +35,18 @@ cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
 
 cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context)
 {
-	int i = 0;
-	while (i < get_max_ports ()) {
-		if (ip_port[i].Status) {
+	int i = 1;
+	while (i <= get_max_ports ()) {
+		if (ip_port[i-1].Status) {
 			const char *State[2] = {"UP", "DOWN"};
 			uint8_t addr[4];
 			uint8_t Mask[4];
 			printf ("\n%s is administratively %s, line protocol is %s\n", IF_DESCR(i), State[IF_ADMIN_STATUS(i) - 1],
 				State[IF_OPER_STATUS(i) - 1]);
 			printf  ("Internet address is ");
-		 	uint32_2_ipstring (ip_port[i].Addr, &addr);
+		 	uint32_2_ipstring (ip_port[i-1].Addr, &addr);
 			printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
-		 	uint32_2_ipstring (ip_port[i].AddrMask, &Mask);
+		 	uint32_2_ipstring (ip_port[i-1].AddrMask, &Mask);
 			printf  (", subnet mask is ");
 			printf("%u.%u.%u.%u\n", Mask[0], Mask[1],Mask[2],Mask[3]);
 		}

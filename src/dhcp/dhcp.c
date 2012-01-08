@@ -95,7 +95,7 @@
 
 /** DHCP_OPTION_MAX_MSG_SIZE is set to the MTU
  * MTU is checked to be big enough in dhcp_start */
-#define DHCP_MAX_MSG_LEN(netif)        (netif->mtu)
+#define DHCP_MAX_MSG_LEN(netif)        (netif->ifMtu)
 #define DHCP_MAX_MSG_LEN_MIN_REQUIRED  576
 /** Minimum length for reply before packet is parsed */
 #define DHCP_MIN_REPLY_LEN             44
@@ -759,7 +759,7 @@ dhcp_start (struct interface *netif)
     }
 
     /* check MTU of the netif */
-    if (netif->mtu < DHCP_MAX_MSG_LEN_MIN_REQUIRED)
+    if (netif->ifMtu < DHCP_MAX_MSG_LEN_MIN_REQUIRED)
     {
         LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE,
                      ("dhcp_start(): Cannot use this netif with DHCP: MTU is too small\n"));

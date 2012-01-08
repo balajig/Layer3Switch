@@ -134,6 +134,14 @@ disable
 //Configures IP address on Interface
 ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
 
+//Acquires an IP address on an interface from DHCP
+ip address dhcp
+
+//Specifies or modifies the host name sent in the DHCP message
+ip dhcp client <STRING:hostname>
+
+//Configures the duration of the lease for an IP address
+ip dhcp client lease <INT:days> { <INT:hours> } { <INT:mins> }
 
 //Exit from the mode
 exit

@@ -1,39 +1,26 @@
 #include "common_types.h"
 #include "cli.h"
+#include "ifmgmt.h"
+#include "cparser.h"
+#include "cparser_tree.h"
 
-
-void cli_dhcp_acquire_ip_address (void *arg[])
+cparser_result_t cparser_cmd_if_ip_address_dhcp(cparser_context_t *context)
 {
 	int port = cli_get_port ();
-
-#if 0
-
-	dhcp_acquire_ip_address (port);
-#endif
+	if (!dhcp_start (IF_INFO (port)))
+		return CPARSER_OK;
+	return CPARSER_NOT_OK;
 }
-
-void cli_dhcp_client_hostname (void *arg[])
+cparser_result_t cparser_cmd_if_ip_dhcp_client_hostname(cparser_context_t *context, char **hostname_ptr)
 {
+	printf ("Not Implemented\n");
+	return CPARSER_OK;
 }
-
-void cli_dhcp_client_lease (void *arg[])
+cparser_result_t cparser_cmd_if_ip_dhcp_client_lease_days_hours_mins(cparser_context_t *context,
+    int32_t *days_ptr,
+    int32_t *hours_ptr,
+    int32_t *mins_ptr)
 {
-}
-
-
-int dhcp_cli_init (void)
-{
-	install_cmd_handler ("ip address dhcp", "Acquires an IP address on an interface from DHCP. ", 
-			     cli_dhcp_acquire_ip_address , NULL,  INTERFACE_MODE);
-
-	install_cmd_handler ("ip dhcp client <hostname> ", "Specifies or modifies the host name sent in the DHCP message", 
-                              cli_dhcp_client_hostname, "ip dhcp client <STR>", INTERFACE_MODE);
-
-	install_cmd_handler ("ip dhcp client lease <days> [<hours>] [<mins>]", "Configures the duration of the lease for an IP address", 
-                              cli_dhcp_client_lease, "ip dhcp client lease  <INT> [<INT>] [<INT>]", INTERFACE_MODE);
-}
-
-int dhcp_init (void)
-{
-	dhcp_cli_init ();
+	printf ("Not Implemented\n");
+	return CPARSER_OK;
 }

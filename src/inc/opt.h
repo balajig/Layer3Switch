@@ -46,7 +46,7 @@ typedef uint16_t u16_t;
 typedef int16_t  s16_t;
 typedef uint32_t u32_t;
 typedef int32_t s32_t;
-typedef char mem_ptr_t;
+typedef unsigned long  mem_ptr_t;
 
 /*
  * Include user defined options first. Anything not defined in these files

@@ -161,8 +161,7 @@ extern struct interface *if_default;
 
 void if_init(void);
 
-struct interface *if_add(struct interface *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
-      ip_addr_t *gw, void *state, if_init_fn init, if_input_fn input);
+void interface_init (struct interface *netif, void *state, if_input_fn input);
 
 void
 if_set_addr(struct interface *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,

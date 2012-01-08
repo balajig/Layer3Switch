@@ -1652,9 +1652,9 @@ tcp_eff_send_mss (u16_t sendmss, ip_addr_t * addr)
     struct interface       *outif;
 
     outif = ip_route (addr);
-    if ((outif != NULL) && (outif->mtu != 0))
+    if ((outif != NULL) && (outif->ifMtu != 0))
     {
-        mss_s = outif->mtu - IP_HLEN - TCP_HLEN;
+        mss_s = outif->ifMtu - IP_HLEN - TCP_HLEN;
         /* RFC 1122, chap 4.2.2.6:
          * Eff.snd.MSS = min(SendMSS+20, MMS_S) - TCPhdrsize - IPoptionsize
          * We correct for TCP options in tcp_write(), and don't support IP options.

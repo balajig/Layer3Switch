@@ -54,6 +54,7 @@
 #include "snmp.h"
 #include "dhcp.h"
 #include "autoip.h"
+#include "ifmgmt.h"
 #include "netif/etharp.h"
 
 #if PPPOE_SUPPORT
@@ -1518,5 +1519,33 @@ ethernet_input (struct pbuf *p, struct interface *netif)
   free_and_return:
     pbuf_free (p);
     return ERR_OK;
+}
+
+static              err_t
+low_level_output (struct interface *netif, struct pbuf *p)
+{
+    struct pbuf        *q;
+    int port = netif->ifIndex;
+
+#if ETH_PAD_SIZE
+    pbuf_header (p, -ETH_PAD_SIZE);    /* drop the padding word */
+#endif
+
+    for (q = p; q != NULL; q = q->next)
+    {
+         send_packet (q->payload, port, q->len);
+    }
+
+
+#if ETH_PAD_SIZE
+    pbuf_header (p, ETH_PAD_SIZE);    /* reclaim the padding word */
+#endif
+
+    return ERR_OK;
+}
+void ethernetif_init (struct interface *netif)
+{
+    netif->output = etharp_output;
+    netif->linkoutput = low_level_output;
 }
 #endif /* LWIP_ARP || LWIP_ETHERNET */

@@ -72,74 +72,9 @@
 #define NETIF_LINK_CALLBACK(n)
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
-#if LWIP_HAVE_LOOPIF
-static struct interface loop_if;
-
-/**
- * Initialize a lwip network interface structure for a loopback interface
- *
- * @param netif the lwip network interface structure for this loopif
- * @return ERR_OK if the loopif is initialized
- *         ERR_MEM if private data couldn't be allocated
- */
-static              err_t
-if_loopif_init (struct interface *netif)
-{
-    /* initialize the snmp variables and counters inside the struct interface
-     * ifSpeed: no assumption can be made!
-     */
-    NETIF_INIT_SNMP (netif, snmp_ifType_softwareLoopback, 0);
-
-    netif->name[0] = 'l';
-    netif->name[1] = 'o';
-    netif->output = if_loop_output;
-    return ERR_OK;
-}
-#endif /* LWIP_HAVE_LOOPIF */
-
-void
-if_init (void)
-{
-#if LWIP_HAVE_LOOPIF
-    ip_addr_t           loop_ipaddr, loop_netmask, loop_gw;
-    IP4_ADDR (&loop_gw, 127, 0, 0, 1);
-    IP4_ADDR (&loop_ipaddr, 127, 0, 0, 1);
-    IP4_ADDR (&loop_netmask, 255, 0, 0, 0);
-
-#if NO_SYS
-    if_add (&loop_if, &loop_ipaddr, &loop_netmask, &loop_gw, NULL,
-               if_loopif_init, ip_input);
-#else /* NO_SYS */
-    if_add (&loop_if, &loop_ipaddr, &loop_netmask, &loop_gw, NULL,
-               if_loopif_init, tcpip_input);
-#endif /* NO_SYS */
-    if_set_up (&loop_if);
-
-#endif /* LWIP_HAVE_LOOPIF */
-}
-
-/**
- * Add a network interface to the list of lwIP netifs.
- *
- * @param netif a pre-allocated netif structure
- * @param ipaddr IP address for the new netif
- * @param netmask network mask for the new netif
- * @param gw default gateway IP address for the new netif
- * @param state opaque data passed to the new netif
- * @param init callback function that initializes the interface
- * @param input callback function that is called to pass
- * ingress packets up in the protocol layer stack.
- *
- * @return netif, or NULL if failed.
- */
-struct interface       *
-if_add (struct interface *netif, ip_addr_t * ipaddr, ip_addr_t * netmask,
-           ip_addr_t * gw, void *state, if_init_fn init,
-           if_input_fn input)
+void interface_init (struct interface *netif, void *state, if_input_fn input)
 {
     static u8_t         netifnum = 0;
-
-    LWIP_ASSERT ("No init function given", init != NULL);
 
     /* reset new interface configuration state */
     ip_addr_set_zero (&netif->ip_addr);
@@ -179,13 +114,15 @@ if_add (struct interface *netif, ip_addr_t * ipaddr, ip_addr_t * netmask,
     netif->loop_cnt_current = 0;
 #endif /* ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS */
 
-    if_set_addr (netif, ipaddr, netmask, gw);
+    ethernetif_init (netif);
 
+#if 0
     /* call user specified initialization function for netif */
     if (init (netif) != ERR_OK)
     {
         return NULL;
     }
+#endif
 
     /* add this netif to the list */
     snmp_inc_iflist ();
@@ -206,7 +143,7 @@ if_add (struct interface *netif, ip_addr_t * ipaddr, ip_addr_t * netmask,
     LWIP_DEBUGF (NETIF_DEBUG, (" gw "));
     ip_addr_debug_print (NETIF_DEBUG, gw);
     LWIP_DEBUGF (NETIF_DEBUG, ("\n"));
-    return netif;
+    return;
 }
 
 /**
@@ -226,66 +163,6 @@ if_set_addr (struct interface *netif, ip_addr_t * ipaddr, ip_addr_t * netmask,
     if_set_netmask (netif, netmask);
     if_set_gw (netif, gw);
 }
-
-/**
- * Remove a network interface from the list of lwIP netifs.
- *
- * @param netif the network interface to remove
- */
-#if 0
-void
-if_remove (struct interface *netif)
-{
-    if (netif == NULL)
-    {
-        return;
-    }
-
-#if LWIP_IGMP
-    /* stop IGMP processing */
-    if (netif->flags & NETIF_FLAG_IGMP)
-    {
-        igmp_stop (netif);
-    }
-#endif /* LWIP_IGMP */
-    if (if_is_up (netif))
-    {
-        /* set netif down before removing (call callback function) */
-        if_set_down (netif);
-    }
-
-    snmp_delete_ipaddridx_tree (netif);
-
-    /*  is it the first netif? */
-    if (if_list == netif)
-    {
-        if_list = netif->next;
-    }
-    else
-    {
-        /*  look for netif further down the list */
-        struct interface       *tmpNetif;
-        for (tmpNetif = if_list; tmpNetif != NULL; tmpNetif = tmpNetif->next)
-        {
-            if (tmpNetif->next == netif)
-            {
-                tmpNetif->next = netif->next;
-                break;
-            }
-        }
-        if (tmpNetif == NULL)
-            return;                /*  we didn't find any netif today */
-    }
-    snmp_dec_iflist ();
-    /* this netif is default? */
-    if (if_default == netif)
-    {
-        /* reset default netif */
-        if_set_default (NULL);
-    }
-    LWIP_DEBUGF (NETIF_DEBUG, ("if_remove: removed netif\n"));
-}
-#endif
 /**
  * Change the IP address of a network interface
  *
@@ -409,32 +286,6 @@ if_set_netmask (struct interface *netif, ip_addr_t * netmask)
                   ip4_addr4_16 (&netif->netmask)));
 }
 
-/**
- * Set a network interface as the default network interface
- * (used to output all packets for which no specific route is found)
- *
- * @param netif the default network interface
- */
-#if 0
-void
-if_set_default (struct interface *netif)
-{
-    if (netif == NULL)
-    {
-        /* remove default route */
-        snmp_delete_iprteidx_tree (1, netif);
-    }
-    else
-    {
-        /* install default route */
-        snmp_insert_iprteidx_tree (1, netif);
-    }
-    if_default = netif;
-    LWIP_DEBUGF (NETIF_DEBUG, ("netif: setting default interface %c%c\n",
-                               netif ? netif->name[0] : '\'',
-                               netif ? netif->name[1] : '\''));
-}
-#endif
 /**
  * Bring an interface up, available for processing
  * traffic.

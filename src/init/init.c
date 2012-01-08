@@ -22,8 +22,6 @@ void layer3switch_init (void)
 
         vrrp_init ();
 
-        dhcp_init ();
-
         init_task_cpu_usage_moniter_timer ();
 
 	/* Sanity check user-configurable values */

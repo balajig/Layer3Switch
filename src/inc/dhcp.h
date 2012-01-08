@@ -99,8 +99,7 @@ struct dhcp_msg
 #  define DHCP_OPTIONS_LEN DHCP_MIN_OPTIONS_LEN
 #endif
   PACK_STRUCT_FIELD(u8_t options[DHCP_OPTIONS_LEN]);
-} ;
-PACK_STRUCT_END
+}__attribute__((packed));
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
 #endif
