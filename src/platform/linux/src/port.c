@@ -12,16 +12,14 @@ if_t port_cdb[MAX_PORTS];
 
 int port_init (void)
 {
-	int idx = get_max_ports ();
+	int idx = 0;
+
+	read_interfaces ();
+
+	idx = get_max_ports ();
 
 	while (idx--) {
 		interface_init (&port_cdb[idx], NULL, NULL);
-		port_cdb[idx].ifIndex = -1;
-		port_cdb[idx].ifType = 0;
-		port_cdb[idx].ifMtu = 1500;
-		port_cdb[idx].ifSpeed = 10;
-		port_cdb[idx].ifAdminStatus = IF_DOWN;
-		port_cdb[idx].ifOperStatus = IF_DOWN;
 		port_cdb[idx].ifLastChange = 0;
 		port_cdb[idx].ifInOctets = 0;
 		port_cdb[idx].ifInUcastPkts = 0;

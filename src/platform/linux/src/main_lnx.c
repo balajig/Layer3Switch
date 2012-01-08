@@ -31,11 +31,13 @@ int vrrp_init (void);
 int dhcp_init (void);
 int init_task_cpu_usage_moniter_timer (void);
 int start_cli_task (void);
+int ifindex = -1;
 
 char switch_mac[6] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x00};
 
 void dump_task_info (void);
 void execute_system_call (char *arg);
+static int32_t  sockid_pkt = 0;
 
 void show_uptime (char *[]);
 
@@ -52,6 +54,8 @@ int main (int argc, char **argv)
 	}
 
 	switch_mac[5] = atoi (argv[1]);
+
+	create_raw_sock_for_pkt_capture ();
 
 	layer3switch_init ();
 
@@ -76,7 +80,35 @@ int spawn_pkt_processing_task (void)
 	return 0;
 }
 
+int create_raw_sock_for_pkt_capture (void)
+{
+	struct sockaddr_in si_me;
+
+	memset((char *) &si_me, 0, sizeof(si_me));
+
+	if ((sockid_pkt =socket(AF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
+		perror ("SOCKET");
+		return -1;
+	}
+
+	return  0;
+}
 
 void send_packet (void *buf, uint16_t port, int len)
 {
+	struct sockaddr_ll socket_address;
+
+	memset (&socket_address, 0, sizeof(socket_address));
+
+	socket_address.sll_family   = PF_PACKET;	
+	socket_address.sll_protocol = htons(ETH_P_ALL);	
+	socket_address.sll_ifindex  = port_cdb[port - 1].ifIndex;
+	socket_address.sll_pkttype  = PACKET_HOST;
+	socket_address.sll_halen    = ETH_ALEN;		
+
+        if (sendto (sockid_pkt, buf, len, 0,(struct sockaddr *)&socket_address,
+                                sizeof(socket_address)) < 0) {
+		;
+        }
+	return;
 }
