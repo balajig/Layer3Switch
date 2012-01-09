@@ -62,7 +62,6 @@ void *stpmgr_task (void *arg)
 		switch (msg->type) {
 			case STP_MSG_TYPE_BPDU:
 				process_bpdu (msg->msg, msg->port, msg->vlanid, msg->len);
-				free (msg->msg);
 				break;
 			case STP_MSG_TYPE_EVENTS:
 				if (stp_process_events (msg->port, (uint8_t)

@@ -3,8 +3,8 @@
 struct interface;
 #include "netif.h"
 struct interface {
-  	struct interface *next;
         int32_t   ifIndex;
+	void      *platform;
         char      ifDescr[MAX_PORT_NAME];          
         int32_t   ifType;
         int32_t   ifMtu;   

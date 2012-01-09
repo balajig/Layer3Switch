@@ -27,11 +27,31 @@ int get_max_ports (void)
 {
 	return idx - 1;
 }
+
+static int create_raw_sock (char *name)
+{
+	int sd = -1;
+
+	if ((sd =socket (AF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
+		perror ("SOCKET");
+		return -1;
+	}
+
+	if (setsockopt(sd, SOL_SOCKET, SO_BINDTODEVICE, name, strlen (name)) < 0)
+		perror ("setsockopt");
+
+	port_cdb[idx].platform = (void *)sd;
+
+	return 0;
+}
+
 static if_t *add_if_info(char *name)
 {
     strncpy(IF_DESCR(idx), name, IFNAMSIZ);
 
-   fetch_and_update_if_info (IF_INFO(idx));
+    fetch_and_update_if_info (IF_INFO(idx));
+
+    create_raw_sock (name);
 
     return IF_INFO(idx);
 }

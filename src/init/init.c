@@ -12,8 +12,6 @@ void layer3switch_init (void)
 
         cli_init ("OpenSwitch");
 
-        spawn_pkt_processing_task ();
-
         port_init ();
 
         ip_init ();
@@ -65,6 +63,8 @@ void layer3switch_init (void)
 #if LWIP_TIMERS
 	sys_timeouts_init ();
 #endif /* LWIP_TIMERS */
+
+        spawn_pkt_processing_task ();
 
         start_cli_task ();
 }

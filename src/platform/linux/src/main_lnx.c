@@ -31,7 +31,7 @@ int vrrp_init (void);
 int dhcp_init (void);
 int init_task_cpu_usage_moniter_timer (void);
 int start_cli_task (void);
-int ifindex = -1;
+void * packet_processing_task (void *unused);
 
 char switch_mac[6] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x00};
 
@@ -77,7 +77,8 @@ int read_port_mac_address (int port, uint8_t *p)
 
 int spawn_pkt_processing_task (void)
 {
-	return 0;
+	tmtaskid_t tid = 0;
+	return task_create ("PKRX", 98, 3, 32000, packet_processing_task, NULL, NULL, &tid);
 }
 
 int create_raw_sock_for_pkt_capture (void)

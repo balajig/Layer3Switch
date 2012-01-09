@@ -19,7 +19,6 @@ void process_pkt (void  *pkt, int len, uint16_t port)
 
 	if ((IF_OPER_STATUS(port) == IF_DOWN) ||
 	    (IF_ADMIN_STATUS(port) == IF_DOWN)) {
-		free (pkt);
 		return;
 	}
 
