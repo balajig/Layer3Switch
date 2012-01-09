@@ -52,7 +52,8 @@ void * packet_processing_task (void *unused)
 			if (FD_ISSET((int)port_cdb[i].platform, &rfds)) {
 				char *buf = malloc (MAX_MTU);
 				len = rcv_pkt ((int)port_cdb[i].platform, buf);
-				process_pkt (buf, len, i);
+				if (len > 0)
+					process_pkt (buf, len, i);
 				free (buf);
 			}
 			i++;

@@ -161,4 +161,3 @@ void calc_cpu_usage (struct pstat* curr, struct pstat* lst, float* ucpu_usage, f
 
 	*tcpu = ((100 * ((curr->utime + curr->stime) -(lst->utime + lst->stime))) / (float)((curr->tcpu - lst->tcpu)));
 }
-

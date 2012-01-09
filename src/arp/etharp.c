@@ -1543,6 +1543,7 @@ low_level_output (struct interface *netif, struct pbuf *p)
 
     return ERR_OK;
 }
+
 void ethernetif_init (struct interface *netif)
 {
     netif->output = etharp_output;
