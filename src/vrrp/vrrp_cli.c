@@ -34,6 +34,7 @@ void cli_show_vrrp (void)
 
 int vrrp_cli_init (void)
 {
+#if 0
 	install_cmd_handler ("vrrp <vrid> ip <ipaddress>", "Enables VRRP on an interface", cli_vrrp_enable, 
 			     "vrrp <INT> ip <IPADDR>", INTERFACE_MODE);
 
@@ -45,4 +46,5 @@ int vrrp_cli_init (void)
 			     cli_vrrp_set_adv_timer, "vrrp <INT> timers advertise <INT>", INTERFACE_MODE);
 
 	install_cmd_handler ("show vrrp", "Displays VRRP information", cli_show_vrrp, NULL, USER_EXEC_MODE);
+#endif
 }

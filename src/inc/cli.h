@@ -17,8 +17,6 @@
 #define PRIV_LEVEL6      (0x1 << 6)
 #define PRIV_LEVEL7      (0x1 << 7)
 
-
-int  install_cmd_handler (const char *,const char *, void (*handler) (char *[]),const char *, int); 
 int cli_get_vlan_id ();
 int cli_get_port ();
 int set_prompt (const char *prmpt_new);
