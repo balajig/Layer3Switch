@@ -83,11 +83,6 @@
 
 #include <string.h>
 
-/** DNS server IP address */
-#ifndef DNS_SERVER_ADDRESS
-#define DNS_SERVER_ADDRESS(ipaddr)        (ip4_addr_set_u32(ipaddr, ipaddr_addr("208.67.222.222")))    /* resolver1.opendns.com */
-#endif
-
 /** DNS server port address */
 #ifndef DNS_SERVER_PORT
 #define DNS_SERVER_PORT           53
@@ -223,24 +218,19 @@ static void         dns_check_entries (void);
 static struct udp_pcb *dns_pcb;
 static u8_t         dns_seqno;
 static struct dns_table_entry dns_table[DNS_TABLE_SIZE];
-static ip_addr_t    dns_servers[DNS_MAX_SERVERS];
 /** Contiguous buffer for processing responses */
 static u8_t         dns_payload_buffer[LWIP_MEM_ALIGN_BUFFER (DNS_MSG_SIZE)];
 static u8_t        *dns_payload;
 
 /**
- * Initialize the resolver: set up the UDP pcb and configure the default server
- * (DNS_SERVER_ADDRESS).
+ * set up the UDP pcb for DNS client
  */
 void
-dns_init ()
+dns_socket_init ()
 {
     ip_addr_t           dnsserver;
 
     dns_payload = (u8_t *) LWIP_MEM_ALIGN (dns_payload_buffer);
-
-    /* initialize default DNS server address */
-    DNS_SERVER_ADDRESS (&dnsserver);
 
     LWIP_DEBUGF (DNS_DEBUG, ("dns_init: initializing\n"));
 
@@ -261,8 +251,6 @@ dns_init ()
             udp_bind (dns_pcb, IP_ADDR_ANY, 0);
             udp_recv (dns_pcb, dns_recv, NULL);
 
-            /* initialize default DNS primary server */
-            dns_setserver (0, &dnsserver);
         }
     }
 #if DNS_LOCAL_HOSTLIST
@@ -282,7 +270,7 @@ dns_setserver (u8_t numdns, ip_addr_t * dnsserver)
     if ((numdns < DNS_MAX_SERVERS) && (dns_pcb != NULL) &&
         (dnsserver != NULL) && !ip_addr_isany (dnsserver))
     {
-        dns_servers[numdns] = (*dnsserver);
+        dns_servers[numdns].addr = (*dnsserver);
     }
 }
 
@@ -298,7 +286,7 @@ dns_getserver (u8_t numdns)
 {
     if (numdns < DNS_MAX_SERVERS)
     {
-        return dns_servers[numdns];
+        return dns_servers[numdns].addr;
     }
     else
     {
@@ -624,7 +612,7 @@ dns_send (u8_t numdns, const char *name, u8_t id)
                   (u16_t) (numdns), name));
     LWIP_ASSERT ("dns server out of array", numdns < DNS_MAX_SERVERS);
     LWIP_ASSERT ("dns server has no IP address set",
-                 !ip_addr_isany (&dns_servers[numdns]));
+                 !ip_addr_isany (&dns_servers[numdns].addr));
 
     /* if here, we have either a new query or a retry on a previous query to process */
     p = pbuf_alloc (PBUF_TRANSPORT, SIZEOF_DNS_HDR + DNS_MAX_NAME_LENGTH +
@@ -670,9 +658,9 @@ dns_send (u8_t numdns, const char *name, u8_t id)
                                ((char *) (p->payload))));
 
         /* connect to the server for faster receiving */
-        udp_connect (dns_pcb, &dns_servers[numdns], DNS_SERVER_PORT);
+        udp_connect (dns_pcb, &dns_servers[numdns].addr, DNS_SERVER_PORT);
         /* send dns packet */
-        err = udp_sendto (dns_pcb, p, &dns_servers[numdns], DNS_SERVER_PORT);
+        err = udp_sendto (dns_pcb, p, &dns_servers[numdns].addr, DNS_SERVER_PORT);
 
         /* free pbuf */
         pbuf_free (p);
@@ -731,7 +719,7 @@ dns_check_entry (u8_t i)
                 if (++pEntry->retries == DNS_MAX_RETRIES)
                 {
                     if ((pEntry->numdns + 1 < DNS_MAX_SERVERS)
-                        && !ip_addr_isany (&dns_servers[pEntry->numdns + 1]))
+                        && !ip_addr_isany (&dns_servers[pEntry->numdns + 1].addr))
                     {
                         /* change of server */
                         pEntry->numdns++;

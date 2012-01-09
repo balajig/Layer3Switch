@@ -35,6 +35,7 @@
 #define __LWIP_DNS_H__
 
 #include "opt.h"
+#include "err.h"
 
 #if LWIP_DNS /* don't build if not configured for use in lwipopts.h */
 
@@ -94,6 +95,15 @@ struct local_hostlist_entry {
 #endif /* DNS_LOCAL_HOSTLIST_IS_DYNAMIC */
 #endif /* DNS_LOCAL_HOSTLIST */
 
+struct dns_server_tbl {
+	ip_addr_t addr;
+	uint32_t status;
+};
+
+
+extern struct dns_server_tbl  dns_servers[];
+
+
 /** Callback which is invoked when a hostname is found.
  * A function of this type must be implemented by the application using the DNS resolver.
  * @param name pointer to the name that was looked up.
@@ -103,7 +113,7 @@ struct local_hostlist_entry {
 */
 typedef void (*dns_found_callback)(const char *name, ip_addr_t *ipaddr, void *callback_arg);
 
-void           dns_init(void);
+int           dns_init(void);
 void           dns_tmr(void);
 void           dns_setserver(u8_t numdns, ip_addr_t *dnsserver);
 ip_addr_t      dns_getserver(u8_t numdns);

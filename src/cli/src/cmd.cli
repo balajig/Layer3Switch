@@ -28,6 +28,9 @@ show ip interface
 //Displays IP Information
 show ip route
 
+//Displays DNS name server
+show ip dns
+
 // Enable privileged mode
 enable privileged-mode
 
@@ -111,6 +114,15 @@ ip default-gateway <IPV4ADDR:addr>
 
 //Configures Routing entry
 ip route <IPV4ADDR:network> <IPV4ADDR:mask> <IPV4ADDR:gateway>
+
+//Defines a default domain name
+ip dns domain name <STRING:domainname>
+
+//Specifies the address of domain name server
+ip dns server address <IPV4ADDR:dnsserver>  primary
+
+//Specifies the address of domain name server
+ip dns server address <IPV4ADDR:dnsserver>
 
 #endsubmode
 
