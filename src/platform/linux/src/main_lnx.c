@@ -107,7 +107,7 @@ void send_packet (void *buf, uint16_t port, int len)
 	socket_address.sll_pkttype  = PACKET_HOST;
 	socket_address.sll_halen    = ETH_ALEN;		
 
-        if (sendto (sockid_pkt, buf, len, 0,(struct sockaddr *)&socket_address,
+        if (sendto ((int)port_cdb[port - 1].platform, buf, len, 0,(struct sockaddr *)&socket_address,
                                 sizeof(socket_address)) < 0) {
 		;
         }
