@@ -208,7 +208,7 @@ static void         dns_init_local ();
 /* forward declarations */
 static void         dns_recv (void *s, struct udp_pcb *pcb, struct pbuf *p,
                               ip_addr_t * addr, u16_t port);
-static void         dns_check_entries (void);
+void         dns_check_entries (void);
 
 /*-----------------------------------------------------------------------------
  * Globales
@@ -291,20 +291,6 @@ dns_getserver (u8_t numdns)
     else
     {
         return *IP_ADDR_ANY;
-    }
-}
-
-/**
- * The DNS resolver client timer - handle retries and timeouts and should
- * be called every DNS_TMR_INTERVAL milliseconds (every second by default).
- */
-void
-dns_tmr (void)
-{
-    if (dns_pcb != NULL)
-    {
-        LWIP_DEBUGF (DNS_DEBUG, ("dns_tmr: dns_check_entries\n"));
-        dns_check_entries ();
     }
 }
 
@@ -783,10 +769,12 @@ dns_check_entry (u8_t i)
 /**
  * Call dns_check_entry for each entry in dns_table - check all entries.
  */
-static void
-dns_check_entries (void)
+void  dns_check_entries (void)
 {
     u8_t                i;
+
+    if (dns_pcb)
+		return;
 
     for (i = 0; i < DNS_TABLE_SIZE; ++i)
     {

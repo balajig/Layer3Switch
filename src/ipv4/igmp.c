@@ -144,6 +144,7 @@ static void         igmp_delaying_member (struct igmp_group *group,
 static err_t        igmp_ip_output_if (struct pbuf *p, ip_addr_t * src,
                                        ip_addr_t * dest, struct interface *netif);
 static void         igmp_send (struct igmp_group *group, u8_t type);
+static int          setup_igmp_group_timer (struct igmp_group  *group);
 
 static struct igmp_group *igmp_group_list;
 static ip_addr_t    allsystems;
@@ -213,6 +214,8 @@ igmp_start (struct interface *netif)
             LWIP_DEBUGF (IGMP_DEBUG, (") on if %p\n", netif));
             netif->igmp_mac_filter (netif, &allsystems, IGMP_ADD_MAC_FILTER);
         }
+
+	setup_igmp_group_timer (group);
 
         return ERR_OK;
     }
@@ -829,6 +832,8 @@ igmp_start_timer (struct igmp_group *group, u8_t max_time)
     }
     /* ensure the random value is > 0 */
     group->timer = (rand () % (max_time - 1)) + 1;
+
+   mod_timer (group->group_timer, milli_secs_to_ticks(group->timer));
 }
 
 /**
@@ -840,6 +845,8 @@ static void
 igmp_stop_timer (struct igmp_group *group)
 {
     group->timer = 0;
+
+    stop_timer (group->group_timer);
 }
 
 /**
@@ -951,4 +958,8 @@ igmp_send (struct igmp_group *group, u8_t type)
     }
 }
 
+static int  setup_igmp_group_timer (struct igmp_group  *group)
+{
+	setup_timer (&group->group_timer, igmp_timeout, group);
+}
 #endif /* LWIP_IGMP */

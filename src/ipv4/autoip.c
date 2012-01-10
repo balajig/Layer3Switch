@@ -122,6 +122,7 @@ static err_t        autoip_bind (struct interface *netif);
 /* start sending probes for llipaddr */
 static void         autoip_start_probing (struct interface *netif);
 
+TIMER_ID autoiptimer; /*TODO: make it per interface*/
 /**
  * Initialize this module
  */
@@ -129,6 +130,8 @@ void
 autoip_init (void)
 {
     LWIP_DEBUGF (AUTOIP_DEBUG | LWIP_DBG_TRACE, ("autoip_init()\n"));
+    setup_timer (&autoiptimer, autoip_tmr, NULL);
+    //mod_timer (autoiptimer, AUTOIP_TMR_INTERVAL);
 }
 
 /** Set a statically allocated struct autoip to work with.

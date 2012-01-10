@@ -74,6 +74,7 @@ struct igmp_group {
   struct igmp_group *next;
   /** interface on which the group is active */
   struct interface      *netif;
+  TIMER_ID           group_timer;
   /** multicast address */
   ip_addr_t          group_address;
   /** signifies we were the last person to report */

@@ -1549,4 +1549,24 @@ void ethernetif_init (struct interface *netif)
     netif->output = etharp_output;
     netif->linkoutput = low_level_output;
 }
+
+TIMER_ID arptimer;
+
+static void arp_timer (void *arg)
+{
+	etharp_tmr ();
+	mod_timer (arptimer, ARP_TMR_INTERVAL * tm_get_ticks_per_second ());
+}
+
+
+void arp_setup_timers (void)
+{
+	setup_timer (&arptimer, arp_timer, NULL);
+	mod_timer (arptimer, ARP_TMR_INTERVAL * tm_get_ticks_per_second ());
+}
+
+int etharp_init (void)
+{
+	arp_setup_timers ();
+}
 #endif /* LWIP_ARP || LWIP_ETHERNET */

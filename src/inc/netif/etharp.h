@@ -132,7 +132,7 @@ PACK_STRUCT_END
 #define SIZEOF_ETHARP_PACKET (SIZEOF_ETH_HDR + SIZEOF_ETHARP_HDR)
 
 /** 5 seconds period */
-#define ARP_TMR_INTERVAL 5000
+#define ARP_TMR_INTERVAL 5
 
 #define ETHTYPE_ARP       0x0806U
 #define ETHTYPE_IP        0x0800U
@@ -178,7 +178,6 @@ struct etharp_q_entry {
 };
 #endif /* ARP_QUEUEING */
 
-#define etharp_init() /* Compatibility define, not init needed. */
 void etharp_tmr(void);
 s8_t etharp_find_addr(struct interface *netif, ip_addr_t *ipaddr,
          struct eth_addr **eth_ret, ip_addr_t **ip_ret);
