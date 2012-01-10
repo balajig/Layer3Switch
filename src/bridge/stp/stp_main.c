@@ -345,7 +345,7 @@ void stp_become_root_bridge(struct stp_instance *br)
 	stp_topology_change_detection(br);
 	del_timer(br->tcn_timer);
 	stp_config_bpdu_generation(br);
-	mod_timer(br->hello_timer, br->hello_time);
+	mod_timer(br->hello_timer, br->hello_time * tm_get_ticks_per_second ());
 }
 
 void stp_transmit_config(struct stp_port_entry *p)
@@ -384,7 +384,7 @@ void stp_transmit_config(struct stp_port_entry *p)
 		p->config_pending = 0;
 /*FIXME*/
 #define BR_HOLD_TIME 1
-		mod_timer(p->hold_timer, BR_HOLD_TIME);
+		mod_timer(p->hold_timer, BR_HOLD_TIME * tm_get_ticks_per_second ());
 	}
 }
 
@@ -395,7 +395,7 @@ static inline void stp_record_config_information(struct stp_port_entry *p,
 	p->designated_cost = bpdu->root_path_cost;
 	p->designated_bridge = bpdu->bridge_id;
 	p->designated_port = bpdu->port_id;
-	mod_timer(p->message_age_timer, (p->br->max_age - bpdu->message_age));
+	mod_timer(p->message_age_timer, (p->br->max_age - bpdu->message_age) * tm_get_ticks_per_second ());
 }
 
 static inline void stp_record_config_timeout_values(struct stp_instance *br,
@@ -507,11 +507,11 @@ void stp_topology_change_detection(struct stp_instance *br)
 
 	if (isroot) {
 		br->topology_change = 1;
-		mod_timer(br->topology_change_timer, br->bridge_forward_delay  
-						      + br->bridge_max_age);
+		mod_timer(br->topology_change_timer, (br->bridge_forward_delay  
+						      + br->bridge_max_age) * tm_get_ticks_per_second ());
 	} else if (!br->topology_change_detected) {
 		stp_transmit_tcn(br);
-		mod_timer(br->tcn_timer, br->bridge_hello_time);
+		mod_timer(br->tcn_timer, br->bridge_hello_time * tm_get_ticks_per_second ());
 	}
 
 	br->topology_change_detected = 1;
@@ -583,7 +583,7 @@ static void stp_make_forwarding(struct stp_port_entry *p)
 		p->state = LEARNING;
 
 	if (br->forward_delay != 0)
-		mod_timer(p->forward_delay_timer,  br->forward_delay);
+		mod_timer(p->forward_delay_timer,  br->forward_delay * tm_get_ticks_per_second ());
 }
 
 void stp_port_state_selection(struct stp_instance *br)
@@ -653,7 +653,7 @@ void stp_received_config_bpdu(struct stp_port_entry *p, STP_BPDU_T *bpdu)
 			if (br->topology_change_detected) {
 				del_timer(br->topology_change_timer);
 				stp_transmit_tcn(br);
-				mod_timer(br->tcn_timer, br->bridge_hello_time);
+				mod_timer(br->tcn_timer, br->bridge_hello_time * tm_get_ticks_per_second ());
 			}
 		}
 

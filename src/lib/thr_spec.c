@@ -27,6 +27,11 @@ unsigned int tm_get_ticks_per_second (void)
 	return SYS_MAX_TICKS_IN_SEC;
 }
 
+unsigned int milli_secs_to_ticks (unsigned int msecs)
+{
+	return (msecs / TICK_TIMER_GRANULARITY);
+}
+
 size_t alloc_size = 0;
 
 void *tm_calloc(size_t nmemb, size_t size)

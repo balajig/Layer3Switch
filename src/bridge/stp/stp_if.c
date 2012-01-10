@@ -95,7 +95,7 @@ void stp_enable (struct stp_instance *br)
 
 	br->stp_enabled = STP_ENABLED;
 
-	mod_timer(br->hello_timer,  br->hello_time);
+	mod_timer(br->hello_timer,  br->hello_time * tm_get_ticks_per_second ());
 
 	stp_config_bpdu_generation(br);
 

@@ -176,8 +176,8 @@
 #define	BSTP_INFO_DISABLED	4
 
 
-#define	BSTP_MESSAGE_AGE_INCR	(1)	/* in 256ths of a second */
-#define	BSTP_TICK_VAL		(1)	/* in 256ths of a second */
+#define	BSTP_MESSAGE_AGE_INCR	(1)
+#define	BSTP_TICK_VAL		(1 * tm_get_ticks_per_second ())
 #define	BSTP_LINK_TIMER		(BSTP_TICK_VAL * 15)
 
 #define	PV2ADDR(pv, eaddr)	do {		\

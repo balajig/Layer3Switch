@@ -29,6 +29,7 @@ void tsk_cancel (tmtaskid_t task_id);
 char * get_tsk_name (tmtaskid_t tskid);
 unsigned long tick_start (void);
 void tick_end (unsigned long *p, unsigned long start);
+unsigned int milli_secs_to_ticks (unsigned int msecs);
 
 
 /*MEM pool*/
@@ -45,7 +46,7 @@ unsigned int tm_get_ticks_per_second (void);
 /*TIMERS*/
 
 int    setup_timer (void **p, void (*handler) (void *), void *data);
-int    mod_timer   (void *p, unsigned int secs);
+int    mod_timer   (void *p, unsigned int ticks);
 int    del_timer   (void *p);
 int    stop_timer  (void *p);
 void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), int flags);

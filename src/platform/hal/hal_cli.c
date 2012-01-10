@@ -50,7 +50,7 @@ void track_cpu_usage (void *unused)
 		tskinfo->cpu_stats.stime = current.stime + current.cstime;
 		tskinfo->cpu_stats.tcpu = current.tcpu;
 	}
-	mod_timer (cpu_timer, 1);
+	mod_timer (cpu_timer, 1 * tm_get_ticks_per_second ());
 }
 
 
@@ -58,7 +58,7 @@ int init_task_cpu_usage_moniter_timer (void)
 {
 	setup_timer (&cpu_timer, track_cpu_usage, NULL);
 
-	mod_timer (cpu_timer, 5);
+	mod_timer (cpu_timer, 5 * tm_get_ticks_per_second ());
 
 	return 0;
 }

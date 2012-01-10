@@ -138,7 +138,7 @@ int setup_timer (void **p, void (*handler) (void *), void *data)
 	return 0;
 }
 
-int mod_timer (void *timer, unsigned int secs)
+int mod_timer (void *timer, unsigned int ticks)
 {
 	APP_TIMER_T *apptimer = NULL;
 	TIMER_T  *p = (TIMER_T *)timer;
@@ -154,7 +154,7 @@ int mod_timer (void *timer, unsigned int secs)
 
 	INIT_LIST_HEAD (&apptimer->elist);
 
-	p->rmt = secs * tm_get_ticks_per_second ();
+	p->rmt = ticks;
 
 	apptimer->timer = p;
 
