@@ -34,13 +34,14 @@ typedef unsigned char   u_int8_t;
 #endif /* SUNOS_5 */
 
 #ifndef HAVE_SOCKLEN_T
-typedef int socklen_t;
+//typedef int socklen_t;
 #endif /* HAVE_SOCKLEN_T */
 
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#if 0
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -106,6 +107,7 @@ typedef int socklen_t;
 #ifdef HAVE_ASM_TYPES_H
 #include <asm/types.h>
 #endif /* HAVE_ASM_TYPES_H */
+#endif
 
 /* misc include group */
 #include <stdarg.h>
@@ -125,6 +127,7 @@ typedef int socklen_t;
 #endif /* !C99 */
 
 
+#if 0
 #ifdef HAVE_LCAPS
 #include <sys/capability.h>
 #include <sys/prctl.h>
@@ -214,6 +217,7 @@ typedef int socklen_t;
 #ifdef HAVE_NETINET6_ND6_H
 #include <netinet6/nd6.h>
 #endif /* HAVE_NETINET6_ND6_H */
+#endif
 
 /* Some systems do not define UINT32_MAX, etc.. from inttypes.h
  * e.g. this makes life easier for FBSD 4.11 users.
@@ -260,7 +264,7 @@ typedef int socklen_t;
 #define __attribute__(x)
 #endif  /* !__GNUC__ || VTYSH_EXTRACT_PL */
 
-#include "zassert.h"
+//#include "zassert.h"
 //#include "str.h"
 
 

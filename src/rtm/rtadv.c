@@ -1,3 +1,4 @@
+#if 0
 /* Router advertisement
  * Copyright (C) 2005 6WIND <jean-mickael.guerin@6wind.com>
  * Copyright (C) 1999 Kunihiro Ishiguro
@@ -20,7 +21,7 @@
  * 02111-1307, USA.  
  */
 
-#include <zebra.h>
+#include "zebra.h"
 
 #include "memory.h"
 #include "sockopt.h"
@@ -1656,3 +1657,4 @@ rtadv_init (void)
   /* Empty.*/;
 }
 #endif /* RTADV && HAVE_IPV6 */
+#endif
