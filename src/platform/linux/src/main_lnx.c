@@ -39,6 +39,11 @@ void dump_task_info (void);
 void execute_system_call (char *arg);
 static int32_t  sockid_pkt = 0;
 
+struct linux_if_mapping {
+	int linux_ifIndex;
+}linux_if_map[MAX_PORTS];
+
+
 void show_uptime (char *[]);
 
 void execute_system_call (char *arg)
@@ -95,6 +100,10 @@ int create_raw_sock_for_pkt_capture (void)
 	return  0;
 }
 
+void update_linux_if_map (int port, int ifindex)
+{
+	linux_if_map[port - 1].linux_ifIndex = ifindex;
+}
 void send_packet (void *buf, uint16_t port, int len)
 {
 	struct sockaddr_ll socket_address;
@@ -103,7 +112,7 @@ void send_packet (void *buf, uint16_t port, int len)
 
 	socket_address.sll_family   = PF_PACKET;	
 	socket_address.sll_protocol = htons(ETH_P_ALL);	
-	socket_address.sll_ifindex  = port_cdb[port - 1].ifIndex;
+	socket_address.sll_ifindex  = linux_if_map[port - 1].linux_ifIndex;
 	socket_address.sll_pkttype  = PACKET_HOST;
 	socket_address.sll_halen    = ETH_ALEN;		
 

@@ -83,8 +83,6 @@ struct interface {
 	u8_t ifPhysAddress[NETIF_MAX_HWADDR_LEN];
 	/** flags (see NETIF_FLAG_ above) */
 	u8_t flags;
-	/** descriptive abbreviation */
-	char name[2];
 	/** number of this interface */
 	u8_t num;
 #if LWIP_SNMP
