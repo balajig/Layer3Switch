@@ -63,6 +63,8 @@ struct dhcp
   ip_addr_t offered_si_addr;
   char boot_file_name[DHCP_FILE_LEN];
 #endif /* LWIP_DHCP_BOOTPFILE */
+  TIMER_ID coarse_timer;
+  TIMER_ID fine_timer;
 };
 
 /* MUST be compiled with "pack structs" or equivalent! */
@@ -127,9 +129,9 @@ void dhcp_arp_reply(struct interface *netif, ip_addr_t *addr);
 #endif
 
 /** to be called every minute */
-void dhcp_coarse_tmr(void);
+void dhcp_coarse_tmr(struct interface  *netif);
 /** to be called every half second */
-void dhcp_fine_tmr(void);
+void dhcp_fine_tmr (struct interface  *netif);
  
 /** DHCP message item offsets and length */
 #define DHCP_OP_OFS       0

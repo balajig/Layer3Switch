@@ -368,40 +368,29 @@ dhcp_select (struct interface *netif)
 /**
  * The DHCP timer that checks for lease renewal/rebind timeouts.
  */
-void
-dhcp_coarse_tmr ()
+void dhcp_coarse_tmr (struct interface       *netif)
 {
-    struct interface       *netif = NULL;
-    int 	            tports = get_max_ports ();
-    int                      port = 1;
 
-    LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE, ("dhcp_coarse_tmr()\n"));
-    /* iterate through all network interfaces */
-    while (port <= tports);
-    {
-	netif = IF_INFO(port);
-        /* only act on DHCP configured interfaces */
-        if (netif->dhcp != NULL)
-        {
-            /* timer is active (non zero), and triggers (zeroes) now? */
-            if (netif->dhcp->t2_timeout-- == 1)
-            {
-                LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
-                             ("dhcp_coarse_tmr(): t2 timeout\n"));
-                /* this clients' rebind timeout triggered */
-                dhcp_t2_timeout (netif);
-                /* timer is active (non zero), and triggers (zeroes) now */
-            }
-            else if (netif->dhcp->t1_timeout-- == 1)
-            {
-                LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
-                             ("dhcp_coarse_tmr(): t1 timeout\n"));
-                /* this clients' renewal timeout triggered */
-                dhcp_t1_timeout (netif);
-            }
-        }
-	port++;
-    }
+	LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE, ("dhcp_coarse_tmr()\n"));
+	if (netif->dhcp != NULL)
+	{
+		/* timer is active (non zero), and triggers (zeroes) now? */
+		if (netif->dhcp->t2_timeout-- == 1)
+		{
+			LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
+					("dhcp_coarse_tmr(): t2 timeout\n"));
+			/* this clients' rebind timeout triggered */
+			dhcp_t2_timeout (netif);
+			/* timer is active (non zero), and triggers (zeroes) now */
+		}
+		else if (netif->dhcp->t1_timeout-- == 1)
+		{
+			LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
+					("dhcp_coarse_tmr(): t1 timeout\n"));
+			/* this clients' renewal timeout triggered */
+			dhcp_t1_timeout (netif);
+		}
+	}
 }
 
 /**
@@ -411,16 +400,8 @@ dhcp_coarse_tmr ()
  * This timer checks whether an outstanding DHCP request is timed out.
  */
 void
-dhcp_fine_tmr ()
+dhcp_fine_tmr (struct interface  *netif)
 {
-    struct interface       *netif = NULL;
-    int 	            tports = get_max_ports ();
-    int                      port = 1;
-
-    /* loop through netif's */
-    while (port <= tports);
-    {
-	netif = IF_INFO(port);
         /* only act on DHCP configured interfaces */
         if (netif->dhcp != NULL)
         {
@@ -439,8 +420,6 @@ dhcp_fine_tmr ()
                 dhcp_timeout (netif);
             }
         }
-	port++;
-    }
 }
 
 /**
@@ -783,6 +762,8 @@ dhcp_start (struct interface *netif)
         LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE,
                      ("dhcp_start(): allocated dhcp"));
         /* already has DHCP client attached */
+	dhcp_setup_if_timers (netif);
+	
     }
     else
     {
@@ -797,7 +778,7 @@ dhcp_start (struct interface *netif)
     }
 
     /* clear data structure */
-    memset (dhcp, 0, sizeof (struct dhcp));
+    memset (dhcp, 0, sizeof (struct dhcp) - 2 * sizeof(TIMER_ID));
     /* dhcp_set_state(&dhcp, DHCP_OFF); */
     /* allocate UDP PCB */
     dhcp->pcb = udp_new ();
@@ -823,6 +804,9 @@ dhcp_start (struct interface *netif)
         dhcp_stop (netif);
         return ERR_MEM;
     }
+
+    dhcp_if_start_fine_timer (netif);
+    dhcp_if_start_coarse_timer (netif);
     /* Set the flag that says this netif is handled by DHCP. */
     netif->flags |= NETIF_FLAG_DHCP;
     return result;

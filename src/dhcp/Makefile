@@ -2,28 +2,22 @@
 
 include ../build/make.h
 
-DHCP_CODE_DIR = $(CODE_DIR)/dhcp
-DHCP_INC_DIR =  $(DHCP_CODE_DIR)/inc -I$(COMMON_INC)
-DHCP_SRCC_DIR = $(DHCP_CODE_DIR)
-DHCP_OBJ_DIR = $(DHCP_CODE_DIR)/obj
+DHCPS_CODE_DIR = $(CODE_DIR)/dhcp
+DHCPS_INC_DIR =  $(DHCPS_CODE_DIR)/ -I$(COMMON_INC)
+DHCPS_SRCC_DIR = $(DHCPS_CODE_DIR)
 
+CFLAGS += -I$(DHCPS_INC_DIR)
 
-DHCP_OBJS += $(DHCP_OBJ_DIR)/dhcp_cli.o
-DHCP_OBJS += $(DHCP_OBJ_DIR)/dhcp.o
+DHCPS_SRCS = $(wildcard *.c)
 
-all: all-before  obj $(DHCP_OBJS) tm_dhcp.o all-after
+DHCP_OBJ = $(DHCPS_SRCS:.c=.o)
 
-obj:
-	mkdir -p ${DHCP_OBJ_DIR}
+all: $(DHCP_OBJ) tm_dhcp.o
 
-clean: clean-custom
-	$(RM) $(DHCP_OBJ_DIR)/*.o $(FINAL_OBJ)/tm_dhcp.o
+$(DHCPS_OBJ)/%.o : %.c Makefile
+	$(CC) -c $(CFLAGS) $< -o $@
+tm_dhcp.o: $(DHCPS_OBJ)
+	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/tm_dhcp.o $(DHCPS_SRCC_DIR)/*.o
 
-$(DHCP_OBJ_DIR)/dhcp_cli.o: $(DHCP_SRCC_DIR)/dhcp_cli.c
-	$(CC) -c $(COMPILATION_SWITCH) $(DHCP_SRCC_DIR)/dhcp_cli.c -o $(DHCP_OBJ_DIR)/dhcp_cli.o $(CFLAGS) -I$(DHCP_INC_DIR)
-$(DHCP_OBJ_DIR)/dhcp.o: $(DHCP_SRCC_DIR)/dhcp.c
-	$(CC) -c $(COMPILATION_SWITCH) $(DHCP_SRCC_DIR)/dhcp.c -o $(DHCP_OBJ_DIR)/dhcp.o $(CFLAGS) -I$(DHCP_INC_DIR)
-
-
-tm_dhcp.o: $(DHCP_OBJS)
-	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/tm_dhcp.o $(DHCP_OBJS)
+clean:
+	rm -f *.o $(FINAL_OBJ)/tm_dhcp.o
