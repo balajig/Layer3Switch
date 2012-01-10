@@ -48,7 +48,7 @@ static tbridge_group_t tbridge;
 
 int fdb_init (void)
 {
-	tbridge.dot1dTpAgingTime = DEFAULT_AGING_TIME_OUT;
+	tbridge.dot1dTpAgingTime = DEFAULT_AGING_TIME_OUT * tm_get_ticks_per_second ();
 
 	tbridge.dot1dTpLearnedEntryDiscards = 0;
 
@@ -172,12 +172,13 @@ void display_fdb_entry (void *data)
 {
 	unsigned char *mac = NULL;
 	fdb_t *p = (fdb_t *)data;
+	unsigned long time = ((p->expiry - get_ticks()) < 0) ?0: (p->expiry - get_ticks());
 
 	mac = p->mac_addr.addr;
 
-        printf ("  %-4d    %02x:%02x:%02x:%02x:%02x:%02x    %-10s    %-4d\n", p->port,
+        printf ("  %-4d    %02x:%02x:%02x:%02x:%02x:%02x    %-10s    %-d.%-02d\n", p->port,
 		mac[0],mac[1],mac[2],mac[3],mac[4],mac[5], p->is_static?"static": "dynamic",
-		((p->expiry - get_secs()) < 0)?0: (p->expiry - get_secs()));
+		time / tm_get_ticks_per_second (), time % tm_get_ticks_per_second());
 
 }
 
