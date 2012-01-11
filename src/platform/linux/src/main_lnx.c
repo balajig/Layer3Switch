@@ -102,7 +102,7 @@ int create_raw_sock_for_pkt_capture (void)
 
 void update_linux_if_map (int port, int ifindex)
 {
-	linux_if_map[port - 1].linux_ifIndex = ifindex;
+	linux_if_map[port].linux_ifIndex = ifindex;
 }
 void send_packet (void *buf, uint16_t port, int len)
 {
@@ -113,8 +113,9 @@ void send_packet (void *buf, uint16_t port, int len)
 	socket_address.sll_family   = PF_PACKET;	
 	socket_address.sll_protocol = htons(ETH_P_ALL);	
 	socket_address.sll_ifindex  = linux_if_map[port - 1].linux_ifIndex;
-	socket_address.sll_pkttype  = PACKET_HOST;
 	socket_address.sll_halen    = ETH_ALEN;		
+
+	memcpy(&socket_address.sll_addr, buf, ETH_ALEN);
 
         if (sendto ((int)port_cdb[port - 1].platform, buf, len, 0,(struct sockaddr *)&socket_address,
                                 sizeof(socket_address)) < 0) {

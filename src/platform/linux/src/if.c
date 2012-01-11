@@ -21,24 +21,37 @@ static int fetch_and_update_if_info (if_t *ife);
 int route_add_if (unsigned char *ipaddr, unsigned char masklen, if_t *netif);
 int read_interfaces (void);
 
-static int idx = 1;
+static int idx = 0;
 
 int get_max_ports (void)
 {
-	return idx - 1;
+	return idx;
 }
 
 static int create_raw_sock (char *name)
 {
 	int sd = -1;
+        struct ifreq ifr;
+	int  fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	if (fd < 0)
+		return (-1);
+
+	strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+
+	ioctl(fd, SIOCGIFINDEX, (char *)&ifr);
+
+	close (fd);
 
 	if ((sd =socket (AF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
 		perror ("SOCKET");
 		return -1;
 	}
 
-	if (setsockopt(sd, SOL_SOCKET, SO_BINDTODEVICE, name, strlen (name)) < 0)
+        if (setsockopt(sd, SOL_SOCKET, SO_BINDTODEVICE,  (void*)&ifr, sizeof(ifr)) < 0)
 		perror ("setsockopt");
+        else 
+		fcntl(sd, F_SETFL, O_NONBLOCK);
 
 	port_cdb[idx].platform = (void *)sd;
 
@@ -47,13 +60,13 @@ static int create_raw_sock (char *name)
 
 static if_t *add_if_info(char *name)
 {
-    strncpy(IF_DESCR(idx), name, IFNAMSIZ);
+    strncpy(IF_DESCR(idx + 1), name, IFNAMSIZ);
 
-    fetch_and_update_if_info (IF_INFO(idx));
+    fetch_and_update_if_info (IF_INFO(idx + 1));
 
     create_raw_sock (name);
 
-    return IF_INFO(idx);
+    return IF_INFO(idx + 1);
 }
 static char *get_name(char *name, char *p)
 {
@@ -204,12 +217,12 @@ static int fetch_and_update_if_info (if_t *ife)
 			//ife->ipv4_netmask.s_addr = mask->sin_addr.s_addr;
 			;
 		} 
-		if (!set_ip_address (idx, sin->sin_addr.s_addr,  mask->sin_addr.s_addr))
+		if (!set_ip_address (idx + 1, sin->sin_addr.s_addr,  mask->sin_addr.s_addr))
 		{
 			if(strncmp (ifname, "lo", strlen ("lo"))) {
 				uint8_t addr[4];
 				uint32_2_ipstring (sin->sin_addr.s_addr, addr);
-				route_add_if (addr, ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx));
+				route_add_if (addr, ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx + 1));
 			}
 		}
 

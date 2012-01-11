@@ -20,6 +20,13 @@
 
 #define MAX_MTU 2048
 
+struct linux_if_mapping {
+	int linux_ifIndex;
+};
+
+extern struct linux_if_mapping linux_if_map[];
+
+
 void * packet_processing_task (void *unused)
 {
 	int retval = -1;
@@ -43,7 +50,7 @@ void * packet_processing_task (void *unused)
 
 		max_fd = (int)port_cdb[i-1].platform;
 
-		retval = select(max_fd + 1, &rfds, NULL, NULL, NULL);
+		retval = select (max_fd + 1, &rfds, NULL, NULL, NULL);
 
 		if (retval < 0)
 			continue;
@@ -52,8 +59,12 @@ void * packet_processing_task (void *unused)
 			if (FD_ISSET((int)port_cdb[i].platform, &rfds)) {
 				char *buf = malloc (MAX_MTU);
 				len = rcv_pkt ((int)port_cdb[i].platform, buf);
-				if (len > 0)
+				if (len > 0) {
+#ifdef PKT_DBG
+					printf (" Index : %d\n", linux_if_map[i].linux_ifIndex);
+#endif
 					process_pkt (buf, len, i);
+				}
 				free (buf);
 			}
 			i++;
@@ -65,14 +76,15 @@ void * packet_processing_task (void *unused)
 
 int rcv_pkt (int sockid, void *buf)
 {
-	struct sockaddr_in si_other;
-	socklen_t slen=sizeof(si_other);
+        struct sockaddr_ll sl;
+        socklen_t slen = sizeof sl;
 
-	int len = recvfrom (sockid, buf, ETH_FRAME_LEN, 0, (struct sockaddr *) &si_other, &slen);
+	int len = recvfrom (sockid, buf, MAX_MTU, 0, (struct sockaddr *) &sl, &slen);
 #ifdef PKT_DBG
-	printf("Received packet from %s:%d\n", 
-			inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+        printf("\nReceive Src ifindex %d %02x:%02x:%02x:%02x:%02x:%02x",
+               sl.sll_ifindex,
+               sl.sll_addr[0], sl.sll_addr[1], sl.sll_addr[2],
+               sl.sll_addr[3], sl.sll_addr[4], sl.sll_addr[5]);
 #endif
-
 	return len;
 }
