@@ -17,7 +17,7 @@
 #include <asm/types.h>
 #include "common_types.h"
 #include "ifmgmt.h"
-
+#undef PKT_DBG 
 #define MAX_MTU 2048
 
 struct linux_if_mapping {
@@ -65,6 +65,7 @@ void * packet_processing_task (void *unused)
 #endif
 					process_pkt (buf, len, i);
 				}
+				FD_CLR ((int)port_cdb[i].platform, &rfds);
 				free (buf);
 			}
 			i++;
