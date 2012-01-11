@@ -184,8 +184,10 @@ static int fetch_and_update_if_info (if_t *ife)
 
 	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
 
-	if (ioctl(fd, SIOCGIFINDEX, (char *)&ifr) == 0)
-		ife->ifIndex = ifr.ifr_ifindex;
+	if (ioctl(fd, SIOCGIFINDEX, (char *)&ifr) == 0) {
+		update_linux_if_map (idx, ifr.ifr_ifindex);
+		ife->ifIndex = idx;
+	}
 
 	if (ioctl(fd, SIOCGIFMTU, (char *)&ifr) == 0)
 		ife->ifMtu = ifr.ifr_mtu;

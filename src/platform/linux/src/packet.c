@@ -43,7 +43,7 @@ void * packet_processing_task (void *unused)
 
 		max_fd = (int)port_cdb[i-1].platform;
 
-		retval = select(max_fd, &rfds, NULL, NULL, NULL);
+		retval = select(max_fd + 1, &rfds, NULL, NULL, NULL);
 
 		if (retval < 0)
 			continue;
