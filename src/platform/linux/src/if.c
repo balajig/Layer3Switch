@@ -222,7 +222,7 @@ static int fetch_and_update_if_info (if_t *ife)
 			if(strncmp (ifname, "lo", strlen ("lo"))) {
 				uint8_t addr[4];
 				uint32_2_ipstring (sin->sin_addr.s_addr, addr);
-				route_add_if (addr, ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx + 1));
+				route_add_if (addr, u32ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx + 1));
 			}
 		}
 

@@ -182,9 +182,6 @@ void if_set_gw(struct interface *netif, ip_addr_t *gw);
 
 void if_set_up(struct interface *netif);
 void if_set_down(struct interface *netif);
-/** Ask if an interface is up */
-#define if_is_up(netif) (((netif)->flags & NETIF_FLAG_UP) ? (u8_t)1 : (u8_t)0)
-
 #if LWIP_NETIF_STATUS_CALLBACK
 void if_set_status_callback(struct interface *netif, if_status_callback_fn status_callback);
 #endif /* LWIP_NETIF_STATUS_CALLBACK */

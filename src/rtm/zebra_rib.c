@@ -19,30 +19,23 @@
  * 02111-1307, USA.  
  */
 
+#include "common_types.h"
+#include "ifmgmt.h"
 #include <zebra.h>
 
-#include "lib/prefix.h"
-#include "lib/table.h"
-#include "lib/memory.h"
-//#include "str.h"
-#include "lib/command.h"
-#include "lib/if.h"
-#include "lib/log.h"
-#include "lib/sockunion.h"
-#include "lib/linklist.h"
-#include "lib/thread.h"
-#include "lib/workqueue.h"
-#include "lib/prefix.h"
-#include "lib/routemap.h"
-
+#include "prefix.h"
+#include "table.h"
+#include "memory.h"
+#include "sockunion.h"
+#include "linklist.h"
+#include "routemap.h"
 #include "rib.h"
-#include "rt.h"
-#include "zserv.h"
-#include "redistribute.h"
-#include "debug.h"
+#include "vector.h"
+#include "workqueue.h"
+#include "rtm.h"
 
 /* Default rtm_table for all clients */
-extern struct zebra_t zebrad;
+struct zebra_t zebrad;
 
 /* Hold time for RIB process, should be very minimal.
  * it is useful to able to set it otherwise for testing, hence exported
@@ -83,7 +76,7 @@ vrf_alloc (const char *name)
 
   /* Put name.  */
   if (name)
-    vrf->name = XSTRDUP (MTYPE_VRF_NAME, name);
+    vrf->name = XSTRDUP (name);
 
   /* Allocate routing table and static table.  */
   vrf->table[AFI_IP][SAFI_UNICAST] = route_table_init ();
@@ -183,8 +176,8 @@ static void
 nexthop_free (struct nexthop *nexthop)
 {
   if (nexthop->ifname)
-    XFREE (0, nexthop->ifname);
-  XFREE (MTYPE_NEXTHOP, nexthop);
+    XFREE (nexthop->ifname);
+  XFREE (nexthop);
 }
 
 struct nexthop *
@@ -208,7 +201,7 @@ nexthop_ifname_add (struct rib *rib, char *ifname)
 
   nexthop = XCALLOC (MTYPE_NEXTHOP, sizeof (struct nexthop));
   nexthop->type = NEXTHOP_TYPE_IFNAME;
-  nexthop->ifname = XSTRDUP (0, ifname);
+  nexthop->ifname = XSTRDUP (ifname);
 
   nexthop_add (rib, nexthop);
 
@@ -273,7 +266,7 @@ nexthop_ipv6_ifname_add (struct rib *rib, struct in6_addr *ipv6,
   nexthop = XCALLOC (MTYPE_NEXTHOP, sizeof (struct nexthop));
   nexthop->type = NEXTHOP_TYPE_IPV6_IFNAME;
   nexthop->gate.ipv6 = *ipv6;
-  nexthop->ifname = XSTRDUP (0, ifname);
+  nexthop->ifname = XSTRDUP (ifname);
 
   nexthop_add (rib, nexthop);
 
@@ -682,7 +675,7 @@ rib_lookup_ipv4_route (struct prefix_ipv4 *p, union sockunion * qgate)
         return ZEBRA_RIB_FOUND_EXACT;
       else
       {
-        if (IS_ZEBRA_DEBUG_RIB)
+        if (0)
         {
           char gate_buf[INET_ADDRSTRLEN], rgate_buf[INET_ADDRSTRLEN], qgate_buf[INET_ADDRSTRLEN];
           inet_ntop (AF_INET, &nexthop->gate.ipv4.s_addr, gate_buf, INET_ADDRSTRLEN);
@@ -801,7 +794,7 @@ nexthop_active_check (struct route_node *rn, struct rib *rib,
       if (ifp && if_is_operative(ifp))
 	{
 	  if (set)
-	    nexthop->ifindex = ifp->ifindex;
+	    nexthop->ifindex = ifp->ifIndex;
 	  SET_FLAG (nexthop->flags, NEXTHOP_FLAG_ACTIVE);
 	}
       else
@@ -861,6 +854,8 @@ nexthop_active_check (struct route_node *rn, struct rib *rib,
     return CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_ACTIVE);
 
   rmap = 0;
+ /*FIXME:*/
+#if 0
   if (rib->type >= 0 && rib->type < ZEBRA_ROUTE_MAX &&
         	proto_rm[family][rib->type])
     rmap = route_map_lookup_by_name (proto_rm[family][rib->type]);
@@ -869,7 +864,7 @@ nexthop_active_check (struct route_node *rn, struct rib *rib,
   if (rmap) {
       ret = route_map_apply(rmap, &rn->p, RMAP_ZEBRA, nexthop);
   }
-
+#endif
   if (ret == RMAP_DENYMATCH)
     UNSET_FLAG (nexthop->flags, NEXTHOP_FLAG_ACTIVE);
   return CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_ACTIVE);
@@ -913,6 +908,8 @@ rib_install_kernel (struct route_node *rn, struct rib *rib)
 {
   int ret = 0;
   struct nexthop *nexthop;
+	/*TODO: move to platfrom*/
+#if 0
 
   switch (PREFIX_FAMILY (&rn->p))
     {
@@ -932,6 +929,7 @@ rib_install_kernel (struct route_node *rn, struct rib *rib)
       for (nexthop = rib->nexthop; nexthop; nexthop = nexthop->next)
 	UNSET_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB);
     }
+#endif
 }
 
 /* Uninstall the route from kernel. */
@@ -941,6 +939,8 @@ rib_uninstall_kernel (struct route_node *rn, struct rib *rib)
   int ret = 0;
   struct nexthop *nexthop;
 
+	/*TODO: move to platfrom*/
+#if 0
   switch (PREFIX_FAMILY (&rn->p))
     {
     case AF_INET:
@@ -955,7 +955,7 @@ rib_uninstall_kernel (struct route_node *rn, struct rib *rib)
 
   for (nexthop = rib->nexthop; nexthop; nexthop = nexthop->next)
     UNSET_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB);
-
+#endif
   return ret;
 }
 
@@ -965,7 +965,7 @@ rib_uninstall (struct route_node *rn, struct rib *rib)
 {
   if (CHECK_FLAG (rib->flags, ZEBRA_FLAG_SELECTED))
     {
-      redistribute_delete (&rn->p, rib);
+      //redistribute_delete (&rn->p, rib);
       if (! RIB_SYSTEM_ROUTE (rib))
 	rib_uninstall_kernel (rn, rib);
       UNSET_FLAG (rib->flags, ZEBRA_FLAG_SELECTED);
@@ -989,7 +989,7 @@ rib_process (struct route_node *rn)
   
   assert (rn);
   
-  if (IS_ZEBRA_DEBUG_RIB || IS_ZEBRA_DEBUG_RIB_Q)
+  if (0 || 0)
     inet_ntop (rn->p.family, &rn->p.u.prefix, buf, INET6_ADDRSTRLEN);
 
   for (rib = rn->info; rib; rib = next)
@@ -1013,7 +1013,7 @@ rib_process (struct route_node *rn)
         {
           if (rib != fib)
             {
-              if (IS_ZEBRA_DEBUG_RIB)
+              if (0)
                 zlog_debug ("%s: %s/%d: rn %p, removing rib %p", __func__,
                   buf, rn->p.prefixlen, rn, rib);
                 rib_unlink (rn, rib);
@@ -1085,12 +1085,12 @@ rib_process (struct route_node *rn)
   /* Same RIB entry is selected. Update FIB and finish. */
   if (select && select == fib)
     {
-      if (IS_ZEBRA_DEBUG_RIB)
+      if (0)
         zlog_debug ("%s: %s/%d: Updating existing route, select %p, fib %p",
                      __func__, buf, rn->p.prefixlen, select, fib);
       if (CHECK_FLAG (select->flags, ZEBRA_FLAG_CHANGED))
         {
-          redistribute_delete (&rn->p, select);
+          //redistribute_delete (&rn->p, select);
           if (! RIB_SYSTEM_ROUTE (select))
             rib_uninstall_kernel (rn, select);
 
@@ -1099,7 +1099,7 @@ rib_process (struct route_node *rn)
   
           if (! RIB_SYSTEM_ROUTE (select))
             rib_install_kernel (rn, select);
-          redistribute_add (&rn->p, select);
+          //redistribute_add (&rn->p, select);
         }
       else if (! RIB_SYSTEM_ROUTE (select))
         {
@@ -1128,10 +1128,10 @@ rib_process (struct route_node *rn)
    */
   if (fib)
     {
-      if (IS_ZEBRA_DEBUG_RIB)
+      if (0)
         zlog_debug ("%s: %s/%d: Removing existing route, fib %p", __func__,
           buf, rn->p.prefixlen, fib);
-      redistribute_delete (&rn->p, fib);
+      //redistribute_delete (&rn->p, fib);
       if (! RIB_SYSTEM_ROUTE (fib))
 	rib_uninstall_kernel (rn, fib);
       UNSET_FLAG (fib->flags, ZEBRA_FLAG_SELECTED);
@@ -1146,7 +1146,7 @@ rib_process (struct route_node *rn)
    */
   if (select)
     {
-      if (IS_ZEBRA_DEBUG_RIB)
+      if (0)
         zlog_debug ("%s: %s/%d: Adding route, select %p", __func__, buf,
           rn->p.prefixlen, select);
       /* Set real nexthop. */
@@ -1155,20 +1155,20 @@ rib_process (struct route_node *rn)
       if (! RIB_SYSTEM_ROUTE (select))
         rib_install_kernel (rn, select);
       SET_FLAG (select->flags, ZEBRA_FLAG_SELECTED);
-      redistribute_add (&rn->p, select);
+      //redistribute_add (&rn->p, select);
     }
 
   /* FIB route was removed, should be deleted */
   if (del)
     {
-      if (IS_ZEBRA_DEBUG_RIB)
+      if (0)
         zlog_debug ("%s: %s/%d: Deleting fib %p, rn %p", __func__, buf,
           rn->p.prefixlen, del, rn);
       rib_unlink (rn, del);
     }
 
 end:
-  if (IS_ZEBRA_DEBUG_RIB_Q)
+  if (0)
     zlog_debug ("%s: %s/%d: rn %p dequeued", __func__, buf, rn->p.prefixlen, rn);
 }
 
@@ -1246,7 +1246,7 @@ rib_meta_queue_add (struct meta_queue *mq, struct route_node *rn)
   struct rib *rib;
   char buf[INET6_ADDRSTRLEN];
 
-  if (IS_ZEBRA_DEBUG_RIB_Q)
+  if (0)
     inet_ntop (rn->p.family, &rn->p.u.prefix, buf, INET6_ADDRSTRLEN);
 
   for (rib = rn->info; rib; rib = rib->next)
@@ -1256,7 +1256,7 @@ rib_meta_queue_add (struct meta_queue *mq, struct route_node *rn)
       /* Invariant: at this point we always have rn->info set. */
       if (CHECK_FLAG (((struct rib *)rn->info)->rn_status, RIB_ROUTE_QUEUED(qindex)))
 	{
-	  if (IS_ZEBRA_DEBUG_RIB_Q)
+	  if (0)
 	    zlog_debug ("%s: %s/%d: rn %p is already queued in sub-queue %u",
 			__func__, buf, rn->p.prefixlen, rn, qindex);
 	  continue;
@@ -1267,7 +1267,7 @@ rib_meta_queue_add (struct meta_queue *mq, struct route_node *rn)
       route_lock_node (rn);
       mq->size++;
 
-      if (IS_ZEBRA_DEBUG_RIB_Q)
+      if (0)
 	zlog_debug ("%s: %s/%d: queued rn %p into sub-queue %u",
 		    __func__, buf, rn->p.prefixlen, rn, qindex);
     }
@@ -1278,7 +1278,7 @@ static void
 rib_queue_add (struct zebra_t *zebra, struct route_node *rn)
 {
   
-  if (IS_ZEBRA_DEBUG_RIB_Q)
+  if (0)
     {
       char buf[INET6_ADDRSTRLEN];
 
@@ -1295,8 +1295,8 @@ rib_queue_add (struct zebra_t *zebra, struct route_node *rn)
    * holder, if necessary, then push the work into it in any case.
    * This semantics was introduced after 0.99.9 release.
    */
-  if (!zebra->ribq->items->count)
-    work_queue_add (zebra->ribq, zebra->mq);
+//  if (!zebra->ribq->items->count)
+ //   work_queue_add (zebra->ribq, zebra->mq);
 
   rib_meta_queue_add (zebra->mq, rn);
 }
@@ -1326,20 +1326,6 @@ meta_queue_new (void)
 static void
 rib_queue_init (struct zebra_t *zebra)
 {
-  if (! (zebra->ribq = work_queue_new (zebra->master, 
-                                       "route_node processing")))
-    {
-      zlog_err ("%s: could not initialise work queue!", __func__);
-      return;
-    }
-
-  /* fill in the work queue spec */
-  zebra->ribq->spec.workfunc = &meta_queue_process;
-  zebra->ribq->spec.errorfunc = NULL;
-  /* XXX: TODO: These should be runtime configurable via vty */
-  zebra->ribq->spec.max_retries = 3;
-  zebra->ribq->spec.hold = rib_process_hold_time;
-  
   if (!(zebra->mq = meta_queue_new ()))
     zlog_err ("%s: could not initialise meta queue!", __func__);
 }
@@ -1393,7 +1379,7 @@ rib_link (struct route_node *rn, struct rib *rib)
   
   route_lock_node (rn); /* rn route table reference */
 
-  if (IS_ZEBRA_DEBUG_RIB)
+  if (0)
   {
     inet_ntop (rn->p.family, &rn->p.u.prefix, buf, INET6_ADDRSTRLEN);
     zlog_debug ("%s: %s/%d: rn %p, rib %p", __func__,
@@ -1403,7 +1389,7 @@ rib_link (struct route_node *rn, struct rib *rib)
   head = rn->info;
   if (head)
     {
-      if (IS_ZEBRA_DEBUG_RIB)
+      if (0)
         zlog_debug ("%s: %s/%d: new head, rn_status copied over", __func__,
           buf, rn->p.prefixlen);
       head->prev = rib;
@@ -1423,7 +1409,7 @@ rib_addnode (struct route_node *rn, struct rib *rib)
    */
   if (CHECK_FLAG (rib->status, RIB_ENTRY_REMOVED))
     {
-      if (IS_ZEBRA_DEBUG_RIB)
+      if (0)
       {
         char buf[INET6_ADDRSTRLEN];
         inet_ntop (rn->p.family, &rn->p.u.prefix, buf, INET6_ADDRSTRLEN);
@@ -1444,7 +1430,7 @@ rib_unlink (struct route_node *rn, struct rib *rib)
 
   assert (rn && rib);
 
-  if (IS_ZEBRA_DEBUG_RIB)
+  if (0)
   {
     inet_ntop (rn->p.family, &rn->p.u.prefix, buf, INET6_ADDRSTRLEN);
     zlog_debug ("%s: %s/%d: rn %p, rib %p",
@@ -1462,7 +1448,7 @@ rib_unlink (struct route_node *rn, struct rib *rib)
       
       if (rn->info)
         {
-          if (IS_ZEBRA_DEBUG_RIB)
+          if (0)
             zlog_debug ("%s: %s/%d: rn %p, rib %p, new head copy",
                         __func__, buf, rn->p.prefixlen, rn, rib);
           rib->next->rn_status = rib->rn_status;
@@ -1475,7 +1461,7 @@ rib_unlink (struct route_node *rn, struct rib *rib)
       next = nexthop->next;
       nexthop_free (nexthop);
     }
-  XFREE (MTYPE_RIB, rib);
+  XFREE (rib);
 
   route_unlock_node (rn); /* rn route table reference */
 }
@@ -1483,7 +1469,7 @@ rib_unlink (struct route_node *rn, struct rib *rib)
 static void
 rib_delnode (struct route_node *rn, struct rib *rib)
 {
-  if (IS_ZEBRA_DEBUG_RIB)
+  if (0)
   {
     char buf[INET6_ADDRSTRLEN];
     inet_ntop (rn->p.family, &rn->p.u.prefix, buf, INET6_ADDRSTRLEN);
@@ -1582,14 +1568,14 @@ rib_add_ipv4 (int type, int flags, struct prefix_ipv4 *p,
       SET_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB);
 
   /* Link new rib to node.*/
-  if (IS_ZEBRA_DEBUG_RIB)
+  if (0)
     zlog_debug ("%s: calling rib_addnode (%p, %p)", __func__, rn, rib);
   rib_addnode (rn, rib);
   
   /* Free implicit route.*/
   if (same)
   {
-    if (IS_ZEBRA_DEBUG_RIB)
+    if (0)
       zlog_debug ("%s: calling rib_delnode (%p, %p)", __func__, rn, rib);
     rib_delnode (rn, same);
   }
@@ -1741,7 +1727,7 @@ void rib_lookup_and_pushup (struct prefix_ipv4 * p)
       ! RIB_SYSTEM_ROUTE (rib))
     {
       changed = 1;
-      if (IS_ZEBRA_DEBUG_RIB)
+      if (0)
       {
         char buf[INET_ADDRSTRLEN];
         inet_ntop (rn->p.family, &p->prefix, buf, INET_ADDRSTRLEN);
@@ -1804,7 +1790,7 @@ rib_add_ipv4_multipath (struct prefix_ipv4 *p, struct rib *rib, safi_t safi)
 
   /* Link new rib to node.*/
   rib_addnode (rn, rib);
-  if (IS_ZEBRA_DEBUG_RIB)
+  if (0)
   {
     zlog_debug ("%s: called rib_addnode (%p, %p) on new RIB entry",
       __func__, rn, rib);
@@ -1814,7 +1800,7 @@ rib_add_ipv4_multipath (struct prefix_ipv4 *p, struct rib *rib, safi_t safi)
   /* Free implicit route.*/
   if (same)
   {
-    if (IS_ZEBRA_DEBUG_RIB)
+    if (0)
     {
       zlog_debug ("%s: calling rib_delnode (%p, %p) on existing RIB entry",
         __func__, rn, same);
@@ -1849,7 +1835,7 @@ rib_delete_ipv4 (int type, int flags, struct prefix_ipv4 *p,
   /* Apply mask. */
   apply_mask_ipv4 (p);
 
-  if (IS_ZEBRA_DEBUG_KERNEL && gate)
+  if (0 && gate)
     zlog_debug ("rib_delete_ipv4(): route delete %s/%d via %s ifindex %d",
 		       inet_ntop (AF_INET, &p->prefix, buf1, INET_ADDRSTRLEN),
 		       p->prefixlen, 
@@ -1860,7 +1846,7 @@ rib_delete_ipv4 (int type, int flags, struct prefix_ipv4 *p,
   rn = route_node_lookup (table, (struct prefix *) p);
   if (! rn)
     {
-      if (IS_ZEBRA_DEBUG_KERNEL)
+      if (0)
 	{
 	  if (gate)
 	    zlog_debug ("route %s/%d via %s ifindex %d doesn't exist in rib",
@@ -1926,7 +1912,7 @@ rib_delete_ipv4 (int type, int flags, struct prefix_ipv4 *p,
 	}
       else
 	{
-	  if (IS_ZEBRA_DEBUG_KERNEL)
+	  if (0)
 	    {
 	      if (gate)
 		zlog_debug ("route %s/%d via %s ifindex %d type %d doesn't exist in rib",
@@ -2166,7 +2152,7 @@ static_add_ipv4 (struct prefix *p, struct in_addr *gate, const char *ifname,
   if (gate)
     si->gate.ipv4 = *gate;
   if (ifname)
-    si->gate.ifname = XSTRDUP (0, ifname);
+    si->gate.ifname = XSTRDUP (ifname);
 
   /* Add new static route information to the tree with sort by
      distance value and gateway address. */
@@ -2257,8 +2243,8 @@ static_delete_ipv4 (struct prefix *p, struct in_addr *gate, const char *ifname,
   
   /* Free static route configuration. */
   if (ifname)
-    XFREE (0, si->gate.ifname);
-  XFREE (MTYPE_STATIC_IPV4, si);
+    XFREE (si->gate.ifname);
+  XFREE (si);
 
   route_unlock_node (rn);
 
@@ -2408,7 +2394,7 @@ rib_delete_ipv6 (int type, int flags, struct prefix_ipv6 *p,
   rn = route_node_lookup (table, (struct prefix *) p);
   if (! rn)
     {
-      if (IS_ZEBRA_DEBUG_KERNEL)
+      if (0)
 	{
 	  if (gate)
 	    zlog_debug ("route %s/%d via %s ifindex %d doesn't exist in rib",
@@ -2474,7 +2460,7 @@ rib_delete_ipv6 (int type, int flags, struct prefix_ipv6 *p,
 	}
       else
 	{
-	  if (IS_ZEBRA_DEBUG_KERNEL)
+	  if (0)
 	    {
 	      if (gate)
 		zlog_debug ("route %s/%d via %s ifindex %d type %d doesn't exist in rib",
@@ -2712,11 +2698,11 @@ static_add_ipv6 (struct prefix *p, u_char type, struct in6_addr *gate,
       si->ipv6 = *gate;
       break;
     case STATIC_IPV6_IFNAME:
-      si->ifname = XSTRDUP (0, ifname);
+      si->ifname = XSTRDUP (ifname);
       break;
     case STATIC_IPV6_GATEWAY_IFNAME:
       si->ipv6 = *gate;
-      si->ifname = XSTRDUP (0, ifname);
+      si->ifname = XSTRDUP (ifname);
       break;
     }
 
@@ -2793,8 +2779,8 @@ static_delete_ipv6 (struct prefix *p, u_char type, struct in6_addr *gate,
   
   /* Free static route configuration. */
   if (ifname)
-    XFREE (0, si->ifname);
-  XFREE (MTYPE_STATIC_IPV6, si);
+    XFREE (si->ifname);
+  XFREE (si);
 
   return 1;
 }

@@ -41,7 +41,7 @@ void uint32_2_ipstring (uint32_t ipAddress, uint8_t *addr)
 	}
 }
 /* Convert masklen into IP address's netmask. */
-void masklen2ip (int masklen, uint32_t *netmask)
+void u32masklen2ip (int masklen, uint32_t *netmask)
 {
 	u_char *pnt;
 	int bit;
@@ -62,7 +62,7 @@ void masklen2ip (int masklen, uint32_t *netmask)
 
 /* Convert IP address's netmask into integer. We assume netmask is
    sequential one. Argument netmask should be network byte order. */
-u_char ip_masklen (uint32_t netmask)
+u_char u32ip_masklen (uint32_t netmask)
 {
 	u_char len;
 	u_char *pnt;
@@ -91,67 +91,10 @@ u_char ip_masklen (uint32_t netmask)
 	return len;
 }
 
-uint32_t ipv4_network_addr (uint32_t hostaddr, int masklen)
+uint32_t u32ipv4_network_addr (uint32_t hostaddr, int masklen)
 {
 	uint32_t mask;
 
-	masklen2ip (masklen, &mask);
+	u32masklen2ip (masklen, &mask);
 	return hostaddr & mask;
-}
-
-	in_addr_t
-ipv4_broadcast_addr (in_addr_t hostaddr, int masklen)
-{
-	uint32_t mask;
-
-	masklen2ip (masklen, &mask);
-	return (masklen != IPV4_MAX_PREFIXLEN-1) ?
-		/* normal case */
-		(hostaddr | ~mask) :
-		/* special case for /31 */
-		(hostaddr ^ ~mask);
-}
-
-/* Utility function to convert ipv4 netmask to prefixes 
-   ex.) "1.1.0.0" "255.255.0.0" => "1.1.0.0/16"
-   ex.) "1.0.0.0" NULL => "1.0.0.0/8"                   */
-int netmask_str2prefix_str (const char *net_str, const char *mask_str, char *prefix_str)
-{
-	struct in_addr network;
-	struct in_addr mask;
-	u_char prefixlen;
-	u_int32_t destination;
-	int ret;
-
-	ret = inet_aton (net_str, &network);
-	if (! ret)
-		return 0;
-
-	if (mask_str)
-	{
-		ret = inet_aton (mask_str, &mask);
-		if (! ret)
-			return 0;
-
-		prefixlen = ip_masklen (mask.s_addr);
-	}
-	else 
-	{
-		destination = ntohl (network.s_addr);
-
-		if (network.s_addr == 0)
-			prefixlen = 0;
-		else if (IN_CLASSC (destination))
-			prefixlen = 24;
-		else if (IN_CLASSB (destination))
-			prefixlen = 16;
-		else if (IN_CLASSA (destination))
-			prefixlen = 8;
-		else
-			return 0;
-	}
-
-	sprintf (prefix_str, "%s/%d", net_str, prefixlen);
-
-	return 1;
 }

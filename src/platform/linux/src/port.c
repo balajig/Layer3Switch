@@ -32,6 +32,7 @@ int port_init (void)
 		port_cdb[idx].ifOutErrors = 0;
 		port_cdb[idx].pstp_info = NULL;
 		port_cdb[idx].flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
+		if_connect_init (&port_cdb[idx]);
 	}
 	read_interfaces ();
 	return 0;

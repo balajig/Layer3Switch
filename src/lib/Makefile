@@ -27,6 +27,10 @@ LIBS_SRCS += $(LIBS_SRCC_DIR)/mem.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/pbuf.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/def.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/timers.c
+LIBS_SRCS += $(LIBS_SRCC_DIR)/table.c
+LIBS_SRCS += $(LIBS_SRCC_DIR)/linklist.c
+LIBS_SRCS += $(LIBS_SRCC_DIR)/prefix.c
+LIBS_SRCS += $(LIBS_SRCC_DIR)/vector.c
 
 
 CFLAGS += -I$(LIBS_INC_DIR)

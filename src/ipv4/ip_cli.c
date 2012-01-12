@@ -26,7 +26,7 @@ cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
 	{
 		uint8_t addr[4];
 	 	uint32_2_ipstring (ntohl(*addr_ptr), &addr);
-		route_add_if (addr, ip_masklen (ntohl(*mask_ptr)),IF_INFO(port));
+		route_add_if (addr, u32ip_masklen (ntohl(*mask_ptr)),IF_INFO(port));
 		return CPARSER_OK;
 	}
 	return CPARSER_NOT_OK;

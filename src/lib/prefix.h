@@ -31,6 +31,8 @@
  * (e.g. AF_INET:10.0.0.9/8), such as might be configured on an
  * interface.
  */
+#include "common_types.h"
+#include "zebra.h"
 
 /* IPv4 and IPv6 unified prefix structure. */
 struct prefix
@@ -159,9 +161,6 @@ extern int prefix_common_bits (const struct prefix *, const struct prefix *);
 extern void prefix_copy (struct prefix *dest, const struct prefix *src);
 extern void apply_mask (struct prefix *);
 
-extern struct prefix *sockunion2prefix (const union sockunion *dest,
-                                        const union sockunion *mask);
-extern struct prefix *sockunion2hostprefix (const union sockunion *);
 extern void prefix2sockunion (const struct prefix *, union sockunion *);
 
 extern struct prefix_ipv4 *prefix_ipv4_new (void);
@@ -175,9 +174,6 @@ extern void apply_mask_ipv4 (struct prefix_ipv4 *);
 extern int prefix_ipv4_any (const struct prefix_ipv4 *);
 extern void apply_classful_mask_ipv4 (struct prefix_ipv4 *);
 
-extern u_char ip_masklen (struct in_addr);
-extern void masklen2ip (const int, struct in_addr *);
-/* returns the network portion of the host address */
 extern in_addr_t ipv4_network_addr (in_addr_t hostaddr, int masklen);
 /* given the address of a host on a network and the network mask length,
  * calculate the broadcast address for that network;

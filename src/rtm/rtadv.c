@@ -412,7 +412,7 @@ rtadv_process_packet (u_char *buf, unsigned int len, unsigned int ifindex, int h
   ifp = if_lookup_by_index (ifindex);
   if (ifp == NULL)
     {
-      zlog_warn ("Unknown interface index: %d", ifindex);
+      warn ("Unknown interface index: %d", ifindex);
       return;
     }
 
@@ -427,7 +427,7 @@ rtadv_process_packet (u_char *buf, unsigned int len, unsigned int ifindex, int h
   /* ICMP message length check. */
   if (len < sizeof (struct icmp6_hdr))
     {
-      zlog_warn ("Invalid ICMPV6 packet length: %d", len);
+      warn ("Invalid ICMPV6 packet length: %d", len);
       return;
     }
 
@@ -437,14 +437,14 @@ rtadv_process_packet (u_char *buf, unsigned int len, unsigned int ifindex, int h
   if (icmph->icmp6_type != ND_ROUTER_SOLICIT &&
       icmph->icmp6_type != ND_ROUTER_ADVERT)
     {
-      zlog_warn ("Unwanted ICMPV6 message type: %d", icmph->icmp6_type);
+      warn ("Unwanted ICMPV6 message type: %d", icmph->icmp6_type);
       return;
     }
 
   /* Hoplimit check. */
   if (hoplimit >= 0 && hoplimit != 255)
     {
-      zlog_warn ("Invalid hoplimit %d for router advertisement ICMP packet",
+      warn ("Invalid hoplimit %d for router advertisement ICMP packet",
 		 hoplimit);
       return;
     }
@@ -478,7 +478,7 @@ rtadv_read (struct thread *thread)
 
   if (len < 0) 
     {
-      zlog_warn ("router solicitation recv failed: %s.", safe_strerror (errno));
+      warn ("router solicitation recv failed: %s.", safe_strerror (errno));
       return len;
     }
 
@@ -1556,58 +1556,6 @@ rtadv_event (enum rtadv_event event, int val)
   return;
 }
 
-void
-rtadv_init (void)
-{
-  int sock;
-
-  sock = rtadv_make_socket ();
-  if (sock < 0)
-    return;
-
-  rtadv = rtadv_new ();
-  rtadv->sock = sock;
-
-  install_element (INTERFACE_NODE, &ipv6_nd_suppress_ra_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_suppress_ra_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_ra_interval_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_ra_interval_msec_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_ra_interval_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_ra_lifetime_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_ra_lifetime_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_reachable_time_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_reachable_time_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_managed_config_flag_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_managed_config_flag_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_other_config_flag_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_other_config_flag_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_homeagent_config_flag_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_homeagent_config_flag_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_homeagent_preference_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_homeagent_preference_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_homeagent_lifetime_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_homeagent_lifetime_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_adv_interval_config_option_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_adv_interval_config_option_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_val_rev_rtaddr_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_val_nortaddr_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_val_rev_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_val_noauto_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_val_offlink_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_val_rtaddr_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_val_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_noval_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_noval_rev_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_noval_noauto_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_noval_offlink_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_noval_rtaddr_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_prefix_prefix_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_prefix_cmd);
-  install_element (INTERFACE_NODE, &ipv6_nd_router_preference_cmd);
-  install_element (INTERFACE_NODE, &no_ipv6_nd_router_preference_cmd);
-}
-
 static int
 if_join_all_router (int sock, struct interface *ifp)
 {
@@ -1622,7 +1570,7 @@ if_join_all_router (int sock, struct interface *ifp)
   ret = setsockopt (sock, IPPROTO_IPV6, IPV6_JOIN_GROUP, 
 		    (char *) &mreq, sizeof mreq);
   if (ret < 0)
-    zlog_warn ("can't setsockopt IPV6_JOIN_GROUP: %s", safe_strerror (errno));
+    warn ("can't setsockopt IPV6_JOIN_GROUP: %s", safe_strerror (errno));
 
   zlog_info ("rtadv: %s join to all-routers multicast group", ifp->name);
 
@@ -1643,7 +1591,7 @@ if_leave_all_router (int sock, struct interface *ifp)
   ret = setsockopt (sock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, 
 		    (char *) &mreq, sizeof mreq);
   if (ret < 0)
-    zlog_warn ("can't setsockopt IPV6_LEAVE_GROUP: %s", safe_strerror (errno));
+    warn ("can't setsockopt IPV6_LEAVE_GROUP: %s", safe_strerror (errno));
 
   zlog_info ("rtadv: %s leave from all-routers multicast group", ifp->name);
 

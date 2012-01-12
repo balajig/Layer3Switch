@@ -21,204 +21,11 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #ifndef _ZEBRA_H
 #define _ZEBRA_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#ifdef SUNOS_5
-#define _XPG4_2
-#define __EXTENSIONS__
 typedef unsigned int    u_int32_t;
 typedef unsigned short  u_int16_t;
 typedef unsigned char   u_int8_t;
-#endif /* SUNOS_5 */
 
-#ifndef HAVE_SOCKLEN_T
-//typedef int socklen_t;
-#endif /* HAVE_SOCKLEN_T */
-
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#if 0
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <string.h>
-#include <pwd.h>
-#include <grp.h>
-#ifdef HAVE_STROPTS_H
-#include <stropts.h>
-#endif /* HAVE_STROPTS_H */
-#include <sys/fcntl.h>
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/param.h>
-#ifdef HAVE_SYS_SYSCTL_H
-#ifdef GNU_LINUX
-#include <linux/types.h>
-#endif
-#include <sys/sysctl.h>
-#endif /* HAVE_SYS_SYSCTL_H */
-#include <sys/ioctl.h>
-#ifdef HAVE_SYS_CONF_H
-#include <sys/conf.h>
-#endif /* HAVE_SYS_CONF_H */
-#ifdef HAVE_SYS_KSYM_H
-#include <sys/ksym.h>
-#endif /* HAVE_SYS_KSYM_H */
-#include <syslog.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif /* TIME_WITH_SYS_TIME */
-#include <sys/uio.h>
-#include <sys/utsname.h>
-#ifdef HAVE_RUSAGE
-#include <sys/resource.h>
-#endif /* HAVE_RUSAGE */
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif /* HAVE_INTTYPES_H */
-
-/* machine dependent includes */
-#ifdef SUNOS_5
-#include <strings.h>
-#endif /* SUNOS_5 */
-
-/* machine dependent includes */
-#ifdef HAVE_LINUX_VERSION_H
-#include <linux/version.h>
-#endif /* HAVE_LINUX_VERSION_H */
-
-#ifdef HAVE_ASM_TYPES_H
-#include <asm/types.h>
-#endif /* HAVE_ASM_TYPES_H */
-#endif
-
-/* misc include group */
-#include <stdarg.h>
-#if !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
-/* Not C99; do we need to define va_copy? */
-#ifndef va_copy
-#ifdef __va_copy
-#define va_copy(DST,SRC) __va_copy(DST,SRC)
-#else
-/* Now we are desperate; this should work on many typical platforms. 
-   But this is slightly dangerous, because the standard does not require
-   va_copy to be a macro. */
-#define va_copy(DST,SRC) memcpy(&(DST), &(SRC), sizeof(va_list))
-#warning "Not C99 and no va_copy macro available, falling back to memcpy"
-#endif /* __va_copy */
-#endif /* !va_copy */
-#endif /* !C99 */
-
-
-#if 0
-#ifdef HAVE_LCAPS
-#include <sys/capability.h>
-#include <sys/prctl.h>
-#endif /* HAVE_LCAPS */
-
-#ifdef HAVE_SOLARIS_CAPABILITIES
-#include <priv.h>
-#endif /* HAVE_SOLARIS_CAPABILITIES */
-
-/* network include group */
-
-#include <sys/socket.h>
-
-#ifdef HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif /* HAVE_SYS_SOCKIO_H */
-
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif /* HAVE_NETINET_IN_H */
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-
-#ifdef HAVE_NET_NETOPT_H
-#include <net/netopt.h>
-#endif /* HAVE_NET_NETOPT_H */
-
-#include <net/if.h>
-
-#ifdef HAVE_NET_IF_DL_H
-#include <net/if_dl.h>
-#endif /* HAVE_NET_IF_DL_H */
-
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif /* HAVE_NET_IF_VAR_H */
-
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif /* HAVE_NET_ROUTE_H */
-
-#ifdef HAVE_NETLINK
-#include <linux/netlink.h>
-#include <linux/rtnetlink.h>
-#include <linux/filter.h>
-#include <stddef.h>
-#else
-#define RT_TABLE_MAIN		0
-#endif /* HAVE_NETLINK */
-
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif /* HAVE_NETDB_H */
-
-#include <arpa/inet.h>
-
-#ifdef HAVE_INET_ND_H
-#include <inet/nd.h>
-#endif /* HAVE_INET_ND_H */
-
-#ifdef HAVE_NETINET_IN_VAR_H
-#include <netinet/in_var.h>
-#endif /* HAVE_NETINET_IN_VAR_H */
-
-#ifdef HAVE_NETINET6_IN6_VAR_H
-#include <netinet6/in6_var.h>
-#endif /* HAVE_NETINET6_IN6_VAR_H */
-
-#ifdef HAVE_NETINET_IN6_VAR_H
-#include <netinet/in6_var.h>
-#endif /* HAVE_NETINET_IN6_VAR_H */
-
-#ifdef HAVE_NETINET6_IN_H
-#include <netinet6/in.h>
-#endif /* HAVE_NETINET6_IN_H */
-
-
-#ifdef HAVE_NETINET6_IP6_H
-#include <netinet6/ip6.h>
-#endif /* HAVE_NETINET6_IP6_H */
-
-#ifdef HAVE_NETINET_ICMP6_H
-#include <netinet/icmp6.h>
-#endif /* HAVE_NETINET_ICMP6_H */
-
-#ifdef HAVE_NETINET6_ND6_H
-#include <netinet6/nd6.h>
-#endif /* HAVE_NETINET6_ND6_H */
-#endif
-
+#define RT_TABLE_MAIN	 256	
 /* Some systems do not define UINT32_MAX, etc.. from inttypes.h
  * e.g. this makes life easier for FBSD 4.11 users.
  */
@@ -241,54 +48,7 @@ typedef unsigned char   u_int8_t;
 #define UINT32_MAX	(4294967295U)
 #endif
 
-#ifdef HAVE_GLIBC_BACKTRACE
-#include <execinfo.h>
-#endif /* HAVE_GLIBC_BACKTRACE */
-
-#ifdef BSDI_NRL
-
-#ifdef HAVE_NETINET6_IN6_H
-#include <netinet6/in6.h>
-#endif /* HAVE_NETINET6_IN6_H */
-
-#ifdef NRL
-#include <netinet6/in6.h>
-#endif /* NRL */
-
 #define IN6_ARE_ADDR_EQUAL IN6_IS_ADDR_EQUAL
-
-#endif /* BSDI_NRL */
-
-/* Local includes: */
-#if !(defined(__GNUC__) || defined(VTYSH_EXTRACT_PL)) 
-#define __attribute__(x)
-#endif  /* !__GNUC__ || VTYSH_EXTRACT_PL */
-
-//#include "zassert.h"
-//#include "str.h"
-
-
-#ifdef HAVE_BROKEN_CMSG_FIRSTHDR
-/* This bug is present in Solaris 8 and pre-patch Solaris 9 <sys/socket.h>;
-   please refer to http://bugzilla.quagga.net/show_bug.cgi?id=142 */
-
-/* Check that msg_controllen is large enough. */
-#define ZCMSG_FIRSTHDR(mhdr) \
-  (((size_t)((mhdr)->msg_controllen) >= sizeof(struct cmsghdr)) ? \
-   CMSG_FIRSTHDR(mhdr) : (struct cmsghdr *)NULL)
-
-#warning "CMSG_FIRSTHDR is broken on this platform, using a workaround"
-
-#else /* HAVE_BROKEN_CMSG_FIRSTHDR */
-#define ZCMSG_FIRSTHDR(M) CMSG_FIRSTHDR(M)
-#endif /* HAVE_BROKEN_CMSG_FIRSTHDR */
-
-
-
-/* 
- * RFC 3542 defines several macros for using struct cmsghdr.
- * Here, we define those that are not present
- */
 
 /*
  * Internal defines, for use only in this file.
@@ -430,8 +190,19 @@ struct in_pktinfo
  */
 #define ZEBRA_HEADER_MARKER              255
 
-/* Zebra route's types are defined in route_types.h */
-#include "route_types.h"
+/* Zebra route's types. */
+#define ZEBRA_ROUTE_SYSTEM               0
+#define ZEBRA_ROUTE_KERNEL               1
+#define ZEBRA_ROUTE_CONNECT              2
+#define ZEBRA_ROUTE_STATIC               3
+#define ZEBRA_ROUTE_RIP                  4
+#define ZEBRA_ROUTE_RIPNG                5
+#define ZEBRA_ROUTE_OSPF                 6
+#define ZEBRA_ROUTE_OSPF6                7
+#define ZEBRA_ROUTE_ISIS                 8
+#define ZEBRA_ROUTE_BGP                  9
+#define ZEBRA_ROUTE_HSLS                 10
+#define ZEBRA_ROUTE_MAX                  11
 
 /* Note: whenever a new route-type or zserv-command is added the
  * corresponding {command,route}_types[] table in lib/log.c MUST be

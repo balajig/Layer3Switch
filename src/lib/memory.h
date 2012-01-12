@@ -53,14 +53,14 @@ extern struct mlist mlists[];
 #define XSTRDUP(mtype, str) \
   mtype_zstrdup (__FILE__, __LINE__, (mtype), (str))
 #else
-#define XMALLOC(mtype, size)       zmalloc ((mtype), (size))
-#define XCALLOC(mtype, size)       zcalloc ((mtype), (size))
-#define XREALLOC(mtype, ptr, size) zrealloc ((mtype), (ptr), (size))
-#define XFREE(mtype, ptr)          do { \
-                                     zfree ((mtype), (ptr)); \
+#define XMALLOC(mtype, size)       calloc (1, (size))
+#define XCALLOC(mtype, size)       calloc (1, (size))
+#define XREALLOC(mtype, ptr, size) realloc ((ptr), (size))
+#define XFREE(ptr)          do { \
+                                     free ((ptr)); \
                                      ptr = NULL; } \
                                    while (0)
-#define XSTRDUP(mtype, str)        zstrdup ((mtype), (str))
+#define XSTRDUP(str)        strdup ((str))
 #endif /* MEMORY_LOG */
 
 /* Prototypes of memory function. */

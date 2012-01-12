@@ -63,7 +63,7 @@ void * packet_processing_task (void *unused)
 #ifdef PKT_DBG
 					printf (" Index : %d\n", linux_if_map[i].linux_ifIndex);
 #endif
-					process_pkt (buf, len, i);
+					process_pkt (buf, len, i + 1);
 				}
 				FD_CLR ((int)port_cdb[i].platform, &rfds);
 				free (buf);

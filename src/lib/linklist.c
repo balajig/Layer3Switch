@@ -19,6 +19,8 @@
  * 02111-1307, USA.
  */
 
+#include "common_types.h"
+
 #include <zebra.h>
 
 #include "linklist.h"
@@ -35,7 +37,7 @@ list_new (void)
 void
 list_free (struct list *l)
 {
-  XFREE (MTYPE_LINK_LIST, l);
+  XFREE (l);
 }
 
 /* Allocate new listnode.  Internal use only. */
@@ -49,7 +51,7 @@ listnode_new (void)
 static void
 listnode_free (struct listnode *node)
 {
-  XFREE (MTYPE_LINK_NODE, node);
+  XFREE (node);
 }
 
 /* Add new data to the list. */

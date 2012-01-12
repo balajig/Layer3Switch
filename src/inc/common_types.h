@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/times.h>
@@ -16,6 +17,7 @@ typedef uint16_t u16;
 typedef uint32_t u32;
 
 #define MAX_PORT_NAME 16 
+#define IFNAMSIZ  MAX_PORT_NAME
 
 #define ETH_ALEN        6               /* Octets in one ethernet addr   */
 #define ETH_HLEN        14              /* Total octets in header.       */

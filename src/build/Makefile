@@ -42,7 +42,7 @@ UDP:
 ROUTE:
 	make -C $(CODE_DIR)/route
 RTM:
-#	make -C $(CODE_DIR)/rtm
+	make -C $(CODE_DIR)/rtm
 TCP:
 	make -C $(CODE_DIR)/tcp
 ARP:

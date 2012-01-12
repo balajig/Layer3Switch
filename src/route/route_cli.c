@@ -34,7 +34,7 @@ cparser_result_t cparser_cmd_config_ip_route_network_mask_gateway(cparser_contex
 	uint32_2_ipstring (ntohl(*network_ptr), &addr);
 	uint32_2_ipstring (ntohl(*gateway_ptr), &gateway);
 
-	if (!route_add_gateway (addr, ip_masklen (ntohl(*mask_ptr)), gateway))
+	if (!route_add_gateway (addr, u32ip_masklen (ntohl(*mask_ptr)), gateway))
 		return CPARSER_OK;
 
 	printf ("No vaild interface\n");

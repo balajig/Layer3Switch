@@ -1,7 +1,12 @@
 #ifndef _IFMGMT_H
 #define _IFMGMT_H
+#include "linklist.h"
 struct interface;
 #include "netif.h"
+#define ZEBRA_INTERFACE_ACTIVE     (1 << 0)
+#define ZEBRA_INTERFACE_SUB        (1 << 1)
+#define ZEBRA_INTERFACE_LINKDETECTION (1 << 2)
+
 struct interface {
         int32_t   ifIndex;
 	void      *platform;
@@ -21,6 +26,7 @@ struct interface {
         uint32_t  ifOutUcastPkts;
         uint32_t  ifOutDiscards;   
         uint32_t  ifOutErrors;    
+ 	uint32_t   metric;
 	struct stp_port_entry *pstp_info;
         unsigned long in_bytes;
         unsigned long in_packets;
@@ -118,6 +124,10 @@ struct interface {
 	u16_t loop_cnt_current;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
 #endif /* ENABLE_LOOPBACK */
+	  /* Connected address list. */
+  	struct list *connected;
+
+	void *info;
 }__attribute__ ((__packed__));
 
 typedef struct interface if_t;

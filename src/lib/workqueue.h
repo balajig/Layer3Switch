@@ -51,11 +51,6 @@ struct work_queue_item
 
 struct work_queue
 {
-  /* Everything but the specification struct is private
-   * the following may be read
-   */
-  struct thread_master *master;       /* thread master */
-  struct thread *thread;              /* thread, if one is active */
   char *name;                         /* work queue name */
   
   /* Specification for this work queue.
