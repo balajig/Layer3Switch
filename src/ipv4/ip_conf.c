@@ -24,6 +24,6 @@ int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask)
 
 	ipaddr.addr = ipaddress;
 	netmask.addr = ipmask;
-	if_set_addr (IF_INFO(ifindex - 1), &ipaddr, &netmask, NULL);
+	if_set_addr (IF_INFO(ifindex), &ipaddr, &netmask, NULL);
 	return 0;
 }
