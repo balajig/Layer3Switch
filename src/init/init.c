@@ -64,6 +64,10 @@ void layer3switch_init (void)
 	sys_timeouts_init ();
 #endif /* LWIP_TIMERS */
 
+#ifdef ZEBRA_RTM_SUPPORT
+	rtm_init ();
+#endif  /* RTM_SUPPORT */
+
         spawn_pkt_processing_task ();
 
         start_cli_task ();
