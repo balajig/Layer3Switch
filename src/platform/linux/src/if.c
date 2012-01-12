@@ -8,6 +8,24 @@
  *
  */
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/types.h>      
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <netpacket/packet.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <mqueue.h>
+#include <arpa/inet.h>
+#include <stdint.h>
+#include <getopt.h>
+
 #include "common_types.h"
 #include "ifmgmt.h"
 #include "nt.h"
@@ -32,10 +50,13 @@ static int create_raw_sock (char *name)
 {
 	int sd = -1;
         struct ifreq ifr;
+	struct sockaddr_ll addr;
 	int  fd = socket(AF_INET, SOCK_DGRAM, 0);
 
 	if (fd < 0)
 		return (-1);
+
+	memset (&addr, 0, sizeof(addr));
 
 	strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
 
@@ -48,10 +69,14 @@ static int create_raw_sock (char *name)
 		return -1;
 	}
 
-        if (setsockopt(sd, SOL_SOCKET, SO_BINDTODEVICE,  (void*)&ifr, sizeof(ifr)) < 0)
-		perror ("setsockopt");
-        else 
-		fcntl(sd, F_SETFL, O_NONBLOCK);
+	addr.sll_family = AF_PACKET;
+	addr.sll_ifindex = ifr.ifr_ifindex;
+	addr.sll_protocol = htons(ETH_P_ALL);	
+
+	if (bind (sd, (struct sockaddr *)&addr, sizeof(struct sockaddr_ll)) < 0)
+		perror ("bind");
+
+	fcntl(sd, F_SETFL, O_NONBLOCK);
 
 	port_cdb[idx].platform = (void *)sd;
 

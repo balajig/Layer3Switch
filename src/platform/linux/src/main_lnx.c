@@ -115,8 +115,6 @@ void send_packet (void *buf, uint16_t port, int len)
 	socket_address.sll_ifindex  = linux_if_map[port].linux_ifIndex;
 	socket_address.sll_halen    = ETH_ALEN;		
 
-	memcpy(&socket_address.sll_addr, buf, ETH_ALEN);
-
         if (sendto ((int)port_cdb[port].platform, buf, len, 0,(struct sockaddr *)&socket_address,
                                 sizeof(socket_address)) < 0) {
 		;
