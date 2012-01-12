@@ -334,6 +334,21 @@ class Node:
         msg += ');\n'
         return msg
 
+    def glue_action_fn(self):
+        '''
+        Generate the Glue function prototype.
+
+        @return  The C action function prototype for a command.
+        '''
+        # Build a list of parse nodes that forms the path from the root.
+        # to this end node
+        path = self.walk_up_to_root()
+
+        # Declare the action function
+        msg =  'cparser_result_t %s (cparser_t *parser);\n' % self.param
+        return msg
+
+
     def glue_fn(self):
         '''
         Generate the glue funtion.
@@ -824,6 +839,7 @@ def main():
                'extern "C" {\n' +
                '#endif /* __cplusplus */\n\n' +
                'extern cparser_node_t cparser_root;\n\n')
+    root.walk(lambda n,f: f.write(n.glue_action_fn()), 'func', fout)
     root.walk(lambda n,f: f.write(n.action_fn()), 'func', fout)
     fout.write('\n#ifdef __cplusplus\n' +
                '}\n' +
