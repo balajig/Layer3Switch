@@ -2941,3 +2941,88 @@ rib_init (void)
   /* VRF initialization.  */
   vrf_init ();
 }
+
+
+static int
+zebra_static_ipv4 (int add_cmd, const char *dest_str,
+		   const char *mask_str, const char *gate_str,
+		   const char *flag_str, const char *distance_str)
+{
+  int ret;
+  u_char distance;
+  struct prefix p;
+  struct in_addr gate;
+  struct in_addr mask;
+  const char *ifname;
+  u_char flag = 0;
+  
+  ret = str2prefix (dest_str, &p);
+  if (ret <= 0)
+    {
+      fprintf (stderr, "Malformed address\n");
+      return -1;
+    }
+
+  /* Cisco like mask notation. */
+  if (mask_str)
+    {
+      ret = inet_aton (mask_str, &mask);
+      if (ret == 0)
+        {
+          fprintf (stderr, "Malformed address");
+          return -1;
+        }
+      p.prefixlen = ip_masklen (mask);
+    }
+
+  /* Apply mask for given prefix. */
+  apply_mask (&p);
+
+  /* Administrative distance. */
+  if (distance_str)
+    distance = atoi (distance_str);
+  else
+    distance = ZEBRA_STATIC_DISTANCE_DEFAULT;
+
+  /* Null0 static route.  */
+  if ((gate_str != NULL) && (strncasecmp (gate_str, "Null0", strlen (gate_str)) == 0))
+    {
+      if (flag_str)
+        {
+	  fprintf (stderr, "can not have flag %s with Null", flag_str);
+          return -1;
+        }
+      if (add_cmd)
+        static_add_ipv4 (&p, NULL, NULL, ZEBRA_FLAG_BLACKHOLE, distance, 0);
+      else
+        static_delete_ipv4 (&p, NULL, NULL, distance, 0);
+      return 0;
+    }
+
+  /* Route flags */
+  if (flag_str) {
+    switch(flag_str[0]) {
+      case 'r':
+      case 'R': /* XXX */
+        SET_FLAG (flag, ZEBRA_FLAG_REJECT);
+        break;
+      case 'b':
+      case 'B': /* XXX */
+        SET_FLAG (flag, ZEBRA_FLAG_BLACKHOLE);
+        break;
+      default:
+        fprintf (stderr, "Malformed flag %s", flag_str);
+        return 0;
+    }
+  }
+
+  if (gate_str == NULL)
+  {
+    if (add_cmd)
+      static_add_ipv4 (&p, NULL, NULL, flag, distance, 0);
+    else
+      static_delete_ipv4 (&p, NULL, NULL, distance, 0);
+
+    return 0;
+  }
+}
