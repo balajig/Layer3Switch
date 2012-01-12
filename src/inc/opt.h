@@ -2049,4 +2049,12 @@ typedef unsigned long  mem_ptr_t;
 #define DNS_DEBUG                       LWIP_DBG_OFF
 #endif
 
+
+/**
+ * ZEBRA_RTM_SUPPORT: Enable Zebra RTM Support.
+ */
+#ifndef ZEBRA_RTM_SUPPORT
+#define ZEBRA_RTM_SUPPORT			1
+#endif
+
 #endif /* __LWIP_OPT_H__ */
