@@ -46,7 +46,6 @@ unsigned int ifname2ifindex (const char *name)
 /* Lookup interface by IPv4 address. */
 struct interface * if_lookup_exact_address (struct in_addr src)
 {
-	struct listnode *node;
 	struct listnode *cnode;
 	struct interface *ifp;
 	struct prefix *p;
@@ -72,7 +71,6 @@ struct interface * if_lookup_exact_address (struct in_addr src)
 /* Lookup interface by IPv4 address. */
 struct interface * if_lookup_address (struct in_addr src)
 {
-	struct listnode *node;
 	struct prefix addr;
 	int bestlen = 0;
 	struct listnode *cnode;

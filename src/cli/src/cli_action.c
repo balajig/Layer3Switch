@@ -94,7 +94,6 @@ cparser_result_t cparser_cmd_disable_privileged_mode(cparser_context_t *context)
 
 cparser_result_t cparser_cmd_config_end(cparser_context_t *context)
 {
-	char prompt[CPARSER_MAX_PROMPT];
         set_prompt ("");
         set_curr_mode (USER_EXEC_MODE);
 }

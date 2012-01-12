@@ -457,7 +457,6 @@ static void bstp_received_stp(struct bstp_state *bs, struct bstp_port *bp, struc
 static void
 bstp_received_rstp(struct bstp_state *bs, struct bstp_port *bp, struct bstp_tbpdu *tpdu)
 {
-	struct bstp_cbpdu cpdu;
 	struct bstp_config_unit *cu = &bp->bp_msg_cu;
 
 	if (tpdu->tbu_bpdutype != BSTP_MSGTYPE_RSTP)

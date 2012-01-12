@@ -67,8 +67,7 @@
 
 /** if "expression" isn't true, then print "message" and execute "handler" expression */
 #ifndef LWIP_ERROR
-#define LWIP_ERROR(message, expression, handler) do { if (!(expression)) { \
-  (message); handler;}} while(0)
+#define LWIP_ERROR(message, expression, handler) 
 #endif /* LWIP_ERROR */
 
 #ifdef LWIP_DEBUG
