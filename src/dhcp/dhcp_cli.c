@@ -11,6 +11,16 @@ cparser_result_t cparser_cmd_if_ip_address_dhcp(cparser_context_t *context)
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
+cparser_result_t cparser_cmd_if_no_ip_address_dhcp(cparser_context_t *context)
+{
+	int port = cli_get_port ();
+	if (!dhcp_release (IF_INFO (port))) {
+		dhcp_stop (IF_INFO (port));
+		return CPARSER_OK;
+	}
+	return CPARSER_NOT_OK;
+}
+
 cparser_result_t cparser_cmd_if_ip_dhcp_client_hostname(cparser_context_t *context, char **hostname_ptr)
 {
 	printf ("Not Implemented\n");

@@ -367,7 +367,7 @@ struct bstp_state {
 	struct list_head	bs_bplist;
 	bstp_state_cb_t		bs_state_cb;
 	bstp_rtage_cb_t		bs_rtage_cb;
-	TIMER_ID            *	bs_bstpcallout;
+	TIMER_ID            	bs_bstpcallout;
 }__attribute__ ((__packed__));
 
 #ifdef LOCK

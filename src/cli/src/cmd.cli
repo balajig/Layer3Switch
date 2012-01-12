@@ -149,6 +149,9 @@ ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
 //Acquires an IP address on an interface from DHCP
 ip address dhcp
 
+//Release an IP address on an interface and disables DHCP on it
+no ip address dhcp
+
 //Specifies or modifies the host name sent in the DHCP message
 ip dhcp client <STRING:hostname>
 

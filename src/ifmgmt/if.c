@@ -76,10 +76,6 @@ void interface_init (struct interface *netif, void *state, if_input_fn input)
 {
     static u8_t         netifnum = 0;
 
-    /* reset new interface configuration state */
-    ip_addr_set_zero (&netif->ip_addr);
-    ip_addr_set_zero (&netif->netmask);
-    ip_addr_set_zero (&netif->gw);
     netif->flags = 0;
 #if LWIP_DHCP
     /* netif not under DHCP control by default */

@@ -1973,7 +1973,7 @@ bstp_detach(struct bstp_state *bs)
 	mtx_lock(&bstp_list_mtx);
 	list_del (&bs->bs_list);
 	mtx_unlock(&bstp_list_mtx);
-	del_timer (&bs->bs_bstpcallout);
+	del_timer (bs->bs_bstpcallout);
 	BSTP_LOCK_DESTROY(bs);
 }
 
@@ -1997,7 +1997,7 @@ bstp_stop(struct bstp_state *bs)
 		bstp_set_port_state(bp, BSTP_IFSTATE_DISCARDING);
 
 	bs->bs_running = 0;
-	stop_timer (&bs->bs_bstpcallout);
+	stop_timer (bs->bs_bstpcallout);
 	BSTP_UNLOCK(bs);
 }
 
