@@ -41,6 +41,7 @@ extern "C" {
 #endif
 
 
+#if 0
 /** 255.255.255.255 */
 #define INADDR_NONE         IPADDR_NONE
 /** 127.0.0.1 */
@@ -82,8 +83,8 @@ extern "C" {
 
 #define IN_EXPERIMENTAL(a)  IP_EXPERIMENTAL(a)
 #define IN_BADCLASS(a)      IP_BADCLASS(a)
-
 #define IN_LOOPBACKNET      IP_LOOPBACKNET
+#endif
 
 #define inet_addr_from_ipaddr(target_inaddr, source_ipaddr) ((target_inaddr)->s_addr = ip4_addr_get_u32(source_ipaddr))
 #define inet_addr_to_ipaddr(target_ipaddr, source_inaddr)   (ip4_addr_set_u32(target_ipaddr, (source_inaddr)->s_addr))
