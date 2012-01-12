@@ -8,45 +8,8 @@ struct interface;
 #define ZEBRA_INTERFACE_LINKDETECTION (1 << 2)
 
 struct interface {
-        int32_t   ifIndex;
 	void      *platform;
-        char      ifDescr[MAX_PORT_NAME];          
-        int32_t   ifType;
-        int32_t   ifMtu;   
-        int32_t   ifSpeed;
-        int32_t   ifAdminStatus;
-        int32_t   ifOperStatus;
-        uint32_t  ifLastChange; 
-        uint32_t  ifInOctets; 
-        uint32_t  ifInUcastPkts;
-        uint32_t  ifInDiscards;    
-        uint32_t  ifInErrors;     
-        uint32_t  ifInUnknownProtos;
-        uint32_t  ifOutOctets;
-        uint32_t  ifOutUcastPkts;
-        uint32_t  ifOutDiscards;   
-        uint32_t  ifOutErrors;    
- 	uint32_t   metric;
 	struct stp_port_entry *pstp_info;
-        unsigned long in_bytes;
-        unsigned long in_packets;
-        unsigned long in_mcast_pkts;
-        unsigned long in_errors;
-        unsigned long in_discards;
-        unsigned long in_unknown_protos;
-
-        unsigned long out_bytes;
-        unsigned long out_packets;
-        unsigned long out_mcast_pkts; 
-        unsigned long out_errors;
-        unsigned long out_discards;
-        unsigned long out_collisions;
-
-	/** IP address configuration in network byte order */
-	ip_addr_t ip_addr;
-	ip_addr_t netmask;
-	ip_addr_t gw;
-
 	/** This function is called by the network device driver
 	 *  to pass a packet up the TCP/IP stack. */
 	if_input_fn input;
@@ -83,31 +46,6 @@ struct interface {
 	/* the hostname for this netif, NULL is a valid value */
 	char*  hostname;
 #endif /* LWIP_NETIF_HOSTNAME */
-	/** number of bytes used in ifPhysAddress */
-	u8_t ifPhysAddress_len;
-	/** link level hardware address of this interface */
-	u8_t ifPhysAddress[NETIF_MAX_HWADDR_LEN];
-	/** flags (see NETIF_FLAG_ above) */
-	u8_t flags;
-	/** number of this interface */
-	u8_t num;
-#if LWIP_SNMP
-	/** link type (from "snmp_ifType" enum from snmp.h) */
-	u8_t link_type;
-	/** (estimate) link speed */
-	u32_t link_speed;
-	/** timestamp at last change made (up/down) */
-	u32_t ts;
-	/** counters */
-	u32_t ifinoctets;
-	u32_t ifinucastpkts;
-	u32_t ifinnucastpkts;
-	u32_t ifindiscards;
-	u32_t ifoutoctets;
-	u32_t ifoutucastpkts;
-	u32_t ifoutnucastpkts;
-	u32_t ifoutdiscards;
-#endif /* LWIP_SNMP */
 #if LWIP_IGMP
 	/** This function could be called to add or delete a entry in the multicast
 	  filter table of the ethernet MAC.*/
@@ -128,6 +66,67 @@ struct interface {
   	struct list *connected;
 
 	void *info;
+        unsigned long in_bytes;
+        unsigned long in_packets;
+        unsigned long in_mcast_pkts;
+        unsigned long in_errors;
+        unsigned long in_discards;
+        unsigned long in_unknown_protos;
+
+        unsigned long out_bytes;
+        unsigned long out_packets;
+        unsigned long out_mcast_pkts; 
+        unsigned long out_errors;
+        unsigned long out_discards;
+        unsigned long out_collisions;
+        char      ifDescr[MAX_PORT_NAME];          
+        int32_t   ifIndex;
+        int32_t   ifType;
+        int32_t   ifMtu;   
+        int32_t   ifSpeed;
+        int32_t   ifAdminStatus;
+        int32_t   ifOperStatus;
+        uint32_t  ifLastChange; 
+        uint32_t  ifInOctets; 
+        uint32_t  ifInUcastPkts;
+        uint32_t  ifInDiscards;    
+        uint32_t  ifInErrors;     
+        uint32_t  ifInUnknownProtos;
+        uint32_t  ifOutOctets;
+        uint32_t  ifOutUcastPkts;
+        uint32_t  ifOutDiscards;   
+        uint32_t  ifOutErrors;    
+ 	uint32_t   metric;
+	/** (estimate) link speed */
+	u32_t link_speed;
+	/** timestamp at last change made (up/down) */
+	u32_t ts;
+	/** counters */
+	u32_t ifinoctets;
+	u32_t ifinucastpkts;
+	u32_t ifinnucastpkts;
+	u32_t ifindiscards;
+	u32_t ifoutoctets;
+	u32_t ifoutucastpkts;
+	u32_t ifoutnucastpkts;
+	u32_t ifoutdiscards;
+
+	/** IP address configuration in network byte order */
+	ip_addr_t ip_addr;
+	ip_addr_t netmask;
+	ip_addr_t gw;
+	/** number of bytes used in ifPhysAddress */
+	u8_t ifPhysAddress_len;
+	/** link level hardware address of this interface */
+	u8_t ifPhysAddress[NETIF_MAX_HWADDR_LEN];
+	/** flags (see NETIF_FLAG_ above) */
+	u8_t flags;
+	/** number of this interface */
+	u8_t num;
+#if LWIP_SNMP
+	/** link type (from "snmp_ifType" enum from snmp.h) */
+	u8_t link_type;
+#endif /* LWIP_SNMP */
 }__attribute__ ((__packed__));
 
 typedef struct interface if_t;

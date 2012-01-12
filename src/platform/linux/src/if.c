@@ -34,8 +34,9 @@
 #define _PATH_PROCNET_DEV "/proc/net/dev"
 
 
+extern char switch_mac[];
 int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask);
-static int fetch_and_update_if_info (if_t *ife);
+int fetch_and_update_if_info (if_t *ife);
 int route_add_if (unsigned char *ipaddr, unsigned char masklen, if_t *netif);
 int read_interfaces (void);
 
@@ -87,9 +88,9 @@ static if_t *add_if_info(char *name)
 {
     strncpy(IF_DESCR(idx + 1), name, IFNAMSIZ);
 
-    fetch_and_update_if_info (IF_INFO(idx + 1));
-
     create_raw_sock (name);
+
+     fetch_and_update_if_info (IF_INFO(idx + 1));
 
     return IF_INFO(idx + 1);
 }
@@ -211,7 +212,7 @@ static int if_readlist(void)
 	return err;
 }
 
-static int fetch_and_update_if_info (if_t *ife)
+int fetch_and_update_if_info (if_t *ife)
 {
 	struct ifreq ifr;
 	char *ifname = ife->ifDescr; 
@@ -262,7 +263,7 @@ static int fetch_and_update_if_info (if_t *ife)
 		unsigned char  *p = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 		int i = 0;
 		while (i < 6) {
-			ife->ifPhysAddress[i] = p[i];
+			ife->ifPhysAddress[i] = switch_mac[i];
 			i++;
 		}
 	}
