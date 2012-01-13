@@ -1,27 +1,33 @@
-CLI (Probably It could be worst implementation ever)
+CLI
 ---
-Sasikanth V <sasikanth@openswitchsolution.com>
+CLI core parser : Henry Kwok
 
-TechMindsLib
+Library
 ------------
-Sasikanth V <sasikanth@openswitchsolution.com>
+Sasikanth V <sasikanth@email.com>
 BASH (hashlib.c and hashlib.h>
-Linux Kernel Comunity (setjmp.S and jhash.h)
+Linux Kernel Comunity (list, jhash.h)
+Quagga
 
 STP
 ---
 Linux Kernel Community 
-Sasikanth V <sasikanth@openswitchsolution.com> <Done small modifications>
+Sasikanth V <sasikanth@email.com> <Done small modifications>
+
+RSTP
+----
+OpenBSD  
+Sasikanth V <sasikanth@email.com> <porting>
 
 TM_VIRTUAL_MANAGER
 -----------------
-Sasikanth V <sasikanth@openswitchsolution.com>
+Sasikanth V <sasikanth@email.com>
 
 SIMULATED ENV
 --------------
-Sasikanth V <sasikanth@openswitchsolution.com>
+Sasikanth V <sasikanth@email.com>
 
 FDB
 ---
-Sasikanth V <sasikanth@openswitchsolution>
+Sasikanth V <sasikanth@email>
 Linux Kernel Community <hashing index>
