@@ -1,3 +1,6 @@
+//Clears the screen
+clear screen
+
 //Locks the Console
 lock
 
