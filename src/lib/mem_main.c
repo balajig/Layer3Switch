@@ -54,6 +54,7 @@ static struct mem_info * get_mem_info (int memid);
 static int build_free_mem_blk_list (struct mem_info *m);
 static int add_to_mcb (struct mem_info *m);
 void *tm_calloc(size_t nmemb, size_t size);
+int show_mem_pool (void);
 
 static struct list_head hd_mcb;
 
@@ -87,7 +88,7 @@ int mem_pool_create (const char *name, size_t size, int n_blks, int flags)
 		debug_mem_pool ("-ERR- : No Free Memory Blks\n");
 		return -1;
 	}
-
+	strncpy(mcb->pool_name,name,MAX_POOL_NAME);
 	mcb->size = size;
 	mcb->fblks = n_blks; 
 	mcb->useblks = 0;
@@ -183,6 +184,27 @@ static struct mem_info * get_mem_info (int memid)
 	}
 	return NULL;
 }
+
+
+int show_mem_pool (void)
+{
+        struct list_head *head = &hd_mcb;
+        struct list_head *p = NULL;
+        struct mem_info  *pmem = NULL;
+        printf ("Memory Pool Information\n");
+        printf ("-----------------------------------------------------------------------------------------------------------\n");
+        printf ("Name\t    Start Addr\t  End Addr\tMem ID\tTotal Blks\tUsed Blks\tFree Blks\tSize(Bytes)\n");
+        printf ("-----------------------------------------------------------------------------------------------------------\n");
+        list_for_each (p, head) 
+	{
+                pmem = list_entry (p, struct mem_info, n) ;
+                        printf ("%-10s %-14p %-15p %-8d %-16d %-14d %-14d %-5d\n",
+                                pmem->pool_name,pmem->saddr,pmem->eaddr,pmem->memid, pmem->nblks,
+                                pmem->useblks, pmem->fblks, pmem->size);
+        }
+        return 0;
+}
+
 
 void * alloc_block (int memid)
 {

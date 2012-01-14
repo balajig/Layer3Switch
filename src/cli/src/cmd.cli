@@ -7,6 +7,9 @@ logout
 //Displays user info
 show users
 
+//Displays the memory pool
+show mem-pool
+
 //Displays the CPU usage of the task
 show task-cpu
 

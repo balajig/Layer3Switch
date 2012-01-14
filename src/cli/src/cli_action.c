@@ -26,6 +26,12 @@ cparser_result_t cparser_cmd_show_users(cparser_context_t *context)
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
+cparser_result_t cparser_cmd_show_mem_pool(cparser_context_t *context)
+{
+        if (show_mem_pool ())
+                return CPARSER_NOT_OK;
+        return CPARSER_OK;
+}
 
 cparser_result_t cparser_cmd_show_task_cpu(cparser_context_t *context)
 {

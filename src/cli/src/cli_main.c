@@ -60,7 +60,8 @@ int end_mode (char **args);
 extern int show_users (void);
 int process_logout();
 int process_lock (void);
-extern void show_cpu_usage (void);
+extern int show_cpu_usage (void);
+extern int show_mem_pool (void);
 
 struct modes {
 	int mode;
