@@ -46,6 +46,13 @@ enable privileged-mode
 // Run the configuration script
 run-script <STRING:filename>
 
+//ping host ip address
+ping <IPV4ADDR:hostaddr>
+
+//ping host
+ping <STRING:hostname>
+
+
 //configuration mode
 configure terminal
 

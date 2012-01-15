@@ -378,4 +378,52 @@ icmp_send_response (struct pbuf *p, u8_t type, u8_t code)
     pbuf_free (q);
 }
 
+static int ntransmitted  = 0;
+
+int ping_IP (uint32_t ipaddr)
+{
+	ip_addr_t destip;
+	destip.addr = ipaddr;
+	
+	pinger (ipaddr);
+
+}
+void pinger (ip_addr_t destip)
+{
+    struct pbuf        *q;
+    struct ip_hdr      *iphdr;
+    /* we can use the echo header here */
+    struct icmp_echo_hdr *icmphdr;
+
+    /* ICMP header + IP header + 8 bytes of data */
+    q = pbuf_alloc (PBUF_IP,
+                    sizeof (struct icmp_echo_hdr) + IP_HLEN +
+                    ICMP_DEST_UNREACH_DATASIZE, PBUF_RAM);
+    if (q == NULL)
+    {
+        LWIP_DEBUGF (ICMP_DEBUG,
+                     ("icmp_time_exceeded: failed to allocate pbuf for ICMP packet.\n"));
+        return;
+    }
+    LWIP_ASSERT ("check that first pbuf can hold icmp message",
+                 (q->len >=
+                  (sizeof (struct icmp_echo_hdr) + IP_HLEN +
+                   ICMP_DEST_UNREACH_DATASIZE)));
+
+    icmphdr = (struct icmp_echo_hdr *) q->payload;
+    icmphdr->type = ICMP_ECHO;
+    icmphdr->code = 0;
+    icmphdr->id = 0;
+    icmphdr->seqno = ntransmitted++;
+    /* calculate checksum */
+    icmphdr->chksum = 0;
+    icmphdr->chksum = inet_chksum (icmphdr, q->len);
+    ICMP_STATS_INC (icmp.xmit);
+    /* increase number of messages attempted to send */
+    snmp_inc_icmpoutmsgs ();
+    /* increase number of destination unreachable messages attempted to send */
+    snmp_inc_icmpouttimeexcds ();
+    ip_output (q, NULL, &destip, ICMP_TTL, 0, IP_PROTO_ICMP);
+    pbuf_free (q);
+}
 #endif /* LWIP_ICMP */
