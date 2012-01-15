@@ -715,7 +715,7 @@ typedef unsigned long  mem_ptr_t;
  * transport.
  */
 #ifndef LWIP_SNMP
-#define LWIP_SNMP                       0
+#define LWIP_SNMP                       1
 #endif
 
 /**
