@@ -309,7 +309,7 @@ int main (int argc, char **argv)
 		return -1;
 	}
 
-	tmlib_init ();
+	lib_init ();
 
 	create_communication_channel ();
 

@@ -1825,5 +1825,48 @@ tcp_pcbs_sane (void)
     return 1;
 }
 #endif /* TCP_DEBUG */
+/** global variable that shows if the tcp timer is currently scheduled or not */
+static int          tcpip_tcp_timer_active;
 
+/**
+ * Timer callback function that calls tcp_tmr() and reschedules itself.
+ *
+ * @param arg unused argument
+ */
+static void
+tcpip_tcp_timer (void *arg)
+{
+    LWIP_UNUSED_ARG (arg);
+
+    /* call TCP timer handler */
+    tcp_tmr ();
+    /* timer still needed? */
+    if (tcp_active_pcbs || tcp_tw_pcbs)
+    {
+        /* restart timer */
+        //sys_timeout (TCP_TMR_INTERVAL, tcpip_tcp_timer, NULL);
+    }
+    else
+    {
+        /* disable timer */
+        tcpip_tcp_timer_active = 0;
+    }
+}
+
+/**
+ * Called from TCP_REG when registering a new PCB:
+ * the reason is to have the TCP timer only running when
+ * there are active (or time-wait) PCBs.
+ */
+void
+tcp_timer_needed (void)
+{
+    /* timer is off but needed again? */
+    if (!tcpip_tcp_timer_active && (tcp_active_pcbs || tcp_tw_pcbs))
+    {
+        /* enable and start timer */
+        tcpip_tcp_timer_active = 1;
+        //sys_timeout (TCP_TMR_INTERVAL, tcpip_tcp_timer, NULL);
+    }
+}
 #endif /* LWIP_TCP */
