@@ -79,3 +79,17 @@ int get_max_ports (void)
 {
         return MAX_PORTS;
 }
+
+int make_if_down (if_t *p)
+{
+	p->ifAdminStatus = IF_DOWN;
+	p->ifOperStatus = IF_DOWN;
+	return 0;
+}
+
+int make_if_up (if_t *p)
+{
+	p->ifAdminStatus = IF_UP;
+	p->ifOperStatus = IF_UP;
+	return 0;
+}
