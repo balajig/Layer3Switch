@@ -65,25 +65,19 @@ int create_user (char *username, char *password, int priv_level)
 {
 
 	int i = MAX_USERS;
-	int update_info = 0;
 
-	if (!username || !password) {
-		write_string("Error!!! Creating Username and Password...\n");
+	if (!username || !password)
 		return -1;
-	}
 
 	if (password_validation (password) < 0) {
-		write_string("Error!!! Passwords should be AlphaNumberic... eg: \"PassWord123\"\n");
 		return -1;
 	}
 
-	if (priv_level < 0 || priv_level > 5) {
-		write_string("Error!!! Priority Level Range Between 0 to 5\n");
+	if (priv_level < 0 || priv_level > 5)
 		return -1;
-	}
 
-	if(!update_user_info (username, password, priv_level)) 
-		return 0;
+	if (!update_user_info (username, password, priv_level))
+		return -1;
 
 	while (i--) {
 		if (!userdb[i].status) {
@@ -98,11 +92,10 @@ int create_user (char *username, char *password, int priv_level)
 		}
 	}
 	
-	write_string("Oops!!! Unable to Create User\n"); 	
 	return -1;
 }
 
-int  update_user_info (char *username, char *password, int priv_level)
+int update_user_info (char *username, char *password, int priv_level)
 {
 
 	struct user_db * p = NULL;
