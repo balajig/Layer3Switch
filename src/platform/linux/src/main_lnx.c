@@ -40,6 +40,7 @@ void execute_system_call (char *arg);
 static int32_t  sockid_pkt = 0;
 
 struct linux_if_mapping {
+	int task_id;
 	int linux_ifIndex;
 }linux_if_map[MAX_PORTS];
 
@@ -82,8 +83,21 @@ int read_port_mac_address (int port, uint8_t *p)
 
 int spawn_pkt_processing_task (void)
 {
-	tmtaskid_t tid = 0;
-	return task_create ("PKRX", 98, 3, 32000, packet_processing_task, NULL, NULL, &tid);
+	int ifport = 0;
+
+	char task_name[8];
+	
+	while (ifport < get_max_ports ()) {
+		sprintf (task_name, "%s-%d", "PKRX", ifport);
+		if (task_create (task_name, 98, 3, 32000, packet_processing_task, NULL, (void *)ifport, 
+			          &linux_if_map[ifport].task_id) == TSK_FAILURE) {
+			printf ("Task creation failed : %s\n", task_name);
+			exit (1);
+		}
+		ifport++;
+	}
+
+	return 0;
 }
 
 int create_raw_sock_for_pkt_capture (void)

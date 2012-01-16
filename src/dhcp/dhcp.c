@@ -1829,14 +1829,24 @@ dhcp_parse_reply (struct dhcp *dhcp, struct pbuf *p)
     return ERR_OK;
 }
 
-/**
- * If an incoming DHCP message is in response to us, then trigger the state machine
- */
 static void
 dhcp_recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t * addr,
            u16_t port)
 {
     struct interface       *netif = (struct interface *) arg;
+    LWIP_UNUSED_ARG (pcb);
+    LWIP_UNUSED_ARG (addr);
+    LWIP_UNUSED_ARG (port);
+
+    /*TODO: post event or message*/
+    dhcp_process (netif, p);
+}
+
+/**
+ * If an incoming DHCP message is in response to us, then trigger the state machine
+ */
+void dhcp_process (struct interface *netif, struct pbuf *p)
+{
     struct dhcp        *dhcp = netif->dhcp;
     struct dhcp_msg    *reply_msg = (struct dhcp_msg *) p->payload;
     u8_t                msg_type;
@@ -1850,10 +1860,6 @@ dhcp_recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t * addr,
                  ("pbuf->len = %" U16_F "\n", p->len));
     LWIP_DEBUGF (DHCP_DEBUG | LWIP_DBG_TRACE,
                  ("pbuf->tot_len = %" U16_F "\n", p->tot_len));
-    /* prevent warnings about unused arguments */
-    LWIP_UNUSED_ARG (pcb);
-    LWIP_UNUSED_ARG (addr);
-    LWIP_UNUSED_ARG (port);
 
     LWIP_ASSERT ("reply wasn't freed", dhcp->msg_in == NULL);
 

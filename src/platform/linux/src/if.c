@@ -67,6 +67,7 @@ static int create_raw_sock (char *name)
 
 	if ((sd =socket (AF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
 		perror ("SOCKET");
+		port_cdb[idx].platform = (void *)-1;
 		return -1;
 	}
 
@@ -76,8 +77,6 @@ static int create_raw_sock (char *name)
 
 	if (bind (sd, (struct sockaddr *)&addr, sizeof(struct sockaddr_ll)) < 0)
 		perror ("bind");
-
-	fcntl(sd, F_SETFL, O_NONBLOCK);
 
 	port_cdb[idx].platform = (void *)sd;
 
