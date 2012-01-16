@@ -156,86 +156,17 @@ enum tcp_state {
  */
 #define TCP_PCB_COMMON(type) \
   type *next; /* for the linked list */ \
-  enum tcp_state state; /* TCP state */ \
-  u8_t prio; \
   void *callback_arg; \
   /* the accept callback for listen- and normal pcbs, if LWIP_CALLBACK_API */ \
   DEF_ACCEPT_CALLBACK \
   /* ports are in host byte order */ \
-  u16_t local_port
+  enum tcp_state state; /* TCP state */ \
+  u16_t local_port;\
+  u8_t prio\
 
 
 /* the TCP protocol control block */
 struct tcp_pcb {
-/** common PCB members */
-  IP_PCB;
-/** protocol specific PCB members */
-  TCP_PCB_COMMON(struct tcp_pcb);
-
-  /* ports are in host byte order */
-  u16_t remote_port;
-  
-  u8_t flags;
-#define TF_ACK_DELAY   ((u8_t)0x01U)   /* Delayed ACK. */
-#define TF_ACK_NOW     ((u8_t)0x02U)   /* Immediate ACK. */
-#define TF_INFR        ((u8_t)0x04U)   /* In fast recovery. */
-#define TF_TIMESTAMP   ((u8_t)0x08U)   /* Timestamp option enabled */
-#define TF_RXCLOSED    ((u8_t)0x10U)   /* rx closed by tcp_shutdown */
-#define TF_FIN         ((u8_t)0x20U)   /* Connection was closed locally (FIN segment enqueued). */
-#define TF_NODELAY     ((u8_t)0x40U)   /* Disable Nagle algorithm */
-#define TF_NAGLEMEMERR ((u8_t)0x80U)   /* nagle enabled, memerr, try to output to prevent delayed ACK to happen */
-
-  /* the rest of the fields are in host byte order
-     as we have to do some math with them */
-  /* receiver variables */
-  u32_t rcv_nxt;   /* next seqno expected */
-  u16_t rcv_wnd;   /* receiver window available */
-  u16_t rcv_ann_wnd; /* receiver window to announce */
-  u32_t rcv_ann_right_edge; /* announced right edge of window */
-
-  /* Timers */
-  u32_t tmr;
-  u8_t polltmr, pollinterval;
-  
-  /* Retransmission timer. */
-  s16_t rtime;
-  
-  u16_t mss;   /* maximum segment size */
-  
-  /* RTT (round trip time) estimation variables */
-  u32_t rttest; /* RTT estimate in 500ms ticks */
-  u32_t rtseq;  /* sequence number being timed */
-  s16_t sa, sv; /* @todo document this */
-
-  s16_t rto;    /* retransmission time-out */
-  u8_t nrtx;    /* number of retransmissions */
-
-  /* fast retransmit/recovery */
-  u32_t lastack; /* Highest acknowledged seqno. */
-  u8_t dupacks;
-  
-  /* congestion avoidance/control variables */
-  u16_t cwnd;  
-  u16_t ssthresh;
-
-  /* sender variables */
-  u32_t snd_nxt;   /* next new seqno to be sent */
-  u16_t snd_wnd;   /* sender window */
-  u32_t snd_wl1, snd_wl2; /* Sequence and acknowledgement numbers of last
-                             window update. */
-  u32_t snd_lbb;       /* Sequence number of next byte to be buffered. */
-
-  u16_t acked;
-  
-  u16_t snd_buf;   /* Available buffer space for sending (in bytes). */
-#define TCP_SNDQUEUELEN_OVERFLOW (0xffffU-3)
-  u16_t snd_queuelen; /* Available buffer space for sending (in tcp_segs). */
-
-#if TCP_OVERSIZE
-  /* Extra bytes available at the end of the last pbuf in unsent. */
-  u16_t unsent_oversize;
-#endif /* TCP_OVERSIZE */ 
-
   /* These are ordered by sequence number: */
   struct tcp_seg *unsent;   /* Unsent (queued) segments. */
   struct tcp_seg *unacked;  /* Sent but unacknowledged segments. */
@@ -258,6 +189,31 @@ struct tcp_pcb {
   tcp_err_fn errf;
 #endif /* LWIP_CALLBACK_API */
 
+/** common PCB members */
+  IP_PCB;
+/** protocol specific PCB members */
+  TCP_PCB_COMMON(struct tcp_pcb);
+  u8_t flags;
+#define TF_ACK_DELAY   ((u8_t)0x01U)   /* Delayed ACK. */
+#define TF_ACK_NOW     ((u8_t)0x02U)   /* Immediate ACK. */
+#define TF_INFR        ((u8_t)0x04U)   /* In fast recovery. */
+#define TF_TIMESTAMP   ((u8_t)0x08U)   /* Timestamp option enabled */
+#define TF_RXCLOSED    ((u8_t)0x10U)   /* rx closed by tcp_shutdown */
+#define TF_FIN         ((u8_t)0x20U)   /* Connection was closed locally (FIN segment enqueued). */
+#define TF_NODELAY     ((u8_t)0x40U)   /* Disable Nagle algorithm */
+#define TF_NAGLEMEMERR ((u8_t)0x80U)   /* nagle enabled, memerr, try to output to prevent delayed ACK to happen */
+
+  /* Timers */
+  u32_t tmr;
+  /* RTT (round trip time) estimation variables */
+  u32_t rttest; /* RTT estimate in 500ms ticks */
+  u32_t rtseq;  /* sequence number being timed */
+
+  /* the rest of the fields are in host byte order
+     as we have to do some math with them */
+  /* receiver variables */
+  u32_t rcv_ann_right_edge; /* announced right edge of window */
+  u32_t rcv_nxt;   /* next seqno expected */
 #if LWIP_TCP_TIMESTAMPS
   u32_t ts_lastacksent;
   u32_t ts_recent;
@@ -272,9 +228,47 @@ struct tcp_pcb {
   
   /* Persist timer counter */
   u32_t persist_cnt;
+
+  /* fast retransmit/recovery */
+  u32_t lastack; /* Highest acknowledged seqno. */
+  /* sender variables */
+  u32_t snd_nxt;   /* next new seqno to be sent */
+  u32_t snd_wl1, snd_wl2; /* Sequence and acknowledgement numbers of last
+                             window update. */
+  u32_t snd_lbb;       /* Sequence number of next byte to be buffered. */
+  u16_t acked;
+  u16_t snd_wnd;   /* sender window */
+  u16_t snd_buf;   /* Available buffer space for sending (in bytes). */
+  /* congestion avoidance/control variables */
+  u16_t cwnd;  
+  u16_t ssthresh;
+#define TCP_SNDQUEUELEN_OVERFLOW (0xffffU-3)
+  u16_t snd_queuelen; /* Available buffer space for sending (in tcp_segs). */
+
+#if TCP_OVERSIZE
+  /* Extra bytes available at the end of the last pbuf in unsent. */
+  u16_t unsent_oversize;
+#endif /* TCP_OVERSIZE */ 
+  u16_t rcv_wnd;   /* receiver window available */
+  u16_t rcv_ann_wnd; /* receiver window to announce */
+  /* Retransmission timer. */
+  s16_t rtime;
+  u16_t mss;   /* maximum segment size */
+
+  /* ports are in host byte order */
+  u16_t remote_port;
+  
+  
+  s16_t sa, sv; /* @todo document this */
+
+  s16_t rto;    /* retransmission time-out */
+  /*timer*/
+  u8_t polltmr, pollinterval;
+  u8_t nrtx;    /* number of retransmissions */
+  /* fast retransmit/recovery */
+  u8_t dupacks;
   /* Persist timer back-off */
   u8_t persist_backoff;
-
   /* KEEPALIVE counter */
   u8_t keep_cnt_sent;
 };
@@ -289,6 +283,7 @@ struct tcp_pcb_listen {
   u8_t backlog;
   u8_t accepts_pending;
 #endif /* TCP_LISTEN_BACKLOG */
+  u8_t pad[3];
 };
 
 #if LWIP_EVENT_API

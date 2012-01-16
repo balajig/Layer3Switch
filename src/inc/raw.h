@@ -61,17 +61,15 @@ typedef u8_t (*raw_recv_fn)(void *arg, struct raw_pcb *pcb, struct pbuf *p,
     ip_addr_t *addr);
 
 struct raw_pcb {
-  /* Common members of all PCB types */
-  IP_PCB;
-
   struct raw_pcb *next;
-
-  u8_t protocol;
-
   /** receive callback function */
   raw_recv_fn recv;
   /* user-supplied argument for the recv callback */
   void *recv_arg;
+  /* Common members of all PCB types */
+  IP_PCB;
+  u8_t protocol;
+  u8_t pad[3];
 };
 
 /* The following functions is the application layer interface to the

@@ -107,7 +107,7 @@ struct snmp_varbind
   u16_t olen;
   /* encoding object value length */
   u16_t vlen;
-};
+}__attribute__ ((packed));
 
 struct snmp_varbind_root
 {
@@ -119,7 +119,7 @@ struct snmp_varbind_root
   u8_t seqlenlen;
   /* encoding varbind-list seq length */
   u16_t seqlen;
-};
+}__attribute__ ((packed));
 
 /** output response message header length fields */
 struct snmp_resp_header_lengths
@@ -153,7 +153,7 @@ struct snmp_resp_header_lengths
   u16_t verlen;
   /* encoding sequence length */
   u16_t seqlen;
-};
+}__attribute__ ((packed));
 
 /** output response message header length fields */
 struct snmp_trap_header_lengths
@@ -195,7 +195,7 @@ struct snmp_trap_header_lengths
   u16_t verlen;
   /* encoding sequence length */
   u16_t seqlen;
-};
+}__attribute__ ((packed));
 
 /* Accepting new SNMP messages. */
 #define SNMP_MSG_EMPTY                 0
@@ -255,7 +255,7 @@ struct snmp_msg_pstat
   struct snmp_varbind_root outvb;
   /* output response lengths used in ASN encoding */
   struct snmp_resp_header_lengths rhl;
-};
+}__attribute__ ((packed));
 
 struct snmp_msg_trap
 {
@@ -278,7 +278,7 @@ struct snmp_msg_trap
   struct snmp_varbind_root outvb;
   /* output trap lengths used in ASN encoding */
   struct snmp_trap_header_lengths thl;
-};
+}__attribute__ ((packed));
 
 /** Agent Version constant, 0 = v1 oddity */
 extern const s32_t snmp_version;

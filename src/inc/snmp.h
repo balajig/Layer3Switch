@@ -95,7 +95,7 @@ struct snmp_obj_id
 {
   u8_t len;
   s32_t id[LWIP_SNMP_OBJ_ID_LEN];
-};
+}__attribute__ ((packed));
 
 /* system */
 void snmp_set_sysdesr(u8_t* str, u8_t* len);

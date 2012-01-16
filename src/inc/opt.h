@@ -691,7 +691,7 @@ typedef unsigned long  mem_ptr_t;
  * the same interface at the same time.
  */
 #ifndef LWIP_DHCP_AUTOIP_COOP
-#define LWIP_DHCP_AUTOIP_COOP           0
+#define LWIP_DHCP_AUTOIP_COOP           1
 #endif
 
 /**
@@ -991,7 +991,7 @@ typedef unsigned long  mem_ptr_t;
  * TCP_LISTEN_BACKLOG: Enable the backlog option for tcp listen pcb.
  */
 #ifndef TCP_LISTEN_BACKLOG
-#define TCP_LISTEN_BACKLOG              0
+#define TCP_LISTEN_BACKLOG              1
 #endif
 
 /**
@@ -1119,7 +1119,7 @@ typedef unsigned long  mem_ptr_t;
  * if you have a tiny ARP table or if there never are concurrent connections.
  */
 #ifndef LWIP_NETIF_HWADDRHINT
-#define LWIP_NETIF_HWADDRHINT           0
+#define LWIP_NETIF_HWADDRHINT           1
 #endif
 
 /**
