@@ -168,7 +168,7 @@ extern void bgp_dump_routes_attr (struct stream *, struct attr *,
 				  struct prefix *);
 extern int attrhash_cmp (const void *, const void *);
 extern unsigned int attrhash_key_make (void *);
-extern void attr_show_all (struct vty *);
+extern void attr_show_all (void *);
 extern unsigned long int attr_count (void);
 extern unsigned long int attr_unknown_count (void);
 

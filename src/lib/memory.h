@@ -60,6 +60,8 @@ extern struct mlist mlists[];
                                      free ((ptr)); \
                                      ptr = NULL; } \
                                    while (0)
+#define FREE(a,ptr)         free  (ptr)
+#define STRDUP(mtype, str)  strdup ((str))
 #define XSTRDUP(str)        strdup ((str))
 #endif /* MEMORY_LOG */
 

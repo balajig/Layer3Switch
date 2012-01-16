@@ -23,7 +23,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "hash.h"
 #include "memory.h"
 #include "prefix.h"
-#include "command.h"
+
 
 #include "bgpd.h"
 #include "bgp_ecommunity.h"
@@ -45,10 +45,10 @@ void
 ecommunity_free (struct ecommunity **ecom)
 {
   if ((*ecom)->val)
-    XFREE (MTYPE_ECOMMUNITY_VAL, (*ecom)->val);
+    FREE (MTYPE_ECOMMUNITY_VAL, (*ecom)->val);
   if ((*ecom)->str)
-    XFREE (MTYPE_ECOMMUNITY_STR, (*ecom)->str);
-  XFREE (MTYPE_ECOMMUNITY, *ecom);
+    FREE (MTYPE_ECOMMUNITY_STR, (*ecom)->str);
+  FREE (MTYPE_ECOMMUNITY, *ecom);
   ecom = NULL;
 }
 

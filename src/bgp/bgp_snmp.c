@@ -33,7 +33,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "if.h"
 #include "log.h"
 #include "prefix.h"
-#include "command.h"
+
 #include "thread.h"
 #include "smux.h"
 

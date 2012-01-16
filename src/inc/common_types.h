@@ -281,6 +281,10 @@ enum ROWSTATUS  {
 #define MODE_STP 1
 #define MODE_RSTP 2
 
+/*FIXME:*/
+#define DISABLE_BGP_ANNOUNCE 0
+
+
 
 enum STP_DEF_VALUES {
 	STP_DEF_PRIORITY = 32768,

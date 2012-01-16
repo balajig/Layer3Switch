@@ -23,9 +23,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 
 #include "prefix.h"
 #include "memory.h"
-#include "command.h"
 #include "log.h"
-#include "thread.h"
 
 #include "bgpd.h"
 #include "bgp_damp.h"
@@ -367,7 +365,7 @@ bgp_damp_info_free (struct bgp_damp_info *bdi, int withdraw)
   if (bdi->lastrecord == BGP_RECORD_WITHDRAW && withdraw)
     bgp_info_delete (bdi->rn, binfo);
   
-  XFREE (MTYPE_BGP_DAMP_INFO, bdi);
+  FREE (MTYPE_BGP_DAMP_INFO, bdi);
 }
 
 static void
@@ -456,13 +454,13 @@ static void
 bgp_damp_config_clean (struct bgp_damp_config *damp)
 {
   /* Free decay array */
-  XFREE (MTYPE_BGP_DAMP_ARRAY, damp->decay_array);
+  FREE (MTYPE_BGP_DAMP_ARRAY, damp->decay_array);
 
   /* Free reuse index array */
-  XFREE (MTYPE_BGP_DAMP_ARRAY, damp->reuse_index);
+  FREE (MTYPE_BGP_DAMP_ARRAY, damp->reuse_index);
 
   /* Free reuse list array. */
-  XFREE (MTYPE_BGP_DAMP_ARRAY, damp->reuse_list);
+  FREE (MTYPE_BGP_DAMP_ARRAY, damp->reuse_list);
 }
 
 /* Clean all the bgp_damp_info stored in reuse_list. */
@@ -514,8 +512,9 @@ bgp_damp_disable (struct bgp *bgp, afi_t afi, safi_t safi)
 }
 
 void
-bgp_config_write_damp (struct vty *vty)
+bgp_config_write_damp ()
 {
+#if 0
   if (bgp_damp_cfg.half_life == DEFAULT_HALF_LIFE*60
       && bgp_damp_cfg.reuse_limit == DEFAULT_REUSE
       && bgp_damp_cfg.suppress_value == DEFAULT_SUPPRESS
@@ -535,6 +534,7 @@ bgp_config_write_damp (struct vty *vty)
 	     bgp_damp_cfg.suppress_value,
 	     bgp_damp_cfg.max_suppress_time/60,
 	     VTY_NEWLINE);
+#endif
 }
 
 static const char *
@@ -571,67 +571,4 @@ bgp_get_reuse_time (unsigned int penalty, char *buf, size_t len)
               tm->tm_yday/7, tm->tm_yday - ((tm->tm_yday/7) * 7), tm->tm_hour); 
 
   return buf;
-}
- 
-void
-bgp_damp_info_vty (struct vty *vty, struct bgp_info *binfo)  
-{
-  struct bgp_damp_info *bdi;
-  time_t t_now, t_diff;
-  char timebuf[BGP_UPTIME_LEN];
-  int penalty;
-
-  if (!binfo->extra)
-    return;
-  
-  /* BGP dampening information.  */
-  bdi = binfo->extra->damp_info;
-
-  /* If dampening is not enabled or there is no dampening information,
-     return immediately.  */
-  if (! damp || ! bdi)
-    return;
-
-  /* Calculate new penalty.  */
-  t_now = bgp_clock ();
-  t_diff = t_now - bdi->t_updated;
-  penalty = bgp_damp_decay (t_diff, bdi->penalty);
-
-  vty_out (vty, "      Dampinfo: penalty %d, flapped %d times in %s",
-           penalty, bdi->flap,
-	   peer_uptime (bdi->start_time, timebuf, BGP_UPTIME_LEN));
-
-  if (CHECK_FLAG (binfo->flags, BGP_INFO_DAMPED)
-      && ! CHECK_FLAG (binfo->flags, BGP_INFO_HISTORY))
-    vty_out (vty, ", reuse in %s",
-	     bgp_get_reuse_time (penalty, timebuf, BGP_UPTIME_LEN));
-
-  vty_out (vty, "%s", VTY_NEWLINE);
-}
-
-const char *
-bgp_damp_reuse_time_vty (struct vty *vty, struct bgp_info *binfo,
-                         char *timebuf, size_t len)
-{
-  struct bgp_damp_info *bdi;
-  time_t t_now, t_diff;
-  int penalty;
-  
-  if (!binfo->extra)
-    return NULL;
-  
-  /* BGP dampening information.  */
-  bdi = binfo->extra->damp_info;
-
-  /* If dampening is not enabled or there is no dampening information,
-     return immediately.  */
-  if (! damp || ! bdi)
-    return NULL;
-
-  /* Calculate new penalty.  */
-  t_now = bgp_clock ();
-  t_diff = t_now - bdi->t_updated;
-  penalty = bgp_damp_decay (t_diff, bdi->penalty);
-
-  return  bgp_get_reuse_time (penalty, timebuf, len);
 }

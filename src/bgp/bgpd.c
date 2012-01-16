@@ -18,23 +18,20 @@ along with GNU Zebra; see the file COPYING.  If not, write to the Free
 Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.  */
 
+#include "common_types.h"
 #include <zebra.h>
 
 #include "prefix.h"
-#include "thread.h"
 #include "buffer.h"
-#include "stream.h"
-#include "command.h"
+
 #include "sockunion.h"
 #include "network.h"
 #include "memory.h"
 #include "filter.h"
 #include "routemap.h"
-#include "str.h"
 #include "log.h"
 #include "plist.h"
 #include "linklist.h"
-#include "workqueue.h"
 
 #include "bgpd.h"
 #include "bgp_table.h"
@@ -56,7 +53,6 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "bgp_mplsvpn.h"
 #include "bgp_advertise.h"
 #include "bgp_network.h"
-#include "bgp_vty.h"
 #ifdef HAVE_SNMP
 #include "bgp_snmp.h"
 #endif /* HAVE_SNMP */
@@ -452,7 +448,7 @@ bgp_confederation_peers_remove (struct bgp *bgp, as_t as)
   if (bgp->confed_peers_cnt == 0)
     {
       if (bgp->confed_peers)
-	XFREE (MTYPE_BGP_CONFED_LIST, bgp->confed_peers);
+	FREE (MTYPE_BGP_CONFED_LIST, bgp->confed_peers);
       bgp->confed_peers = NULL;
     }
   else
@@ -627,7 +623,7 @@ peer_global_config_reset (struct peer *peer)
     }
   if (peer->update_if)
     {
-      XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+      FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
       peer->update_if = NULL;
     }
 
@@ -711,18 +707,18 @@ peer_free (struct peer *peer)
   BGP_EVENT_FLUSH (peer);
   
   if (peer->desc)
-    XFREE (MTYPE_PEER_DESC, peer->desc);
+    FREE (MTYPE_PEER_DESC, peer->desc);
   
   /* Free allocated host character. */
   if (peer->host)
-    XFREE (MTYPE_BGP_PEER_HOST, peer->host);
+    FREE (MTYPE_BGP_PEER_HOST, peer->host);
   
   /* Update source configuration.  */
   if (peer->update_source)
     sockunion_free (peer->update_source);
   
   if (peer->update_if)
-    XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+    FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
     
   if (peer->clear_node_queue)
     work_queue_free (peer->clear_node_queue);
@@ -730,7 +726,7 @@ peer_free (struct peer *peer)
   bgp_sync_delete (peer);
   memset (peer, 0, sizeof (struct peer));
   
-  XFREE (MTYPE_BGP_PEER, peer);
+  FREE (MTYPE_BGP_PEER, peer);
 }
                                                 
 /* increase reference count on a struct peer */
@@ -869,7 +865,7 @@ peer_create (union sockunion *su, struct bgp *bgp, as_t local_as,
 
   /* Make peer's address string. */
   sockunion2str (su, buf, SU_ADDRSTRLEN);
-  peer->host = XSTRDUP (MTYPE_BGP_PEER_HOST, buf);
+  peer->host = STRDUP (MTYPE_BGP_PEER_HOST, buf);
 
   /* Set up peer's events and timers. */
   if (! active && peer_active (peer))
@@ -1216,7 +1212,7 @@ peer_delete (struct peer *peer)
   /* Password configuration */
   if (peer->password)
     {
-      XFREE (MTYPE_PEER_PASSWORD, peer->password);
+      FREE (MTYPE_PEER_PASSWORD, peer->password);
       peer->password = NULL;
 
       if (! CHECK_FLAG (peer->sflags, PEER_STATUS_GROUP))
@@ -1342,7 +1338,7 @@ peer_group_new (void)
 static void
 peer_group_free (struct peer_group *group)
 {
-  XFREE (MTYPE_PEER_GROUP, group);
+  FREE (MTYPE_PEER_GROUP, group);
 }
 
 struct peer_group *
@@ -1375,7 +1371,7 @@ peer_group_get (struct bgp *bgp, const char *name)
   group->conf = peer_new (bgp);
   if (! bgp_flag_check (bgp, BGP_FLAG_NO_DEFAULT_IPV4))
     group->conf->afc[AFI_IP][SAFI_UNICAST] = 1;
-  group->conf->host = XSTRDUP (MTYPE_BGP_PEER_HOST, name);
+  group->conf->host = STRDUP (MTYPE_BGP_PEER_HOST, name);
   group->conf->group = group;
   group->conf->as = 0; 
   group->conf->ttl = 1;
@@ -1447,10 +1443,10 @@ peer_group2peer_config_copy (struct peer_group *group, struct peer *peer,
 
   /* password apply */
   if (peer->password)
-    XFREE (MTYPE_PEER_PASSWORD, peer->password);
+    FREE (MTYPE_PEER_PASSWORD, peer->password);
 
   if (conf->password)
-    peer->password =  XSTRDUP (MTYPE_PEER_PASSWORD, conf->password);
+    peer->password =  STRDUP (MTYPE_PEER_PASSWORD, conf->password);
   else
     peer->password = NULL;
 
@@ -1508,7 +1504,7 @@ peer_group2peer_config_copy (struct peer_group *group, struct peer *peer,
 	sockunion_free (peer->update_source);
       if (peer->update_if)
 	{
-	  XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+	  FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
 	  peer->update_if = NULL;
 	}
       peer->update_source = sockunion_dup (conf->update_source);
@@ -1516,13 +1512,13 @@ peer_group2peer_config_copy (struct peer_group *group, struct peer *peer,
   else if (conf->update_if)
     {
       if (peer->update_if)
-	XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+	FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
       if (peer->update_source)
 	{
 	  sockunion_free (peer->update_source);
 	  peer->update_source = NULL;
 	}
-      peer->update_if = XSTRDUP (MTYPE_PEER_UPDATE_SOURCE, conf->update_if);
+      peer->update_if = STRDUP (MTYPE_PEER_UPDATE_SOURCE, conf->update_if);
     }
 
   /* inbound filter apply */
@@ -1930,7 +1926,7 @@ bgp_create (as_t *as, const char *name)
   
   bgp_lock (bgp);
   bgp->peer_self = peer_new (bgp);
-  bgp->peer_self->host = XSTRDUP (MTYPE_BGP_PEER_HOST, "Static announcement");
+  bgp->peer_self->host = STRDUP (MTYPE_BGP_PEER_HOST, "Static announcement");
 
   bgp->peer = list_new ();
   bgp->peer->cmp = (int (*)(void *, void *)) peer_cmp;
@@ -2147,7 +2143,7 @@ bgp_free (struct bgp *bgp)
 	if (bgp->rib[afi][safi])
           bgp_table_finish (&bgp->rib[afi][safi]);
       }
-  XFREE (MTYPE_BGP, bgp);
+  FREE (MTYPE_BGP, bgp);
 }
 
 struct peer *
@@ -2765,9 +2761,9 @@ int
 peer_description_set (struct peer *peer, char *desc)
 {
   if (peer->desc)
-    XFREE (MTYPE_PEER_DESC, peer->desc);
+    FREE (MTYPE_PEER_DESC, peer->desc);
 
-  peer->desc = XSTRDUP (MTYPE_PEER_DESC, desc);
+  peer->desc = STRDUP (MTYPE_PEER_DESC, desc);
 
   return 0;
 }
@@ -2776,7 +2772,7 @@ int
 peer_description_unset (struct peer *peer)
 {
   if (peer->desc)
-    XFREE (MTYPE_PEER_DESC, peer->desc);
+    FREE (MTYPE_PEER_DESC, peer->desc);
 
   peer->desc = NULL;
 
@@ -2796,7 +2792,7 @@ peer_update_source_if_set (struct peer *peer, const char *ifname)
 	  && strcmp (peer->update_if, ifname) == 0)
 	return 0;
 
-      XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+      FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
       peer->update_if = NULL;
     }
 
@@ -2806,7 +2802,7 @@ peer_update_source_if_set (struct peer *peer, const char *ifname)
       peer->update_source = NULL;
     }
 
-  peer->update_if = XSTRDUP (MTYPE_PEER_UPDATE_SOURCE, ifname);
+  peer->update_if = STRDUP (MTYPE_PEER_UPDATE_SOURCE, ifname);
 
   if (! CHECK_FLAG (peer->sflags, PEER_STATUS_GROUP))
     {
@@ -2830,7 +2826,7 @@ peer_update_source_if_set (struct peer *peer, const char *ifname)
 	  if (strcmp (peer->update_if, ifname) == 0)
 	    continue;
 
-	  XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+	  FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
 	  peer->update_if = NULL;
 	}
 
@@ -2840,7 +2836,7 @@ peer_update_source_if_set (struct peer *peer, const char *ifname)
 	  peer->update_source = NULL;
 	}
 
-      peer->update_if = XSTRDUP (MTYPE_PEER_UPDATE_SOURCE, ifname);
+      peer->update_if = STRDUP (MTYPE_PEER_UPDATE_SOURCE, ifname);
 
       if (peer->status == Established)
        {
@@ -2871,7 +2867,7 @@ peer_update_source_addr_set (struct peer *peer, union sockunion *su)
 
   if (peer->update_if)
     {
-      XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+      FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
       peer->update_if = NULL;
     }
 
@@ -2904,7 +2900,7 @@ peer_update_source_addr_set (struct peer *peer, union sockunion *su)
 
       if (peer->update_if)
 	{
-	  XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+	  FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
 	  peer->update_if = NULL;
 	}
 
@@ -2941,7 +2937,7 @@ peer_update_source_unset (struct peer *peer)
     }
   if (peer->update_if)
     {
-      XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+      FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
       peer->update_if = NULL;
     }
 
@@ -2956,7 +2952,7 @@ peer_update_source_unset (struct peer *peer)
 	}
       else if (group->conf->update_if)
 	peer->update_if = 
-	  XSTRDUP (MTYPE_PEER_UPDATE_SOURCE, group->conf->update_if);
+	  STRDUP (MTYPE_PEER_UPDATE_SOURCE, group->conf->update_if);
     }
 
   if (! CHECK_FLAG (peer->sflags, PEER_STATUS_GROUP))
@@ -2987,7 +2983,7 @@ peer_update_source_unset (struct peer *peer)
 
       if (peer->update_if)
 	{
-	  XFREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
+	  FREE (MTYPE_PEER_UPDATE_SOURCE, peer->update_if);
 	  peer->update_if = NULL;
 	}
 
@@ -3517,9 +3513,9 @@ peer_password_set (struct peer *peer, const char *password)
     return 0;
 
   if (peer->password)
-    XFREE (MTYPE_PEER_PASSWORD, peer->password);
+    FREE (MTYPE_PEER_PASSWORD, peer->password);
   
-  peer->password = XSTRDUP (MTYPE_PEER_PASSWORD, password);
+  peer->password = STRDUP (MTYPE_PEER_PASSWORD, password);
 
   if (! CHECK_FLAG (peer->sflags, PEER_STATUS_GROUP))
     {
@@ -3537,9 +3533,9 @@ peer_password_set (struct peer *peer, const char *password)
 	continue;
       
       if (peer->password)
-        XFREE (MTYPE_PEER_PASSWORD, peer->password);
+        FREE (MTYPE_PEER_PASSWORD, peer->password);
       
-      peer->password = XSTRDUP(MTYPE_PEER_PASSWORD, password);
+      peer->password = STRDUP(MTYPE_PEER_PASSWORD, password);
 
       if (peer->status == Established)
         bgp_notify_send (peer, BGP_NOTIFY_CEASE, BGP_NOTIFY_CEASE_CONFIG_CHANGE);
@@ -3575,7 +3571,7 @@ peer_password_unset (struct peer *peer)
         BGP_EVENT_ADD (peer, BGP_Stop);
 
       if (peer->password)
-        XFREE (MTYPE_PEER_PASSWORD, peer->password);
+        FREE (MTYPE_PEER_PASSWORD, peer->password);
       
       peer->password = NULL;
       
@@ -3584,7 +3580,7 @@ peer_password_unset (struct peer *peer)
       return 0;
     }
 
-  XFREE (MTYPE_PEER_PASSWORD, peer->password);
+  FREE (MTYPE_PEER_PASSWORD, peer->password);
   peer->password = NULL;
 
   for (ALL_LIST_ELEMENTS (peer->group->peer, nn, nnode, peer))
@@ -3597,7 +3593,7 @@ peer_password_unset (struct peer *peer)
       else
         BGP_EVENT_ADD (peer, BGP_Stop);
       
-      XFREE (MTYPE_PEER_PASSWORD, peer->password);
+      FREE (MTYPE_PEER_PASSWORD, peer->password);
       peer->password = NULL;
 
       bgp_md5_set (peer);
@@ -4646,7 +4642,7 @@ peer_uptime (time_t uptime2, char *buf, size_t len)
 }
 
 static void
-bgp_config_write_filter (struct vty *vty, struct peer *peer,
+bgp_config_write_filter (void *vty, struct peer *peer,
 			 afi_t afi, safi_t safi)
 {
   struct bgp_filter *filter;
@@ -4717,7 +4713,7 @@ bgp_config_write_filter (struct vty *vty, struct peer *peer,
 
 /* BGP peer configuration display function. */
 static void
-bgp_config_write_peer (struct vty *vty, struct bgp *bgp,
+bgp_config_write_peer (void *vty, struct bgp *bgp,
 		       struct peer *peer, afi_t afi, safi_t safi)
 {
   struct bgp_filter *filter;
@@ -5053,9 +5049,10 @@ bgp_config_write_peer (struct vty *vty, struct bgp *bgp,
 
 /* Display "address-family" configuration header. */
 void
-bgp_config_write_family_header (struct vty *vty, afi_t afi, safi_t safi,
+bgp_config_write_family_header (void *vty, afi_t afi, safi_t safi,
 				int *write)
 {
+#if 0
   if (*write)
     return;
 
@@ -5082,13 +5079,15 @@ bgp_config_write_family_header (struct vty *vty, afi_t afi, safi_t safi,
   vty_out (vty, "%s", VTY_NEWLINE);
 
   *write = 1;
+#endif
 }
 
 /* Address family based peer configuration display.  */
 static int
-bgp_config_write_family (struct vty *vty, struct bgp *bgp, afi_t afi,
+bgp_config_write_family (void *vty, struct bgp *bgp, afi_t afi,
 			 safi_t safi)
 {
+#if 0
   int write = 0;
   struct peer *peer;
   struct peer_group *group;
@@ -5121,11 +5120,13 @@ bgp_config_write_family (struct vty *vty, struct bgp *bgp, afi_t afi,
     vty_out (vty, " exit-address-family%s", VTY_NEWLINE);
 
   return write;
+#endif
 }
 
 int
-bgp_config_write (struct vty *vty)
+bgp_config_write (void *vty)
 {
+#if 0
   int write = 0;
   struct bgp *bgp;
   struct peer_group *group;
@@ -5312,6 +5313,7 @@ bgp_config_write (struct vty *vty)
       write++;
     }
   return write;
+#endif
 }
 
 void
@@ -5323,7 +5325,6 @@ bgp_master_init (void)
   bm->bgp = list_new ();
   bm->listen_sockets = list_new ();
   bm->port = BGP_PORT_DEFAULT;
-  bm->master = thread_master_create ();
   bm->start_time = bgp_clock ();
 }
 

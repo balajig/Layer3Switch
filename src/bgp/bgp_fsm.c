@@ -782,7 +782,7 @@ bgp_establish (struct peer *peer)
   /* Clear last notification data. */
   notify = &peer->notify;
   if (notify->data)
-    XFREE (MTYPE_TMP, notify->data);
+    FREE (MTYPE_TMP, notify->data);
   memset (notify, 0, sizeof (struct bgp_notify));
 
   /* Clear start timer value to default. */

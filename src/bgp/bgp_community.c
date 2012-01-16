@@ -18,6 +18,7 @@ along with GNU Zebra; see the file COPYING.  If not, write to the Free
 Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.  */
 
+#include "common_types.h"
 #include <zebra.h>
 
 #include "hash.h"
@@ -41,10 +42,10 @@ void
 community_free (struct community *com)
 {
   if (com->val)
-    XFREE (MTYPE_COMMUNITY_VAL, com->val);
+    FREE (MTYPE_COMMUNITY_VAL, com->val);
   if (com->str)
-    XFREE (MTYPE_COMMUNITY_STR, com->str);
-  XFREE (MTYPE_COMMUNITY, com);
+    FREE (MTYPE_COMMUNITY_STR, com->str);
+  FREE (MTYPE_COMMUNITY, com);
 }
 
 /* Add one community value to the community. */
@@ -87,7 +88,7 @@ community_del_val (struct community *com, u_int32_t *val)
 				 com_length (com));
 	  else
 	    {
-	      XFREE (MTYPE_COMMUNITY_VAL, com->val);
+	      FREE (MTYPE_COMMUNITY_VAL, com->val);
 	      com->val = NULL;
 	    }
 	  return;

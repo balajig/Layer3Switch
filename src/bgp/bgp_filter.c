@@ -20,7 +20,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 
 #include <zebra.h>
 
-#include "command.h"
+
 #include "log.h"
 #include "memory.h"
 #include "buffer.h"
@@ -109,8 +109,8 @@ as_filter_free (struct as_filter *asfilter)
   if (asfilter->reg)
     bgp_regex_free (asfilter->reg);
   if (asfilter->reg_str)
-    XFREE (MTYPE_AS_FILTER_STR, asfilter->reg_str);
-  XFREE (MTYPE_AS_FILTER, asfilter);
+    FREE (MTYPE_AS_FILTER_STR, asfilter->reg_str);
+  FREE (MTYPE_AS_FILTER, asfilter);
 }
 
 /* Make new AS filter. */
@@ -122,7 +122,7 @@ as_filter_make (regex_t *reg, const char *reg_str, enum as_filter_type type)
   asfilter = as_filter_new ();
   asfilter->reg = reg;
   asfilter->type = type;
-  asfilter->reg_str = XSTRDUP (MTYPE_AS_FILTER_STR, reg_str);
+  asfilter->reg_str = STRDUP (MTYPE_AS_FILTER_STR, reg_str);
 
   return asfilter;
 }
@@ -186,7 +186,7 @@ as_list_free (struct as_list *aslist)
       free (aslist->name);
       aslist->name = NULL;
     }
-  XFREE (MTYPE_AS_LIST, aslist);
+  FREE (MTYPE_AS_LIST, aslist);
 }
 
 /* Insert new AS list to list of as_list.  Each as_list is sorted by
@@ -460,7 +460,7 @@ DEFUN (ip_as_path, ip_as_path_cmd,
   regex = bgp_regcomp (regstr);
   if (!regex)
     {
-      XFREE (MTYPE_TMP, regstr);
+      FREE (MTYPE_TMP, regstr);
       vty_out (vty, "can't compile regexp %s%s", argv[0],
 	       VTY_NEWLINE);
       return CMD_WARNING;
@@ -468,7 +468,7 @@ DEFUN (ip_as_path, ip_as_path_cmd,
 
   asfilter = as_filter_make (regex, regstr, type);
   
-  XFREE (MTYPE_TMP, regstr);
+  FREE (MTYPE_TMP, regstr);
 
   /* Install new filter to the access_list. */
   aslist = as_list_get (argv[0]);
@@ -526,7 +526,7 @@ DEFUN (no_ip_as_path,
   regex = bgp_regcomp (regstr);
   if (!regex)
     {
-      XFREE (MTYPE_TMP, regstr);
+      FREE (MTYPE_TMP, regstr);
       vty_out (vty, "can't compile regexp %s%s", argv[0],
 	       VTY_NEWLINE);
       return CMD_WARNING;
@@ -535,7 +535,7 @@ DEFUN (no_ip_as_path,
   /* Lookup asfilter. */
   asfilter = as_filter_lookup (aslist, regstr, type);
 
-  XFREE (MTYPE_TMP, regstr);
+  FREE (MTYPE_TMP, regstr);
   bgp_regex_free (regex);
 
   if (asfilter == NULL)
@@ -578,7 +578,7 @@ DEFUN (no_ip_as_path_all,
 }
 
 static void
-as_list_show (struct vty *vty, struct as_list *aslist)
+as_list_show (void *vty, struct as_list *aslist)
 {
   struct as_filter *asfilter;
 
@@ -592,7 +592,7 @@ as_list_show (struct vty *vty, struct as_list *aslist)
 }
 
 static void
-as_list_show_all (struct vty *vty)
+as_list_show_all (void *vty)
 {
   struct as_list *aslist;
   struct as_filter *asfilter;
@@ -649,7 +649,7 @@ DEFUN (show_ip_as_path_access_list_all,
 }
 
 static int
-config_write_as_list (struct vty *vty)
+config_write_as_list (void *vty)
 {
   struct as_list *aslist;
   struct as_filter *asfilter;

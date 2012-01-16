@@ -136,8 +136,8 @@ static void
 cluster_free (struct cluster_list *cluster)
 {
   if (cluster->list)
-    XFREE (MTYPE_CLUSTER_VAL, cluster->list);
-  XFREE (MTYPE_CLUSTER, cluster);
+    FREE (MTYPE_CLUSTER_VAL, cluster->list);
+  FREE (MTYPE_CLUSTER, cluster);
 }
 
 #if 0
@@ -207,8 +207,8 @@ static void
 transit_free (struct transit *transit)
 {
   if (transit->val)
-    XFREE (MTYPE_TRANSIT_VAL, transit->val);
-  XFREE (MTYPE_TRANSIT, transit);
+    FREE (MTYPE_TRANSIT_VAL, transit->val);
+  FREE (MTYPE_TRANSIT, transit);
 }
 
 
@@ -292,7 +292,7 @@ bgp_attr_extra_free (struct attr *attr)
 {
   if (attr->extra)
     {
-      XFREE (MTYPE_ATTR_EXTRA, attr->extra);
+      FREE (MTYPE_ATTR_EXTRA, attr->extra);
       attr->extra = NULL;
     }
 }
@@ -435,16 +435,17 @@ attrhash_finish (void)
 }
 
 static void
-attr_show_all_iterator (struct hash_backet *backet, struct vty *vty)
+attr_show_all_iterator (struct hash_backet *backet, void *vty)
 {
   struct attr *attr = backet->data;
-
+#if 0
   vty_out (vty, "attr[%ld] nexthop %s%s", attr->refcnt, 
 	   inet_ntoa (attr->nexthop), VTY_NEWLINE);
+#endif
 }
 
 void
-attr_show_all (struct vty *vty)
+attr_show_all (void *vty)
 {
   hash_iterate (attrhash, 
 		(void (*)(struct hash_backet *, void *))
@@ -670,7 +671,7 @@ bgp_attr_unintern (struct attr **attr)
       ret = hash_release (attrhash, *attr);
       assert (ret != NULL);
       bgp_attr_extra_free (*attr);
-      XFREE (MTYPE_ATTR, *attr);
+      FREE (MTYPE_ATTR, *attr);
       *attr = NULL;
     }
 

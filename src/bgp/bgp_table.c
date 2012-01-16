@@ -96,7 +96,7 @@ bgp_node_set (struct bgp_table *table, struct prefix *prefix)
 static void
 bgp_node_free (struct bgp_node *node)
 {
-  XFREE (MTYPE_BGP_NODE, node);
+  FREE (MTYPE_BGP_NODE, node);
 }
 
 /* Free route table. */
@@ -156,7 +156,7 @@ bgp_table_free (struct bgp_table *rt)
       rt->owner = NULL;
     }
 
-  XFREE (MTYPE_BGP_TABLE, rt);
+  FREE (MTYPE_BGP_TABLE, rt);
   return;
 }
 

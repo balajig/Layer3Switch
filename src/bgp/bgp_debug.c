@@ -24,7 +24,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "prefix.h"
 #include "linklist.h"
 #include "stream.h"
-#include "command.h"
+
 #include "str.h"
 #include "log.h"
 #include "sockunion.h"
@@ -788,7 +788,7 @@ DEFUN (show_debugging_bgp,
 }
 
 static int
-bgp_config_write_debug (struct vty *vty)
+bgp_config_write_debug (void *vty)
 {
   int write = 0;
 

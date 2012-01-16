@@ -201,10 +201,10 @@ extern void bgp_static_update (struct bgp *, struct prefix *, struct bgp_static 
 			afi_t, safi_t);
 extern void bgp_static_withdraw (struct bgp *, struct prefix *, afi_t, safi_t);
                      
-extern int bgp_static_set_vpnv4 (struct vty *vty, const char *, 
+extern int bgp_static_set_vpnv4 (void *vty, const char *, 
                           const char *, const char *);
 
-extern int bgp_static_unset_vpnv4 (struct vty *, const char *, 
+extern int bgp_static_unset_vpnv4 (void *, const char *, 
                             const char *, const char *);
 
 /* this is primarily for MPLS-VPN */
@@ -216,8 +216,8 @@ extern int bgp_withdraw (struct peer *, struct prefix *, struct attr *,
 
 /* for bgp_nexthop and bgp_damp */
 extern void bgp_process (struct bgp *, struct bgp_node *, afi_t, safi_t);
-extern int bgp_config_write_network (struct vty *, struct bgp *, afi_t, safi_t, int *);
-extern int bgp_config_write_distance (struct vty *, struct bgp *);
+extern int bgp_config_write_network (void *, struct bgp *, afi_t, safi_t, int *);
+extern int bgp_config_write_distance (void *, struct bgp *);
 
 extern void bgp_aggregate_increment (struct bgp *, struct prefix *, struct bgp_info *,
 			      afi_t, safi_t);
@@ -226,11 +226,11 @@ extern void bgp_aggregate_decrement (struct bgp *, struct prefix *, struct bgp_i
 
 extern u_char bgp_distance_apply (struct prefix *, struct bgp_info *, struct bgp *);
 
-extern afi_t bgp_node_afi (struct vty *);
-extern safi_t bgp_node_safi (struct vty *);
+extern afi_t bgp_node_afi (void *);
+extern safi_t bgp_node_safi (void *);
 
-extern void route_vty_out (struct vty *, struct prefix *, struct bgp_info *, int, safi_t);
-extern void route_vty_out_tag (struct vty *, struct prefix *, struct bgp_info *, int, safi_t);
-extern void route_vty_out_tmp (struct vty *, struct prefix *, struct attr *, safi_t);
+extern void route_vty_out (void *, struct prefix *, struct bgp_info *, int, safi_t);
+extern void route_vty_out_tag (void *, struct prefix *, struct bgp_info *, int, safi_t);
+extern void route_vty_out_tmp (void *, struct prefix *, struct attr *, safi_t);
 
 #endif /* _QUAGGA_BGP_ROUTE_H */

@@ -21,7 +21,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include <zebra.h>
 
 #include "log.h"
-#include "command.h"
+
 #include "memory.h"
 
 #include "bgpd.h"
@@ -68,11 +68,11 @@ bgp_regcomp (const char *regstr)
 
   ret = regcomp (regex, magic_str, REG_EXTENDED|REG_NOSUB);
 
-  XFREE (MTYPE_TMP, magic_str);
+  FREE (MTYPE_TMP, magic_str);
 
   if (ret != 0)
     {
-      XFREE (MTYPE_BGP_REGEXP, regex);
+      FREE (MTYPE_BGP_REGEXP, regex);
       return NULL;
     }
 
@@ -89,5 +89,5 @@ void
 bgp_regex_free (regex_t *regex)
 {
   regfree (regex);
-  XFREE (MTYPE_BGP_REGEXP, regex);
+  FREE (MTYPE_BGP_REGEXP, regex);
 }

@@ -20,7 +20,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 
 #include <zebra.h>
 
-#include "command.h"
+
 #include "thread.h"
 #include "prefix.h"
 #include "zclient.h"
@@ -91,7 +91,7 @@ bnc_nexthop_free (struct bgp_nexthop_cache *bnc)
   for (nexthop = bnc->nexthop; nexthop; nexthop = next)
     {
       next = nexthop->next;
-      XFREE (MTYPE_NEXTHOP, nexthop);
+      FREE (MTYPE_NEXTHOP, nexthop);
     }
 }
 
@@ -105,7 +105,7 @@ static void
 bnc_free (struct bgp_nexthop_cache *bnc)
 {
   bnc_nexthop_free (bnc);
-  XFREE (MTYPE_BGP_NEXTHOP_CACHE, bnc);
+  FREE (MTYPE_BGP_NEXTHOP_CACHE, bnc);
 }
 
 static int
@@ -640,7 +640,7 @@ bgp_connected_delete (struct connected *ifc)
       bc->refcnt--;
       if (bc->refcnt == 0)
 	{
-	  XFREE (MTYPE_BGP_CONN, bc);
+	  FREE (MTYPE_BGP_CONN, bc);
 	  rn->info = NULL;
 	}
       bgp_unlock_node (rn);
@@ -666,7 +666,7 @@ bgp_connected_delete (struct connected *ifc)
       bc->refcnt--;
       if (bc->refcnt == 0)
 	{
-	  XFREE (MTYPE_BGP_CONN, bc);
+	  FREE (MTYPE_BGP_CONN, bc);
 	  rn->info = NULL;
 	}
       bgp_unlock_node (rn);
@@ -1277,7 +1277,7 @@ DEFUN (show_ip_bgp_scan,
 }
 
 int
-bgp_config_write_scan_time (struct vty *vty)
+bgp_config_write_scan_time (void *vty)
 {
   if (bgp_scan_interval != BGP_SCAN_INTERVAL_DEFAULT)
     vty_out (vty, " bgp scan-time %d%s", bgp_scan_interval, VTY_NEWLINE);

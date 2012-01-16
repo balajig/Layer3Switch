@@ -35,9 +35,6 @@ struct bgp_master
   /* BGP instance list.  */
   struct list *bgp;
 
-  /* BGP thread master.  */
-  struct thread_master *master;
-
   /* work queues */
   struct work_queue *process_main_queue;
   struct work_queue *process_rsclient_queue;
@@ -833,8 +830,8 @@ extern int peer_active (struct peer *);
 extern int peer_active_nego (struct peer *);
 extern struct peer *peer_create_accept (struct bgp *);
 extern char *peer_uptime (time_t, char *, size_t);
-extern int bgp_config_write (struct vty *);
-extern void bgp_config_write_family_header (struct vty *, afi_t, safi_t, int *);
+extern int bgp_config_write (void *);
+extern void bgp_config_write_family_header (void *, afi_t, safi_t, int *);
 
 extern void bgp_master_init (void);
 

@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <zebra.h>
 
-#include "command.h"
+
 #include "stream.h"
 #include "network.h"
 #include "prefix.h"

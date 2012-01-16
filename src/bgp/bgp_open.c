@@ -25,7 +25,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "stream.h"
 #include "thread.h"
 #include "log.h"
-#include "command.h"
+
 #include "memory.h"
 
 #include "bgpd.h"
@@ -48,7 +48,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    inforation at each peer. */
 
 void
-bgp_capability_vty_out (struct vty *vty, struct peer *peer)
+bgp_capability_vty_out (void *vty, struct peer *peer)
 {
   char *pnt;
   char *end;

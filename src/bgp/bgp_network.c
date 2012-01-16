@@ -27,7 +27,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "log.h"
 #include "if.h"
 #include "prefix.h"
-#include "command.h"
+
 #include "privs.h"
 #include "linklist.h"
 #include "network.h"
@@ -198,7 +198,7 @@ bgp_accept (struct thread *thread)
 
     /* Make peer's address string. */
     sockunion2str (&su, buf, SU_ADDRSTRLEN);
-    peer->host = XSTRDUP (MTYPE_BGP_PEER_HOST, buf);
+    peer->host = STRDUP (MTYPE_BGP_PEER_HOST, buf);
   }
 
   BGP_EVENT_ADD (peer, TCP_connection_open);
@@ -544,6 +544,6 @@ bgp_close (void)
       thread_cancel (listener->thread);
       close (listener->fd);
       listnode_delete (bm->listen_sockets, listener);
-      XFREE (MTYPE_BGP_LISTENER, listener);
+      FREE (MTYPE_BGP_LISTENER, listener);
     }
 }

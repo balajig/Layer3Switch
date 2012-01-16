@@ -19,21 +19,20 @@ along with GNU Zebra; see the file COPYING.  If not, write to the Free
 Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.  */
 
+#include "common_types.h"
 #include <zebra.h>
 
 #include "hash.h"
 #include "memory.h"
 #include "vector.h"
-#include "vty.h"
-#include "str.h"
-#include "log.h"
 #include "stream.h"
 #include "jhash.h"
+#include "log.h"
 
 #include "bgpd.h"
 #include "bgp_aspath.h"
-#include "bgp_debug.h"
 #include "bgp_attr.h"
+#include "bgp_debug.h"
 
 /* Attr. Flags and Attr. Type Code. */
 #define AS_HEADER_SIZE        2	 
@@ -100,7 +99,7 @@ assegment_data_new (int num)
 static inline void
 assegment_data_free (as_t *asdata)
 {
-  XFREE (MTYPE_AS_SEG_DATA,asdata);
+  FREE (MTYPE_AS_SEG_DATA,asdata);
 }
 
 /* Get a new segment. Note that 0 is an allowed length,
@@ -131,9 +130,9 @@ assegment_free (struct assegment *seg)
     return;
   
   if (seg->as)
-    XFREE (MTYPE_AS_SEG_DATA, seg->as);
+    FREE (MTYPE_AS_SEG_DATA, seg->as);
   memset (seg, 0xfe, sizeof(struct assegment));
-  XFREE (MTYPE_AS_SEG, seg);
+  FREE (MTYPE_AS_SEG, seg);
   
   return;
 }
@@ -207,7 +206,7 @@ assegment_prepend_asns (struct assegment *seg, as_t asnum, int num)
         newas[i] = asnum;
       
       memcpy (newas + num, seg->as, ASSEGMENT_DATA_SIZE (seg->length, 1));
-      XFREE (MTYPE_AS_SEG_DATA, seg->as);
+      FREE (MTYPE_AS_SEG_DATA, seg->as);
       seg->as = newas; 
       seg->length += num;
       return seg;
@@ -334,8 +333,8 @@ aspath_free (struct aspath *aspath)
   if (aspath->segments)
     assegment_free_all (aspath->segments);
   if (aspath->str)
-    XFREE (MTYPE_AS_STR, aspath->str);
-  XFREE (MTYPE_AS_PATH, aspath);
+    FREE (MTYPE_AS_STR, aspath->str);
+  FREE (MTYPE_AS_PATH, aspath);
 }
 
 /* Unintern aspath from AS path bucket. */
@@ -553,7 +552,7 @@ aspath_make_str_count (struct aspath *as)
             seperator = ' ';
             break;
           default:
-            XFREE (MTYPE_AS_STR, str_buf);
+            FREE (MTYPE_AS_STR, str_buf);
             return NULL;
         }
       
@@ -609,7 +608,7 @@ static void
 aspath_str_update (struct aspath *as)
 {
   if (as->str)
-    XFREE (MTYPE_AS_STR, as->str);
+    FREE (MTYPE_AS_STR, as->str);
   as->str = aspath_make_str_count (as);
 }
 
@@ -803,7 +802,7 @@ aspath_parse (struct stream *s, size_t length, int use32bit)
    */
   assegment_free_all (as.segments);
   if (as.str)
-    XFREE (MTYPE_AS_STR, as.str);
+    FREE (MTYPE_AS_STR, as.str);
   
   if (! find)
     return NULL;
@@ -1865,39 +1864,4 @@ const char *
 aspath_print (struct aspath *as)
 {
   return (as ? as->str : NULL);
-}
-
-/* Printing functions */
-/* Feed the AS_PATH to the vty; the suffix string follows it only in case
- * AS_PATH wasn't empty.
- */
-void
-aspath_print_vty (struct vty *vty, const char *format, struct aspath *as, const char * suffix)
-{
-  assert (format);
-  vty_out (vty, format, as->str);
-  if (strlen (as->str) && strlen (suffix))
-    vty_out (vty, "%s", suffix);
-}
-
-static void
-aspath_show_all_iterator (struct hash_backet *backet, struct vty *vty)
-{
-  struct aspath *as;
-
-  as = (struct aspath *) backet->data;
-
-  vty_out (vty, "[%p:%u] (%ld) ", backet, backet->key, as->refcnt);
-  vty_out (vty, "%s%s", as->str, VTY_NEWLINE);
-}
-
-/* Print all aspath and hash information.  This function is used from
-   `show ip bgp paths' command. */
-void
-aspath_print_all_vty (struct vty *vty)
-{
-  hash_iterate (ashash, 
-		(void (*) (struct hash_backet *, void *))
-		aspath_show_all_iterator,
-		vty);
 }

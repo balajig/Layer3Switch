@@ -20,7 +20,6 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 
 #include <zebra.h>
 
-#include "command.h"
 #include "prefix.h"
 #include "memory.h"
 
@@ -68,20 +67,20 @@ community_entry_free (struct community_entry *entry)
       /* In case of standard extcommunity-list, configuration string
          is made by ecommunity_ecom2str().  */
       if (entry->config)
-        XFREE (MTYPE_ECOMMUNITY_STR, entry->config);
+        FREE (MTYPE_ECOMMUNITY_STR, entry->config);
       if (entry->u.ecom)
         ecommunity_free (&entry->u.ecom);
       break;
     case COMMUNITY_LIST_EXPANDED:
     case EXTCOMMUNITY_LIST_EXPANDED:
       if (entry->config)
-        XFREE (MTYPE_COMMUNITY_LIST_CONFIG, entry->config);
+        FREE (MTYPE_COMMUNITY_LIST_CONFIG, entry->config);
       if (entry->reg)
         bgp_regex_free (entry->reg);
     default:
       break;
     }
-  XFREE (MTYPE_COMMUNITY_LIST_ENTRY, entry);
+  FREE (MTYPE_COMMUNITY_LIST_ENTRY, entry);
 }
 
 /* Allocate a new community-list.  */
@@ -96,8 +95,8 @@ static void
 community_list_free (struct community_list *list)
 {
   if (list->name)
-    XFREE (MTYPE_COMMUNITY_LIST_NAME, list->name);
-  XFREE (MTYPE_COMMUNITY_LIST, list);
+    FREE (MTYPE_COMMUNITY_LIST_NAME, list->name);
+  FREE (MTYPE_COMMUNITY_LIST, list);
 }
 
 static struct community_list *
@@ -118,7 +117,7 @@ community_list_insert (struct community_list_handler *ch,
 
   /* Allocate new community_list and copy given name. */
   new = community_list_new ();
-  new->name = XSTRDUP (MTYPE_COMMUNITY_LIST_NAME, name);
+  new->name = STRDUP (MTYPE_COMMUNITY_LIST_NAME, name);
 
   /* If name is made by all digit character.  We treat it as
      number. */
@@ -638,7 +637,7 @@ community_list_set (struct community_list_handler *ch,
   entry->any = (str ? 0 : 1);
   entry->u.com = com;
   entry->reg = regex;
-  entry->config = (regex ? XSTRDUP (MTYPE_COMMUNITY_LIST_CONFIG, str) : NULL);
+  entry->config = (regex ? STRDUP (MTYPE_COMMUNITY_LIST_CONFIG, str) : NULL);
 
   /* Do not put duplicated community entry.  */
   if (community_list_dup_check (list, entry))
@@ -753,7 +752,7 @@ extcommunity_list_set (struct community_list_handler *ch,
   if (ecom)
     entry->config = ecommunity_ecom2str (ecom, ECOMMUNITY_FORMAT_COMMUNITY_LIST);
   else if (regex)
-    entry->config = XSTRDUP (MTYPE_COMMUNITY_LIST_CONFIG, str);
+    entry->config = STRDUP (MTYPE_COMMUNITY_LIST_CONFIG, str);
   else
     entry->config = NULL;
   entry->u.ecom = ecom;
@@ -847,5 +846,5 @@ community_list_terminate (struct community_list_handler *ch)
   while ((list = cm->str.head) != NULL)
     community_list_delete (list);
 
-  XFREE (MTYPE_COMMUNITY_LIST_HANDLER, ch);
+  FREE (MTYPE_COMMUNITY_LIST_HANDLER, ch);
 }

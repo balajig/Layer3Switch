@@ -20,7 +20,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 
 #include <zebra.h>
 
-#include "command.h"
+
 #include "prefix.h"
 #include "log.h"
 #include "memory.h"
@@ -202,7 +202,7 @@ str2prefix_rd (const char *str, struct prefix_rd *prd)
     {
       if (! all_digit (half))
 	{
-	  XFREE (MTYPE_TMP, half);
+	  FREE (MTYPE_TMP, half);
 	  return 0;
 	}
       stream_putw (s, RD_TYPE_AS);
@@ -214,7 +214,7 @@ str2prefix_rd (const char *str, struct prefix_rd *prd)
       ret = inet_aton (half, &addr);
       if (! ret)
 	{
-	  XFREE (MTYPE_TMP, half);
+	  FREE (MTYPE_TMP, half);
 	  return 0;
 	}
       stream_putw (s, RD_TYPE_IP);
@@ -308,7 +308,7 @@ DEFUN (no_vpnv4_network,
 }
 
 static int
-show_adj_route_vpn (struct vty *vty, struct peer *peer, struct prefix_rd *prd)
+show_adj_route_vpn (void *vty, struct peer *peer, struct prefix_rd *prd)
 {
   struct bgp *bgp;
   struct bgp_table *table;
@@ -402,7 +402,7 @@ enum bgp_show_type
 };
 
 static int
-bgp_show_mpls_vpn (struct vty *vty, struct prefix_rd *prd, enum bgp_show_type type,
+bgp_show_mpls_vpn (void *vty, struct prefix_rd *prd, enum bgp_show_type type,
 		   void *output_arg, int tags)
 {
   struct bgp *bgp;

@@ -23,7 +23,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "log.h"
 #include "stream.h"
 #include "sockunion.h"
-#include "command.h"
+
 #include "prefix.h"
 #include "thread.h"
 #include "linklist.h"
@@ -584,7 +584,7 @@ bgp_dump_parse_time (const char *str)
 }
 
 static int
-bgp_dump_set (struct vty *vty, struct bgp_dump *bgp_dump,
+bgp_dump_set (void *vty, struct bgp_dump *bgp_dump,
               enum bgp_dump_type type, const char *path,
               const char *interval_str)
 {
@@ -639,7 +639,7 @@ bgp_dump_set (struct vty *vty, struct bgp_dump *bgp_dump,
 }
 
 static int
-bgp_dump_unset (struct vty *vty, struct bgp_dump *bgp_dump)
+bgp_dump_unset (void *vty, struct bgp_dump *bgp_dump)
 {
   /* Set file name. */
   if (bgp_dump->filename)
@@ -811,7 +811,7 @@ config_time2str (unsigned int interval)
 #endif
 
 static int
-config_write_bgp_dump (struct vty *vty)
+config_write_bgp_dump (void *vty)
 {
   if (bgp_dump_all.filename)
     {

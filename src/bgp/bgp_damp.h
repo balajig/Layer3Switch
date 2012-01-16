@@ -139,9 +139,5 @@ extern int bgp_damp_scan (struct bgp_info *, afi_t, safi_t);
 extern void bgp_damp_info_free (struct bgp_damp_info *, int);
 extern void bgp_damp_info_clean (void);
 extern int bgp_damp_decay (time_t, int);
-extern void bgp_config_write_damp (struct vty *);
-extern void bgp_damp_info_vty (struct vty *, struct bgp_info *);
-extern const char * bgp_damp_reuse_time_vty (struct vty *, struct bgp_info *,
-                                             char *, size_t);
 
 #endif /* _QUAGGA_BGP_DAMP_H */

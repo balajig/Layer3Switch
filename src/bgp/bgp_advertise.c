@@ -18,13 +18,12 @@ along with GNU Zebra; see the file COPYING.  If not, write to the Free
 Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.  */
 
+#include "common_types.h"
 #include <zebra.h>
 
-#include "command.h"
-#include "memory.h"
 #include "prefix.h"
 #include "hash.h"
-#include "thread.h"
+#include "memory.h"
 
 #include "bgpd.h"
 #include "bgp_table.h"
@@ -49,7 +48,7 @@ baa_new (void)
 static void
 baa_free (struct bgp_advertise_attr *baa)
 {
-  XFREE (MTYPE_BGP_ADVERTISE_ATTR, baa);
+  FREE (MTYPE_BGP_ADVERTISE_ATTR, baa);
 }
 
 static void *
@@ -95,7 +94,7 @@ bgp_advertise_free (struct bgp_advertise *adv)
 {
   if (adv->binfo)
     bgp_info_unlock (adv->binfo); /* bgp_advertise bgp_info reference */
-  XFREE (MTYPE_BGP_ADVERTISE, adv);
+  FREE (MTYPE_BGP_ADVERTISE, adv);
 }
 
 static void
@@ -157,7 +156,7 @@ static void
 bgp_adj_out_free (struct bgp_adj_out *adj)
 {
   peer_unlock (adj->peer); /* adj_out peer reference */
-  XFREE (MTYPE_BGP_ADJ_OUT, adj);
+  FREE (MTYPE_BGP_ADJ_OUT, adj);
 }
 
 int
@@ -358,7 +357,7 @@ bgp_adj_in_remove (struct bgp_node *rn, struct bgp_adj_in *bai)
   bgp_attr_unintern (&bai->attr);
   BGP_ADJ_IN_DEL (rn, bai);
   peer_unlock (bai->peer); /* adj_in peer reference */
-  XFREE (MTYPE_BGP_ADJ_IN, bai);
+  FREE (MTYPE_BGP_ADJ_IN, bai);
 }
 
 void
@@ -407,7 +406,7 @@ bgp_sync_delete (struct peer *peer)
     for (safi = SAFI_UNICAST; safi < SAFI_MAX; safi++)
       {
 	if (peer->sync[afi][safi])
-	  XFREE (MTYPE_BGP_SYNCHRONISE, peer->sync[afi][safi]);
+	  FREE (MTYPE_BGP_SYNCHRONISE, peer->sync[afi][safi]);
 	peer->sync[afi][safi] = NULL;
 	
 	if (peer->hash[afi][safi])
