@@ -345,3 +345,40 @@ int make_if_down (if_t *p)
 	close(fd);
 	return 0;
 }
+
+void * if_link_monitor (void *arg)
+{
+	int max_ports = get_max_ports ();
+	struct ifreq ifr;
+	int  fd = -1;
+	fd =  socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd < 0)
+		return (-1);
+
+	memset (&ifr, 0, sizeof(ifr));
+
+	while (1) {
+		int i = 0;
+
+		while (i < max_ports) {
+
+			struct interface *p = &port_cdb[i];
+
+			strncpy(ifr.ifr_name, p->ifDescr, sizeof(ifr.ifr_name));
+
+			if (ioctl(fd, SIOCGIFFLAGS, &ifr) == 0)  {
+				int oper = (ifr.ifr_flags & IFF_RUNNING)?IF_UP:IF_DOWN;
+				if ((p->ifOperStatus  == oper)) {
+					/*No Change*/
+					i++;
+					continue;
+				}
+				p->ifOperStatus = oper;
+				send_interface_enable_or_disable (i+ 1, oper);
+			}
+			i++;
+		}
+		
+		sleep (1); /*Check for every one second - Modify in future*/
+	}
+}

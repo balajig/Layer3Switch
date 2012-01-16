@@ -69,9 +69,9 @@ int show_cpu_usage (void)
 	register tmtask_t  *tskinfo = NULL;
 
 	printf
-		("\n  Task Name         CPU User          System \n");
+		("\n Task Name         CPU User        System \n");
 	printf
-		("\r  ---------        ---------         --------\n");
+		("\r ---------         --------        -------\n");
 
 
 	list_for_each (node, (&tsk_hd))
@@ -92,7 +92,7 @@ int show_cpu_usage (void)
 
 		calc_cpu_usage (&curr, &tskinfo->cpu_stats, &user_usage, &system_usage , & tcpu) ;
 
-		printf ("%10s     %10.1f       %10.1f\n", tskinfo->task_name, user_usage * 2, system_usage);
+		printf (" %-16s    %-8.1f       %-8.1f\n", tskinfo->task_name, user_usage * 2, system_usage);
 	}
 	return 0;
 }

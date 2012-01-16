@@ -32,6 +32,7 @@ int dhcp_init (void);
 int init_task_cpu_usage_moniter_timer (void);
 int start_cli_task (void);
 void * packet_processing_task (void *unused);
+void * if_link_monitor (void *unused);
 
 char switch_mac[6] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x00};
 
@@ -84,11 +85,18 @@ int read_port_mac_address (int port, uint8_t *p)
 int spawn_pkt_processing_task (void)
 {
 	int ifport = 0;
+	int  taskid = 0;
+	char task_name[16];
 
-	char task_name[8];
+	if (task_create ("linkmonitor", 98, 3, 32000, if_link_monitor, NULL, NULL, 
+		          &taskid) == TSK_FAILURE) {
+		printf ("Task creation failed : %s\n", task_name);
+		exit (1);
+	}
+
 	
 	while (ifport < get_max_ports ()) {
-		sprintf (task_name, "%s-%d", "PKRX", ifport);
+		sprintf (task_name, "%s-%d", "PKTRX", ifport);
 		if (task_create (task_name, 98, 3, 32000, packet_processing_task, NULL, (void *)ifport, 
 			          &linux_if_map[ifport].task_id) == TSK_FAILURE) {
 			printf ("Task creation failed : %s\n", task_name);

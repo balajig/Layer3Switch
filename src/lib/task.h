@@ -20,7 +20,7 @@
 #include "list.h"
 
 #define  MIN_THREAD_STACK_SIZE   20000  /*should be atleast PTHREAD_STACK_MIN (bits/local_lim.h)*/
-#define  MAX_TASK_NAME       6
+#define  MAX_TASK_NAME       16 
 #define  MAX_TSKS            100
 
 #define  NONE          0
@@ -64,7 +64,7 @@ struct pstat
 
 typedef struct __task_tm__ {
     struct list_head     tsk_node;
-    char            task_name[MAX_TASK_NAME + 2];
+    char            task_name[MAX_TASK_NAME];
     tmtaskid_t       task_id;
 #if 0
     tmsemid_t       sem_id; /*Currently not used */
