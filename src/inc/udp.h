@@ -89,31 +89,26 @@ typedef void (*udp_recv_fn)(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
 
 struct udp_pcb {
-/* Common members of all PCB types */
-  IP_PCB;
-
 /* Protocol specific PCB members */
-
   struct udp_pcb *next;
-
-  u8_t flags;
-  /** ports are in host byte order */
-  u16_t local_port, remote_port;
-
-#if LWIP_IGMP
-  /** outgoing network interface for multicast packets */
-  ip_addr_t multicast_ip;
-#endif /* LWIP_IGMP */
-
-#if LWIP_UDPLITE
-  /** used for UDP_LITE only */
-  u16_t chksum_len_rx, chksum_len_tx;
-#endif /* LWIP_UDPLITE */
-
   /** receive callback function */
   udp_recv_fn recv;
   /** user-supplied argument for the recv callback */
   void *recv_arg;  
+/* Common members of all PCB types */
+  IP_PCB;
+#if LWIP_IGMP
+  /** outgoing network interface for multicast packets */
+  ip_addr_t multicast_ip;
+#endif /* LWIP_IGMP */
+#if LWIP_UDPLITE
+  /** used for UDP_LITE only */
+  u16_t chksum_len_rx, chksum_len_tx;
+#endif /* LWIP_UDPLITE */
+  /** ports are in host byte order */
+  u16_t local_port, remote_port;
+  u8_t flags;
+  u8_t pad[3];
 };
 /* udp_pcbs export for exernal reference (e.g. SNMP agent) */
 extern struct udp_pcb *udp_pcbs;

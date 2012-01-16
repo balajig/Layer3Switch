@@ -53,7 +53,7 @@ struct prefix
     } lp;
     u_char val[8];
   } u __attribute__ ((aligned (8)));
-};
+}__attribute__ ((packed));
 
 /* IPv4 prefix structure. */
 struct prefix_ipv4
@@ -61,7 +61,7 @@ struct prefix_ipv4
   u_char family;
   u_char prefixlen;
   struct in_addr prefix __attribute__ ((aligned (8)));
-};
+}__attribute__ ((packed));
 
 /* IPv6 prefix structure. */
 #ifdef HAVE_IPV6
@@ -70,7 +70,7 @@ struct prefix_ipv6
   u_char family;
   u_char prefixlen;
   struct in6_addr prefix __attribute__ ((aligned (8)));
-};
+}__attribute__ ((packed));
 #endif /* HAVE_IPV6 */
 
 struct prefix_ls
@@ -79,7 +79,7 @@ struct prefix_ls
   u_char prefixlen;
   struct in_addr id __attribute__ ((aligned (8)));
   struct in_addr adv_router;
-};
+}__attribute__ ((packed));
 
 /* Prefix for routing distinguisher. */
 struct prefix_rd
@@ -87,7 +87,7 @@ struct prefix_rd
   u_char family;
   u_char prefixlen;
   u_char val[8] __attribute__ ((aligned (8)));
-};
+}__attribute__ ((packed));
 
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16

@@ -112,6 +112,15 @@ static void         ip_reass_dequeue_datagram (struct ip_reassdata *ipr,
 static int          ip_reass_free_complete_datagram (struct ip_reassdata *ipr,
                                                      struct ip_reassdata *prev);
 
+static void
+ip_reass_timer (void *arg)
+{
+    LWIP_UNUSED_ARG (arg);
+    LWIP_DEBUGF (TIMERS_DEBUG, ("tcpip: ip_reass_tmr()\n"));
+    ip_reass_tmr ();
+    //sys_timeout (IP_TMR_INTERVAL, ip_reass_timer, NULL);
+}
+
 /**
  * Reassembly timer base function
  * for both NO_SYS == 0 and 1 (!).

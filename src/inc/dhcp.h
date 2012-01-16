@@ -28,12 +28,36 @@ extern "C" {
 
 struct dhcp
 {
-  /** transaction identifier of last sent request */ 
-  u32_t xid;
   /** our connection to the DHCP server */ 
   struct udp_pcb *pcb;
   /** incoming msg */
   struct dhcp_msg *msg_in;
+  TIMER_ID coarse_timer;
+  TIMER_ID fine_timer;
+  struct pbuf *p_out; /* pbuf of outcoming msg */
+  struct dhcp_msg *msg_out; /* outgoing msg */
+
+  /** transaction identifier of last sent request */ 
+  u32_t xid;
+
+  ip_addr_t server_ip_addr; /* dhcp server address that offered this lease */
+  ip_addr_t offered_ip_addr;
+  ip_addr_t offered_sn_mask;
+  ip_addr_t offered_gw_addr;
+#if LWIP_DHCP_BOOTP_FILE
+  ip_addr_t offered_si_addr;
+  char boot_file_name[DHCP_FILE_LEN];
+#endif /* LWIP_DHCP_BOOTPFILE */
+
+  u32_t offered_t0_lease; /* lease period (in seconds) */
+  u32_t offered_t1_renew; /* recommended renew time (usually 50% of lease period) */
+  u32_t offered_t2_rebind; /* recommended rebind time (usually 66% of lease period)  */
+  /* @todo: LWIP_DHCP_BOOTP_FILE configuration option?
+     integrate with possible TFTP-client for booting? */
+  u16_t options_out_len; /* outgoing msg options length */
+  u16_t request_timeout; /* #ticks with period DHCP_FINE_TIMER_SECS for request timeout */
+  u16_t t1_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for renewal time */
+  u16_t t2_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for rebind time */
   /** current DHCP state machine state */
   u8_t state;
   /** retries of current request */
@@ -42,29 +66,6 @@ struct dhcp
   u8_t autoip_coop_state;
 #endif
   u8_t subnet_mask_given;
-
-  struct pbuf *p_out; /* pbuf of outcoming msg */
-  struct dhcp_msg *msg_out; /* outgoing msg */
-  u16_t options_out_len; /* outgoing msg options length */
-  u16_t request_timeout; /* #ticks with period DHCP_FINE_TIMER_SECS for request timeout */
-  u16_t t1_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for renewal time */
-  u16_t t2_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for rebind time */
-  ip_addr_t server_ip_addr; /* dhcp server address that offered this lease */
-  ip_addr_t offered_ip_addr;
-  ip_addr_t offered_sn_mask;
-  ip_addr_t offered_gw_addr;
- 
-  u32_t offered_t0_lease; /* lease period (in seconds) */
-  u32_t offered_t1_renew; /* recommended renew time (usually 50% of lease period) */
-  u32_t offered_t2_rebind; /* recommended rebind time (usually 66% of lease period)  */
-  /* @todo: LWIP_DHCP_BOOTP_FILE configuration option?
-     integrate with possible TFTP-client for booting? */
-#if LWIP_DHCP_BOOTP_FILE
-  ip_addr_t offered_si_addr;
-  char boot_file_name[DHCP_FILE_LEN];
-#endif /* LWIP_DHCP_BOOTPFILE */
-  TIMER_ID coarse_timer;
-  TIMER_ID fine_timer;
 };
 
 /* MUST be compiled with "pack structs" or equivalent! */

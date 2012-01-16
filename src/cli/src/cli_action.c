@@ -156,3 +156,11 @@ cparser_result_t cparser_cmd_run_script_filename(cparser_context_t *context, cha
 	}
 	return CPARSER_OK;
 }
+
+cparser_result_t cparser_cmd_clear_screen (cparser_context_t *context)
+{
+	printf("\033[2J");
+	printf("\033[0;0f");
+	fflush (stdout);
+	return CPARSER_OK;
+}

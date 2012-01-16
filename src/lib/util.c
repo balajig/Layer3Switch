@@ -33,6 +33,15 @@ uint32_t ip_2_uint32 (uint8_t *ipaddress, int byte_order)
 		return (byte[3] << 24) | (byte[2] << 16) | (byte[1] << 8) | (byte[0]);
 }
 
+void convert_uint32_str_ip_mask (char *str, uint32_t ip, uint32_t mask)
+{
+	uint8_t  addr[4];
+
+	uint32_2_ipstring (ntohl(ip), addr);
+
+	sprintf (str, "%d.%d.%d.%d/%d", addr[0], addr[1], addr[2], addr[3], u32ip_masklen(ntohl(mask)));
+}
+
 void uint32_2_ipstring (uint32_t ipAddress, uint8_t *addr)
 {
 	int i = 0;

@@ -29,49 +29,27 @@ extern struct linux_if_mapping linux_if_map[];
 
 void * packet_processing_task (void *unused)
 {
-	int retval = -1;
 	int len = 0;
-	int retry = 0;
-	char *pkt_buf = NULL;
 	char *buf = NULL;
-	fd_set rfds;
-	int max_fd = -1;
-	int max_ports = get_max_ports ();
+	int sock_id = -1;
+	int ifport = (int)unused;
+
+	sock_id = (int)port_cdb[ifport].platform;
+
+	if (sock_id < 0)
+		sleep (sock_id);
 
 	while (1) {
-		int i = 0;
-
-		FD_ZERO(&rfds);
-
-		while (i < max_ports) {
-			FD_SET((int)port_cdb[i].platform, &rfds);
-			i++;
-		}
-
-		max_fd = (int)port_cdb[i-1].platform;
-
-		retval = select (max_fd + 1, &rfds, NULL, NULL, NULL);
-
-		if (retval < 0)
-			continue;
-		i = 0;
-		while (i < max_ports) {
-			if (FD_ISSET((int)port_cdb[i].platform, &rfds)) {
-				char *buf = malloc (MAX_MTU);
-				len = rcv_pkt ((int)port_cdb[i].platform, buf);
-				if (len > 0) {
+		char *buf = malloc (MAX_MTU);
+		len = rcv_pkt (sock_id, buf);
+		if (len > 0) {
 #ifdef PKT_DBG
-					printf (" Index : %d\n", linux_if_map[i].linux_ifIndex);
+			printf (" Index : %d\n", linux_if_map[ifport].linux_ifIndex);
 #endif
-					process_pkt (buf, len, i + 1);
-				}
-				FD_CLR ((int)port_cdb[i].platform, &rfds);
-				free (buf);
-			}
-			i++;
+			process_pkt (buf, len, ifport + 1);
 		}
+		free (buf);
 	}
-
 	return 0;
 }
 

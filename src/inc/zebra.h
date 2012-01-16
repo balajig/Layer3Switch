@@ -48,8 +48,6 @@ typedef unsigned char   u_int8_t;
 #define UINT32_MAX	(4294967295U)
 #endif
 
-#define IN6_ARE_ADDR_EQUAL IN6_IS_ADDR_EQUAL
-
 /*
  * Internal defines, for use only in this file.
  * These are likely wrong on other than ILP32 machines, so warn.
@@ -190,6 +188,8 @@ struct in_pktinfo
  */
 #define ZEBRA_HEADER_MARKER              255
 
+#if 0
+defined in inc/rtm.h
 /* Zebra route's types. */
 #define ZEBRA_ROUTE_SYSTEM               0
 #define ZEBRA_ROUTE_KERNEL               1
@@ -203,7 +203,7 @@ struct in_pktinfo
 #define ZEBRA_ROUTE_BGP                  9
 #define ZEBRA_ROUTE_HSLS                 10
 #define ZEBRA_ROUTE_MAX                  11
-
+#endif
 /* Note: whenever a new route-type or zserv-command is added the
  * corresponding {command,route}_types[] table in lib/log.c MUST be
  * updated! */
@@ -343,5 +343,11 @@ struct fifo
 
 #define FIFO_TOP(F)                                   \
   (FIFO_EMPTY(F) ? NULL : ((struct fifo *)(F))->next)
+
+#define SHOW_ROUTE_V4_HEADER \
+  "Codes: K - kernel route, C - connected, S - static, R - RIP," \
+  "       O - OSPF, I - IS-IS, B - BGP," \
+  "       > - selected route, * - FIB route\n"
+
 
 #endif /* _ZEBRA_H */

@@ -83,13 +83,13 @@ struct obj_def
   u8_t  id_inst_len;
   /* instance part of supplied object identifier */
   s32_t *id_inst_ptr;
-};
+}__attribute__ ((packed));
 
 struct snmp_name_ptr
 {
   u8_t ident_len;
   s32_t *ident;
-};
+}__attribute__ ((packed));
 
 /** MIB const scalar (.0) node */
 #define MIB_NODE_SC 0x01
@@ -118,7 +118,7 @@ struct mib_node
   u8_t node_type;
   /* array or max list length */
   u16_t maxlength;
-};
+}__attribute__ ((packed));
 
 /** derived node for scalars .0 index */
 typedef struct mib_node mib_scalar_node;
@@ -139,7 +139,7 @@ struct mib_array_node
   /* additional struct members */
   const s32_t *objid;
   struct mib_node* const *nptr;
-};
+}__attribute__ ((packed));
 
 /** derived node, points to a fixed size mem_malloced array
     of sub-identifiers plus a 'child' pointer */
@@ -157,7 +157,7 @@ struct mib_ram_array_node
   /* aditional struct members */
   s32_t *objid;
   struct mib_node **nptr;
-};
+}__attribute__ ((packed));
 
 struct mib_list_node
 {
@@ -165,7 +165,7 @@ struct mib_list_node
   struct mib_list_node *next;
   s32_t objid;
   struct mib_node *nptr;
-};
+}__attribute__ ((packed));
 
 /** derived node, points to a doubly linked list
     of sub-identifiers plus a 'child' pointer */
@@ -185,7 +185,7 @@ struct mib_list_rootnode
   struct mib_list_node *tail;
   /* counts list nodes in list  */
   u16_t count;
-};
+}__attribute__ ((packed));
 
 /** derived node, has access functions for mib object in external memory or device
     using 'tree_level' and 'idx', with a range 0 .. (level_length() - 1) */
@@ -229,7 +229,7 @@ struct mib_external_node
   void (*get_value_pc)(u8_t rid, struct obj_def *od);
   void (*set_test_pc)(u8_t rid, struct obj_def *od);
   void (*set_value_pc)(u8_t rid, struct obj_def *od);
-};
+}__attribute__ ((packed));
 
 /** export MIB tree from mib2.c */
 extern const struct mib_array_node internet;

@@ -67,8 +67,10 @@ cparser_result_t cparser_cmd_show_interface(cparser_context_t *context)
 int  cli_set_port_enable (void)
 {
 	int port = cli_get_port ();
-	port_cdb[port - 1].ifAdminStatus = IF_UP;
-	port_cdb[port - 1].ifOperStatus = IF_UP;
+
+	if (hal_interface_up (IF_INFO(port)) < 0) {
+		return -1;
+	}
 	send_interface_enable_or_disable (port, IF_UP);
 	return 0;
 }
@@ -76,10 +78,10 @@ int  cli_set_port_enable (void)
 int cli_set_port_disable (void)
 {
 	int port = cli_get_port ();
-	port_cdb[port - 1].ifAdminStatus = IF_DOWN;
-	port_cdb[port - 1].ifOperStatus = IF_DOWN;
 
+	if (hal_interface_down (IF_INFO(port)) < 0) {
+		return -1;
+	}
 	send_interface_enable_or_disable (port, IF_DOWN);
-
 	return 0;
 }

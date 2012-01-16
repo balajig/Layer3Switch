@@ -67,6 +67,7 @@ static int create_raw_sock (char *name)
 
 	if ((sd =socket (AF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
 		perror ("SOCKET");
+		port_cdb[idx].platform = (void *)-1;
 		return -1;
 	}
 
@@ -76,8 +77,6 @@ static int create_raw_sock (char *name)
 
 	if (bind (sd, (struct sockaddr *)&addr, sizeof(struct sockaddr_ll)) < 0)
 		perror ("bind");
-
-	fcntl(sd, F_SETFL, O_NONBLOCK);
 
 	port_cdb[idx].platform = (void *)sd;
 
@@ -285,11 +284,6 @@ int make_if_up (if_t *p)
 	struct ifreq ifr;
 	int  fd = -1;
 
-	/*MUST be ROOT to make If UP*/
-	if (!getuid ()) {
-		return -1;
-	}
-	
 	fd =  socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd < 0)
 		return (-1);
@@ -302,8 +296,45 @@ int make_if_up (if_t *p)
 	ifr.ifr_flags |= IFF_RUNNING;
 
 	/*make the interface UP and Running*/
-	if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0)
+	if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
+		close(fd);
 		return -1;
+	}
+	/*Read and update the interface states*/
+	if (ioctl(fd, SIOCGIFFLAGS, &ifr) == 0)  {
+		p->ifAdminStatus = (ifr.ifr_flags & IFF_UP)? IF_UP: IF_DOWN;
+		p->ifOperStatus  = (ifr.ifr_flags & IFF_RUNNING)?IF_UP:IF_DOWN;
+	}
+
+	close(fd);
+	return 0;
+}
+
+int make_if_down (if_t *p)
+{
+	struct ifreq ifr;
+	int  fd = -1;
+
+	fd =  socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd < 0)
+		return (-1);
+
+	memset (&ifr, 0, sizeof(ifr));
+
+	strncpy(ifr.ifr_name, p->ifDescr, sizeof(ifr.ifr_name));
+
+	if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0) {
+		close(fd);
+		return -1;
+	}
+
+	ifr.ifr_flags &= ~ (IFF_UP | IFF_RUNNING);
+
+	/*make the interface Down*/
+	if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
+		close(fd);
+		return -1;
+	}
 
 	/*Read and update the interface states*/
 	if (ioctl(fd, SIOCGIFFLAGS, &ifr) == 0)  {
@@ -311,5 +342,6 @@ int make_if_up (if_t *p)
 		p->ifOperStatus  = (ifr.ifr_flags & IFF_RUNNING)?IF_UP:IF_DOWN;
 	}
 
+	close(fd);
 	return 0;
 }

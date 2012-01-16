@@ -276,6 +276,7 @@ PACK_STRUCT_END
 
 /* This structure represents a TCP segment on the unsent, unacked and ooseq queues */
 struct tcp_seg {
+  struct tcp_hdr *tcphdr;  /* the TCP header */
   struct tcp_seg *next;    /* used when putting segements on a queue */
   struct pbuf *p;          /* buffer containing data + TCP header */
   u16_t len;               /* the TCP length of this segment */
@@ -293,7 +294,7 @@ struct tcp_seg {
 #define TF_SEG_OPTS_TS          (u8_t)0x02U /* Include timestamp option. */
 #define TF_SEG_DATA_CHECKSUMMED (u8_t)0x04U /* ALL data (not the header) is
                                                checksummed into 'chksum' */
-  struct tcp_hdr *tcphdr;  /* the TCP header */
+ u8_t  pad[1];
 };
 
 #define LWIP_TCP_OPT_LENGTH(flags)              \

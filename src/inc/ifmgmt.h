@@ -153,4 +153,19 @@ extern if_t port_cdb[];
 #define   IF_OUT_ERRORS(port)       port_cdb[port - 1].ifOutErrors
 #define   IF_STP_STATE(port)        port_cdb[port - 1].pstp_info->state
 #define   IF_STP_INFO(port)         port_cdb[port - 1].pstp_info
+
+struct interface *if_lookup_by_index(unsigned int index);
+const char *ifindex2ifname(unsigned int index);
+struct interface *if_lookup_by_name(const char *name);
+unsigned int ifname2ifindex(const char *name);
+struct interface *if_lookup_exact_address(struct in_addr src);
+struct interface *if_lookup_address(struct in_addr src);
+struct interface *if_get_by_name(const char *name);
+int if_is_running(struct interface *ifp);
+int if_is_up(struct interface *ifp);
+int if_is_operative(struct interface *ifp);
+int if_is_loopback(struct interface *ifp);
+int if_is_broadcast(struct interface *ifp);
+int if_is_pointopoint(struct interface *ifp);
+int if_is_multicast(struct interface *ifp);
 #endif
