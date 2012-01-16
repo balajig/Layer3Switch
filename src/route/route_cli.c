@@ -30,13 +30,20 @@ cparser_result_t cparser_cmd_config_ip_route_network_mask_gateway(cparser_contex
 {
 	uint8_t addr[4];
 	uint8_t gateway[4];
+	char* prefix_str;
 
+#ifdef ZEBRA_RTM_SUPPORT
+	convert_uint32_str_ip_mask(prefix_str,*network_ptr,*mask_ptr);
+
+	if (!zebra_static_ipv4(1,prefix_str,NULL,gateway,NULL,NULL))
+		return CPARSER_OK;
+#else
 	uint32_2_ipstring (ntohl(*network_ptr), &addr);
-	uint32_2_ipstring (ntohl(*gateway_ptr), &gateway);
+        uint32_2_ipstring (ntohl(*gateway_ptr), &gateway);
 
 	if (!route_add_gateway (addr, u32ip_masklen (ntohl(*mask_ptr)), gateway))
 		return CPARSER_OK;
-
+#endif
 	printf ("No vaild interface\n");
 	return CPARSER_NOT_OK;
 }
