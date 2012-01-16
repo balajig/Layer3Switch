@@ -10,6 +10,10 @@
 
 #define MAX_TRY 3
 
+int validate_username_password (char *user, char *passwd);
+int process_lock (void);
+int process_logout();
+
 int process_logout()
 {
 	return process_login ();

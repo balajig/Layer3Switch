@@ -10,6 +10,11 @@
 #include "common_types.h"
 #include "ifmgmt.h"
 
+int hal_interface_down(struct interface *fp);
+int hal_interface_up(struct interface *fp);
+extern int make_if_down (struct interface *fp);
+extern int make_if_up (struct interface *fp);
+
 int hal_interface_down (struct interface *fp)
 {
 	if (make_if_down (fp) < 0) {

@@ -5,7 +5,19 @@
 #include <termios.h>
 #include <unistd.h>
 #include <termio.h>
+#include <ctype.h>
 #include "defs.h"
+
+int user_db_init(void);
+int create_user(char *username, char *password, int priv_level);
+int user_del(char *username);
+int show_users(void);
+static struct user_db * get_user_info (char *username);
+int validate_username_password (char *user, char *passwd);
+static int  update_user_info (char *username, char *password, int priv_level);
+static int password_validation (char *pswd);
+static char * encrypt_password (char *password);
+static char * decrypt_password (char *password);
 
 
 struct user_db {
@@ -19,11 +31,11 @@ static struct  user_db userdb[MAX_USERS];
 
 int user_db_init (void)
 {
-	if (create_user ("guest", "Guest1", 5)  < 0) {
+	if (create_user ((char *)"guest", (char *)"Guest1", 5)  < 0) {
 		write_string ("Default User \"guest\" creation failed\n");
 		return -1;
 	}
-	if (create_user ("admin", "Admin123", 0) < 0) {
+	if (create_user ((char *)"admin", (char *)"Admin123", 0) < 0) {
 		write_string ("Default User \"admin\" creation failed\n");
 		return -1;
 	}
@@ -31,7 +43,7 @@ int user_db_init (void)
 
 }
 
-struct user_db * get_user_info (char *username)
+static struct user_db * get_user_info (char *username)
 {
 	int i = MAX_USERS;
 
@@ -101,7 +113,7 @@ int create_user (char *username, char *password, int priv_level)
 	return -1;
 }
 
-int  update_user_info (char *username, char *password, int priv_level)
+static int  update_user_info (char *username, char *password, int priv_level)
 {
 
 	struct user_db * p = NULL;
@@ -119,7 +131,7 @@ int  update_user_info (char *username, char *password, int priv_level)
 	return 0;
 }
 
-int password_validation (char *pswd)
+static int password_validation (char *pswd)
 {
 	char is_u = 0;
 	char is_l = 0;
@@ -166,12 +178,12 @@ int user_del (char *username)
 } 
 
 
-char * encrypt_password (char *password)
+static char * encrypt_password (char *password)
 {
 
 }
 
-char * decrypt_password (char *password)
+static char * decrypt_password (char *password)
 {
 }
 

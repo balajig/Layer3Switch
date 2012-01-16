@@ -4,6 +4,20 @@
 #include "cparser_tree.h"
 #include "cli.h"
 
+/**************************************************************/
+void cparser_fsm_reset (cparser_t *parser);
+void cparser_record_command (cparser_t *parser, cparser_result_t rc);
+void cparser_print_prompt (const cparser_t *parser);
+int create_user(char *username, char *password, int priv_level);
+int user_del(char *username);
+int show_users(void);
+int process_lock (void);
+int process_logout();
+int show_mem_pool (void);
+int show_cpu_usage (void);
+int show_mac_table (void);
+/**************************************************************/
+
 static cparser_result_t cparser_cmd_enter_privileged_mode (cparser_t *parser, char *buf, int buf_size);
 
 
@@ -81,7 +95,7 @@ cparser_result_t cparser_cmd_config_user_del_username(cparser_context_t *context
 }
 cparser_result_t cparser_cmd_end(cparser_context_t *context)
 {
-
+	return CPARSER_OK;
 }
 cparser_result_t cparser_cmd_exit(cparser_context_t *context)
 {
@@ -102,6 +116,7 @@ cparser_result_t cparser_cmd_config_end(cparser_context_t *context)
 {
         set_prompt ("");
         set_curr_mode (USER_EXEC_MODE);
+	return CPARSER_OK;
 }
 
 cparser_result_t cparser_cmd_config_exit(cparser_context_t *context)
