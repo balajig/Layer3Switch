@@ -608,7 +608,7 @@ etharp_add_static_entry (ip_addr_t * ipaddr, struct eth_addr * ethaddr)
     {
         return ERR_RTE;
     }
-
+    ipaddr->addr = ntohl (ipaddr->addr);
     return update_arp_entry (netif, ipaddr, ethaddr,
                              ETHARP_FLAG_TRY_HARD | ETHARP_FLAG_STATIC_ENTRY);
 }
@@ -630,6 +630,7 @@ etharp_remove_static_entry (ip_addr_t * ipaddr)
                   ".%" U16_F "\n", ip4_addr1_16 (ipaddr), ip4_addr2_16 (ipaddr),
                   ip4_addr3_16 (ipaddr), ip4_addr4_16 (ipaddr)));
 
+    ipaddr->addr = ntohl (ipaddr->addr);
     /* find or create ARP entry */
     i = find_entry (ipaddr, ETHARP_FLAG_FIND_ONLY);
     /* bail out if no entry could be found */
@@ -1568,5 +1569,29 @@ void arp_setup_timers (void)
 int etharp_init (void)
 {
 	arp_setup_timers ();
+}
+
+int show_arp_entries (void)
+{
+	int i = 0;
+	printf ("ARP Entries\n");
+	printf ("-----------\n");
+	for (i = 0; i < ARP_TABLE_SIZE; ++i)
+	{
+		u8_t                state = arp_table[i].state;
+		if (state != ETHARP_STATE_EMPTY) {
+			uint8_t addr[4];
+		 	uint32_2_ipstring (arp_table[i].ipaddr.addr, &addr);
+			printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
+			printf(" at %02x:%02x:%02x:%02x:%02x:%02x on %s\n",
+				arp_table[i].ethaddr.addr[0],arp_table[i].ethaddr.addr[1],
+				arp_table[i].ethaddr.addr[2],arp_table[i].ethaddr.addr[3],
+				arp_table[i].ethaddr.addr[4],arp_table[i].ethaddr.addr[5],
+				arp_table[i].netif? arp_table[i].netif->ifDescr: "invalid");
+		}
+	}
+
+	return 0;
+
 }
 #endif /* LWIP_ARP || LWIP_ETHERNET */

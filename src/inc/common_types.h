@@ -140,6 +140,10 @@ struct ether_hdr
 	MACADDRESS  smac;      /* source ether addr    */
 	uint16_t type;                 /* packet type ID field */
 };
+typedef struct {
+    /** Six octet holding the MAC address */
+    uint8_t octet[6];
+} cparser_macaddr_t;
 
 struct ether_header
 {
