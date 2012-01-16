@@ -97,6 +97,47 @@ struct zebra_t
   struct meta_queue *mq;
 };
 
+struct zebra_desc_table
+{ 
+  unsigned int type;
+  const char *string;
+  char chr;
+};
+
+/* Zebra route's types. */
+#define ZEBRA_ROUTE_SYSTEM               0
+#define ZEBRA_ROUTE_KERNEL               1
+#define ZEBRA_ROUTE_CONNECT              2
+#define ZEBRA_ROUTE_STATIC               3
+#define ZEBRA_ROUTE_RIP                  4
+#define ZEBRA_ROUTE_RIPNG                5
+#define ZEBRA_ROUTE_OSPF                 6
+#define ZEBRA_ROUTE_OSPF6                7
+#define ZEBRA_ROUTE_ISIS                 8
+#define ZEBRA_ROUTE_BGP                  9
+#define ZEBRA_ROUTE_HSLS                 10
+#define ZEBRA_ROUTE_OLSR                 11
+#define ZEBRA_ROUTE_MAX                  12
+
+
+
+#define DESC_ENTRY(T,S,C) [(T)] = { (T), (S), (C) }
+static const struct zebra_desc_table route_types[] = {
+  DESC_ENTRY    (ZEBRA_ROUTE_SYSTEM,     "system",      'X' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_KERNEL,     "kernel",      'K' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_CONNECT,    "connected",   'C' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_STATIC,     "static",      'S' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_RIP,        "rip", 'R' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_RIPNG,      "ripng",       'R' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_OSPF,       "ospf",        'O' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_OSPF6,      "ospf6",       'O' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_ISIS,       "isis",        'I' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_BGP,        "bgp", 'B' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_HSLS,       "hsls",        'H' ),
+  DESC_ENTRY    (ZEBRA_ROUTE_OLSR,       "olsr",        'o' ),
+};
+
+
 static zlog_debug (const char *p, ...)
 {
 }

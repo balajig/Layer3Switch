@@ -344,4 +344,10 @@ struct fifo
 #define FIFO_TOP(F)                                   \
   (FIFO_EMPTY(F) ? NULL : ((struct fifo *)(F))->next)
 
+#define SHOW_ROUTE_V4_HEADER \
+  "Codes: K - kernel route, C - connected, S - static, R - RIP," \
+  "       O - OSPF, I - IS-IS, B - BGP," \
+  "       > - selected route, * - FIB route\n"
+
+
 #endif /* _ZEBRA_H */
