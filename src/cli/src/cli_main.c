@@ -11,7 +11,6 @@
 #include <termios.h>
 #include <unistd.h>
 #include <termio.h>
-#include "common_types.h"
 #include "defs.h"
 #include "cparser.h"
 #include "cparser_tree.h"

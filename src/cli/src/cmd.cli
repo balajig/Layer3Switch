@@ -10,9 +10,6 @@ show users
 //Displays the memory pool
 show mem-pool
 
-//Displays the ARP mapping
-show arp
-
 //Displays the CPU usage of the task
 show task-cpu
 
@@ -129,12 +126,6 @@ ip dns server address <IPV4ADDR:dnsserver>  primary
 
 //Specifies the address of domain name server
 ip dns server address <IPV4ADDR:dnsserver>
-
-// Define a static ARP mapping.
-arp <IPV4ADDR:ipaddr> <MACADDR:hostmacaddr>
-
-// Remove a static ARP mapping.
-no arp <IPV4ADDR:ipaddr>
 
 #endsubmode
 
