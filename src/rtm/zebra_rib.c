@@ -2011,6 +2011,7 @@ static_install_ipv4 (struct prefix *p, struct static_ipv4 *si)
 
       /* Link this rib to the tree. */
       rib_addnode (rn, rib);
+      fprintf(stdout,"Route Added Successfully\n");
     }
 }
 
@@ -2943,7 +2944,7 @@ rib_init (void)
 }
 
 
-static int
+int
 zebra_static_ipv4 (int add_cmd, const char *dest_str,
 		   const char *mask_str, const char *gate_str,
 		   const char *flag_str, const char *distance_str)
@@ -3025,4 +3026,175 @@ zebra_static_ipv4 (int add_cmd, const char *dest_str,
 
     return 0;
   }
+}
+static const struct zebra_desc_table unknown = { 0, "unknown", '?' };
+
+static const struct zebra_desc_table *
+zroute_lookup(u_int zroute)
+{
+  u_int i;
+
+  if (zroute >= sizeof(route_types)/sizeof(route_types[0]))
+    {
+      fprintf(stderr,"unknown zebra route type: %u", zroute);
+      return &unknown;
+    }
+  if (zroute == route_types[zroute].type)
+    return &route_types[zroute];
+  for (i = 0; i < sizeof(route_types)/sizeof(route_types[0]); i++)
+    {
+      if (zroute == route_types[i].type)
+        {
+          fprintf(stderr,"internal error: route type table out of order "
+                    "while searching for %u, please notify developers", zroute);
+          return &route_types[i];
+        }
+    }
+  fprintf(stderr,"internal error: cannot find route type %u in table!", zroute);
+  return &unknown;
+}
+
+
+char
+zebra_route_char(u_int zroute)
+{
+    return zroute_lookup(zroute)->chr;
+}
+
+void
+show_ip_route (struct route_node *rn, struct rib *rib)
+{
+  struct nexthop *nexthop;
+  int len = 0;
+  char buf[BUFSIZ];
+
+  /* Nexthop information. */
+  for (nexthop = rib->nexthop; nexthop; nexthop = nexthop->next)
+    {
+      if (nexthop == rib->nexthop)
+	{
+	  /* Prefix information. */
+	  fprintf (stdout, "%c%c%c %s/%d",
+			 zebra_route_char (rib->type),
+			 CHECK_FLAG (rib->flags, ZEBRA_FLAG_SELECTED)
+			 ? '>' : ' ',
+			 CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB)
+			 ? '*' : ' ',
+			 inet_ntop (AF_INET, &rn->p.u.prefix, buf, BUFSIZ),
+			 rn->p.prefixlen);
+		
+	  /* Distance and metric display. */
+	  if (rib->type != ZEBRA_ROUTE_CONNECT 
+	      && rib->type != ZEBRA_ROUTE_KERNEL)
+	     fprintf (stdout, " [%d/%d]", rib->distance,
+			    rib->metric);
+	}
+      else
+	fprintf (stdout,"  %c%*c",
+		 CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB)
+		 ? '*' : ' ',
+		 len - 3, ' ');
+
+      switch (nexthop->type)
+	{
+	case NEXTHOP_TYPE_IPV4:
+	case NEXTHOP_TYPE_IPV4_IFINDEX:
+	  fprintf (stdout, " via %s", inet_ntoa (nexthop->gate.ipv4));
+	  if (nexthop->ifindex)
+	    fprintf (stdout, ", %s", ifindex2ifname (nexthop->ifindex));
+	  break;
+	case NEXTHOP_TYPE_IFINDEX:
+	  fprintf (stdout, " is directly connected, %s",
+		   ifindex2ifname (nexthop->ifindex));
+	  break;
+	case NEXTHOP_TYPE_IFNAME:
+	  fprintf (stdout, " is directly connected, %s", nexthop->ifname);
+	  break;
+	case NEXTHOP_TYPE_BLACKHOLE:
+	  fprintf (stdout, " is directly connected, Null0");
+	  break;
+	default:
+	  break;
+	}
+      if (! CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_ACTIVE))
+	fprintf (stdout, " inactive");
+
+      if (CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_RECURSIVE))
+	{
+	  fprintf (stdout, " (recursive");
+		
+	  switch (nexthop->rtype)
+	    {
+	    case NEXTHOP_TYPE_IPV4:
+	    case NEXTHOP_TYPE_IPV4_IFINDEX:
+	      fprintf (stdout, " via %s)", inet_ntoa (nexthop->rgate.ipv4));
+	      break;
+	    case NEXTHOP_TYPE_IFINDEX:
+	    case NEXTHOP_TYPE_IFNAME:
+	      fprintf (stdout, " is directly connected, %s)",
+		       ifindex2ifname (nexthop->rifindex));
+	      break;
+	    default:
+	      break;
+	    }
+	}
+      switch (nexthop->type)
+        {
+          case NEXTHOP_TYPE_IPV4:
+          case NEXTHOP_TYPE_IPV4_IFINDEX:
+          case NEXTHOP_TYPE_IPV4_IFNAME:
+            if (nexthop->src.ipv4.s_addr)
+              {
+		if (inet_ntop(AF_INET, &nexthop->src.ipv4, buf, sizeof buf))
+                  fprintf (stdout, ", src %s", buf);
+              }
+            break;
+#ifdef HAVE_IPV6
+          case NEXTHOP_TYPE_IPV6:
+          case NEXTHOP_TYPE_IPV6_IFINDEX:
+          case NEXTHOP_TYPE_IPV6_IFNAME:
+            if (!IPV6_ADDR_SAME(&nexthop->src.ipv6, &in6addr_any))
+              {
+		if (inet_ntop(AF_INET6, &nexthop->src.ipv6, buf, sizeof buf))
+                  fprintf (stdout,", src %s", buf);
+              }
+            break;
+#endif /* HAVE_IPV6 */
+          default:
+	    break;
+        }
+
+      if (CHECK_FLAG (rib->flags, ZEBRA_FLAG_BLACKHOLE))
+               fprintf (stdout, ", bh");
+      if (CHECK_FLAG (rib->flags, ZEBRA_FLAG_REJECT))
+               fprintf (stdout, ", rej");
+
+      if (rib->type == ZEBRA_ROUTE_RIP
+	  || rib->type == ZEBRA_ROUTE_OSPF
+	  || rib->type == ZEBRA_ROUTE_ISIS
+	  || rib->type == ZEBRA_ROUTE_BGP)
+	{
+	  time_t uptime;
+	  struct tm *tm;
+
+	  uptime = time (NULL);
+	  uptime -= rib->uptime;
+	  tm = gmtime (&uptime);
+
+#define ONE_DAY_SECOND 60*60*24
+#define ONE_WEEK_SECOND 60*60*24*7
+
+	  if (uptime < ONE_DAY_SECOND)
+	    fprintf (stdout,  ", %02d:%02d:%02d", 
+		     tm->tm_hour, tm->tm_min, tm->tm_sec);
+	  else if (uptime < ONE_WEEK_SECOND)
+	    fprintf (stdout, ", %dd%02dh%02dm", 
+		     tm->tm_yday, tm->tm_hour, tm->tm_min);
+	  else
+	    fprintf (stdout, ", %02dw%dd%02dh", 
+		     tm->tm_yday/7,
+		     tm->tm_yday - ((tm->tm_yday/7) * 7), tm->tm_hour);
+	}
+      fprintf (stdout, "\n");
+    }
 }
