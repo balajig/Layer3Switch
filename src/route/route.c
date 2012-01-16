@@ -1,4 +1,7 @@
 #include "route.h"
+#include "rib.h"
+#include "zebra.h"
+#include "table.h"
 
 
 route_t *route = NULL;
@@ -313,6 +316,7 @@ unsigned char *route_lookup_ipaddr (unsigned char *ipaddr, if_t *netif)
 
 int  cli_show_ip_route (void)
 {
+#ifndef ZEBRA_RTM_SUPPORT
 	route_t *r;
 
         printf ("%-20s    %-16s      %-10s\n", "Destination", "Gateway","Iface");
@@ -328,5 +332,30 @@ int  cli_show_ip_route (void)
 		printf ("%-20s    %-16s      %-10s\n", network,gateway,r->netif->ifDescr);
 	}
 	return 0;
+#else
+
+	struct route_table *table;
+	struct route_node *rn;
+	struct rib *rib;
+	int first = 1;
+
+	table = vrf_table (AFI_IP, SAFI_UNICAST, 0);
+	if (! table)
+	  return 0;
+
+	/* Show all IPv4 routes. */
+	for (rn = route_top (table); rn; rn = route_next (rn))
+	  for (rib = rn->info; rib; rib = rib->next)
+	    {
+	     if (first)
+	       {
+		 fprintf (stdout, SHOW_ROUTE_V4_HEADER);
+		 first = 0;
+	       }
+	     show_ip_route (rn, rib);
+	    }
+	return 0;
+
+#endif
 }
 
