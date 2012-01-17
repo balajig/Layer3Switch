@@ -40,7 +40,7 @@ HASH_TABLE * create_hash_table (const char *hashname, int buckets,
 	int size = (sizeof (hash_bucket_t *)) * 
                    ((!buckets) ? (buckets = DEFAULT_HASH_BUCKETS) : buckets);
 
-	htable = (HASH_TABLE *) malloc (sizeof (HASH_TABLE)); 
+	htable = (HASH_TABLE *) calloc (1, sizeof (HASH_TABLE)); 
 
 	if (!htable) {
 		return NULL;
@@ -59,8 +59,7 @@ HASH_TABLE * create_hash_table (const char *hashname, int buckets,
 		free (htable);	
 		return NULL;
 	}
-        htable->bucket_array = (hash_bucket_t **) malloc (buckets * 
-							 sizeof (hash_bucket_t *));
+        htable->bucket_array = (hash_bucket_t **) calloc (1, buckets * sizeof (hash_bucket_t *));
 
 
 	if (!htable->bucket_array) {
