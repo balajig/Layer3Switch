@@ -39,6 +39,11 @@ int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask);
 int fetch_and_update_if_info (if_t *ife);
 int route_add_if (unsigned char *ipaddr, unsigned char masklen, if_t *netif);
 int read_interfaces (void);
+void update_linux_if_map (int port, int ifindex);
+int make_if_down (if_t *p);
+int make_if_up (if_t *p);
+void * if_link_monitor (void *arg);
+void send_interface_enable_or_disable (int port , int state);
 
 static int idx = 0;
 
@@ -259,7 +264,7 @@ int fetch_and_update_if_info (if_t *ife)
 	} 
 
 	if (ioctl (fd, SIOCGIFHWADDR, &ifr) == 0) {
-		unsigned char  *p = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+		//unsigned char  *p = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 		int i = 0;
 		while (i < 6) {
 			ife->ifPhysAddress[i] = switch_mac[i];
@@ -352,8 +357,9 @@ void * if_link_monitor (void *arg)
 	struct ifreq ifr;
 	int  fd = -1;
 	fd =  socket(AF_INET, SOCK_DGRAM, 0);
-	if (fd < 0)
-		return (-1);
+	if (fd < 0) {
+		return NULL;
+	}
 
 	memset (&ifr, 0, sizeof(ifr));
 

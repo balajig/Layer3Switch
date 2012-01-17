@@ -11,8 +11,17 @@
 #define MAX_TRY 3
 
 int validate_username_password (char *user, char *passwd);
-int process_lock (void);
-int process_logout();
+int process_logout(void);
+void show_login_prompt(void);
+int process_lock(void);
+int process_login(void);
+void read_username_password(char *pword, int flag);
+int write_input_on_screen(char c);
+void write_string (const char *str);
+int get_current_user_name(char *user);
+int set_current_user_name(char *user);
+char read_input(void);
+
 
 int process_logout()
 {

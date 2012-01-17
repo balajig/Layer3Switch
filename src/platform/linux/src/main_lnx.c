@@ -21,18 +21,12 @@
 #include "cli.h"
 
 int parse_cmdline (int argc, char *argv[]);
-int tmlib_init (void);
-int cli_init (const char *prmt);
-int spawn_pkt_processing_task (void);
-int port_init (void);
-int ip_init (void);
-int bridge_init (void);
-int vrrp_init (void);
-int dhcp_init (void);
-int init_task_cpu_usage_moniter_timer (void);
-int start_cli_task (void);
 void * packet_processing_task (void *unused);
 void * if_link_monitor (void *unused);
+void update_linux_if_map (int port, int ifindex);
+int create_raw_sock_for_pkt_capture (void);
+void layer3switch_init (void);
+int spawn_pkt_processing_task (void);
 
 char switch_mac[6] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x00};
 
@@ -41,7 +35,7 @@ void execute_system_call (char *arg);
 static int32_t  sockid_pkt = 0;
 
 struct linux_if_mapping {
-	int task_id;
+	tmtaskid_t task_id;
 	int linux_ifIndex;
 }linux_if_map[MAX_PORTS];
 
@@ -52,6 +46,7 @@ void execute_system_call (char *arg)
 {
 	system (arg);
 }
+
 
 int main (int argc, char **argv)
 {
@@ -85,7 +80,7 @@ int read_port_mac_address (int port, uint8_t *p)
 int spawn_pkt_processing_task (void)
 {
 	int ifport = 0;
-	int  taskid = 0;
+	tmtaskid_t  taskid = 0;
 	char task_name[16];
 
 	if (task_create ("linkmonitor", 98, 3, 32000, if_link_monitor, NULL, NULL, 

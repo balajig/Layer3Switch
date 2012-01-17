@@ -176,7 +176,7 @@ void display_fdb_entry (void *data)
 
 	mac = p->mac_addr.addr;
 
-        printf ("  %-4d    %02x:%02x:%02x:%02x:%02x:%02x    %-10s    %-d.%-02d\n", p->port,
+        printf ("  %-4d    %02x:%02x:%02x:%02x:%02x:%02x    %-10s    %-lu.%-2lu\n", p->port,
 		mac[0],mac[1],mac[2],mac[3],mac[4],mac[5], p->is_static?"static": "dynamic",
 		time / tm_get_ticks_per_second (), time % tm_get_ticks_per_second());
 

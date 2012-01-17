@@ -13,6 +13,7 @@
 #define MAX_UDP_CTRL_BLOCKS      256
 #define UDP_PKT_RX_ON_SOCK       0x1 
 
+#if 0
 static int udp_pool_id = -1;
 
 static struct list_head udp_sock_list;
@@ -144,9 +145,9 @@ udp_packet:
 
 	return 0;
 }
-#if 0
 int udp_sendto (unsigned long udpblk, uint8_t *data, size_t datalen, uint32_t to_addr, uint16_t to_port)
 {
 	return 0;
 }
+
 #endif

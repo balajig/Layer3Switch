@@ -21,8 +21,8 @@
 
 #include "zebra.h"
 
-int
-rtm_init (int argc, char **argv)
+int rtm_init (void);
+int rtm_init (void)
 {
   /* Zebra related initialize. */
   rib_init ();

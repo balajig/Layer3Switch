@@ -180,11 +180,12 @@ int user_del (char *username)
 
 static char * encrypt_password (char *password)
 {
-
+	return NULL;
 }
 
 static char * decrypt_password (char *password)
 {
+	return NULL;
 }
 
 int show_users (void)

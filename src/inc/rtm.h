@@ -138,7 +138,7 @@ static const struct zebra_desc_table route_types[] = {
 };
 
 
-static zlog_debug (const char *p, ...)
+static void zlog_debug (const char *p, ...)
 {
 }
 

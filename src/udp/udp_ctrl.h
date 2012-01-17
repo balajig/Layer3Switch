@@ -30,6 +30,7 @@ typedef struct udp_ctrl_blk
 	uint32_t	   udpEndpointRemoteAddressType;
 	uint16_t           udpEndpointLocalPort;
 	uint16_t           udpEndpointRemotePort;
-	unsigned char   count;
+	unsigned char      count;
+	uint8_t            pad[3];
 }udpctrlblk_t;
 

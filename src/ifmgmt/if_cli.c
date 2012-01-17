@@ -3,6 +3,7 @@
 #include "ifmgmt.h"
 #include "cparser.h"
 #include "cparser_tree.h"
+#include "hal.h"
 
 int  cli_set_port_enable (void);
 int cli_show_interfaces (int port);

@@ -12,6 +12,8 @@ void send_pkt (void *buf, int len, uint16_t dport);
 int stp_rcv_bpdu (void *pkt, int port, int vlanid, int len);
 int mac_address_update (MACADDRESS mac_addr, int32_t port_no, uint16_t vlan_id);
 int is_dest_stp_group_address (MACADDRESS mac);
+struct pbuf * allocate_and_cpy_buf_2_pbuf (uint8_t *buf, int len);
+err_t ethernet_input (struct pbuf *p, struct interface *netif);
 
 struct pbuf * allocate_and_cpy_buf_2_pbuf (uint8_t *buf, int len)
 {

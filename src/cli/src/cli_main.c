@@ -40,13 +40,38 @@ struct cli {
 }__attribute__ ((__packed__));
 
 
-static void init_signals (void);
 static void spawn_cli_thread (int);
 static void *cmdinterface(void *unused);
-static void init_tty_prompt (void);
 void handle_segfault (int );
-int start_cli_task (void);
-int cli_init (const char *prmt);
+int cli_init(const char *prmt);
+int cli_session_init(const char *prmt, int this_session);
+int start_cli_task(void);
+void install_signal_handler(int signo, void (*handler)(int));
+int set_prompt_internal(char *pmt, int len);
+int get_prompt(char *pmt);
+void print_prompt (void);
+int write_input_on_screen(char c);
+void write_string(const char *str);
+void handle_segfault(int signo);
+int get_curr_priv_level(void);
+int get_curr_mode(void);
+int set_curr_mode(int mode);
+void set_curr_priv_level(int level);
+int set_prompt(const char *prmpt_new);
+void  cli_set_port(int port);
+int cli_get_vlan_id(void);
+void cli_set_vlan_id(int vlan_id);
+int cli_get_port(void);
+int get_current_user_name(char *user);
+int set_current_user_name(char *user);
+char read_input(void);
+void do_mode_change(int mode);
+int change_vlan_mode(char **args);
+int change_to_interface_mode(char **args);
+int change_config_mode(char **args);
+int end_mode(char **args);
+int exit_mode(void);
+
 
 struct cli this_cli[MAX_CLI_SESSION];
 int this_session = -1;
@@ -81,6 +106,7 @@ int cli_init (const char *prmt)
 	this_session = 0;
         cli_set_vlan_id (1);
 	cli_session_init (prmt, 0);
+	return 0;
 }
 int cli_session_init (const char *prmt, int this_session) 
 {
@@ -118,11 +144,6 @@ void install_signal_handler (int signo, void (*handler)(int))
 	signal (signo, handler);
 }
 
-static void init_signals (void)
-{
-	install_signal_handler (SIGSEGV, handle_segfault);
-}
-
 static void spawn_cli_thread (int this_session)
 {
 	task_create ("CLI", 10, 3, 32000, cmdinterface, NULL, this_session, &clitskid);
@@ -136,6 +157,8 @@ static void *cmdinterface(void *unused)
 	rc = cparser_init(&this_cli[session].parser.cfg, &this_cli[session].parser);
 
 	cparser_run(&this_cli[session].parser);
+
+	return NULL;
 }
 
 int set_prompt_internal (char *pmt, int len)
@@ -155,7 +178,7 @@ int  get_prompt (char *pmt)
 	return 0;
 }
 
-print_prompt ()
+void print_prompt (void)
 {
 	write(gfd, this_cli[this_session].prmpt, 
 			strlen(this_cli[this_session].prmpt));
@@ -173,7 +196,6 @@ void write_string (const char *str)
 {
 	write (gfd, str, strlen(str));
 	fflush (stdout);
-	return 0;
 }
 
 
@@ -222,7 +244,7 @@ int set_prompt (const char *prmpt_new)
 	return 0;
 }
 
-int cli_set_port (int port)
+void cli_set_port (int port)
 {
 	this_cli[this_session].port_no = port;
 }
@@ -232,7 +254,7 @@ int cli_get_vlan_id ()
 	return this_cli[this_session].vlanid;
 }
 
-int cli_set_vlan_id (int vlan_id)
+void cli_set_vlan_id (int vlan_id)
 {
 	this_cli[this_session].vlanid = vlan_id;
 }

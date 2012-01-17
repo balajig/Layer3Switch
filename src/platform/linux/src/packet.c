@@ -26,11 +26,13 @@ struct linux_if_mapping {
 
 extern struct linux_if_mapping linux_if_map[];
 
+void * packet_processing_task (void *unused);
+int rcv_pkt (int sockid, void *buf);
+void process_pkt (void  *pkt, int len, uint16_t port);
 
 void * packet_processing_task (void *unused)
 {
 	int len = 0;
-	char *buf = NULL;
 	int sock_id = -1;
 	int ifport = (int)unused;
 

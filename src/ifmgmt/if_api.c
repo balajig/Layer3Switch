@@ -17,7 +17,7 @@ static struct interface * get_if (void *key, uint8_t key_type);
 /* Interface existance check by index. */
 struct interface * if_lookup_by_index (unsigned int index)
 {
-	return get_if (index, GET_IF_BY_IFINDEX);
+	return get_if ((void *)index, GET_IF_BY_IFINDEX);
 }
 
 const char * ifindex2ifname (unsigned int index)
@@ -31,7 +31,7 @@ const char * ifindex2ifname (unsigned int index)
 /* Interface existance check by interface name. */
 struct interface * if_lookup_by_name (const char *name)
 {
-	return get_if (index, GET_IF_BY_NAME);
+	return get_if ((void *)name, GET_IF_BY_NAME);
 }
 
 
@@ -47,7 +47,7 @@ unsigned int ifname2ifindex (const char *name)
 struct interface * if_lookup_exact_address (struct in_addr src)
 {
 	struct listnode *cnode;
-	struct interface *ifp;
+	struct interface *ifp = NULL;
 	struct prefix *p;
 	struct connected *c;
         int idx = 0;
@@ -74,7 +74,7 @@ struct interface * if_lookup_address (struct in_addr src)
 	struct prefix addr;
 	int bestlen = 0;
 	struct listnode *cnode;
-	struct interface *ifp;
+	struct interface *ifp = NULL;
 	struct connected *c;
 	struct interface *match = NULL;
         int idx = 0;
@@ -164,7 +164,7 @@ static struct interface * get_if (void *key, uint8_t key_type)
 					return &port_cdb[idx];
 				break;
 			case GET_IF_BY_IFINDEX:
-				if ((unsigned int)key == port_cdb[idx].ifIndex)
+				if ((int32_t)key == port_cdb[idx].ifIndex)
 					return &port_cdb[idx];
 				break;
 		}

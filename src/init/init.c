@@ -1,5 +1,18 @@
 #include "init.h"
 
+int lib_init (void);
+int cli_init (const char *prmt);
+int spawn_pkt_processing_task (void);
+int port_init (void);
+int bridge_init (void);
+int vrrp_init (void);
+int dhcp_init (void);
+int init_task_cpu_usage_moniter_timer (void);
+int start_cli_task (void);
+void layer3switch_init (void);
+int etharp_init (void);
+int rtm_init (void);
+
 void layer3switch_init (void)
 {
         lib_init ();

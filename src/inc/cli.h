@@ -20,7 +20,7 @@
 int cli_get_vlan_id ();
 int cli_get_port ();
 int set_prompt (const char *prmpt_new);
-int cli_set_port (int port);
+void cli_set_port (int port);
 int set_curr_mode (int mode);
-int  get_prompt (char *pmt);
+int get_prompt (char *pmt);
 int exit_mode ();

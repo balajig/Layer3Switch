@@ -7,6 +7,7 @@ int port_init (void);
 void send_interface_enable_or_disable (int port , int state);
 int read_interfaces (void);
 int cli_show_interfaces (int port);
+struct interface * if_connect_init (struct interface *ifp);
 
 if_t port_cdb[MAX_PORTS];
 

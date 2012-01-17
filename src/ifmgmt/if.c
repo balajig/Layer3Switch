@@ -72,6 +72,8 @@
 #define NETIF_LINK_CALLBACK(n)
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
+void ethernetif_init (struct interface *netif);
+
 void interface_init (struct interface *netif, void *state, if_input_fn input)
 {
     static u8_t         netifnum = 0;
