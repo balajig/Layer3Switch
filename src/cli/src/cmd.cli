@@ -40,6 +40,8 @@ show ip route
 //Displays DNS name server
 show ip dns
 
+#include "../sntp/sntpshow.cli"
+
 // Enable privileged mode
 enable privileged-mode
 
@@ -150,6 +152,8 @@ arp <IPV4ADDR:ipaddr> <MACADDR:hostmacaddr>
 
 // Remove a static ARP mapping.
 no arp <IPV4ADDR:ipaddr>
+
+#include "../sntp/sntpcfg.cli"
 
 #endsubmode
 

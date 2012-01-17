@@ -173,7 +173,7 @@ if_t *route_lookup (uint32_t ip)
 	route_t *r, *best;
 	unsigned char ipaddr[4];
 
- 	uint32_2_ipstring (ntohl(ip), ipaddr);
+ 	uint32_2_ipstring (ip, ipaddr);
 
 	best = 0;
 	for (r=route; r; r=r->next) {
