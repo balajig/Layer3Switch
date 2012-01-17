@@ -52,6 +52,11 @@ ping <IPV4ADDR:hostaddr>
 //ping host
 ping <STRING:hostname>
 
+//Debug memory pool allocation
+debug mem-pool { <INT:poolid> }
+
+//No Debug memory pool allocation
+no debug mem-pool { <INT:poolid> }
 
 //configuration mode
 configure terminal

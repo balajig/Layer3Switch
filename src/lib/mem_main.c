@@ -19,44 +19,56 @@
 #include "common_types.h"
 #include "list.h"
 
-#define MAX_POOL_NAME         8
-#define MACHINE_ALIGNEMENT    (sizeof(unsigned long))
+/* TODO: 1) shrik pool based on the flags 
+ *       2) block usage period
+ *       3) allocation freq handling
+ *       4) expanding the memory pool based on the flags
+ *       5) pool id allocation
+ *       6) Global pool allocator - implement using mmap, allocate based pages 
+ *       			    memory pool will access global pool allocator for memory
+ *       			    not malloc
+ *       7) more support the mempool debuging display address also
+ */
 
-#define MEM_ALIGNED(bytes)    (bytes % MACHINE_ALIGNEMENT) 
+#define   in_range(start, end, size, value)        ((value >= start) && ((value + size) <= end))
+#define   is_not_valid_block_offset(offset ,size)  (offset % size)
 
-#define in_range(start, end, size, value) ((value >= start)  && \
-					  ((value + size)  <= end))
+#define   ALLOCATED                             0x01
+#define   MAX_POOL_NAME                         8
+#define   MACHINE_ALIGNEMENT                    (sizeof(unsigned long))
+#define   MEM_ALIGNED(bytes)                    (bytes % MACHINE_ALIGNEMENT) 
+#define   COMPUTE_ADDR_BLOCK(saddr, cnt, size)	(saddr + (cnt * size))
 
-#define is_not_valid_block_offset(offset ,size)  (offset % size)
-
-#define COMPUTE_ADDR_BLOCK(saddr, cnt, size)	(saddr + (cnt * size))
-
-#define debug_mem_pool(fmt) printf ("MEM_POOL_MGR: %s", fmt);
+#define   debug_mem_pool(p, fmt)                   if (p->debug_enabled || debug_all)\
+							printf ("%s-MEM_POOL_MGR: %s\n", p->pool_name, fmt);
 
 struct mem_info {
 	struct list_head n;
+	sync_lock_t  lock;
 	char     pool_name[MAX_POOL_NAME];
-	uint8_t  *  saddr,  *  eaddr;
-	uint8_t  **addr_blks;
+	void     *saddr;
+	void     *addr_cache;
 	int      memid;
 	int      nblks;
 	int      useblks;
 	int      fblks;
 	int      size;
+	int      debug_enabled;
 };
 
-
-int mem_init (void);
-static void * alloc_mem (size_t size);
-static inline void free_mem(void *mem);
+static int               add_to_mcb        (struct mem_info *m);
+void  *                  tm_calloc         (size_t nmemb, size_t size);
+int                      show_mem_pool     (void);
+int                      mem_init          (void);
 static struct mem_info * get_next_free_mcb (int *memid);
-static struct mem_info * get_mem_info (int memid);
-static int build_free_mem_blk_list (struct mem_info *m);
-static int add_to_mcb (struct mem_info *m);
-void *tm_calloc(size_t nmemb, size_t size);
-int show_mem_pool (void);
+static struct mem_info * get_mem_info      (int memid);
+static void   *          alloc_mem         (size_t size);
+static void              free_mem          (void *mem);
+int                      debug_memory_pool (int pool_id, int set);
 
 static struct list_head hd_mcb;
+static unsigned long    pool_index;
+static int debug_all = 0;
 
 int mem_init (void)
 {
@@ -66,47 +78,52 @@ int mem_init (void)
 
 int mem_pool_create (const char *name, size_t size, int n_blks, int flags)
 {
-	unsigned int bytes = size * n_blks;
+	uint32_t           bytes = 0;
+	int                align = 0;
+	int                memid = -1;
+	struct mem_info    *mcb   = NULL;
 
-	struct mem_info   *mcb = NULL;
 
-	int          align = MEM_ALIGNED (bytes);
+	if (!name || !name[0] || !size  || !n_blks)
+		return -1;
 
-	int memid = -1;
+	/*Allocate 1 byte blk status to indicate free or not*/
+	size++;
+
+	bytes = size * n_blks;  
+
+	align = MEM_ALIGNED (bytes);
 
 	if (align) {
 		/*Requested memory is not aligned ,so aligned it 
  		  as per machine aligenment*/
 		align += ((MACHINE_ALIGNEMENT - align));
 		bytes +=  align;
-	//	warn ("Memory is not aligned");
+		//warn ("Memory is not aligned");
 	}
 
 	mcb = get_next_free_mcb (&memid); /*XXX:Dynamic or Static - What to do*/
 
 	if (!mcb) {
-		debug_mem_pool ("-ERR- : No Free Memory Blks\n");
+		printf ("-ERR- : No Free Memory Blks\n");
 		return -1;
 	}
-	strncpy(mcb->pool_name,name,MAX_POOL_NAME);
+
+	strncpy(mcb->pool_name, name, MAX_POOL_NAME);
 	mcb->size = size;
 	mcb->fblks = n_blks; 
 	mcb->useblks = 0;
 	mcb->nblks = n_blks;
 	mcb->memid = memid;
-	
+	create_sync_lock (&mcb->lock);
 	INIT_LIST_HEAD (&mcb->n);
 
 	if (!(mcb->saddr = alloc_mem (bytes))) {
-		debug_mem_pool ("-ERR- : Insufficent Memory\n");
+		debug_mem_pool (mcb, "-ERR- : Insufficent Memory\n");
 		return -1;
 	}
 
- 	/*Compute the end */
-	mcb->eaddr = mcb->saddr + bytes;
-
-	/*build the free list as a dll to access the mem blk O(1)*/
-	build_free_mem_blk_list (mcb);
+	mcb->addr_cache = COMPUTE_ADDR_BLOCK (mcb->saddr, 0, mcb->size);
 
 	/*Add to main control block*/
 	add_to_mcb (mcb);
@@ -122,10 +139,11 @@ int mem_pool_delete (int pool_id)
 		return -1;
 	}
 
-	free_mem (p->addr_blks);
+	sync_lock (&p->lock);
+	list_del (&p->n);
+	sync_unlock (&p->lock);
 	free_mem (p->saddr);
 	free_mem (p);
-
 	return 0;
 }	
 
@@ -135,38 +153,15 @@ static int add_to_mcb (struct mem_info *m)
 	return 0;
 }
 
-static int build_free_mem_blk_list (struct mem_info *m) 
-{
-	int i = 0;
-	uint8_t **mblk = NULL;
-
-	mblk = alloc_mem (sizeof(void *) * m->nblks);
-
-	if (!mblk) {
-		debug_mem_pool ("-E- Out of Memory");
-		return -1;
-	}
-
-	while (i < m->nblks) {
-		/*Compute the addr of the new block */
-		mblk[i] = COMPUTE_ADDR_BLOCK (m->saddr, i, m->size); 
-		++i;
-	}
-	m->addr_blks = (uint8_t **)mblk;
-
-	return 0;
-}
-
 static struct mem_info * get_next_free_mcb (int *memid)
 {
 	/*XXX: Re-implement this function*/
-	static int i = 0;
 	struct mem_info *p = alloc_mem (sizeof(struct mem_info));
 
 	if (!p) {
 		return NULL;
 	}
-	*memid = ++i;
+	*memid = ++pool_index;
 
 	return p;
 }
@@ -191,74 +186,128 @@ int show_mem_pool (void)
         struct list_head *head = &hd_mcb;
         struct list_head *p = NULL;
         struct mem_info  *pmem = NULL;
+
         printf ("Memory Pool Information\n");
-        printf ("-----------------------------------------------------------------------------------------------------------\n");
-        printf ("Name\t    Start Addr\t  End Addr\tMem ID\tTotal Blks\tUsed Blks\tFree Blks\tSize(Bytes)\n");
-        printf ("-----------------------------------------------------------------------------------------------------------\n");
+        printf (" %-8s %-8s  %-10s  %-10s   %-10s  %-10s  %-20s\n", 
+		"Pool ID", "Pool Name", "Total Blks","Used Blks", "Free Blks", "Size(Bytes)", "Start Addr");
+	printf (" %-8s %-8s  %-10s  %-10s   %-10s  %-10s  %-20s\n", 
+		"-------", "---------", "-----------", "---------", "--------", "---------", "-----------");
         list_for_each (p, head) 
 	{
                 pmem = list_entry (p, struct mem_info, n) ;
-                        printf ("%-10s %-14p %-15p %-8d %-16d %-14d %-14d %-5d\n",
-                                pmem->pool_name,pmem->saddr,pmem->eaddr,pmem->memid, pmem->nblks,
-                                pmem->useblks, pmem->fblks, pmem->size);
+		sync_lock (&pmem->lock);
+	        printf ("   %-8d %-8s  %-10d    %-10d %-10d  %-10d  %-20p\n", pmem->memid,
+                        pmem->pool_name,pmem->nblks, pmem->useblks, pmem->fblks, 
+			pmem->size - sizeof (uint8_t), pmem->saddr);
+		sync_unlock (&pmem->lock);
         }
         return 0;
 }
 
+int debug_memory_pool (int pool_id, int set)
+{
+	if (pool_id) {
+		struct mem_info *p = get_mem_info (pool_id);
+		if (!p) {
+			printf ("%%Error: Invalid memory pool id\n");
+			return -1;
+		}
+		if (set) {
+			p->debug_enabled = 1;
+		} else 
+			p->debug_enabled = 0;
+		
+	} else  {
+		if (set)
+			debug_all = 1;
+		else 
+			debug_all = 0;
+	}
+
+	return 0;
+}
 
 void * alloc_block (int memid)
 {
 	struct mem_info *p = get_mem_info (memid);
 	int i = 0;
-	void *retaddr = NULL;
+	uint8_t *retaddr = NULL;
+
+	sync_lock (&p->lock);
 
 	if (!p->fblks) {
+		debug_mem_pool (p, "No free memory blocks");
+		sync_unlock (&p->lock);
 		return NULL;
 	}
+
+	if (p->addr_cache) {
+		*(uint8_t *)p->addr_cache = ALLOCATED;
+		retaddr = ((uint8_t *)p->addr_cache + sizeof (uint8_t));
+		p->fblks--;
+		p->useblks++;
+		p->addr_cache = NULL;
+		debug_mem_pool (p, "Allocated NEW block");
+		sync_unlock (&p->lock);
+		return retaddr;
+	}
+
 	while (i < p->nblks) {
-		if (!p->addr_blks[i])  {
+		retaddr = COMPUTE_ADDR_BLOCK (p->saddr, i, p->size);
+		if (*retaddr) {
 			i++;
 			continue;
 		}
-		retaddr = p->addr_blks[i];
-		p->addr_blks[i] = NULL;
 		p->fblks--;
 		p->useblks++;
-		return retaddr;
+		*retaddr = ALLOCATED;
+		retaddr += sizeof (uint8_t);
+		debug_mem_pool (p, "Allocated NEW block");
+		sync_unlock (&p->lock);
+		return (void *)retaddr;
 	}
+
+	debug_mem_pool (p, "Allocated failed .. No New Block");
 	return NULL;	
 }
 
 int free_blk (int memid, void *addr)
 {
-	int  idx = -1;
-	int offset = -1;
-	struct mem_info *p = get_mem_info (memid);
+	int             offset = -1;
+	struct mem_info *p     = get_mem_info (memid);
 
 	if (!p) {
-		debug_mem_pool ("-ERR- : Invalid POOL ID\n");
+		warn ("-ERR- : Invalid POOL ID\n");
 		return -1;
 	}
 
-	if (!in_range (p->saddr, p->eaddr, p->size, (uint8_t *)addr)) 
+	sync_lock (&p->lock);
+
+	/*Move pointer 1 byte backwards to access the status flag*/
+	addr  = (uint8_t *)addr - sizeof (uint8_t); 
+
+	if (!in_range (p->saddr, (p->saddr + (p->size * p->nblks)), p->size, 
+		       (uint8_t *)addr)) 
 		goto invalid_address;
 
-	offset = ((unsigned long)addr - (unsigned long)p->saddr);
+	offset = (((unsigned long)addr - (unsigned long)p->saddr));
 
 	if (is_not_valid_block_offset (offset , p->size)) 
 		goto invalid_address;
 
-	idx = offset / p->size;
-
-	if (!p->addr_blks[idx]) {
-		p->addr_blks[idx] = addr;
-		p->fblks++;
-		p->useblks--;
-		return 0;
-	}
+	memset (addr, 0, p->size);
+	
+	if (!p->addr_cache)
+		p->addr_cache = addr;
+	p->fblks++;
+	p->useblks--;
+        debug_mem_pool (p, "Freed block");
+	sync_unlock (&p->lock);
+	return 0;
 
 invalid_address:
-	debug_mem_pool ("-ERR- : Trying to free invaild address\n");
+	printf ("-ERR- : Trying to free invaild address\n");
+	sync_unlock (&p->lock);
 	return -1;
 }
 

@@ -5,17 +5,18 @@
 #include "cli.h"
 
 /**************************************************************/
-void cparser_fsm_reset (cparser_t *parser);
-void cparser_record_command (cparser_t *parser, cparser_result_t rc);
-void cparser_print_prompt (const cparser_t *parser);
-int create_user(char *username, char *password, int priv_level);
-int user_del(char *username);
-int show_users(void);
-int process_lock (void);
-int process_logout();
-int show_mem_pool (void);
-int show_cpu_usage (void);
-int show_mac_table (void);
+void  cparser_fsm_reset       (cparser_t *parser);
+void  cparser_record_command  (cparser_t *parser, cparser_result_t rc);
+void  cparser_print_prompt    (const cparser_t *parser);
+int   create_user             (char *username, char *password, int priv_level);
+int   user_del                (char *username);
+int   show_users              (void);
+int   process_lock            (void);
+int   process_logout          (void);
+int   show_mem_pool           (void);
+int   show_cpu_usage          (void);
+int   show_mac_table          (void);
+int   debug_memory_pool       (int pool_id, int set);
 /**************************************************************/
 
 static cparser_result_t cparser_cmd_enter_privileged_mode (cparser_t *parser, char *buf, int buf_size);
@@ -177,5 +178,33 @@ cparser_result_t cparser_cmd_clear_screen (cparser_context_t *context)
 	printf("\033[2J");
 	printf("\033[0;0f");
 	fflush (stdout);
+	return CPARSER_OK;
+}
+
+cparser_result_t cparser_cmd_debug_mem_pool_poolid(cparser_context_t *context, int32_t *poolid_ptr)
+{
+	int rval = -1;
+
+	if (poolid_ptr) {
+		rval = debug_memory_pool (*poolid_ptr, 1);
+	} else
+		rval = debug_memory_pool (0, 1);
+
+	if (rval < 0)
+		return CPARSER_NOT_OK;
+	return CPARSER_OK;
+}
+
+cparser_result_t cparser_cmd_no_debug_mem_pool_poolid(cparser_context_t *context, int32_t *poolid_ptr)
+{
+	int rval = -1;
+
+	if (poolid_ptr) {
+		rval = debug_memory_pool (*poolid_ptr, 0);
+	} else
+		rval = debug_memory_pool (0, 0);
+
+	if (rval < 0)
+		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
