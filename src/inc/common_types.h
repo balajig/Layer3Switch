@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/times.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <linux/ip.h>
 #include <arpa/inet.h>

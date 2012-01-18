@@ -1,3 +1,6 @@
+
+#define EPOCH_DIFF ((unsigned long) 86400 * (365 * 70 + 17))
+
 #define JAN_1970 0x83aa7e80 /* 2208988800 1970 - 1900 in seconds */
 
 #define NTP_TO_UNIX(n,u) do {  u = n - JAN_1970; } while (0)
@@ -71,3 +74,8 @@ typedef struct
 	l_fp  txTimeStamp;
 }__attribute__ ((packed)) ntphdr_t;
 
+int synctime(void);
+unsigned long fromnetnum(const char *oct);
+const char *tonetnum(unsigned long num);
+unsigned long usec2frac(long usec);
+long frac2usec(unsigned long frac);

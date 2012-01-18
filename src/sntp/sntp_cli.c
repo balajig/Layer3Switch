@@ -24,6 +24,15 @@ cparser_result_t cparser_cmd_show_ntp_status(cparser_context_t *context)
 }
 cparser_result_t cparser_cmd_show_clock(cparser_context_t *context)
 {
+	char buf[64];                                                                   
+	struct timeval tv;                                                                 
+	time_t curtime;                                                                    
+
+	gettimeofday(&tv, NULL);                                                           
+	curtime = tv.tv_sec;                                                                 
+	strftime (buf, sizeof(buf), "%a %b %e %H:%M:%S %Z %Y", localtime(&curtime));                           
+	printf("%s\n", buf);                                               
+	return 0;          
 }
 cparser_result_t cparser_cmd_config_ntp_server_servername(cparser_context_t *context,
  							   char **servername_ptr)

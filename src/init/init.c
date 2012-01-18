@@ -72,6 +72,7 @@ void layer3switch_init (void)
 #if LWIP_DNS
 	dns_init ();
 #endif /* LWIP_DNS */
+	sntp_init ();
 
 #if LWIP_TIMERS
 	sys_timeouts_init ();
