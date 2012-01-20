@@ -208,7 +208,7 @@ int stop_timer (void *timer)
 {
 	TIMER_T  *p = (TIMER_T *)timer;
 
-	if (p->apptimer && p->is_running) {
+	if (p && p->apptimer && p->is_running) {
 
 		timer_del (p->apptimer, &tmrrq.root[p->wheel]);
 
