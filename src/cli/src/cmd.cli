@@ -7,40 +7,9 @@ lock
 //logout from current session
 logout
 
-//Displays user info
-show users
-
-//Displays the memory pool
-show mem-pool
-
-//Displays the ARP mapping
-show arp
-
-//Displays the CPU usage of the task
-show task-cpu
-
-//Display MAC table
-show mac-address-table
-
-//shows Spanning Tree
-show spanning-tree
-
-//shows Rapid spanning Tree
-show rstp 
-
-//Displays interface
-show interface
-
-//Displays IP Information
-show ip interface
-
-//Displays IP Information
-show ip route
-
-//Displays DNS name server
-show ip dns
-
+#include "../clicmds/showcmds.cli"
 #include "../sntp/sntpshow.cli"
+#include "../clicmds/debug.cli"
 
 // Enable privileged mode
 enable privileged-mode
@@ -53,12 +22,6 @@ ping <IPV4ADDR:hostaddr>
 
 //ping host
 ping <STRING:hostname>
-
-//Debug memory pool allocation
-debug mem-pool { <INT:poolid> }
-
-//No Debug memory pool allocation
-no debug mem-pool { <INT:poolid> }
 
 //configuration mode
 configure terminal
@@ -77,60 +40,10 @@ end
 //Exit from the current mode
 exit
 
-//Enables Spanning Tree
-spanning-tree
 
-//Disables Spanning Tree
-no spanning-tree
+#include "../clicmds/stp.cli"
 
-//Sets Spanning Priority <0-65535>
-spanning-tree priority <INT:priority>
-
-//Sets Spanning Hello time <1-10 secs>
-spanning-tree hello-time <INT:htimesecs> { forward-delay <INT:fdlysecs> } { max-age <INT:maxagesecs> }
-
-//Sets Spanning foward delay  <4-30 secs>
-spanning-tree forward-delay <INT:fdlysecs> { max-age <INT:maxagesecs> } { hello-time <INT:htimesecs> }
-
-//Sets Spanning max age <6-40 secs>
-spanning-tree max-age <INT:maxagesecs> { forward-delay <INT:fdlysecs> } { hello-time <INT:htimesecs> }
-
-//Sets Spanning ports path cost <0 – 200000000>
-spanning-tree ethernet <INT:portnum> path-cost <INT:cost>
-
-//Sets Spanning port priority <0 – 255>
-spanning-tree ethernet <INT:portnum> priority <INT:priority>
-
-//Enables Rapid Spanning Tree
-spanning-tree rstp
-
-//Disables Rapid Spanning Tree
-no spanning-tree rstp
-
-//Sets Rapid Spanning Priority <0-65535>
-spanning-tree rstp priority <INT:priority>
-
-//Sets Rapid Spanning Hello time <1-10 secs>
-spanning-tree rstp hello-time <INT:htimesecs> { forward-delay <INT:fdlysecs> } { max-age <INT:maxagesecs> }
-
-//Sets Rapid Spanning foward delay  <4-30 secs>
-spanning-tree rstp forward-delay <INT:fdlysecs> { max-age <INT:maxagesecs> } { hello-time <INT:htimesecs> }
-
-//Sets Rapid Spanning max age <6-40 secs>
-spanning-tree rstp max-age <INT:maxagesecs> { forward-delay <INT:fdlysecs> } { hello-time <INT:htimesecs> }
-
-//Sets Rapid Spanning ports path cost <0 – 200000000>
-spanning-tree rstp ethernet <INT:portnum> path-cost <INT:cost>
-
-//Sets Rapid Spanning port priority <0 – 255>
-spanning-tree rstp ethernet <INT:portnum> priority <INT:priority>
-
-//Sets Rapid Spanning port as edge port
-spanning-tree rstp ethernet <INT:portnum> admin-edge-port
-
-//Sets Rapid Spanning port link as point 2 point
-spanning-tree rstp ethernet <INT:portnum> admin-pt2pt
-
+#include "../clicmds/rstp.cli"
 
 //Configures default gateway
 ip default-gateway <IPV4ADDR:addr>
@@ -177,17 +90,7 @@ disable
 //Configures IP address on Interface
 ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
 
-//Acquires an IP address on an interface from DHCP
-ip address dhcp
-
-//Release an IP address on an interface and disables DHCP on it
-no ip address dhcp
-
-//Specifies or modifies the host name sent in the DHCP message
-ip dhcp client <STRING:hostname>
-
-//Configures the duration of the lease for an IP address
-ip dhcp client lease <INT:days> { <INT:hours> } { <INT:mins> }
+#include "../clicmds/dhcpclient.cli"
 
 //Exit from the mode
 exit
