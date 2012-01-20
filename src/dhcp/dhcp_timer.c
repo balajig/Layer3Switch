@@ -12,6 +12,7 @@
 #include "ifmgmt.h"
 #include "dhcp.h"
 
+void         dhcp_timeout (struct interface *netif);
 static void dhcp_timer_coarse (void *arg)
 {
     struct interface *p = (struct interface *)arg;
@@ -21,29 +22,15 @@ static void dhcp_timer_coarse (void *arg)
     mod_timer (p->dhcp->coarse_timer, DHCP_COARSE_TIMER_SECS * tm_get_ticks_per_second ());
 }
 
-static void dhcp_timer_fine (void *arg)
-{
-    struct interface *p = (struct interface *)arg;
-
-    dhcp_fine_tmr (p);
-
-    mod_timer (p->dhcp->fine_timer, milli_secs_to_ticks (DHCP_FINE_TIMER_MSECS));
-}
-
-void dhcp_if_start_fine_timer (struct interface *p)
-{
-    mod_timer (p->dhcp->coarse_timer, DHCP_COARSE_TIMER_SECS * tm_get_ticks_per_second ());
-}
-
 void dhcp_if_start_coarse_timer (struct interface *p)
 {
-    mod_timer (p->dhcp->fine_timer, milli_secs_to_ticks (DHCP_FINE_TIMER_MSECS));
+    mod_timer (p->dhcp->coarse_timer, DHCP_COARSE_TIMER_SECS * tm_get_ticks_per_second ());
 }
 
 int dhcp_setup_if_timers (struct interface *p)
 {
 	setup_timer(&p->dhcp->coarse_timer, dhcp_timer_coarse, p);
-	setup_timer(&p->dhcp->fine_timer, dhcp_timer_fine, p);
+	setup_timer(&p->dhcp->request_timeout, dhcp_timeout, p);
 
 	return 0;
 }
