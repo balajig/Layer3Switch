@@ -271,6 +271,7 @@ dns_setserver (u8_t numdns, ip_addr_t * dnsserver)
         (dnsserver != NULL) && !ip_addr_isany (dnsserver))
     {
         dns_servers[numdns].addr = (*dnsserver);
+	dns_servers[numdns].status = 1;
     }
 }
 
