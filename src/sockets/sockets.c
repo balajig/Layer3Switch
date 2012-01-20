@@ -38,11 +38,13 @@
  *
  */
 
+#define LWIP_PROVIDE_ERRNO
+
+#include "common_types.h"
 #include "opt.h"
 
 #if LWIP_SOCKET                    /* don't build if not configured for use in lwipopts.h */
 
-#include "sockets.h"
 #include "api.h"
 #include "sys.h"
 #include "igmp.h"

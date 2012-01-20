@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <sys/types.h>          /* See NOTES */
-#include <sys/socket.h>
-#include <netpacket/packet.h>
-#include <stdint.h>
 #include "rbtree.h"
 
 #define MAX_MTU 1500

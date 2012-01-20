@@ -9,21 +9,6 @@
  *  2 of the License, or (at your option) any later version.
  *
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <locale.h>
-#include <sys/socket.h>
-#include <linux/if.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <linux/sockios.h>
-#include <libintl.h>
-#include <netdb.h>
 #include "list.h"
 
 

@@ -36,7 +36,6 @@
 #include <stddef.h> /* for size_t */
 
 #include "inet.h"
-#include "sockets.h"
 
 #ifdef __cplusplus
 extern "C" {

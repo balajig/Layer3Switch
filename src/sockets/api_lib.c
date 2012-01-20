@@ -42,15 +42,17 @@
 #include "opt.h"
 
 #if LWIP_NETCONN                /* don't build if not configured for use in lwipopts.h */
-
+#include "sys.h"
 #include "api.h"
+#include "api_msg.h"
 #include "tcpip.h"
 #include "memp.h"
 
-#include "ip.h"
+#include "ip_hdr.h"
 #include "raw.h"
 #include "udp.h"
 #include "tcp.h"
+#include "tcpip.h"
 
 #include <string.h>
 
@@ -77,7 +79,8 @@ netconn_new_with_proto_and_callback (enum netconn_type t, u8_t proto,
         msg.function = do_newconn;
         msg.msg.msg.n.proto = proto;
         msg.msg.conn = conn;
-        if (TCPIP_APIMSG (&msg) != ERR_OK)
+        do_newconn (&msg.msg);
+	if (msg.msg.err != ERR_OK)
         {
             LWIP_ASSERT ("freeing conn without freeing pcb",
                          conn->pcb.tcp == NULL);
@@ -119,7 +122,7 @@ netconn_delete (struct netconn * conn)
 
     msg.function = do_delconn;
     msg.msg.conn = conn;
-    tcpip_apimsg (&msg);
+    do_newconn (&msg.msg);
 
     netconn_free (conn);
 
@@ -158,7 +161,8 @@ netconn_getaddr (struct netconn * conn, ip_addr_t * addr, u16_t * port,
     msg.msg.msg.ad.ipaddr = addr;
     msg.msg.msg.ad.port = port;
     msg.msg.msg.ad.local = local;
-    err = TCPIP_APIMSG (&msg);
+    do_getaddr (&msg.msg);
+    err = msg.msg.err; 
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -317,7 +321,8 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
            waiting on acceptmbox forever! */
         return err;
     }
-
+/*FIXME: SASI*/
+#if 0
 #if LWIP_SO_RCVTIMEO
     if (sys_arch_mbox_fetch
         (&conn->acceptmbox, (void **) &newconn,
@@ -329,6 +334,7 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
 #else
     sys_arch_mbox_fetch (&conn->acceptmbox, (void **) &newconn, 0);
 #endif /* LWIP_SO_RCVTIMEO */
+#endif 
     /* Register event with callback */
     API_EVENT (conn, NETCONN_EVT_RCVMINUS, 0);
 
@@ -748,6 +754,9 @@ netconn_join_leave_group (struct netconn * conn,
                           ip_addr_t * netif_addr,
                           enum netconn_igmp join_or_leave)
 {
+
+/*FIXME: SASI*/
+#if 0
     struct api_msg      msg;
     err_t               err;
 
@@ -764,6 +773,7 @@ netconn_join_leave_group (struct netconn * conn,
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
+#endif
 }
 #endif /* LWIP_IGMP */
 

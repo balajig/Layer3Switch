@@ -8,28 +8,17 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/types.h>      
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <netpacket/packet.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <mqueue.h>
-#include <arpa/inet.h>
-#include <stdint.h>
-#include <getopt.h>
 
 #include "common_types.h"
 #include "ifmgmt.h"
-#include "nt.h"
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <mqueue.h>
+#include <stdint.h>
+#include <getopt.h>
+#include <linux/if.h>
+
+#include "nt.h"
 
 #define _PATH_PROCNET_DEV "/proc/net/dev"
 

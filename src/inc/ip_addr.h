@@ -61,7 +61,6 @@ PACK_STRUCT_END
 
 /** ip_addr_t uses a struct for convenience only, so that the same defines can
  * operate both on ip_addr_t as well as on ip_addr_p_t. */
-typedef struct ip_addr ip_addr_t;
 typedef struct ip_addr_packed ip_addr_p_t;
 
 /*

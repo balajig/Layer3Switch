@@ -1,26 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/types.h>      
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <netpacket/packet.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <mqueue.h>
-#include <net/if.h>
-#include <arpa/inet.h>
-#include <stdint.h>
-#include <getopt.h>
-#include <netdb.h>
-#include <asm/types.h>
 #include "common_types.h"
 #include "ifmgmt.h"
 #undef PKT_DBG 
 #define MAX_MTU 2048
 
 struct linux_if_mapping {
+	tmtaskid_t task_id;
 	int linux_ifIndex;
 };
 

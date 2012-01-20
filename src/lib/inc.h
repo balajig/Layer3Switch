@@ -26,9 +26,6 @@
 #include <fcntl.h>
 #include <termio.h>
 #include <sys/types.h>     /* standard system types       */
-#include <netinet/in.h>    /* Internet address structures */
-#include <sys/socket.h>    /* socket interface functions  */
-#include <sys/select.h>
 #include <semaphore.h>
 #include "common_types.h"
 #include "list.h"

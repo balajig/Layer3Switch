@@ -31,7 +31,7 @@ void layer3switch_init (void)
 
         bridge_init ();
 
-        vrrp_init ();
+        //vrrp_init ();
 
         init_task_cpu_usage_moniter_timer ();
 

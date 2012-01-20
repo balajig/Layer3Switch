@@ -9,7 +9,7 @@ if [ "$1" = "" ]; then
 	make -C ./build 2>Err_log
 else
 	echo "Cleaning SIM Lib"
-	make $1 -C ./build 
+	make $1 -C ./build
 	rm -f Err_log
 	rm -f ./build/Switch.exe
 	rm -f ./Switch.exe

@@ -124,8 +124,5 @@ extern const char * inet_ntop (int family, const void *addrptr,
 extern int inet_pton (int family, const char *strptr, void *addrptr);
 #endif /* HAVE_INET_PTON */
 
-#ifndef HAVE_INET_ATON
-extern int inet_aton (const char *cp, struct in_addr *inaddr);
-#endif
 
 #endif /* _ZEBRA_SOCKUNION_H */

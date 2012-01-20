@@ -43,10 +43,10 @@
 #include "ip_addr.h"
 #include "inet.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-#if 0
 /* members are in network byte order */
 struct sockaddr_in {
   u8_t sin_len;
@@ -65,11 +65,6 @@ struct sockaddr {
 #ifndef socklen_t
 #  define socklen_t u32_t
 #endif
-/* Socket protocol types (TCP/UDP/RAW) */
-#define SOCK_STREAM     1
-#define SOCK_DGRAM      2
-#define SOCK_RAW        3
-
 /*
  * Option flags per-socket. These must match the SOF_ flags in ip.h (checked in init.c)
  */
@@ -114,11 +109,6 @@ struct linger {
  */
 #define  SOL_SOCKET  0xfff    /* options for socket level */
 
-
-#define AF_UNSPEC       0
-#define AF_INET         2
-#define PF_INET         AF_INET
-#define PF_UNSPEC       AF_UNSPEC
 
 #define IPPROTO_IP      0
 #define IPPROTO_TCP     6
@@ -306,7 +296,7 @@ typedef struct ip_mreq {
 #define LWIP_TIMEVAL_PRIVATE 1
 #endif
 
-#if LWIP_TIMEVAL_PRIVATE
+#ifndef LWIP_TIMEVAL_PRIVATE
 struct timeval {
   long    tv_sec;         /* seconds */
   long    tv_usec;        /* and microseconds */
@@ -339,6 +329,7 @@ int lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptse
 int lwip_ioctl(int s, long cmd, void *argp);
 int lwip_fcntl(int s, int cmd, int val);
 
+#if 0
 #if LWIP_COMPAT_SOCKETS
 #define accept(a,b,c)         lwip_accept(a,b,c)
 #define bind(a,b,c)           lwip_bind(a,b,c)
@@ -363,12 +354,11 @@ int lwip_fcntl(int s, int cmd, int val);
 #define write(a,b,c)          lwip_write(a,b,c)
 #define close(s)              lwip_close(s)
 #endif /* LWIP_POSIX_SOCKETS_IO_NAMES */
-
+#endif
 #endif /* LWIP_COMPAT_SOCKETS */
 
 #ifdef __cplusplus
 }
-#endif
 
 #endif /* LWIP_SOCKET */
 

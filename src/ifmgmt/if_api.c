@@ -6,6 +6,7 @@
 #include "prefix.h"
 #include "linklist.h"
 #include "rtm.h"
+#include "sockets.h"
 
 enum GET_IF {   
 	GET_IF_BY_NAME = 1, 

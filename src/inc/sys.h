@@ -47,22 +47,30 @@ typedef u8_t sys_mutex_t;
 typedef u8_t sys_mbox_t;
 
 #define sys_sem_new(s, c) ERR_OK
-#define sys_sem_signal(s)
-#define sys_sem_wait(s)
-#define sys_arch_sem_wait(s,t)
-#define sys_sem_free(s)
+#define sys_sem_signal(s) ERR_OK
+#define sys_sem_wait(s)  ERR_OK
+#define sys_arch_sem_wait(s,t) ERR_OK
+#define sys_sem_free(s) ERR_OK
 #define sys_mutex_new(mu) ERR_OK
-#define sys_mutex_lock(mu)
-#define sys_mutex_unlock(mu)
-#define sys_mutex_free(mu)
+#define sys_mutex_lock(mu) ERR_OK
+#define sys_mutex_unlock(mu) ERR_OK
+#define sys_mutex_free(mu) ERR_OK
 #define sys_mbox_new(m, s) ERR_OK
-#define sys_mbox_fetch(m,d)
-#define sys_mbox_tryfetch(m,d)
-#define sys_mbox_post(m,d)
-#define sys_mbox_trypost(m,d)
+#define sys_mbox_fetch(m,d)      ERR_OK
+#define sys_mbox_tryfetch(m,d)   ERR_OK
+#define sys_mbox_post(m,d)       ERR_OK
+#define sys_mbox_trypost(m,d)    ERR_OK
 #define sys_mbox_free(m)
 
 #define sys_thread_new(n,t,a,s,p)
+/** Return code for timeouts from sys_arch_mbox_fetch and sys_arch_sem_wait */
+#define SYS_ARCH_TIMEOUT 0xffffffffUL
+
+/** sys_mbox_tryfetch() returns SYS_MBOX_EMPTY if appropriate.
+ * For now we use the same magic value, but we allow this to change in future.
+ */
+#define SYS_MBOX_EMPTY SYS_ARCH_TIMEOUT 
+
 
 #define sys_msleep(t)
 
@@ -88,7 +96,7 @@ typedef void (*lwip_thread_fn)(void *arg);
 
 /** Define LWIP_COMPAT_MUTEX if the port has no mutexes and binary semaphores
     should be used instead */
-#if !LWIP_COMPAT_MUTEX
+#if LWIP_COMPAT_MUTEX
 /* for old ports that don't have mutexes: define them to binary semaphores */
 #define sys_mutex_t                   sys_sem_t
 #define sys_mutex_new(mutex)          sys_sem_new(mutex, 1)

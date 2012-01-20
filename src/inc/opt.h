@@ -1352,7 +1352,7 @@ typedef unsigned long  mem_ptr_t;
  * Don't use it if you're not an active lwIP project member
  */
 #ifndef LWIP_TCPIP_CORE_LOCKING
-#define LWIP_TCPIP_CORE_LOCKING         0
+#define LWIP_TCPIP_CORE_LOCKING         1
 #endif
 
 /**
@@ -1412,35 +1412,35 @@ typedef unsigned long  mem_ptr_t;
  * in seconds. (does not require sockets.c, and will affect tcp.c)
  */
 #ifndef LWIP_TCP_KEEPALIVE
-#define LWIP_TCP_KEEPALIVE              0
+#define LWIP_TCP_KEEPALIVE              1
 #endif
 
 /**
  * LWIP_SO_RCVTIMEO==1: Enable SO_RCVTIMEO processing.
  */
 #ifndef LWIP_SO_RCVTIMEO
-#define LWIP_SO_RCVTIMEO                0
+#define LWIP_SO_RCVTIMEO                1
 #endif
 
 /**
  * LWIP_SO_RCVBUF==1: Enable SO_RCVBUF processing.
  */
 #ifndef LWIP_SO_RCVBUF
-#define LWIP_SO_RCVBUF                  0
+#define LWIP_SO_RCVBUF                  1
 #endif
 
 /**
  * If LWIP_SO_RCVBUF is used, this is the default value for recv_bufsize.
  */
 #ifndef RECV_BUFSIZE_DEFAULT
-#define RECV_BUFSIZE_DEFAULT            INT_MAX
+#define RECV_BUFSIZE_DEFAULT            8192
 #endif
 
 /**
  * SO_REUSE==1: Enable SO_REUSEADDR option.
  */
 #ifndef SO_REUSE
-#define SO_REUSE                        0
+#define SO_REUSE                        1
 #endif
 
 /**

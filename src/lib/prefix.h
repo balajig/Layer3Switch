@@ -174,12 +174,12 @@ extern void apply_mask_ipv4 (struct prefix_ipv4 *);
 extern int prefix_ipv4_any (const struct prefix_ipv4 *);
 extern void apply_classful_mask_ipv4 (struct prefix_ipv4 *);
 
-extern in_addr_t ipv4_network_addr (in_addr_t hostaddr, int masklen);
+//extern in_addr_t ipv4_network_addr (in_addr_t hostaddr, int masklen);
 /* given the address of a host on a network and the network mask length,
  * calculate the broadcast address for that network;
  * special treatment for /31: returns the address of the other host
  * on the network by flipping the host bit */
-extern in_addr_t ipv4_broadcast_addr (in_addr_t hostaddr, int masklen);
+//extern in_addr_t ipv4_broadcast_addr (in_addr_t hostaddr, int masklen);
 
 extern int netmask_str2prefix_str (const char *, const char *, char *);
 

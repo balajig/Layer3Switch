@@ -42,9 +42,6 @@ extern "C" {
 
 
 #if 0
-struct in_addr {
-  u32_t s_addr;
-};
 
 /** 255.255.255.255 */
 #define INADDR_NONE         IPADDR_NONE
