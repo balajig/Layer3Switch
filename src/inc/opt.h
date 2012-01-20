@@ -48,11 +48,8 @@ typedef uint32_t u32_t;
 typedef int32_t s32_t;
 typedef unsigned long  mem_ptr_t;
 
-/*
- * Include user defined options first. Anything not defined in these files
- * will be set to standard values. Override anything you dont like!
- */
-#include "debug.h"
+#define LWIP_DEBUG 1
+
 
 /*
    -----------------------------------------------
@@ -1085,7 +1082,7 @@ typedef unsigned long  mem_ptr_t;
  * field.
  */
 #ifndef LWIP_NETIF_HOSTNAME
-#define LWIP_NETIF_HOSTNAME             0
+#define LWIP_NETIF_HOSTNAME             1
 #endif
 
 /**
@@ -1929,6 +1926,8 @@ typedef unsigned long  mem_ptr_t;
 #define TCP_DEBUG                       LWIP_DBG_OFF
 #endif
 
+#define SNTP_DEBUG                      LWIP_DBG_OFF
+
 /**
  * TCP_INPUT_DEBUG: Enable debugging in tcp_in.c for incoming debug.
  */
@@ -2015,13 +2014,6 @@ typedef unsigned long  mem_ptr_t;
 #endif
 
 /**
- * DHCP_DEBUG: Enable debugging in dhcp.c.
- */
-#ifndef DHCP_DEBUG
-#define DHCP_DEBUG                      LWIP_DBG_OFF
-#endif
-
-/**
  * AUTOIP_DEBUG: Enable debugging in autoip.c.
  */
 #ifndef AUTOIP_DEBUG
@@ -2056,5 +2048,12 @@ typedef unsigned long  mem_ptr_t;
 #ifndef ZEBRA_RTM_SUPPORT
 #define ZEBRA_RTM_SUPPORT			0
 #endif
+
+/*
+ * Include user defined options first. Anything not defined in these files
+ * will be set to standard values. Override anything you dont like!
+ */
+#include "debug.h"
+
 
 #endif /* __LWIP_OPT_H__ */

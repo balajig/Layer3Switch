@@ -233,7 +233,7 @@ extern "C" {
 #error "ETHARP_ALWAYS_INSERT option is deprecated. Remove it from your lwipopts.h."
 #endif
 #endif
-#ifdef LWIP_DEBUG
+#ifndef LWIP_DEBUG
 	static void
 lwip_sanity_check (void)
 {

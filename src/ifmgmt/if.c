@@ -134,12 +134,7 @@ void interface_init (struct interface *netif, void *state, if_input_fn input)
 #endif /* LWIP_IGMP */
 
     LWIP_DEBUGF (NETIF_DEBUG, ("netif: added interface %c%c IP addr ",
-                               netif->name[0], netif->name[1]));
-    ip_addr_debug_print (NETIF_DEBUG, ipaddr);
-    LWIP_DEBUGF (NETIF_DEBUG, (" netmask "));
-    ip_addr_debug_print (NETIF_DEBUG, netmask);
-    LWIP_DEBUGF (NETIF_DEBUG, (" gw "));
-    ip_addr_debug_print (NETIF_DEBUG, gw);
+                               netif->ifDescr[0], netif->ifDescr[1]));
     LWIP_DEBUGF (NETIF_DEBUG, ("\n"));
     return;
 }
@@ -232,8 +227,8 @@ if_set_ipaddr (struct interface *netif, ip_addr_t * ipaddr)
 
     LWIP_DEBUGF (NETIF_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
                  ("netif: IP address of interface %c%c set to %" U16_F ".%"
-                  U16_F ".%" U16_F ".%" U16_F "\n", netif->name[0],
-                  netif->name[1], ip4_addr1_16 (&netif->ip_addr),
+                  U16_F ".%" U16_F ".%" U16_F "\n", netif->ifDescr[0],
+                  netif->ifDescr[1], ip4_addr1_16 (&netif->ip_addr),
                   ip4_addr2_16 (&netif->ip_addr),
                   ip4_addr3_16 (&netif->ip_addr),
                   ip4_addr4_16 (&netif->ip_addr)));
@@ -253,8 +248,8 @@ if_set_gw (struct interface *netif, ip_addr_t * gw)
     ip_addr_set (&(netif->gw), gw);
     LWIP_DEBUGF (NETIF_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
                  ("netif: GW address of interface %c%c set to %" U16_F ".%"
-                  U16_F ".%" U16_F ".%" U16_F "\n", netif->name[0],
-                  netif->name[1], ip4_addr1_16 (&netif->gw),
+                  U16_F ".%" U16_F ".%" U16_F "\n", netif->ifDescr[0],
+                  netif->ifDescr[1], ip4_addr1_16 (&netif->gw),
                   ip4_addr2_16 (&netif->gw), ip4_addr3_16 (&netif->gw),
                   ip4_addr4_16 (&netif->gw)));
 }
@@ -277,7 +272,7 @@ if_set_netmask (struct interface *netif, ip_addr_t * netmask)
     snmp_insert_iprteidx_tree (0, netif);
     LWIP_DEBUGF (NETIF_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
                  ("netif: netmask of interface %c%c set to %" U16_F ".%" U16_F
-                  ".%" U16_F ".%" U16_F "\n", netif->name[0], netif->name[1],
+                  ".%" U16_F ".%" U16_F "\n", netif->ifDescr[0], netif->ifDescr[1],
                   ip4_addr1_16 (&netif->netmask),
                   ip4_addr2_16 (&netif->netmask),
                   ip4_addr3_16 (&netif->netmask),

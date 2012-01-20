@@ -15,8 +15,6 @@
 #include "udp.h"
 #include "ip_addr.h"
 
-#undef SNTP_DEBUG
-
 #define MAX_NTP_SERVER 1
 
 static void         sntp_recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t * addr, u16_t port);

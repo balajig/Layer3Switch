@@ -1053,9 +1053,9 @@ pbuf_take (struct pbuf * buf, const void *dataptr, u16_t len)
     u16_t               total_copy_len = len;
     u16_t               copied_total = 0;
 
-    LWIP_ERROR ("pbuf_take: invalid buf", (buf != NULL), return 0;
+    LWIP_ERROR ("pbuf_take: invalid buf", (buf == NULL), return 0;
         );
-    LWIP_ERROR ("pbuf_take: invalid dataptr", (dataptr != NULL), return 0;
+    LWIP_ERROR ("pbuf_take: invalid dataptr", (dataptr == NULL), return 0;
         );
 
     if ((buf == NULL) || (dataptr == NULL) || (buf->tot_len < len))

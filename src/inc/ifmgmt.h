@@ -43,8 +43,7 @@ struct interface {
 	struct autoip *autoip;
 #endif
 #if LWIP_NETIF_HOSTNAME
-	/* the hostname for this netif, NULL is a valid value */
-	char*  hostname;
+	char  hostname[MAX_PORT_NAME];
 #endif /* LWIP_NETIF_HOSTNAME */
 #if LWIP_IGMP
 	/** This function could be called to add or delete a entry in the multicast

@@ -33,7 +33,7 @@ struct dhcp
   /** incoming msg */
   struct dhcp_msg *msg_in;
   TIMER_ID coarse_timer;
-  TIMER_ID fine_timer;
+  TIMER_ID request_timeout; /* #ticks with period DHCP_FINE_TIMER_SECS for request timeout */
   struct pbuf *p_out; /* pbuf of outcoming msg */
   struct dhcp_msg *msg_out; /* outgoing msg */
 
@@ -55,7 +55,6 @@ struct dhcp
   /* @todo: LWIP_DHCP_BOOTP_FILE configuration option?
      integrate with possible TFTP-client for booting? */
   u16_t options_out_len; /* outgoing msg options length */
-  u16_t request_timeout; /* #ticks with period DHCP_FINE_TIMER_SECS for request timeout */
   u16_t t1_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for renewal time */
   u16_t t2_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for rebind time */
   /** current DHCP state machine state */

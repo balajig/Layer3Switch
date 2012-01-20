@@ -380,7 +380,7 @@ ip_input (struct pbuf * p, struct interface * inp)
                 {
                     LWIP_DEBUGF (IP_DEBUG,
                                  ("ip_input: packet accepted on interface %c%c\n",
-                                  netif->name[0], netif->name[1]));
+                                  netif->ifDescr[0], netif->ifDescr[1]));
                     /* break out of for loop */
                     break;
                 }
@@ -393,7 +393,7 @@ ip_input (struct pbuf * p, struct interface * inp)
                 {
                     LWIP_DEBUGF (IP_DEBUG,
                                  ("ip_input: LLA packet accepted on interface %c%c\n",
-                                  netif->name[0], netif->name[1]));
+                                  netif->ifDescr[0], netif->ifDescr[1]));
                     /* break out of for loop */
                     break;
                 }
@@ -784,8 +784,8 @@ ip_output_if_opt (struct pbuf * p, ip_addr_t * src, ip_addr_t * dest,
     IP_STATS_INC (ip.xmit);
 
     LWIP_DEBUGF (IP_DEBUG,
-                 ("ip_output_if: %c%c%" U16_F "\n", netif->name[0],
-                  netif->name[1], netif->num));
+                 ("ip_output_if: %c%c%" U16_F "\n", netif->ifDescr[0],
+                  netif->ifDescr[1], netif->num));
     ip_debug_print (p);
 
 #if ENABLE_LOOPBACK

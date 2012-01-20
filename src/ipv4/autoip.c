@@ -283,8 +283,8 @@ autoip_bind (struct interface *netif)
 
     LWIP_DEBUGF (AUTOIP_DEBUG | LWIP_DBG_TRACE,
                  ("autoip_bind(netif=%p) %c%c%" U16_F " %" U16_F ".%" U16_F ".%"
-                  U16_F ".%" U16_F "\n", (void *) netif, netif->name[0],
-                  netif->name[1], (u16_t) netif->num,
+                  U16_F ".%" U16_F "\n", (void *) netif, netif->ifDescr[0],
+                  netif->ifDescr[1], (u16_t) netif->num,
                   ip4_addr1_16 (&autoip->llipaddr),
                   ip4_addr2_16 (&autoip->llipaddr),
                   ip4_addr3_16 (&autoip->llipaddr),
@@ -328,7 +328,7 @@ autoip_start (struct interface * netif)
 
     LWIP_DEBUGF (AUTOIP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
                  ("autoip_start(netif=%p) %c%c%" U16_F "\n", (void *) netif,
-                  netif->name[0], netif->name[1], (u16_t) netif->num));
+                  netif->ifDescr[0], netif->ifDescr[1], (u16_t) netif->num));
     if (autoip == NULL)
     {
         /* no AutoIP client attached yet? */

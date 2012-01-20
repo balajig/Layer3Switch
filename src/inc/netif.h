@@ -196,7 +196,7 @@ void if_set_link_callback(struct interface *netif, if_status_callback_fn link_ca
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
 #if LWIP_NETIF_HOSTNAME
-#define if_set_hostname(netif, name) do { if((netif) != NULL) { (netif)->hostname = name; }}while(0)
+#define if_set_hostname(netif, name)  if((netif) != NULL) { memcpy ((netif)->hostname, name, strlen (name));}
 #define if_get_hostname(netif) (((netif) != NULL) ? ((netif)->hostname) : NULL)
 #endif /* LWIP_NETIF_HOSTNAME */
 

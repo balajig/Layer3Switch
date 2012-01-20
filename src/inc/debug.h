@@ -34,6 +34,13 @@
 
 #include "arch.h"
 
+#define U16_F "hu"
+#define X16_F "hx"
+#define S16_F "hd"
+#define X32_F "x"
+#define S32_F "d"
+#define U32_F "u"
+
 /** lower two bits indicate debug level
  * - 0 all
  * - 1 warning
@@ -67,7 +74,10 @@
 
 /** if "expression" isn't true, then print "message" and execute "handler" expression */
 #ifndef LWIP_ERROR
-#define LWIP_ERROR(message, expression, handler) 
+#define LWIP_ERROR(message, expression, handler)
+//#define LWIP_ERROR(message, expression, handler)  if (expression) { \
+//							printf (message); \
+//							handler; 
 #endif /* LWIP_ERROR */
 
 #ifdef LWIP_DEBUG
@@ -79,7 +89,7 @@
                                    ((debug) & LWIP_DBG_ON) && \
                                    ((debug) & LWIP_DBG_TYPES_ON) && \
                                    ((s16_t)((debug) & LWIP_DBG_MASK_LEVEL) >= LWIP_DBG_MIN_LEVEL)) { \
-                                 LWIP_PLATFORM_DIAG(message); \
+                                 printf message; \
                                  if ((debug) & LWIP_DBG_HALT) { \
                                    while(1); \
                                  } \

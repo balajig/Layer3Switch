@@ -1285,7 +1285,7 @@ tcp_kill_prio (u8_t prio)
     if (inactive != NULL)
     {
         LWIP_DEBUGF (TCP_DEBUG,
-                     ("tcp_kill_prio: killing oldest PCB %p (%" S32_F ")\n",
+                     ("tcp_kill_prio: killing oldest PCB %p (U32_F)\n",
                       (void *) inactive, inactivity));
         tcp_abort (inactive);
     }
@@ -1315,8 +1315,8 @@ tcp_kill_timewait (void)
     if (inactive != NULL)
     {
         LWIP_DEBUGF (TCP_DEBUG,
-                     ("tcp_kill_timewait: killing oldest TIME-WAIT PCB %p (%"
-                      S32_F ")\n", (void *) inactive, inactivity));
+                     ("tcp_kill_timewait: killing oldest TIME-WAIT PCB %p S32_F\n", 
+		     (void *) inactive, inactivity));
         tcp_abort (inactive);
     }
 }
