@@ -294,6 +294,14 @@ struct sockaddr_in6
 #define ARPOP_InREPLY   9               /* InARP reply                  */
 #define ARPOP_NAK       10              /* (ATM)ARP NAK                 */
 
+typedef uint8_t u8_t;
+typedef int8_t s8_t;
+typedef uint16_t u16_t;
+typedef int16_t  s16_t;
+typedef uint32_t u32_t;
+typedef int32_t s32_t;
+typedef unsigned long  mem_ptr_t;
+
 
 typedef struct mac_addr
 {       

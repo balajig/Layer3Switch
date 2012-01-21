@@ -39,7 +39,7 @@ int llc_mac_hdr_init (uint8_t *pkt, const uint8_t *daddr, const uint8_t *saddr, 
 
 void llc_pdu_header_init(uint8_t *pkt, uint8_t type, uint8_t ssap, uint8_t dsap, uint8_t cr)
 {
-        struct llc_pdu_un *pdu = (struct llc_pdu_un *)(pkt + sizeof(MACHDR));
+        struct llc_pdu_un *pdu = (struct llc_pdu_un *)pkt;
         pdu->dsap = dsap;
         pdu->ssap = ssap;
         pdu->ssap |= cr;
@@ -47,7 +47,7 @@ void llc_pdu_header_init(uint8_t *pkt, uint8_t type, uint8_t ssap, uint8_t dsap,
 
 void llc_pdu_init_as_ui_cmd(uint8_t *pkt)
 {
-        struct llc_pdu_un *pdu = (struct llc_pdu_un *)(pkt + sizeof(MACHDR));
+        struct llc_pdu_un *pdu = (struct llc_pdu_un *)pkt;
         pdu->ctrl_1  = LLC_PDU_TYPE_U;
         pdu->ctrl_1 |= LLC_1_PDU_CMD_UI;
 }

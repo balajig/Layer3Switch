@@ -1,6 +1,8 @@
 #include "common_types.h"
 #include "list.h"
 #include "bridge.h"
+#include "opt.h"
+#include "pbuf.h"
 
 #define BPDU_PROTOCOL_ID        0x00
 #define BPDU_VERSION_ID         0x00
@@ -117,7 +119,7 @@ struct stp_hdr {
   uint16_t max_age;
   uint16_t hello_time;
   uint16_t  forward_delay;
-};
+}STP_HDR_T;
 
 
 
@@ -126,7 +128,7 @@ typedef struct stp_bpdu {
  * Params common for the CONF and TC BPDU*
  * ***************************************/
   MACHDR   mac_hdr;
-  LLCHDR   eth_hdr;
+  LLCHDR   llc_hdr;
   uint16_t protocol;
   uint8_t  version;
   uint8_t  type;

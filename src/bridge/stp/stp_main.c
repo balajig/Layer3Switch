@@ -1,4 +1,5 @@
 #include "stp_info.h"
+#include "ifmgmt.h"
 
 static void stp_encode_bpdu (STP_BPDU_T *cpdu);
 static void stp_decode_bpdu (STP_BPDU_T *cpdu);
@@ -683,41 +684,49 @@ int stp_is_designated_port(const struct stp_port_entry *p)
 }
 
 
-static void stp_send_bpdu(struct stp_port_entry *p,  const unsigned char *data,
+static void stp_send_bpdu(struct stp_port_entry *p,  struct pbuf *p_out,
 			 int length)
 {
-	uint8_t * pkt = NULL;
 	uint8_t  smac[6];
 
-	int size = sizeof (MACHDR) + sizeof(LLCHDR);
 
-	pkt = tm_malloc (size + length); 
-
-	if (!pkt)
-		return;
-
-	llc_pdu_header_init (pkt , LLC_PDU_TYPE_U, LLC_SAP_BSPAN, LLC_SAP_BSPAN, 
+	llc_pdu_header_init (p_out->payload , LLC_PDU_TYPE_U, LLC_SAP_BSPAN, LLC_SAP_BSPAN, 
 			     LLC_1_PDU_CMD_UI);
 
-	llc_pdu_init_as_ui_cmd(pkt);
+	llc_pdu_init_as_ui_cmd(p_out->payload);
 
 	get_port_mac_address (p->port_no, smac);
 
-	llc_mac_hdr_init (pkt, br_group_address, smac, 0x4, length + sizeof(LLCHDR));
+	/* make room for Eth HDR - should not fail */
+	if (pbuf_header (p_out,sizeof (struct mac_hdr)) != 0)
+	{
+		printf ("could not allocate room for LLC header\n");
+		pbuf_free (p_out);
+		return;
+	}
 
-	memcpy(pkt + size, data, length);
+	llc_mac_hdr_init (p_out->payload, br_group_address, smac, 0x4, length);
 
-	send_packet (pkt, p->port_no, length + size);
+	send_packet (p_out->payload, IF_INDEX(p->port_no), length + sizeof (MACHDR));
 
-	tm_free (pkt, size + length);
+	pbuf_free (p_out);
 }
 
 void stp_send_config_bpdu(struct stp_port_entry *p, STP_BPDU_T *bpdu)
 {
-	unsigned char buf[35];
+	unsigned char * buf = NULL;
+        struct pbuf    *p_out = NULL;
 
 	if (p->br->stp_enabled != STP_ENABLED)
 		return;
+
+	p_out = pbuf_alloc (PBUF_LINK, sizeof (STP_HDR_T) + sizeof (LLCHDR), PBUF_RAM);
+
+	if (!p_out)
+		return;
+
+	buf = p_out->payload + sizeof (LLCHDR);
+
 	buf[0] = 0;
 	buf[1] = 0;
 	buf[2] = 0;
@@ -749,18 +758,26 @@ void stp_send_config_bpdu(struct stp_port_entry *p, STP_BPDU_T *bpdu)
 	memcpy (&buf[31], &bpdu->hello_time, sizeof(uint16_t));
 	memcpy (&buf[33], &bpdu->forward_delay, sizeof(uint16_t));
 
-	stp_send_bpdu(p, buf, 35);
+	stp_send_bpdu(p, p_out, sizeof (STP_HDR_T) + sizeof (LLCHDR));
 }
 
 void stp_send_tcn_bpdu(struct stp_port_entry *p)
 {
-	unsigned char buf[4];
+	unsigned char *buf;
+        struct pbuf    *p_out = NULL;
 
 	if (!p)
 		return;
 
 	if (p->br->stp_enabled != STP_ENABLED)
 		return;
+
+	p_out = pbuf_alloc (PBUF_LINK, 4 + sizeof (LLCHDR), PBUF_RAM);
+
+	if (!p_out)
+		return;
+
+	buf = p_out->payload  + sizeof (LLCHDR);
 
 	buf[0] = 0;
 	buf[1] = 0;

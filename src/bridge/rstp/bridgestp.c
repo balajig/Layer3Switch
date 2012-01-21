@@ -35,6 +35,7 @@
  */
 
 #include "bridgestp.h"
+#include "ifmgmt.h"
 
 #define LLC_8021D_LSAP  0x42
 #define LLC_UI          0x3
@@ -209,7 +210,7 @@ bstp_transmit_tcn(struct bstp_state *bs, struct bstp_port *bp)
 
 	bp->bp_txcount++;
 
-        send_packet (&bpdu, ifp, sizeof(bpdu));
+        send_packet (&bpdu, IF_INDEX (ifp), sizeof(bpdu));
 }
 
 static void
@@ -320,7 +321,7 @@ bstp_send_bpdu(struct bstp_state *bs, struct bstp_port *bp,
 	}
 	bp->bp_txcount++;
 
-        send_packet (bpdu, ifp, sizeof(*bpdu));
+        send_packet (bpdu, IF_INDEX (ifp), sizeof(*bpdu));
 
 }
 
