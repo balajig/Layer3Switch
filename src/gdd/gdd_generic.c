@@ -8,7 +8,6 @@
 #define IS_MAC_UCAST_MAC(addr)  (!(addr[0] & 0xFF))
 
 void process_pkt (void  *pkt, int len, uint16_t port);
-void send_pkt (void *buf, int len, uint16_t dport);
 int stp_rcv_bpdu (void *pkt, int port, int vlanid, int len);
 int mac_address_update (MACADDRESS mac_addr, int32_t port_no, uint16_t vlan_id);
 int is_dest_stp_group_address (MACADDRESS mac);
@@ -59,8 +58,4 @@ void process_pkt (void  *pkt, int len, uint16_t port)
     	p = allocate_and_cpy_buf_2_pbuf (pkt, len);
 	if (p)
 		ethernet_input (p, IF_INFO (port));
-}
-
-void send_pkt (void *buf, int len, uint16_t dport)
-{
 }

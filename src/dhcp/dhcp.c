@@ -1164,15 +1164,14 @@ dhcp_bind (struct interface *netif)
     LWIP_DEBUGF (g_dhcp_debug | LWIP_DBG_STATE,
                  ("dhcp_bind(): IP: 0x%08" X32_F "\n",
                   ip4_addr_get_u32 (&dhcp->offered_ip_addr)));
-    if_set_ipaddr (netif, &dhcp->offered_ip_addr);
     LWIP_DEBUGF (g_dhcp_debug | LWIP_DBG_STATE,
                  ("dhcp_bind(): SN: 0x%08" X32_F "\n",
                   ip4_addr_get_u32 (&sn_mask)));
-    if_set_netmask (netif, &sn_mask);
     LWIP_DEBUGF (g_dhcp_debug | LWIP_DBG_STATE,
                  ("dhcp_bind(): GW: 0x%08" X32_F "\n",
                   ip4_addr_get_u32 (&gw_addr)));
-    if_set_gw (netif, &gw_addr);
+
+    if_set_addr (netif, &dhcp->offered_ip_addr, &sn_mask, &gw_addr);
     /* bring the interface up */
     if_set_up (netif);
     /* netif is now bound to DHCP leased address */

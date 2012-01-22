@@ -191,7 +191,9 @@ netconn_bind (struct netconn * conn, ip_addr_t * addr, u16_t port)
     msg.msg.conn = conn;
     msg.msg.msg.bc.ipaddr = addr;
     msg.msg.msg.bc.port = port;
-    err = TCPIP_APIMSG (&msg);
+
+    do_bind (&msg.msg);
+    err = msg.msg.err;
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -218,8 +220,9 @@ netconn_connect (struct netconn * conn, ip_addr_t * addr, u16_t port)
     msg.msg.conn = conn;
     msg.msg.msg.bc.ipaddr = addr;
     msg.msg.msg.bc.port = port;
-    /* This is the only function which need to not block tcpip_thread */
-    err = tcpip_apimsg (&msg);
+
+    do_connect (&msg.msg);
+    err = msg.msg.err;
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -243,7 +246,9 @@ netconn_disconnect (struct netconn * conn)
 
     msg.function = do_disconnect;
     msg.msg.conn = conn;
-    err = TCPIP_APIMSG (&msg);
+
+    do_disconnect (&msg.msg);
+    err = msg.msg.err;
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -275,7 +280,8 @@ netconn_listen_with_backlog (struct netconn * conn, u8_t backlog)
 #if TCP_LISTEN_BACKLOG
     msg.msg.msg.lb.backlog = backlog;
 #endif /* TCP_LISTEN_BACKLOG */
-    err = TCPIP_APIMSG (&msg);
+    do_listen (&msg.msg);
+    err = msg.msg.err;
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -321,8 +327,6 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
            waiting on acceptmbox forever! */
         return err;
     }
-/*FIXME: SASI*/
-#if 0
 #if LWIP_SO_RCVTIMEO
     if (sys_arch_mbox_fetch
         (&conn->acceptmbox, (void **) &newconn,
@@ -334,7 +338,6 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
 #else
     sys_arch_mbox_fetch (&conn->acceptmbox, (void **) &newconn, 0);
 #endif /* LWIP_SO_RCVTIMEO */
-#endif 
     /* Register event with callback */
     API_EVENT (conn, NETCONN_EVT_RCVMINUS, 0);
 
@@ -348,8 +351,9 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
     /* Let the stack know that we have accepted the connection. */
     msg.function = do_recv;
     msg.msg.conn = conn;
+
     /* don't care for the return value of do_recv */
-    TCPIP_APIMSG (&msg);
+    do_recv (&msg.msg);
 #endif /* TCP_LISTEN_BACKLOG */
 
     *new_conn = newconn;
@@ -431,7 +435,7 @@ netconn_recv_data (struct netconn *conn, void **new_buf)
                 msg.msg.msg.r.len = 1;
             }
             /* don't care for the return value of do_recv */
-            TCPIP_APIMSG (&msg);
+            do_recv (&msg.msg);
         }
 
         /* If we are closed, we indicate that we no longer wish to use the socket */
@@ -578,7 +582,7 @@ netconn_recved (struct netconn *conn, u32_t length)
         msg.msg.conn = conn;
         msg.msg.msg.r.len = length;
         /* don't care for the return value of do_recv */
-        TCPIP_APIMSG (&msg);
+        do_recv (&msg.msg);
     }
 #else /* LWIP_TCP */
     LWIP_UNUSED_ARG (conn);
@@ -630,7 +634,8 @@ netconn_send (struct netconn * conn, struct netbuf * buf)
     msg.function = do_send;
     msg.msg.conn = conn;
     msg.msg.msg.b = buf;
-    err = TCPIP_APIMSG (&msg);
+    do_send (&msg.msg);
+    err = msg.msg.err;
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -675,7 +680,9 @@ netconn_write (struct netconn * conn, const void *dataptr, size_t size,
     /* For locking the core: this _can_ be delayed on low memory/low send buffer,
        but if it is, this is done inside api_msg.c:do_write(), so we can use the
        non-blocking version here. */
-    err = TCPIP_APIMSG (&msg);
+
+    do_write (&msg.msg);
+    err = msg.msg.err;
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -703,7 +710,8 @@ netconn_close_shutdown (struct netconn *conn, u8_t how)
     msg.msg.msg.sd.shut = how;
     /* because of the LWIP_TCPIP_CORE_LOCKING implementation of do_close,
        don't use TCPIP_APIMSG here */
-    err = tcpip_apimsg (&msg);
+    do_close (&msg.msg);
+    err = msg.msg.err;
 
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
@@ -813,7 +821,7 @@ netconn_gethostbyname (const char *name, ip_addr_t * addr)
     msg.err = &err;
     msg.sem = &sem;
 
-    tcpip_callback (do_gethostbyname, &msg);
+    do_gethostbyname (&msg);
     sys_sem_wait (&sem);
     sys_sem_free (&sem);
 

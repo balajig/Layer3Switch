@@ -1,3 +1,4 @@
+#include "common_types.h"
 #include "route.h"
 #include "rib.h"
 #include "zebra.h"
@@ -358,4 +359,3 @@ int  cli_show_ip_route (void)
 
 #endif
 }
-

@@ -1901,7 +1901,7 @@ lwip_getsockopt (int s, int level, int optname, void *optval,
     data.optval = optval;
     data.optlen = optlen;
     data.err = err;
-    tcpip_callback (lwip_getsockopt_internal, &data);
+    lwip_getsockopt_internal (&data);
     sys_arch_sem_wait (&sock->conn->op_completed, 0);
     /* maybe lwip_getsockopt_internal has changed err */
     err = data.err;
@@ -2371,7 +2371,7 @@ lwip_setsockopt (int s, int level, int optname, const void *optval,
     data.optval = (void *) optval;
     data.optlen = &optlen;
     data.err = err;
-    tcpip_callback (lwip_setsockopt_internal, &data);
+    lwip_setsockopt_internal (&data);
     sys_arch_sem_wait (&sock->conn->op_completed, 0);
     /* maybe lwip_setsockopt_internal has changed err */
     err = data.err;

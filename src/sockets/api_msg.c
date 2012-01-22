@@ -547,8 +547,6 @@ do_newconn(struct api_msg_msg *msg)
   /* Else? This "new" connection already has a PCB allocated. */
   /* Is this an error condition? Should it be deleted? */
   /* We currently just are happy and return. */
-
-  TCPIP_APIMSG_ACK(msg);
 }
 
 /**
@@ -912,7 +910,6 @@ do_bind(struct api_msg_msg *msg)
       }
     }
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 
 #if LWIP_TCP
@@ -1039,7 +1036,6 @@ do_disconnect(struct api_msg_msg *msg)
   {
     msg->err = ERR_VAL;
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 
 #if LWIP_TCP
@@ -1093,7 +1089,6 @@ do_listen(struct api_msg_msg *msg)
       }
     }
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 #endif /* LWIP_TCP */
 
@@ -1146,7 +1141,6 @@ do_send(struct api_msg_msg *msg)
       }
     }
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 
 #if LWIP_TCP
@@ -1177,7 +1171,6 @@ do_recv(struct api_msg_msg *msg)
       }
     }
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 
 /**
@@ -1356,7 +1349,6 @@ do_write(struct api_msg_msg *msg)
 #endif /* (LWIP_UDP || LWIP_RAW) */
     }
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 
 /**
@@ -1409,7 +1401,6 @@ do_getaddr(struct api_msg_msg *msg)
   } else {
     msg->err = ERR_CONN;
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 
 /**
@@ -1483,7 +1474,6 @@ do_join_leave_group(struct api_msg_msg *msg)
       msg->err = ERR_CONN;
     }
   }
-  TCPIP_APIMSG_ACK(msg);
 }
 #endif /* LWIP_IGMP */
 

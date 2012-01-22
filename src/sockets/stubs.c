@@ -1,25 +1,6 @@
-TCPIP_APIMSG ()
-{
-}
-
 sys_mbox_valid ()
 {
-
 }
-
-tcpip_apimsg ()
-{
-
-}
-
-tcpip_callback () 
-{
-}
-
-TCPIP_APIMSG_ACK () 
-{
-}
-
 sys_arch_mbox_fetch ()
 {
 }
@@ -43,4 +24,3 @@ LOCK_TCPIP_CORE ()
 UNLOCK_TCPIP_CORE ()
 {
 }
-
