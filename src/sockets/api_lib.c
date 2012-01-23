@@ -87,13 +87,13 @@ netconn_new_with_proto_and_callback (enum netconn_type t, u8_t proto,
             LWIP_ASSERT ("conn has no op_completed",
                          sys_sem_valid (&conn->op_completed));
             LWIP_ASSERT ("conn has no recvmbox",
-                         sys_mbox_valid (&conn->recvmbox));
+                         pqueue_valid (conn->recvmbox));
 #if LWIP_TCP
             LWIP_ASSERT ("conn->acceptmbox shouldn't exist",
-                         !sys_mbox_valid (&conn->acceptmbox));
+                         !pqueue_valid (conn->acceptmbox));
 #endif /* LWIP_TCP */
-            sys_sem_free (&conn->op_completed);
-            sys_mbox_free (&conn->recvmbox);
+            destroy_sync_lock (&conn->op_completed);
+            pqueue_destroy (conn->recvmbox);
             memp_free (MEMP_NETCONN, conn);
             return NULL;
         }
@@ -317,7 +317,7 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
     LWIP_ERROR ("netconn_accept: invalid conn", (conn != NULL), return ERR_ARG;
         );
     LWIP_ERROR ("netconn_accept: invalid acceptmbox",
-                sys_mbox_valid (&conn->acceptmbox), return ERR_ARG;
+                pqueue_valid (conn->acceptmbox), return ERR_ARG;
         );
 
     err = conn->last_err;
@@ -392,7 +392,7 @@ netconn_recv_data (struct netconn *conn, void **new_buf)
     LWIP_ERROR ("netconn_recv: invalid conn", (conn != NULL), return ERR_ARG;
         );
     LWIP_ERROR ("netconn_accept: invalid recvmbox",
-                sys_mbox_valid (&conn->recvmbox), return ERR_CONN;
+                pqueue_valid (conn->recvmbox), return ERR_CONN;
         );
 
     err = conn->last_err;
@@ -516,7 +516,7 @@ netconn_recv (struct netconn *conn, struct netbuf **new_buf)
     LWIP_ERROR ("netconn_recv: invalid conn", (conn != NULL), return ERR_ARG;
         );
     LWIP_ERROR ("netconn_accept: invalid recvmbox",
-                sys_mbox_valid (&conn->recvmbox), return ERR_CONN;
+                pqueue_valid (conn->recvmbox), return ERR_CONN;
         );
 
 #if LWIP_TCP

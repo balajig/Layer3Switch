@@ -21,34 +21,79 @@ typedef struct _socket_queue_t {
 
 typedef struct queue_cb 
 {
-	struct list_head   next;
 	struct list_head   queue;
 	EVT_T              evt;
-	int32_t            sock;
+	int32_t            state;
 }queue_cb_t;
 
 static int  q_mem_pool_id = -1;
 
-static struct list_head queue_sock_list;
+static queue_cb_t  pqcb[MAX_Q_CTRL_BLOCKS];
 
+static sync_lock_t  pq_lock;
 
 int pqueue_init (void)
 {
-	INIT_LIST_HEAD (&queue_sock_list);
-
 	q_mem_pool_id = mem_pool_create ("PQUEUE", MAX_Q_CTRL_BLOCKS * sizeof(queue_cb_t), 
                                          MAX_Q_CTRL_BLOCKS, 0);
 	if (q_mem_pool_id < 0) {
 		return -1;
 	}
 
+	create_sync_lock (&pq_lock);	
+
 	return 0;
 }
 
+unsigned long  pqueue_create (void)
+{
+	int          i   = 0;
+
+	sync_lock (&pq_lock);
+
+	while (i < MAX_Q_CTRL_BLOCKS) {
+		if (!pqcb[i]. state) {
+			pqcb[i]. state = 1;
+			INIT_LIST_HEAD (&pqcb[i].queue);
+			EventInit (&pqcb[i].evt);
+			sync_unlock (&pq_lock);
+			return (unsigned long) &pqcb[i];
+		}
+
+	}
+
+	sync_unlock (&pq_lock);
+	return 0;
+}
+
+int  pqueue_destroy (unsigned long pcb)
+{
+	queue_cb_t *p = (queue_cb_t *)pcb;
+
+	if (!p)
+		return -1;
+	sync_lock (&pq_lock);
+
+	p->state = 0;
+	EventDeInit (&p->evt);
+	sync_unlock (&pq_lock);
+	return 0;
+}
+
+int  pqueue_valid (unsigned long pcb)
+{
+	queue_cb_t *p = (queue_cb_t *)pcb;
+
+	if (!p)
+		return 0;
+	if (!p->state)
+		return 0;
+	return 1;
+}
 
 int queue_packet (unsigned long qblk , uint8_t *buf, int len)
 {
-	queue_cb_t * p = (queue_cb_t *)qcb;
+	queue_cb_t * p = (queue_cb_t *)qblk;
 	socket_queue_t  *qbuf = NULL;
 
 	if (!p)
@@ -71,20 +116,25 @@ int queue_packet (unsigned long qblk , uint8_t *buf, int len)
 	return 0;
 }
 
-int dequeue_packet (unsigned long qcb, uint8_t *data, size_t datalen)
+int dequeue_packet (unsigned long qcb, uint8_t *data, size_t datalen, int secs, int nsecs)
 {
 	queue_cb_t * p = (queue_cb_t *)qcb;
-
 	socket_queue_t  *qbuf = NULL;
+	int        err = -1;
 
-	if (!p)
+	if (!p || !p->state)
 		return -1;
 
 	while (1) {
 
 		int event = 0;
 		if (list_empty (&p->queue)) {
-			EvtRx (&p->evt, &event, PKT_RX_ON_SOCK);
+			if (!secs && !nsecs)
+				err = EvtRx (&p->evt, &event, PKT_RX_ON_SOCK);
+			else
+				err = EvtRx_timed_wait (&p->evt, &event, PKT_RX_ON_SOCK, secs, nsecs);
+			if (err < 0)
+				return -1;
 			if ((event & PKT_RX_ON_SOCK))
 				goto packet;
 
@@ -96,7 +146,8 @@ packet:
 				return -1;
 			if (datalen > qbuf->len)
 				datalen = qbuf->len;
-			memcpy (data, qbuf->buf, datalen);
+			if (qbuf->buf)
+				memcpy (data, qbuf->buf, datalen);
 			/*TODO: free buf*/
 			list_del (&qbuf->nbuf);
 			free (qbuf);

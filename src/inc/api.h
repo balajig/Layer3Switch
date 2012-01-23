@@ -146,14 +146,14 @@ struct netconn {
   /** the last error this netconn had */
   err_t last_err;
   /** sem that is used to synchroneously execute functions in the core context */
-  sys_sem_t op_completed;
+  sync_lock_t op_completed;
   /** mbox where received packets are stored until they are fetched
       by the netconn application thread (can grow quite big) */
-  sys_mbox_t recvmbox;
+  unsigned long recvmbox;
 #if LWIP_TCP
   /** mbox where new connections are stored until processed
       by the application thread */
-  sys_mbox_t acceptmbox;
+  unsigned long acceptmbox;
 #endif /* LWIP_TCP */
   /** only used for socket layer */
 #if LWIP_SOCKET

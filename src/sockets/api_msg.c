@@ -86,7 +86,7 @@ recv_raw(void *arg, struct raw_pcb *pcb, struct pbuf *p,
   LWIP_UNUSED_ARG(addr);
   conn = (struct netconn *)arg;
 
-  if ((conn != NULL) && sys_mbox_valid(&conn->recvmbox)) {
+  if ((conn != NULL) && pqueue_valid(conn->recvmbox)) {
 #if LWIP_SO_RCVBUF
     int recv_avail;
     SYS_ARCH_GET(conn->recv_avail, recv_avail);
@@ -117,7 +117,7 @@ recv_raw(void *arg, struct raw_pcb *pcb, struct pbuf *p,
       buf->port = pcb->protocol;
 
       len = q->tot_len;
-      if (sys_mbox_trypost(&conn->recvmbox, buf) != ERR_OK) {
+      if (queue_packet(conn->recvmbox, buf, sizeof (*buf)) != ERR_OK) {
         netbuf_delete(buf);
         return 0;
       } else {
@@ -160,10 +160,10 @@ recv_udp(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
 #if LWIP_SO_RCVBUF
   SYS_ARCH_GET(conn->recv_avail, recv_avail);
-  if ((conn == NULL) || !sys_mbox_valid(&conn->recvmbox) ||
+  if ((conn == NULL) || !pqueue_valid(conn->recvmbox) ||
       ((recv_avail + (int)(p->tot_len)) > conn->recv_bufsize)) {
 #else  /* LWIP_SO_RCVBUF */
-  if ((conn == NULL) || !sys_mbox_valid(&conn->recvmbox)) {
+  if ((conn == NULL) || !pqueue_valid(conn->recvmbox)) {
 #endif /* LWIP_SO_RCVBUF */
     pbuf_free(p);
     return;
@@ -193,7 +193,7 @@ recv_udp(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   }
 
   len = p->tot_len;
-  if (sys_mbox_trypost(&conn->recvmbox, buf) != ERR_OK) {
+  if (queue_packet(conn->recvmbox, buf, sizeof (*buf)) != ERR_OK) {
     netbuf_delete(buf);
     return;
   } else {
@@ -228,7 +228,7 @@ recv_tcp(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
   if (conn == NULL) {
     return ERR_VAL;
   }
-  if (!sys_mbox_valid(&conn->recvmbox)) {
+  if (!pqueue_valid(conn->recvmbox)) {
     /* recvmbox already deleted */
     if (p != NULL) {
       tcp_recved(pcb, p->tot_len);
@@ -249,7 +249,7 @@ recv_tcp(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
     len = 0;
   }
 
-  if (sys_mbox_trypost(&conn->recvmbox, p) != ERR_OK) {
+  if (queue_packet (conn->recvmbox, p, sizeof (*p))!= ERR_OK) {
     /* don't deallocate p: it is presented to us later again from tcp_fasttmr! */
     return ERR_MEM;
   } else {
@@ -374,14 +374,14 @@ err_tcp(void *arg, err_t err)
   API_EVENT(conn, NETCONN_EVT_SENDPLUS, 0);
 
   /* pass NULL-message to recvmbox to wake up pending recv */
-  if (sys_mbox_valid(&conn->recvmbox)) {
+  if (pqueue_valid(conn->recvmbox)) {
     /* use trypost to prevent deadlock */
-    sys_mbox_trypost(&conn->recvmbox, NULL);
+    queue_packet (&conn->recvmbox, NULL, 0);
   }
   /* pass NULL-message to acceptmbox to wake up pending accept */
-  if (sys_mbox_valid(&conn->acceptmbox)) {
+  if (pqueue_valid(conn->acceptmbox)) {
     /* use trypost to preven deadlock */
-    sys_mbox_trypost(&conn->acceptmbox, NULL);
+    queue_packet (&conn->acceptmbox, NULL, 0);
   }
 
   if ((old_state == NETCONN_WRITE) || (old_state == NETCONN_CLOSE) ||
@@ -397,7 +397,7 @@ err_tcp(void *arg, err_t err)
       conn->current_msg->err = err;
       conn->current_msg = NULL;
       /* wake up the waiting task */
-      sys_sem_signal(&conn->op_completed);
+      sync_unlock (&conn->op_completed);
     }
   } else {
     LWIP_ASSERT("conn->current_msg == NULL", conn->current_msg == NULL);
@@ -437,7 +437,7 @@ accept_function(void *arg, struct tcp_pcb *newpcb, err_t err)
 
   LWIP_DEBUGF(API_MSG_DEBUG, ("accept_function: newpcb->tate: %s\n", tcp_debug_state_str(newpcb->state)));
 
-  if (!sys_mbox_valid(&conn->acceptmbox)) {
+  if (!pqueue_valid(conn->acceptmbox)) {
     LWIP_DEBUGF(API_MSG_DEBUG, ("accept_function: acceptmbox already deleted\n"));
     return ERR_VAL;
   }
@@ -454,13 +454,13 @@ accept_function(void *arg, struct tcp_pcb *newpcb, err_t err)
      to the application thread */
   newconn->last_err = err;
 
-  if (sys_mbox_trypost(&conn->acceptmbox, newconn) != ERR_OK) {
+  if (queue_packet(conn->acceptmbox, newconn, sizeof (*newconn)) != ERR_OK) {
     /* When returning != ERR_OK, the pcb is aborted in tcp_process(),
        so do nothing here! */
     newconn->pcb.tcp = NULL;
     /* no need to drain since we know the recvmbox is empty. */
-    sys_mbox_free(&newconn->recvmbox);
-    sys_mbox_set_invalid(&newconn->recvmbox);
+    pqueue_destroy(newconn->recvmbox);
+    //sys_mbox_set_invalid(&newconn->recvmbox);
     netconn_free(newconn);
     return ERR_MEM;
   } else {
@@ -600,18 +600,18 @@ netconn_alloc(enum netconn_type t, netconn_callback callback)
   }
 #endif
 
-  if (sys_sem_new(&conn->op_completed, 0) != ERR_OK) {
+  if (create_sync_lock (&conn->op_completed) != ERR_OK) {
     memp_free(MEMP_NETCONN, conn);
     return NULL;
   }
-  if (sys_mbox_new(&conn->recvmbox, size) != ERR_OK) {
-    sys_sem_free(&conn->op_completed);
+  if (!(conn->recvmbox = pqueue_create ())) {
+    destroy_sync_lock (&conn->op_completed);
     memp_free(MEMP_NETCONN, conn);
     return NULL;
   }
 
 #if LWIP_TCP
-  sys_mbox_set_invalid(&conn->acceptmbox);
+  //sys_mbox_set_invalid(&conn->acceptmbox);
 #endif
   conn->state        = NETCONN_NONE;
 #if LWIP_SOCKET
@@ -645,14 +645,13 @@ netconn_free(struct netconn *conn)
 {
   LWIP_ASSERT("PCB must be deallocated outside this function", conn->pcb.tcp == NULL);
   LWIP_ASSERT("recvmbox must be deallocated before calling this function",
-    !sys_mbox_valid(&conn->recvmbox));
+    !pqueue_valid(conn->recvmbox));
 #if LWIP_TCP
   LWIP_ASSERT("acceptmbox must be deallocated before calling this function",
-    !sys_mbox_valid(&conn->acceptmbox));
+    !pqueue_valid(conn->acceptmbox));
 #endif /* LWIP_TCP */
 
-  sys_sem_free(&conn->op_completed);
-  sys_sem_set_invalid(&conn->op_completed);
+  destroy_sync_lock (&conn->op_completed);
 
   memp_free(MEMP_NETCONN, conn);
 }
@@ -676,8 +675,8 @@ netconn_drain(struct netconn *conn)
   /* This runs in tcpip_thread, so we don't need to lock against rx packets */
 
   /* Delete and drain the recvmbox. */
-  if (sys_mbox_valid(&conn->recvmbox)) {
-    while (sys_mbox_tryfetch(&conn->recvmbox, &mem) != SYS_MBOX_EMPTY) {
+  if (pqueue_valid(conn->recvmbox)) {
+    while (dequeue_packet (conn->recvmbox, &mem, sizeof (struct netbuf), 0, 0) != -1) {
 #if LWIP_TCP
       if (conn->type == NETCONN_TCP) {
         if(mem != NULL) {
@@ -694,14 +693,14 @@ netconn_drain(struct netconn *conn)
         netbuf_delete((struct netbuf *)mem);
       }
     }
-    sys_mbox_free(&conn->recvmbox);
-    sys_mbox_set_invalid(&conn->recvmbox);
+    pqueue_destroy(conn->recvmbox);
+    //sys_mbox_set_invalid(&conn->recvmbox);
   }
 
   /* Delete and drain the acceptmbox. */
 #if LWIP_TCP
-  if (sys_mbox_valid(&conn->acceptmbox)) {
-    while (sys_mbox_tryfetch(&conn->acceptmbox, &mem) != SYS_MBOX_EMPTY) {
+  if (pqueue_valid(conn->acceptmbox)) {
+    while (dequeue_packet (conn->acceptmbox, &mem, sizeof (struct netbuf), 0, 0) != -1) {
       struct netconn *newconn = (struct netconn *)mem;
       /* Only tcp pcbs have an acceptmbox, so no need to check conn->type */
       /* pcb might be set to NULL already by err_tcp() */
@@ -716,8 +715,8 @@ netconn_drain(struct netconn *conn)
       }
       netconn_free(newconn);
     }
-    sys_mbox_free(&conn->acceptmbox);
-    sys_mbox_set_invalid(&conn->acceptmbox);
+    pqueue_destroy(conn->acceptmbox);
+    //sys_mbox_set_invalid(&conn->acceptmbox);
   }
 #endif /* LWIP_TCP */
 }
@@ -793,7 +792,7 @@ do_close_internal(struct netconn *conn)
       API_EVENT(conn, NETCONN_EVT_SENDPLUS, 0);
     }
     /* wake up the application task */
-    sys_sem_signal(&conn->op_completed);
+    sync_unlock (&conn->op_completed);
   } else {
     /* Closing failed, restore some of the callbacks */
     /* Closing of listen pcb will never fail! */
@@ -869,9 +868,7 @@ do_delconn(struct api_msg_msg *msg)
     API_EVENT(msg->conn, NETCONN_EVT_RCVPLUS, 0);
     API_EVENT(msg->conn, NETCONN_EVT_SENDPLUS, 0);
   }
-  if (sys_sem_valid(&msg->conn->op_completed)) {
-    sys_sem_signal(&msg->conn->op_completed);
-  }
+    sync_unlock (&msg->conn->op_completed);
 }
 
 /**
@@ -953,7 +950,7 @@ do_connected(void *arg, struct tcp_pcb *pcb, err_t err)
   API_EVENT(conn, NETCONN_EVT_SENDPLUS, 0);
 
   if (was_blocking) {
-    sys_sem_signal(&conn->op_completed);
+    sync_unlock(&conn->op_completed);
   }
   return ERR_OK;
 }
@@ -1014,7 +1011,7 @@ do_connect(struct api_msg_msg *msg)
     break;
     }
   }
-  sys_sem_signal(&msg->conn->op_completed);
+  sync_unlock(&msg->conn->op_completed);
 }
 
 /**
@@ -1065,14 +1062,16 @@ do_listen(struct api_msg_msg *msg)
             msg->err = ERR_MEM;
           } else {
             /* delete the recvmbox and allocate the acceptmbox */
-            if (sys_mbox_valid(&msg->conn->recvmbox)) {
+            if (pqueue_valid(msg->conn->recvmbox)) {
               /** @todo: should we drain the recvmbox here? */
-              sys_mbox_free(&msg->conn->recvmbox);
-              sys_mbox_set_invalid(&msg->conn->recvmbox);
+              pqueue_destroy(&msg->conn->recvmbox);
+              //sys_mbox_set_invalid(&msg->conn->recvmbox);
             }
             msg->err = ERR_OK;
-            if (!sys_mbox_valid(&msg->conn->acceptmbox)) {
-              msg->err = sys_mbox_new(&msg->conn->acceptmbox, DEFAULT_ACCEPTMBOX_SIZE);
+            if (!pqueue_valid(msg->conn->acceptmbox)) {
+              if (!(msg->conn->acceptmbox = pqueue_create ()))
+			msg->err = ERR_MEM;
+	      
             }
             if (msg->err == ERR_OK) {
               msg->conn->state = NETCONN_LISTEN;
@@ -1286,7 +1285,7 @@ do_writemore(struct netconn *conn)
     if ((conn->flags & NETCONN_FLAG_WRITE_DELAYED) != 0)
 #endif
     {
-      sys_sem_signal(&conn->op_completed);
+      sync_unlock(&conn->op_completed);
     }
   }
 #if LWIP_TCPIP_CORE_LOCKING
@@ -1327,7 +1326,7 @@ do_write(struct api_msg_msg *msg)
         if (do_writemore(msg->conn) != ERR_OK) {
           LWIP_ASSERT("state!", msg->conn->state == NETCONN_WRITE);
           UNLOCK_TCPIP_CORE();
-          sys_arch_sem_wait(&msg->conn->op_completed, 0);
+          sync_lock (&msg->conn->op_completed);
           LOCK_TCPIP_CORE();
           LWIP_ASSERT("state!", msg->conn->state == NETCONN_NONE);
         }
@@ -1440,7 +1439,7 @@ do_close(struct api_msg_msg *msg)
   {
     msg->err = ERR_VAL;
   }
-  sys_sem_signal(&msg->conn->op_completed);
+  sync_unlock(&msg->conn->op_completed);
 }
 
 #if LWIP_IGMP

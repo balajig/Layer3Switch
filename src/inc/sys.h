@@ -55,12 +55,6 @@ typedef u8_t sys_mbox_t;
 #define sys_mutex_lock(mu) ERR_OK
 #define sys_mutex_unlock(mu) ERR_OK
 #define sys_mutex_free(mu) ERR_OK
-#define sys_mbox_new(m, s) ERR_OK
-#define sys_mbox_fetch(m,d)      ERR_OK
-#define sys_mbox_tryfetch(m,d)   ERR_OK
-#define sys_mbox_post(m,d)       ERR_OK
-#define sys_mbox_trypost(m,d)    ERR_OK
-#define sys_mbox_free(m)
 
 #define sys_thread_new(n,t,a,s,p)
 /** Return code for timeouts from sys_arch_mbox_fetch and sys_arch_sem_wait */

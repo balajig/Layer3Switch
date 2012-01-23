@@ -21,6 +21,16 @@ int EventInit (EVT_T *p)
 	return 0;
 }
 
+int EventDeInit (EVT_T *p)
+{
+	if (!p)
+		return -1;
+
+	pthread_cond_destroy (&p->evt_cnd);
+	pthread_mutex_destroy (&p->evt_mtx);
+	return 0;
+}
+
 
 int EvtRx (EVT_T *evt, int *pevent, int event)
 {
@@ -40,6 +50,37 @@ int EvtRx (EVT_T *evt, int *pevent, int event)
 
 	return -1;
 }
+
+int EvtRx_timed_wait (EVT_T *evt, int *pevent, int event, int secs, int nsecs)
+{
+	struct timespec ts;
+	int    err = 0;
+
+	pthread_mutex_lock (&evt->evt_mtx);
+
+	clock_gettime(CLOCK_REALTIME, &ts);
+
+	ts.tv_sec  += secs;
+	ts.tv_nsec += nsecs;
+
+	while (1)
+	{
+		if (evt->event & event)
+		{
+			*pevent = evt->event;
+			evt->event &= 0;
+			pthread_mutex_unlock (&evt->evt_mtx);
+			return 0;
+		}
+		err =  pthread_cond_timedwait (&evt->evt_cnd, &evt->evt_mtx, &ts);
+		if (err == ETIMEDOUT) {
+			return -1;
+		}
+	}
+
+	return -1;
+}
+
 
 void EvtSnd (EVT_T *evt, int event)
 {

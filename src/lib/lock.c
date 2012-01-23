@@ -30,6 +30,18 @@ int create_sync_lock (sync_lock_t *slock)
 	return 0;
 }
 
+int destroy_sync_lock (sync_lock_t *slock)
+{
+	if (!slock)
+		return -1;
+	if (sem_destroy(slock) < 0) {
+		perror ("SEM_DESTROY: ");
+		return -1;
+	}
+	return 0;
+}
+
+
 int sync_lock (sync_lock_t *slock)
 {
 	while (sem_wait (slock) < 0)  {
@@ -41,6 +53,27 @@ int sync_lock (sync_lock_t *slock)
 
 	return 0;
 }
+
+int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs)
+{
+	struct timespec abs_timeout;
+
+	abs_timeout.tv_sec = secs;
+	abs_timeout.tv_nsec = nanosecs;
+
+	while (sem_timedwait (slock, &abs_timeout) < 0)  {
+		/*signal interrupts*/
+		if (errno == EINTR) {
+			continue;
+		}
+		if (errno == ETIMEDOUT) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 int sync_unlock (sync_lock_t *slock)
 {
 	if (sem_post (slock) < 0) {
