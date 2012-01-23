@@ -114,6 +114,7 @@ int init_timer_mgr (void)
 	}
 	while (--i >= 0) {
 		create_sync_lock (&tmrrq.root[i].lock);
+		sync_unlock (&tmrrq.root[i].lock);
 	}
 
 	return SUCCESS;

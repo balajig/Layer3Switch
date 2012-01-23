@@ -604,6 +604,7 @@ netconn_alloc(enum netconn_type t, netconn_callback callback)
     memp_free(MEMP_NETCONN, conn);
     return NULL;
   }
+  sync_unlock (&conn->op_completed);
   if (!(conn->recvmbox = pqueue_create ())) {
     destroy_sync_lock (&conn->op_completed);
     memp_free(MEMP_NETCONN, conn);
@@ -998,7 +999,7 @@ do_connect(struct api_msg_msg *msg)
           msg->err = ERR_INPROGRESS;
         } else {
           msg->conn->current_msg = msg;
-          /* sys_sem_signal() is called from do_connected (or err_tcp()),
+          /* sync_unlock() is called from do_connected (or err_tcp()),
           * when the connection is established! */
           return;
         }
@@ -1499,7 +1500,7 @@ do_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
     *msg->addr = *ipaddr;
   }
   /* wake up the application task waiting in netconn_gethostbyname */
-  sys_sem_signal(msg->sem);
+  sync_unlock(msg->sem);
 }
 
 /**
@@ -1517,7 +1518,7 @@ do_gethostbyname(void *arg)
   if (*msg->err != ERR_INPROGRESS) {
     /* on error or immediate success, wake up the application
      * task waiting in netconn_gethostbyname */
-    sys_sem_signal(msg->sem);
+    sync_unlock(msg->sem);
   }
 }
 #endif /* LWIP_DNS */

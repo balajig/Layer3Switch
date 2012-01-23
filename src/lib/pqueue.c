@@ -41,6 +41,7 @@ int pqueue_init (void)
 	}
 
 	create_sync_lock (&pq_lock);	
+	sync_unlock (&pq_lock);
 
 	return 0;
 }
@@ -59,7 +60,7 @@ unsigned long  pqueue_create (void)
 			sync_unlock (&pq_lock);
 			return (unsigned long) &pqcb[i];
 		}
-
+		i++;
 	}
 
 	sync_unlock (&pq_lock);
@@ -134,7 +135,7 @@ int dequeue_packet (unsigned long qcb, uint8_t *data, size_t datalen, int secs, 
 			else
 				err = EvtRx_timed_wait (&p->evt, &event, PKT_RX_ON_SOCK, secs, nsecs);
 			if (err < 0)
-				return -1;
+				return err;
 			if ((event & PKT_RX_ON_SOCK))
 				goto packet;
 

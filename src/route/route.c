@@ -317,24 +317,7 @@ unsigned char *route_lookup_ipaddr (unsigned char *ipaddr, if_t *netif)
 
 int  cli_show_ip_route (void)
 {
-#ifndef ZEBRA_RTM_SUPPORT
-	route_t *r;
-
-        printf ("%-20s    %-16s      %-10s\n", "Destination", "Gateway","Iface");
-	printf ("%-20s    %-16s      %-10s\n","-----------","---------","--------");
-
-	for (r=route; r; r=r->next) {
-		uint8_t  network[20];
-		uint8_t  gateway[16];
-		if (!r->netif)
-			continue;
-		sprintf (network, "%d.%d.%d.%d/%d", r->netaddr[0], r->netaddr[1], r->netaddr[2], r->netaddr[3], r->masklen);
-		sprintf (gateway, "%d.%d.%d.%d",  r->gateway[0],r->gateway[1],r->gateway[2],r->gateway[3]);
-		printf ("%-20s    %-16s      %-10s\n", network,gateway,r->netif->ifDescr);
-	}
-	return 0;
-#else
-
+#ifdef ZEBRA_RTM_SUPPORT
 	struct route_table *table;
 	struct route_node *rn;
 	struct rib *rib;
@@ -357,5 +340,22 @@ int  cli_show_ip_route (void)
 	    }
 	return 0;
 
+
+#else
+	route_t *r;
+
+        printf ("%-20s    %-16s      %-10s\n", "Destination", "Gateway","Iface");
+	printf ("%-20s    %-16s      %-10s\n","-----------","---------","--------");
+
+	for (r=route; r; r=r->next) {
+		uint8_t  network[20];
+		uint8_t  gateway[16];
+		if (!r->netif)
+			continue;
+		sprintf (network, "%d.%d.%d.%d/%d", r->netaddr[0], r->netaddr[1], r->netaddr[2], r->netaddr[3], r->masklen);
+		sprintf (gateway, "%d.%d.%d.%d",  r->gateway[0],r->gateway[1],r->gateway[2],r->gateway[3]);
+		printf ("%-20s    %-16s      %-10s\n", network,gateway,r->netif->ifDescr);
+	}
+	return 0;
 #endif
 }

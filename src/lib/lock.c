@@ -23,7 +23,7 @@ int create_sync_lock (sync_lock_t *slock)
 {
 	if (!slock)
 		return -1;
-	if (sem_init(slock, 0, 1) < 0) {
+	if (sem_init(slock, 0, 0) < 0) {
 		perror ("SEM_INIT: ");
 		return -1;
 	}

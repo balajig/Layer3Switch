@@ -55,10 +55,17 @@ cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context)
 
 cparser_result_t cparser_cmd_ping_hostaddr(cparser_context_t *context, uint32_t *hostaddr_ptr)
 {
-	ping_IP (ntohl(*hostaddr_ptr));
+        uint8_t  addr[4];
+        uint8_t  str[10];
+
+        uint32_2_ipstring (ntohl(*hostaddr_ptr), addr);
+
+        sprintf (str, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
+
+	ping_me (str);
 }
 
 cparser_result_t cparser_cmd_ping_hostname(cparser_context_t *context, char **hostname_ptr)
 {
-
+	ping_me (*hostname_ptr);
 }

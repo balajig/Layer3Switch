@@ -67,9 +67,9 @@ extern sys_mutex_t lock_tcpip_core;
 #define LOCK_TCPIP_CORE()
 #define UNLOCK_TCPIP_CORE()
 #define TCPIP_APIMSG(m)       tcpip_apimsg(m)
-#define TCPIP_APIMSG_ACK(m)   sys_sem_signal(&m->conn->op_completed)
+#define TCPIP_APIMSG_ACK(m)   sync_unlock(&m->conn->op_completed)
 #define TCPIP_NETIFAPI(m)     tcpip_ifapi(m)
-#define TCPIP_NETIFAPI_ACK(m) sys_sem_signal(&m->sem)
+#define TCPIP_NETIFAPI_ACK(m) sync_unlock(&m->sem)
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
 /** Function prototype for the init_done function passed to tcpip_init */

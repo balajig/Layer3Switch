@@ -1,0 +1,518 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * $Id: ping.c,v 1.1 2000/08/21 17:38:46 erich-roncarolo Exp $
+ * Mini ping implementation for busybox
+ *
+ * Copyright (C) 1999 by Randolph Chung <tausq@debian.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * This version of ping is adapted from the ping in netkit-base 0.10,
+ * which is:
+ *
+ * Copyright (c) 1989 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * This code is derived from software contributed to Berkeley by
+ * Mike Muuss.
+ * 
+ * Copyright (c) 1989 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * This code is derived from software contributed to Berkeley by
+ * Mike Muuss.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+#include "common_types.h"
+#include "ip_hdr.h"
+#include "netdb.h"
+#include "icmp.h"
+#include "signal.h"
+#if LWIP_COMPAT_SOCKETS
+#define accept(a,b,c)         lwip_accept(a,b,c)
+#define bind(a,b,c)           lwip_bind(a,b,c)
+#define shutdown(a,b)         lwip_shutdown(a,b)
+#define closesocket(s)        lwip_close(s)
+#define connect(a,b,c)        lwip_connect(a,b,c)
+#define getsockname(a,b,c)    lwip_getsockname(a,b,c)
+#define getpeername(a,b,c)    lwip_getpeername(a,b,c)
+#define setsockopt(a,b,c,d,e) lwip_setsockopt(a,b,c,d,e)
+#define getsockopt(a,b,c,d,e) lwip_getsockopt(a,b,c,d,e)
+#define listen(a,b)           lwip_listen(a,b)
+#define recv(a,b,c,d)         lwip_recv(a,b,c,d)
+#define recvfrom(a,b,c,d,e,f) lwip_recvfrom(a,b,c,d,e,f)
+#define send(a,b,c,d)         lwip_send(a,b,c,d)
+#define sendto(a,b,c,d,e,f)   lwip_sendto(a,b,c,d,e,f)
+#define socket(a,b,c)         lwip_socket(a,b,c)
+#define select(a,b,c,d,e)     lwip_select(a,b,c,d,e)
+#define ioctlsocket(a,b,c)    lwip_ioctl(a,b,c)
+
+#if LWIP_POSIX_SOCKETS_IO_NAMES
+#define read(a,b,c)           lwip_read(a,b,c)
+#define write(a,b,c)          lwip_write(a,b,c)
+#define close(s)              lwip_close(s)
+#endif /* LWIP_POSIX_SOCKETS_IO_NAMES */
+#endif
+
+#define MAXHOSTNAMELEN  64      /* max length of hostname */
+
+#define	ICMP_MINLEN	8				/* abs minimum */
+
+#define ICMP_ECHOREPLY		0	/* Echo Reply			*/
+#define ICMP_DEST_UNREACH	3	/* Destination Unreachable	*/
+#define ICMP_SOURCE_QUENCH	4	/* Source Quench		*/
+#define ICMP_REDIRECT		5	/* Redirect (change route)	*/
+#define ICMP_ECHO		8	/* Echo Request			*/
+#define ICMP_TIME_EXCEEDED	11	/* Time Exceeded		*/
+#define ICMP_PARAMETERPROB	12	/* Parameter Problem		*/
+#define ICMP_TIMESTAMP		13	/* Timestamp Request		*/
+#define ICMP_TIMESTAMPREPLY	14	/* Timestamp Reply		*/
+#define ICMP_INFO_REQUEST	15	/* Information Request		*/
+#define ICMP_INFO_REPLY		16	/* Information Reply		*/
+#define ICMP_ADDRESS		17	/* Address Mask Request		*/
+#define ICMP_ADDRESSREPLY	18	/* Address Mask Reply		*/
+#define NR_ICMP_TYPES		18
+
+
+/* Codes for UNREACH. */
+#define ICMP_NET_UNREACH	0	/* Network Unreachable		*/
+#define ICMP_HOST_UNREACH	1	/* Host Unreachable		*/
+#define ICMP_PROT_UNREACH	2	/* Protocol Unreachable		*/
+#define ICMP_PORT_UNREACH	3	/* Port Unreachable		*/
+#define ICMP_FRAG_NEEDED	4	/* Fragmentation Needed/DF set	*/
+#define ICMP_SR_FAILED		5	/* Source Route failed		*/
+#define ICMP_NET_UNKNOWN	6
+#define ICMP_HOST_UNKNOWN	7
+#define ICMP_HOST_ISOLATED	8
+#define ICMP_NET_ANO		9
+#define ICMP_HOST_ANO		10
+#define ICMP_NET_UNR_TOS	11
+#define ICMP_HOST_UNR_TOS	12
+#define ICMP_PKT_FILTERED	13	/* Packet filtered */
+#define ICMP_PREC_VIOLATION	14	/* Precedence violation */
+#define ICMP_PREC_CUTOFF	15	/* Precedence cut off */
+#define NR_ICMP_UNREACH		15	/* instead of hardcoding immediate value */
+
+/* Codes for REDIRECT. */
+#define ICMP_REDIR_NET		0	/* Redirect Net			*/
+#define ICMP_REDIR_HOST		1	/* Redirect Host		*/
+#define ICMP_REDIR_NETTOS	2	/* Redirect Net for TOS		*/
+#define ICMP_REDIR_HOSTTOS	3	/* Redirect Host for TOS	*/
+
+/* Codes for TIME_EXCEEDED. */
+#define ICMP_EXC_TTL		0	/* TTL count exceeded		*/
+#define ICMP_EXC_FRAGTIME	1	/* Fragment Reass time exceeded	*/
+
+
+
+struct icmp_ra_addr
+{
+  u_int32_t ira_addr;
+  u_int32_t ira_preference;
+};
+
+
+struct icmp
+{
+  u_int8_t  icmp_type;	/* type of message, see below */
+  u_int8_t  icmp_code;	/* type sub code */
+  u_int16_t icmp_cksum;	/* ones complement checksum of struct */
+  union
+  {
+    u_char ih_pptr;		/* ICMP_PARAMPROB */
+    struct in_addr ih_gwaddr;	/* gateway address */
+    struct ih_idseq		/* echo datagram */
+    {
+      u_int16_t icd_id;
+      u_int16_t icd_seq;
+    } ih_idseq;
+    u_int32_t ih_void;
+
+    /* ICMP_UNREACH_NEEDFRAG -- Path MTU Discovery (RFC1191) */
+    struct ih_pmtu
+    {
+      u_int16_t ipm_void;
+      u_int16_t ipm_nextmtu;
+    } ih_pmtu;
+
+    struct ih_rtradv
+    {
+      u_int8_t irt_num_addrs;
+      u_int8_t irt_wpa;
+      u_int16_t irt_lifetime;
+    } ih_rtradv;
+  } icmp_hun;
+#define	icmp_pptr	icmp_hun.ih_pptr
+#define	icmp_gwaddr	icmp_hun.ih_gwaddr
+#define	icmp_id		icmp_hun.ih_idseq.icd_id
+#define	icmp_seq	icmp_hun.ih_idseq.icd_seq
+#define	icmp_void	icmp_hun.ih_void
+#define	icmp_pmvoid	icmp_hun.ih_pmtu.ipm_void
+#define	icmp_nextmtu	icmp_hun.ih_pmtu.ipm_nextmtu
+#define	icmp_num_addrs	icmp_hun.ih_rtradv.irt_num_addrs
+#define	icmp_wpa	icmp_hun.ih_rtradv.irt_wpa
+#define	icmp_lifetime	icmp_hun.ih_rtradv.irt_lifetime
+  union
+  {
+    struct
+    {
+      u_int32_t its_otime;
+      u_int32_t its_rtime;
+      u_int32_t its_ttime;
+    } id_ts;
+    struct
+    {
+      struct ip_hdr idi_ip;
+      /* options and then 64 bits of data */
+    } id_ip;
+    struct icmp_ra_addr id_radv;
+    u_int32_t   id_mask;
+    u_int8_t    id_data[1];
+  } icmp_dun;
+#define	icmp_otime	icmp_dun.id_ts.its_otime
+#define	icmp_rtime	icmp_dun.id_ts.its_rtime
+#define	icmp_ttime	icmp_dun.id_ts.its_ttime
+#define	icmp_ip		icmp_dun.id_ip.idi_ip
+#define	icmp_radv	icmp_dun.id_radv
+#define	icmp_mask	icmp_dun.id_mask
+#define	icmp_data	icmp_dun.id_data
+};
+
+#define DEFDATALEN      56
+#define	MAXIPLEN	60
+#define	MAXICMPLEN	76
+#define	MAXPACKET	65468
+#define	MAX_DUP_CHK	(8 * 128)
+#define MAXWAIT         10
+#define PINGINTERVAL    1		/* second */
+
+#define O_QUIET         (1 << 0)
+
+#define	A(bit)		rcvd_tbl[(bit)>>3]	/* identify byte in array */
+#define	B(bit)		(1 << ((bit) & 0x07))	/* identify bit in byte */
+#define	SET(bit)	(A(bit) |= B(bit))
+#define	CLR(bit)	(A(bit) &= (~B(bit)))
+#define	TST(bit)	(A(bit) & B(bit))
+
+
+
+static char *hostname = NULL;
+static struct sockaddr_in pingaddr;
+static int pingsock = -1;
+static int datalen = DEFDATALEN;
+
+static long ntransmitted = 0, nreceived = 0, nrepeats = 0, pingcount = 3;
+static int myid = 0, options = 0;
+static unsigned long tmin = -1, tmax = 0, tsum = 0;
+static char rcvd_tbl[MAX_DUP_CHK / 8];
+
+static void sendping(int);
+static void pingstats(int);
+static void unpack(char *, int, struct sockaddr_in *);
+
+/**************************************************************************/
+static int in_cksum(unsigned short *buf, int sz)
+{
+	int nleft = sz;
+	int sum = 0;
+	unsigned short *w = buf;
+	unsigned short ans = 0;
+
+	while (nleft > 1) {
+		sum += *w++;
+		nleft -= 2;
+	}
+
+	if (nleft == 1) {
+		*(unsigned char *) (&ans) = *(unsigned char *) w;
+		sum += ans;
+	}
+
+	sum = (sum >> 16) + (sum & 0xFFFF);
+	sum += (sum >> 16);
+	ans = ~sum;
+	return (ans);
+}
+
+
+static void pingstats(int ign)
+{
+	signal(SIGINT, SIG_IGN);
+
+	printf("\n--- %s ping statistics ---\n", hostname);
+	printf("%ld packets transmitted, ", ntransmitted);
+	printf("%ld packets received, ", nreceived);
+	if (nrepeats)
+		printf("%ld duplicates, ", nrepeats);
+	if (ntransmitted)
+		printf("%ld%% packet loss\n",
+			   (ntransmitted - nreceived) * 100 / ntransmitted);
+	if (nreceived)
+		printf("round-trip min/avg/max = %lu.%lu/%lu.%lu/%lu.%lu ms\n",
+			   tmin / 10, tmin % 10,
+			   (tsum / (nreceived + nrepeats)) / 10,
+			   (tsum / (nreceived + nrepeats)) % 10, tmax / 10, tmax % 10);
+	ntransmitted = 0;
+	nreceived = 0; 
+	nrepeats = 0; 
+	myid = 0;
+	options = 0;
+	tmin = -1;
+	tmax = 0;
+	tsum = 0;
+
+}
+
+static void sendping(int ign)
+{
+	struct icmp *pkt;
+	int i;
+	char packet[datalen + 8];
+
+	pkt = (struct icmp *) packet;
+
+	pkt->icmp_type = ICMP_ECHO;
+	pkt->icmp_code = 0;
+	pkt->icmp_cksum = 0;
+	pkt->icmp_seq = ntransmitted++;
+	pkt->icmp_id = myid;
+	CLR(pkt->icmp_seq % MAX_DUP_CHK);
+
+	gettimeofday((struct timeval *) &packet[8], NULL);
+	pkt->icmp_cksum = in_cksum((unsigned short *) pkt, sizeof(packet));
+
+	i = sendto(pingsock, packet, sizeof(packet), 0,
+			   (struct sockaddr *) &pingaddr, sizeof(struct sockaddr_in));
+
+#if 0
+	if (i < 0)
+		printf ("ping: sendto: %s\n", strerror(errno));
+	else if (i != sizeof(packet))
+		printf ("ping wrote %d chars; %d expected\n", i,
+			   (int)sizeof(packet));
+
+	if (pingcount == 0 || ntransmitted < pingcount) {	/* schedule next in 1s */
+		alarm(PINGINTERVAL);
+	} else {					/* done, wait for the last ping to come back */
+		/* todo, don't necessarily need to wait so long... */
+		signal(SIGALRM, pingstats);
+		alarm(MAXWAIT);
+	}
+#endif
+}
+
+static char *icmp_type_name (int id)
+{
+	switch (id) {
+	case ICMP_ECHOREPLY: 		return "Echo Reply";
+	case ICMP_DEST_UNREACH: 	return "Destination Unreachable";
+	case ICMP_SOURCE_QUENCH: 	return "Source Quench";
+	case ICMP_REDIRECT: 		return "Redirect (change route)";
+	case ICMP_ECHO: 			return "Echo Request";
+	case ICMP_TIME_EXCEEDED: 	return "Time Exceeded";
+	case ICMP_PARAMETERPROB: 	return "Parameter Problem";
+	case ICMP_TIMESTAMP: 		return "Timestamp Request";
+	case ICMP_TIMESTAMPREPLY: 	return "Timestamp Reply";
+	case ICMP_INFO_REQUEST: 	return "Information Request";
+	case ICMP_INFO_REPLY: 		return "Information Reply";
+	case ICMP_ADDRESS: 			return "Address Mask Request";
+	case ICMP_ADDRESSREPLY: 	return "Address Mask Reply";
+	default: 					return "unknown ICMP type";
+	}
+}
+
+static void unpack(char *buf, int sz, struct sockaddr_in *from)
+{
+	struct icmp *icmppkt;
+	struct ip_hdr *iphdr;
+	struct timeval tv, *tp;
+	int hlen, dupflag;
+	unsigned long triptime;
+
+	gettimeofday(&tv, NULL);
+
+	/* check IP header */
+	iphdr = (struct ip_hdr *) buf;
+	hlen = iphdr->_len << 2;
+	/* discard if too short */
+	if (sz < (datalen + ICMP_MINLEN))
+		return;
+
+	sz -= hlen;
+	icmppkt = (struct icmp *) (buf + hlen);
+
+	if (icmppkt->icmp_id != myid)
+	    return;				/* not our ping */
+
+	if (icmppkt->icmp_type == ICMP_ECHOREPLY) {
+	    ++nreceived;
+		tp = (struct timeval *) icmppkt->icmp_data;
+
+		if ((tv.tv_usec -= tp->tv_usec) < 0) {
+			--tv.tv_sec;
+			tv.tv_usec += 1000000;
+		}
+		tv.tv_sec -= tp->tv_sec;
+
+		triptime = tv.tv_sec * 10000 + (tv.tv_usec / 100);
+		tsum += triptime;
+		if (triptime < tmin)
+			tmin = triptime;
+		if (triptime > tmax)
+			tmax = triptime;
+
+		if (TST(icmppkt->icmp_seq % MAX_DUP_CHK)) {
+			++nrepeats;
+			--nreceived;
+			dupflag = 1;
+		} else {
+			SET(icmppkt->icmp_seq % MAX_DUP_CHK);
+			dupflag = 0;
+		}
+
+		if (options & O_QUIET)
+			return;
+
+		printf("%d bytes from %s: icmp_seq=%u", sz,
+			   inet_ntoa(*(struct in_addr *) &from->sin_addr.s_addr),
+			   icmppkt->icmp_seq);
+		printf(" ttl=%d", iphdr->_ttl);
+		printf(" time=%lu.%lu ms", triptime / 10, triptime % 10);
+		if (dupflag)
+			printf(" (DUP!)");
+		printf("\n");
+	} else 
+		if (icmppkt->icmp_type != ICMP_ECHO)
+			fprintf(stderr,
+					"Warning: Got ICMP %d (%s)\n",
+					icmppkt->icmp_type, icmp_type_name (icmppkt->icmp_type));
+}
+
+static void ping(const char *host)
+{
+	struct hostent *h;
+	char buf[MAXHOSTNAMELEN];
+	char packet[datalen + MAXIPLEN + MAXICMPLEN];
+	int sockopt;
+
+	if ((pingsock = lwip_socket (AF_INET, SOCK_RAW,IP_PROTO_ICMP)) < 0) {	/* 1 == ICMP */
+		if (errno == EPERM) {
+			fprintf(stderr, "ping: permission denied. (are you root?)\n");
+		} else {
+			perror("ping: creating a raw socket");
+		}
+		return -1;
+	}
+
+	memset(&pingaddr, 0, sizeof(struct sockaddr_in));
+
+	pingaddr.sin_family = AF_INET;
+	if (!(h = gethostbyname(host))) {
+		fprintf(stderr, "ping: unknown host %s\n", host);
+		lwip_close (pingsock);
+		return -1;
+	}
+
+	if (h->h_addrtype != AF_INET) {
+		fprintf(stderr,
+				"ping: unknown address type; only AF_INET is currently supported.\n");
+		lwip_close (pingsock);
+		return -1;
+	}
+
+	pingaddr.sin_family = AF_INET;	/* h->h_addrtype */
+	memcpy(&pingaddr.sin_addr, h->h_addr, sizeof(pingaddr.sin_addr));
+	strncpy(buf, h->h_name, sizeof(buf) - 1);
+	hostname = buf;
+
+	/* enable broadcast pings */
+	sockopt = 1;
+	setsockopt(pingsock, SOL_SOCKET, SO_BROADCAST, (char *) &sockopt,
+			   sizeof(sockopt));
+
+	/* set recv buf for broadcast pings */
+	sockopt = 48 * 1024;
+	setsockopt(pingsock, SOL_SOCKET, SO_RCVBUF, (char *) &sockopt,
+			   sizeof(sockopt));
+
+	printf("PING %s (%s): %d data bytes\n",
+		   hostname,
+		   inet_ntoa(*(struct in_addr *) &pingaddr.sin_addr.s_addr),
+		   datalen);
+
+	//signal(SIGINT, pingstats);
+
+	/* start the ping's going ... */
+
+	/* listen for replies */
+	while (1) {
+		struct sockaddr_in from;
+		socklen_t fromlen = (socklen_t) sizeof(from);
+		int c;
+		sendping(0);
+		sleep (1);
+		if ((c = recvfrom(pingsock, packet, sizeof(packet), 0,
+						  (struct sockaddr *) &from, &fromlen)) < 0) {
+			if (errno == EINTR)
+				continue;
+		}
+		unpack(packet, c, &from);
+
+		if (ntransmitted >= pingcount)
+			break;
+		if (pingcount > 0 && nreceived >= pingcount)
+			break;
+	}
+	pingstats(0);
+	lwip_close (pingsock);
+}
+usage (int k)
+{
+}
+int ping_me (char *host)
+{
+	myid = getpid() & 0xFFFF;
+	ping(host);
+	return 0;
+}
+

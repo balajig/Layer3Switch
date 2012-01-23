@@ -101,7 +101,7 @@ struct lwip_select_cb
   /** don't signal the same semaphore twice: set to 1 when signalled */
     int                 sem_signalled;
   /** semaphore to wake up a task waiting for select */
-    sys_sem_t           sem;
+    sync_lock_t           sem;
 };
 
 /** This struct is used to pass data to the set/getsockopt_internal
@@ -1302,7 +1302,7 @@ lwip_select (int maxfdp1, fd_set * readset, fd_set * writeset,
         select_cb.writeset = writeset;
         select_cb.exceptset = exceptset;
         select_cb.sem_signalled = 0;
-        err = sys_sem_new (&select_cb.sem, 0);
+        err = create_sync_lock(&select_cb.sem);
         if (err != ERR_OK)
         {
             /* failed to create semaphore */
@@ -1564,7 +1564,7 @@ event_callback (struct netconn *conn, enum netconn_evt evt, u16_t len)
                 scb->sem_signalled = 1;
                 /* Don't call SYS_ARCH_UNPROTECT() before signaling the semaphore, as this might
                    lead to the select thread taking itself off the list, invalidagin the semaphore. */
-                sys_sem_signal (&scb->sem);
+                sync_unlock (&scb->sem);
             }
         }
         /* unlock interrupts with each step */
@@ -2143,7 +2143,7 @@ lwip_getsockopt_internal (void *arg)
             LWIP_ASSERT ("unhandled level", 0);
             break;
     }                            /* switch (level) */
-    sys_sem_signal (&sock->conn->op_completed);
+    sync_unlock (&sock->conn->op_completed);
 }
 
 int
@@ -2640,7 +2640,7 @@ lwip_setsockopt_internal (void *arg)
             LWIP_ASSERT ("unhandled level", 0);
             break;
     }                            /* switch (level) */
-    sys_sem_signal (&sock->conn->op_completed);
+    sync_unlock (&sock->conn->op_completed);
 }
 
 int

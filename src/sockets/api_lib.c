@@ -328,15 +328,15 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
         return err;
     }
 #if LWIP_SO_RCVTIMEO
-    if (sys_arch_mbox_fetch
-        (&conn->acceptmbox, (void **) &newconn,
-         conn->recv_timeout) == SYS_ARCH_TIMEOUT)
+    if (dequeue_packet
+        (conn->acceptmbox, (void **) &newconn, sizeof (struct netconn),
+         conn->recv_timeout, 0) == SYS_ARCH_TIMEOUT)
     {
         NETCONN_SET_SAFE_ERR (conn, ERR_TIMEOUT);
         return ERR_TIMEOUT;
     }
 #else
-    sys_arch_mbox_fetch (&conn->acceptmbox, (void **) &newconn, 0);
+    dequeue_packet (conn->acceptmbox, (void **) &newconn, sizeof (struct netconn),0, 0);
 #endif /* LWIP_SO_RCVTIMEO */
     /* Register event with callback */
     API_EVENT (conn, NETCONN_EVT_RCVMINUS, 0);
@@ -406,14 +406,13 @@ netconn_recv_data (struct netconn *conn, void **new_buf)
     }
 
 #if LWIP_SO_RCVTIMEO
-    if (sys_arch_mbox_fetch (&conn->recvmbox, &buf, conn->recv_timeout) ==
-        SYS_ARCH_TIMEOUT)
+    if (dequeue_packet (conn->recvmbox, &buf, sizeof (buf), 1, 0) < 0)
     {
         NETCONN_SET_SAFE_ERR (conn, ERR_TIMEOUT);
         return ERR_TIMEOUT;
     }
 #else
-    sys_arch_mbox_fetch (&conn->recvmbox, &buf, 0);
+    dequeue_packet (conn->recvmbox, &buf, sizeof (buf), 0, 0);
 #endif /* LWIP_SO_RCVTIMEO */
 
 #if LWIP_TCP
@@ -801,7 +800,7 @@ netconn_gethostbyname (const char *name, ip_addr_t * addr)
 {
     struct dns_api_msg  msg;
     err_t               err;
-    sys_sem_t           sem;
+    sync_lock_t         sem;
 
     LWIP_ERROR ("netconn_gethostbyname: invalid name", (name != NULL),
                 return ERR_ARG;
@@ -810,7 +809,7 @@ netconn_gethostbyname (const char *name, ip_addr_t * addr)
                 return ERR_ARG;
         );
 
-    err = sys_sem_new (&sem, 0);
+    err = create_sync_lock (&sem);
     if (err != ERR_OK)
     {
         return err;
@@ -822,8 +821,8 @@ netconn_gethostbyname (const char *name, ip_addr_t * addr)
     msg.sem = &sem;
 
     do_gethostbyname (&msg);
-    sys_sem_wait (&sem);
-    sys_sem_free (&sem);
+    sync_lock (&sem);
+    destroy_sync_lock (&sem);
 
     return err;
 }

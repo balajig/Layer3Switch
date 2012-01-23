@@ -10,6 +10,7 @@
 
 
 #include "common_types.h"
+#include "err.h"
 
 int EventInit (EVT_T *p)
 {
@@ -74,7 +75,8 @@ int EvtRx_timed_wait (EVT_T *evt, int *pevent, int event, int secs, int nsecs)
 		}
 		err =  pthread_cond_timedwait (&evt->evt_cnd, &evt->evt_mtx, &ts);
 		if (err == ETIMEDOUT) {
-			return -1;
+			pthread_mutex_unlock (&evt->evt_mtx);
+			return ERR_TIMEOUT;
 		}
 	}
 

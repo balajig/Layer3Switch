@@ -116,6 +116,7 @@ int mem_pool_create (const char *name, size_t size, int n_blks, int flags)
 	mcb->nblks = n_blks;
 	mcb->memid = memid;
 	create_sync_lock (&mcb->lock);
+	sync_unlock (&mcb->lock);
 	INIT_LIST_HEAD (&mcb->n);
 
 	if (!(mcb->saddr = alloc_mem (bytes))) {

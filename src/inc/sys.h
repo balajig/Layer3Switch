@@ -40,15 +40,6 @@ extern "C" {
 
 #if NO_SYS
 
-/* For a totally minimal and standalone system, we provide null
-   definitions of the sys_ functions. */
-typedef u8_t sys_sem_t;
-typedef u8_t sys_mutex_t;
-typedef u8_t sys_mbox_t;
-
-#define sys_sem_new(s, c) ERR_OK
-#define sys_sem_signal(s) ERR_OK
-#define sys_sem_wait(s)  ERR_OK
 #define sys_arch_sem_wait(s,t) ERR_OK
 #define sys_sem_free(s) ERR_OK
 #define sys_mutex_new(mu) ERR_OK
@@ -95,7 +86,7 @@ typedef void (*lwip_thread_fn)(void *arg);
 #define sys_mutex_t                   sys_sem_t
 #define sys_mutex_new(mutex)          sys_sem_new(mutex, 1)
 #define sys_mutex_lock(mutex)         sys_sem_wait(mutex)
-#define sys_mutex_unlock(mutex)       sys_sem_signal(mutex)
+#define sys_mutex_unlock(mutex)       sync_unlock(mutex)
 #define sys_mutex_free(mutex)         sys_sem_free(mutex)
 #define sys_mutex_valid(mutex)        sys_sem_valid(mutex)
 #define sys_mutex_set_invalid(mutex)  sys_sem_set_invalid(mutex)
@@ -126,40 +117,6 @@ void sys_mutex_set_invalid(sys_mutex_t *mutex);
 #endif /* LWIP_COMPAT_MUTEX */
 
 /* Semaphore functions: */
-
-/** Create a new semaphore
- * @param sem pointer to the semaphore to create
- * @param count initial count of the semaphore
- * @return ERR_OK if successful, another err_t otherwise */
-err_t sys_sem_new(sys_sem_t *sem, u8_t count);
-/** Signals a semaphore
- * @param sem the semaphore to signal */
-void sys_sem_signal(sys_sem_t *sem);
-/** Wait for a semaphore for the specified timeout
- * @param sem the semaphore to wait for
- * @param timeout timeout in milliseconds to wait (0 = wait forever)
- * @return time (in milliseconds) waited for the semaphore
- *         or SYS_ARCH_TIMEOUT on timeout */
-u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout);
-/** Delete a semaphore
- * @param sem semaphore to delete */
-void sys_sem_free(sys_sem_t *sem);
-/** Wait for a semaphore - forever/no timeout */
-#define sys_sem_wait(sem)                  sys_arch_sem_wait(sem, 0)
-#ifndef sys_sem_valid
-/** Check if a sempahore is valid/allocated: return 1 for valid, 0 for invalid */
-int sys_sem_valid(sys_sem_t *sem);
-#endif
-#ifndef sys_sem_set_invalid
-/** Set a semaphore invalid so that sys_sem_valid returns 0 */
-void sys_sem_set_invalid(sys_sem_t *sem);
-#endif
-
-/* Time functions. */
-#ifndef sys_msleep
-void sys_msleep(u32_t ms); /* only has a (close to) 1 jiffy resolution. */
-#endif
-
 /* Mailbox functions. */
 
 /** Create a new mbox of specified size
@@ -183,8 +140,6 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg);
  * @return time (in milliseconds) waited for a message, may be 0 if not waited
            or SYS_ARCH_TIMEOUT on timeout
  *         The returned time has to be accurate to prevent timer jitter! */
-u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout);
-/* Allow port to override with a macro, e.g. special timout for sys_arch_mbox_fetch() */
 #ifndef sys_arch_mbox_tryfetch
 /** Wait for a new message to arrive in the mbox
  * @param mbox mbox to get a message from

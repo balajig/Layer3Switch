@@ -1172,6 +1172,16 @@ dhcp_bind (struct interface *netif)
                   ip4_addr_get_u32 (&gw_addr)));
 
     if_set_addr (netif, &dhcp->offered_ip_addr, &sn_mask, &gw_addr);
+    {
+	    uint8_t addr[4];
+	    uint8_t gateway[4];
+	    uint32_2_ipstring ((dhcp->offered_ip_addr.addr), &addr);
+	    uint32_2_ipstring ((gw_addr.addr), &gateway);
+	    int masklen = u32ip_masklen ((sn_mask.addr));
+	     
+	    route_add_if (addr, masklen, netif);
+	    route_add_gateway (addr, masklen, gateway);
+    }
     /* bring the interface up */
     if_set_up (netif);
     /* netif is now bound to DHCP leased address */

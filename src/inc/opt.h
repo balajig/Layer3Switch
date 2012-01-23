@@ -325,7 +325,7 @@
  * (only needed if you use the sequential API, like api_lib.c)
  */
 #ifndef MEMP_NUM_NETCONN
-#define MEMP_NUM_NETCONN                4
+#define MEMP_NUM_NETCONN               	10 
 #endif
 
 /**
@@ -2038,7 +2038,7 @@
  * ZEBRA_RTM_SUPPORT: Enable Zebra RTM Support.
  */
 #ifndef ZEBRA_RTM_SUPPORT
-#define ZEBRA_RTM_SUPPORT			1
+#define ZEBRA_RTM_SUPPORT			0
 #endif
 
 /*

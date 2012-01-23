@@ -33,5 +33,7 @@ int lib_init (void)
 
 	init_timer_mgr ();
 
+	pqueue_init ();
+
 	return 0;
 }
