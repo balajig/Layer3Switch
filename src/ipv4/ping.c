@@ -373,7 +373,7 @@ static void unpack(char *buf, int sz, struct sockaddr_in *from)
 
 	/* check IP header */
 	iphdr = (struct ip_hdr *) buf;
-	hlen = iphdr->_len << 2;
+    	hlen = IPH_HL (iphdr) * 4;
 	/* discard if too short */
 	if (sz < (datalen + ICMP_MINLEN))
 		return;

@@ -92,4 +92,11 @@ int EventInit (EVT_T *p);
 int EvtRx (EVT_T *evt, int *pevent, int event);
 void EvtSnd (EVT_T *evt, int event);
 
+/*Pqueue lib*/
+
+unsigned long  pqueue_create (void);
+int  pqueue_destroy (unsigned long pcb);
+int  pqueue_valid (unsigned long pcb);
+int queue_packet (unsigned long qblk , uint8_t *buf, int len);
+int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs, int nsecs);
 #endif

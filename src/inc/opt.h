@@ -437,7 +437,7 @@
  * packet in a row to an IP address that is not in the ARP cache.
  */
 #ifndef ARP_QUEUEING
-#define ARP_QUEUEING                    0
+#define ARP_QUEUEING                    1
 #endif
 
 /**

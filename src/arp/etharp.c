@@ -1532,9 +1532,11 @@ low_level_output (struct interface *netif, struct pbuf *p)
     pbuf_header (p, -ETH_PAD_SIZE);    /* drop the padding word */
 #endif
 
+#if 0
     for (q = p; q != NULL; q = q->next)
+#endif
     {
-         send_packet (q->payload, port, q->len);
+         send_packet (p->payload, port, p->tot_len);
     }
 
 

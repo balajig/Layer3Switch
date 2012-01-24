@@ -10,6 +10,9 @@
 
 #include "common_types.h"
 
+
+int pqueue_init (void);
+
 #define MAX_Q_CTRL_BLOCKS    32
 #define PKT_RX_ON_SOCK       0x1 
 
@@ -117,7 +120,7 @@ int queue_packet (unsigned long qblk , uint8_t *buf, int len)
 	return 0;
 }
 
-int dequeue_packet (unsigned long qcb, uint8_t *data, size_t datalen, int secs, int nsecs)
+int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs, int nsecs)
 {
 	queue_cb_t * p = (queue_cb_t *)qcb;
 	socket_queue_t  *qbuf = NULL;
@@ -147,8 +150,7 @@ packet:
 				return -1;
 			if (datalen > qbuf->len)
 				datalen = qbuf->len;
-			data = qbuf->buf;
-			/*TODO: free buf*/
+			*data = qbuf->buf;
 			list_del (&qbuf->nbuf);
 			free (qbuf);
 			break;
