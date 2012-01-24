@@ -317,7 +317,7 @@ unsigned char *route_lookup_ipaddr (unsigned char *ipaddr, if_t *netif)
 
 int  cli_show_ip_route (void)
 {
-#ifdef ZEBRA_RTM_SUPPORT
+#if ZEBRA_RTM_SUPPORT
 	struct route_table *table;
 	struct route_node *rn;
 	struct rib *rib;

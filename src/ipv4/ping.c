@@ -277,7 +277,7 @@ static int in_cksum(unsigned short *buf, int sz)
 
 static void pingstats(int ign)
 {
-	signal(SIGINT, SIG_IGN);
+	//signal(SIGINT, SIG_IGN);
 
 	printf("\n--- %s ping statistics ---\n", hostname);
 	printf("%ld packets transmitted, ", ntransmitted);

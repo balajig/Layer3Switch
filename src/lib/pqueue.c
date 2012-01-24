@@ -147,8 +147,7 @@ packet:
 				return -1;
 			if (datalen > qbuf->len)
 				datalen = qbuf->len;
-			if (qbuf->buf)
-				memcpy (data, qbuf->buf, datalen);
+			data = qbuf->buf;
 			/*TODO: free buf*/
 			list_del (&qbuf->nbuf);
 			free (qbuf);

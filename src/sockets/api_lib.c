@@ -336,7 +336,7 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
         return ERR_TIMEOUT;
     }
 #else
-    dequeue_packet (conn->acceptmbox, (void **) &newconn, sizeof (struct netconn),0, 0);
+    dequeue_packet (conn->acceptmbox, (void **) &newconn, sizeof (&new),0, 0);
 #endif /* LWIP_SO_RCVTIMEO */
     /* Register event with callback */
     API_EVENT (conn, NETCONN_EVT_RCVMINUS, 0);
@@ -406,13 +406,13 @@ netconn_recv_data (struct netconn *conn, void **new_buf)
     }
 
 #if LWIP_SO_RCVTIMEO
-    if (dequeue_packet (conn->recvmbox, &buf, sizeof (buf), 1, 0) < 0)
+    if (dequeue_packet (conn->recvmbox, &buf, sizeof (&buf), 1, 0) < 0)
     {
         NETCONN_SET_SAFE_ERR (conn, ERR_TIMEOUT);
         return ERR_TIMEOUT;
     }
 #else
-    dequeue_packet (conn->recvmbox, &buf, sizeof (buf), 0, 0);
+    dequeue_packet (conn->recvmbox, &buf, sizeof (&buf), 0, 0);
 #endif /* LWIP_SO_RCVTIMEO */
 
 #if LWIP_TCP

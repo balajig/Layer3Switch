@@ -117,7 +117,7 @@ recv_raw(void *arg, struct raw_pcb *pcb, struct pbuf *p,
       buf->port = pcb->protocol;
 
       len = q->tot_len;
-      if (queue_packet(conn->recvmbox, buf, sizeof (*buf)) != ERR_OK) {
+      if (queue_packet(conn->recvmbox, buf, sizeof (buf)) != ERR_OK) {
         netbuf_delete(buf);
         return 0;
       } else {
@@ -193,7 +193,7 @@ recv_udp(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   }
 
   len = p->tot_len;
-  if (queue_packet(conn->recvmbox, buf, sizeof (*buf)) != ERR_OK) {
+  if (queue_packet(conn->recvmbox, buf, sizeof (buf)) != ERR_OK) {
     netbuf_delete(buf);
     return;
   } else {
@@ -249,7 +249,7 @@ recv_tcp(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
     len = 0;
   }
 
-  if (queue_packet (conn->recvmbox, p, sizeof (*p))!= ERR_OK) {
+  if (queue_packet (conn->recvmbox, p, sizeof (p))!= ERR_OK) {
     /* don't deallocate p: it is presented to us later again from tcp_fasttmr! */
     return ERR_MEM;
   } else {
@@ -454,7 +454,7 @@ accept_function(void *arg, struct tcp_pcb *newpcb, err_t err)
      to the application thread */
   newconn->last_err = err;
 
-  if (queue_packet(conn->acceptmbox, newconn, sizeof (*newconn)) != ERR_OK) {
+  if (queue_packet(conn->acceptmbox, newconn, sizeof (newconn)) != ERR_OK) {
     /* When returning != ERR_OK, the pcb is aborted in tcp_process(),
        so do nothing here! */
     newconn->pcb.tcp = NULL;
@@ -677,7 +677,7 @@ netconn_drain(struct netconn *conn)
 
   /* Delete and drain the recvmbox. */
   if (pqueue_valid(conn->recvmbox)) {
-    while (dequeue_packet (conn->recvmbox, &mem, sizeof (struct netbuf), 0, 0) != -1) {
+    while (dequeue_packet (conn->recvmbox, &mem, sizeof (&mem), 0, 0) != -1) {
 #if LWIP_TCP
       if (conn->type == NETCONN_TCP) {
         if(mem != NULL) {
@@ -701,7 +701,7 @@ netconn_drain(struct netconn *conn)
   /* Delete and drain the acceptmbox. */
 #if LWIP_TCP
   if (pqueue_valid(conn->acceptmbox)) {
-    while (dequeue_packet (conn->acceptmbox, &mem, sizeof (struct netbuf), 0, 0) != -1) {
+    while (dequeue_packet (conn->acceptmbox, &mem, sizeof (&mem), 0, 0) != -1) {
       struct netconn *newconn = (struct netconn *)mem;
       /* Only tcp pcbs have an acceptmbox, so no need to check conn->type */
       /* pcb might be set to NULL already by err_tcp() */
