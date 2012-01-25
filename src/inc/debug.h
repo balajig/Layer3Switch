@@ -75,9 +75,10 @@
 /** if "expression" isn't true, then print "message" and execute "handler" expression */
 #ifndef LWIP_ERROR
 #define LWIP_ERROR(message, expression, handler)
-//#define LWIP_ERROR(message, expression, handler)  if (expression) { \
-//							printf (message); \
-//							handler; 
+/*#define LWIP_ERROR(message, expression, handler)  if (expression) { 
+							printf (message); 
+							handler; 
+*/
 #endif /* LWIP_ERROR */
 
 #ifdef LWIP_DEBUG
