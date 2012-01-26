@@ -1,5 +1,5 @@
 //Configures SNTP to request NTP packets from an NTP server
-ntp server <STRING:servername>
+ntp server hostname <STRING:servername>
 
 //Configures SNTP to request NTP packets from an NTP server
 ntp server <IPV4ADDR:serveripaddr>

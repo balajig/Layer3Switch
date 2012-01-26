@@ -38,6 +38,17 @@ int sntp_init (void)
 	return -1;
 }
 
+int set_sntp_server (uint32_t addr)
+{
+	int i = 0;
+
+	while (i < MAX_NTP_SERVER) {
+		ntp_server[i].addr = addr;
+		i++;
+	}
+	return -1;
+}
+
 static void  sntp_recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t * addr, u16_t port)
 {
 	char           *reply_msg = (ntphdr_t *) p->payload;
