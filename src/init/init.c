@@ -63,6 +63,7 @@ void layer3switch_init (void)
 #if LWIP_SNMP
 	snmp_init ();
 #endif /* LWIP_SNMP */
+	dhcp_init ();
 #if LWIP_AUTOIP
 	autoip_init ();
 #endif /* LWIP_AUTOIP */

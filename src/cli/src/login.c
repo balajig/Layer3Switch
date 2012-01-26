@@ -44,8 +44,6 @@ int process_lock (void)
 	memset (user, 0, sizeof(user));
 	memset(pword,0, sizeof(pword));
 
-	write_string ("\n");
-
 	get_current_user_name (user);
 retry:
 	write_string("\rEnter Password To UnLock The Console:");
