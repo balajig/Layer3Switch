@@ -1333,7 +1333,7 @@ tcp_alloc (u8_t prio)
     struct tcp_pcb     *pcb;
     u32_t               iss;
 
-    pcb = (struct tcp_pcb *) memp_malloc (MEMP_TCP_PCB);
+    pcb = (struct tcp_pcb *) calloc (1, sizeof (struct tcp_pcb));
     if (pcb == NULL)
     {
         /* Try killing oldest connection in TIME-WAIT. */
@@ -1341,7 +1341,7 @@ tcp_alloc (u8_t prio)
                      ("tcp_alloc: killing off oldest TIME-WAIT connection\n"));
         tcp_kill_timewait ();
         /* Try to allocate a tcp_pcb again. */
-        pcb = (struct tcp_pcb *) memp_malloc (MEMP_TCP_PCB);
+    	pcb = (struct tcp_pcb *) calloc (1, sizeof (struct tcp_pcb));
         if (pcb == NULL)
         {
             /* Try killing active connections with lower priority than the new one. */
@@ -1350,7 +1350,7 @@ tcp_alloc (u8_t prio)
                           prio));
             tcp_kill_prio (prio);
             /* Try to allocate a tcp_pcb again. */
-            pcb = (struct tcp_pcb *) memp_malloc (MEMP_TCP_PCB);
+  	    pcb = (struct tcp_pcb *) calloc (1, sizeof (struct tcp_pcb));
             if (pcb != NULL)
             {
                 /* adjust err stats: memp_malloc failed twice before */
@@ -1827,6 +1827,7 @@ tcp_pcbs_sane (void)
 #endif /* TCP_DEBUG */
 /** global variable that shows if the tcp timer is currently scheduled or not */
 static int          tcpip_tcp_timer_active;
+static TIMER_ID     tcp_timer_id;
 
 /**
  * Timer callback function that calls tcp_tmr() and reschedules itself.
@@ -1844,7 +1845,7 @@ tcpip_tcp_timer (void *arg)
     if (tcp_active_pcbs || tcp_tw_pcbs)
     {
         /* restart timer */
-        //sys_timeout (TCP_TMR_INTERVAL, tcpip_tcp_timer, NULL);
+    	mod_timer (tcp_timer_id, milli_secs_to_ticks (TCP_TMR_INTERVAL));
     }
     else
     {
@@ -1866,7 +1867,12 @@ tcp_timer_needed (void)
     {
         /* enable and start timer */
         tcpip_tcp_timer_active = 1;
-        //sys_timeout (TCP_TMR_INTERVAL, tcpip_tcp_timer, NULL);
+    	mod_timer (tcp_timer_id, milli_secs_to_ticks (TCP_TMR_INTERVAL));
     }
+}
+
+tcp_init ()
+{
+	setup_timer(&tcp_timer_id, tcpip_tcp_timer, NULL);
 }
 #endif /* LWIP_TCP */
