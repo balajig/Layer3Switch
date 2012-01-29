@@ -654,6 +654,11 @@ netconn_free(struct netconn *conn)
 
   destroy_sync_lock (&conn->op_completed);
 
+  if (pqueue_valid(conn->acceptmbox))
+	pqueue_destroy(conn->acceptmbox);
+  if (pqueue_valid(conn->recvmbox))
+	pqueue_destroy(conn->recvmbox);
+
   memp_free(MEMP_NETCONN, conn);
 }
 
@@ -1065,7 +1070,7 @@ do_listen(struct api_msg_msg *msg)
             /* delete the recvmbox and allocate the acceptmbox */
             if (pqueue_valid(msg->conn->recvmbox)) {
               /** @todo: should we drain the recvmbox here? */
-              pqueue_destroy(&msg->conn->recvmbox);
+              pqueue_destroy(msg->conn->recvmbox);
               //sys_mbox_set_invalid(&msg->conn->recvmbox);
             }
             msg->err = ERR_OK;
