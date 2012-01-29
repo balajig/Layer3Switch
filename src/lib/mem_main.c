@@ -315,7 +315,7 @@ invalid_address:
 /* alloc_mem  is the final routine to allocate memory*/
 static void * alloc_mem (size_t size)
 {
-	return (void *) tm_calloc (1, size);
+	return malloc (size);
 }
 
 static inline void free_mem(void *mem)

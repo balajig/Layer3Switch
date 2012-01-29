@@ -1032,9 +1032,9 @@
  *     LWIP_CALLBACK_API==1: The PCB callback function is called directly
  *         for the event.
  */
+#define LWIP_CALLBACK_API               1
 #ifndef LWIP_EVENT_API
 #define LWIP_EVENT_API                  0
-#define LWIP_CALLBACK_API               1
 #else 
 #define LWIP_EVENT_API                  1
 #define LWIP_CALLBACK_API               0
@@ -1341,7 +1341,7 @@
  * Don't use it if you're not an active lwIP project member
  */
 #ifndef LWIP_TCPIP_CORE_LOCKING
-#define LWIP_TCPIP_CORE_LOCKING         1
+#define LWIP_TCPIP_CORE_LOCKING         0
 #endif
 
 /**

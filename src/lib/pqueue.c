@@ -29,20 +29,12 @@ typedef struct queue_cb
 	int32_t            state;
 }queue_cb_t;
 
-static int  q_mem_pool_id = -1;
-
 static queue_cb_t  pqcb[MAX_Q_CTRL_BLOCKS];
 
 static sync_lock_t  pq_lock;
 
 int pqueue_init (void)
 {
-	q_mem_pool_id = mem_pool_create ("PQUEUE", MAX_Q_CTRL_BLOCKS * sizeof(queue_cb_t), 
-                                         MAX_Q_CTRL_BLOCKS, 0);
-	if (q_mem_pool_id < 0) {
-		return -1;
-	}
-
 	create_sync_lock (&pq_lock);	
 	sync_unlock (&pq_lock);
 

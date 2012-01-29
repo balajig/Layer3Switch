@@ -73,7 +73,7 @@ void layer3switch_init (void)
 #if LWIP_DNS
 	dns_init ();
 #endif /* LWIP_DNS */
-	sntp_init ();
+	init_sntpd ();
 
 #if LWIP_TIMERS
 	sys_timeouts_init ();
@@ -82,6 +82,8 @@ void layer3switch_init (void)
 #ifdef ZEBRA_RTM_SUPPORT
 	rtm_init ();
 #endif  /* RTM_SUPPORT */
+
+	telnet_init ();
 
         spawn_pkt_processing_task ();
 

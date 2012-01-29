@@ -12,6 +12,7 @@
 #include <sys/times.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <stdarg.h>
 
 /* Types of sockets.  */
 enum __socket_type
