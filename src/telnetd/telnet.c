@@ -150,6 +150,8 @@ void sendopt(struct termstate *ts, int code, int option)
 {
 	unsigned char buf[3];
 
+	return;
+
 	buf[0] = TELNET_IAC;
 	buf[1] = (unsigned char) code;
 	buf[2] = (unsigned char) option;
@@ -213,6 +215,7 @@ void parse(struct termstate *ts, int c)
 	{
 		case STATE_NORMAL:
 			if (c == TELNET_IAC)
+				read (ts->sock, c, 1);
 				ts->state = STATE_IAC;
 			break;
 
@@ -364,7 +367,7 @@ void *telnetd (void *arg)
 
 		setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *) &off, sizeof(off));
 
-		if (task_create ("telent", 30, 3, 20 * 1024, telnet_task, NULL, (void *)s, 
+		if (task_create ("telent", 30, 3, 48 * 1024, telnet_task, NULL, (void *)s, 
 					&hthread) == TSK_FAILURE) {
 			printf ("Task creation failed : %s\n", "telnet");
 		}

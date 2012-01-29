@@ -1,6 +1,6 @@
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before lib INIT CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD VRRP TCP UDP SOCK SNMP SNTP RTM BGP LIB PLATFORM SWITCH all-after
+all: all-before lib INIT CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD VRRP TCP UDP SOCK SNMP SNTP RTM BGP UTIL LIB PLATFORM SWITCH all-after
 
 include make.h
 
@@ -61,12 +61,11 @@ SOCK:
 	make -C $(CODE_DIR)/sockets
 TELNETD:
 	make -C $(CODE_DIR)/telnetd
+UTIL:
+	make -C $(CODE_DIR)/utils
 
 
-
-
-
-SWITCH:  lib INIT CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD VRRP TCP UDP RTM BGP SNMP SNTP LIB PLATFORM
+SWITCH:  lib INIT CLI ROUTE BRIDGE STP PORT GDD  RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD VRRP TCP UDP RTM BGP SNMP UTIL SNTP LIB PLATFORM
 	gcc -o Switch.exe obj/*.o $(PLATFORM_EXE)_obj/*.o -lpthread -lrt
 
 clean: clean-custom
@@ -96,4 +95,5 @@ clean: clean-custom
 	make clean -C $(CODE_DIR)/sntp
 	make clean -C $(CODE_DIR)/sockets
 	make clean -C $(CODE_DIR)/telnetd
+	make clean -C $(CODE_DIR)/utils
 	#make clean -C $(CODE_DIR)/dhcpserver
