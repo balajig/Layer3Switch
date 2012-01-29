@@ -168,3 +168,88 @@ cparser_io_config (cparser_t *parser)
     parser->cfg.printc     = cparser_unix_printc;
     parser->cfg.prints     = cparser_unix_prints;
 }
+
+static void
+cparser_telnet_unix_printc (const cparser_t *parser, const char ch)
+{
+    ssize_t wsize;
+    assert(parser);
+    wsize = lwip_write(parser->cfg.fd, &ch, 1);
+}
+
+static void
+cparser_telent_unix_prints (const cparser_t *parser, const char *s)
+{
+    ssize_t wsize;
+    assert(parser);
+    if (s) {
+        wsize = lwip_write(parser->cfg.fd, s, strlen(s));
+    }
+}
+void
+cparser_telnet_unix_getch (cparser_t *parser, int *ch, cparser_char_t *type)
+{
+    assert(VALID_PARSER(parser) && ch && type);
+    *type = CPARSER_CHAR_UNKNOWN;
+    if ('' == *ch) {
+            lwip_read (parser->cfg.fd, ch, 1);
+        if ('[' == *ch) {
+    	    lwip_read (parser->cfg.fd, ch, 1);
+            switch (*ch) {
+                case 'A':
+                    *type = CPARSER_CHAR_UP_ARROW;
+                    break;
+                case 'B':
+                    *type = CPARSER_CHAR_DOWN_ARROW;
+                    break;
+                case 'C':
+                    *type = CPARSER_CHAR_RIGHT_ARROW;
+                    break;
+                case 'D':
+                    *type = CPARSER_CHAR_LEFT_ARROW;
+                    break;
+            }
+        }
+#ifdef CPARSER_EMACS_BINDING
+    } else if (CTRL_P == (*ch)) {
+        *type = CPARSER_CHAR_UP_ARROW;
+    } else if (CTRL_N == (*ch)) {
+        *type = CPARSER_CHAR_DOWN_ARROW;
+    } else if (CTRL_A == (*ch)) {
+        *type = CPARSER_CHAR_FIRST;
+    } else if (CTRL_E == (*ch)) {
+        *type = CPARSER_CHAR_LAST;
+#endif /* EMACS_BINDING */
+    } else if (isalnum(*ch) || ('\n' == *ch) ||
+               ispunct(*ch) || (' ' == *ch) ||
+               (*ch == parser->cfg.ch_erase) ||
+               (*ch == parser->cfg.ch_del) ||
+               (*ch == parser->cfg.ch_help) ||
+               (*ch == parser->cfg.ch_complete)) {
+        *type = CPARSER_CHAR_REGULAR;
+    } else if (IS_BACK_SPACE(*ch)) {
+        *ch = parser->cfg.ch_erase;
+	*type = CPARSER_CHAR_REGULAR;
+   }
+}
+
+static void
+cparser_telnet_unix_io_init (cparser_t *parser)
+{
+}
+
+static void
+cparser_telnet_unix_io_cleanup (cparser_t *parser)
+{
+}
+
+void
+cparser_telnet_io_config (cparser_t *parser)
+{
+    assert(parser);
+    parser->cfg.io_init    = cparser_telnet_unix_io_init;
+    parser->cfg.io_cleanup = cparser_telnet_unix_io_cleanup;
+    parser->cfg.getch      = cparser_telnet_unix_getch;
+    parser->cfg.printc     = cparser_telnet_unix_printc;
+    parser->cfg.prints     = cparser_telent_unix_prints;
+}
