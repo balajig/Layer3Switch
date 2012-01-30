@@ -6,7 +6,6 @@
  *
  * Licensed under GPLv2, see file LICENSE in this source tree.
  */
-#include <netinet/ether.h>
 
 #include "common.h"
 #include "dhcpd.h"
@@ -74,7 +73,7 @@ static const struct config_keyword keywords[] = {
 	{"conflict_time", read_u32        , &server_config.conflict_time, "3600"},
 	{"offer_time"   , read_u32        , &server_config.offer_time   , "60"},
 	{"min_lease"    , read_u32        , &server_config.min_lease_sec, "60"},
-	{"lease_file"   , read_str        , &server_config.lease_file   , LEASES_FILE},
+	{"lease_file"   , read_str        , &server_config.lease_file   , "lease.conf"},
 	{"pidfile"      , read_str        , &server_config.pidfile      , "/var/run/udhcpd.pid"},
 	{"siaddr"       , udhcp_str2nip   , &server_config.siaddr_nip   , "0.0.0.0"},
 	/* keywords with no defaults must be last! */
@@ -85,10 +84,11 @@ static const struct config_keyword keywords[] = {
 	{"boot_file"    , read_str        , &server_config.boot_file    , NULL},
 	{"static_lease" , read_staticlease, &server_config.static_leases, ""},
 };
-enum { KWS_WITH_DEFAULTS = ARRAY_SIZE(keywords) - 6 };
+#define KWS_WITH_DEFAULTS  (ARRAY_SIZE(keywords) - 6)
 
 void FAST_FUNC read_config(const char *file)
 {
+#if 0
 	parser_t *parser;
 	const struct config_keyword *k;
 	unsigned i;
@@ -102,7 +102,7 @@ void FAST_FUNC read_config(const char *file)
 		for (k = keywords, i = 0; i < ARRAY_SIZE(keywords); k++, i++) {
 			if (strcasecmp(token[0], k->keyword) == 0) {
 				if (!k->handler(token[1], k->var)) {
-					bb_error_msg("can't parse line %u in %s",
+					printf("can't parse line %u in %s",
 							parser->lineno, file);
 					/* reset back to the default value */
 					k->handler(k->def, k->var);
@@ -115,6 +115,7 @@ void FAST_FUNC read_config(const char *file)
 
 	server_config.start_ip = ntohl(server_config.start_ip);
 	server_config.end_ip = ntohl(server_config.end_ip);
+#endif
 }
 
 void FAST_FUNC write_leases(void)
@@ -131,7 +132,7 @@ void FAST_FUNC write_leases(void)
 	curr = written_at = time(NULL);
 
 	written_at = SWAP_BE64(written_at);
-	full_write(fd, &written_at, sizeof(written_at));
+	write(fd, &written_at, sizeof(written_at));
 
 	for (i = 0; i < server_config.max_leases; i++) {
 		leasetime_t tmp_time;
@@ -149,7 +150,7 @@ void FAST_FUNC write_leases(void)
 
 		/* No error check. If the file gets truncated,
 		 * we lose some leases on restart. Oh well. */
-		full_write(fd, &g_leases[i], sizeof(g_leases[i]));
+		write(fd, &g_leases[i], sizeof(g_leases[i]));
 
 		/* Then restore it when done */
 		g_leases[i].expires = tmp_time;
@@ -178,7 +179,7 @@ void FAST_FUNC read_leases(const char *file)
 	if (fd < 0)
 		return;
 
-	if (full_read(fd, &written_at, sizeof(written_at)) != sizeof(written_at))
+	if (read(fd, &written_at, sizeof(written_at)) != sizeof(written_at))
 		goto ret;
 	written_at = SWAP_BE64(written_at);
 
@@ -188,7 +189,7 @@ void FAST_FUNC read_leases(const char *file)
 	if ((uint64_t)time_passed > 12 * 60 * 60)
 		goto ret;
 
-	while (full_read(fd, &lease, sizeof(lease)) == sizeof(lease)) {
+	while (read(fd, &lease, sizeof(lease)) == sizeof(lease)) {
 //FIXME: what if it matches some static lease?
 		uint32_t y = ntohl(lease.lease_nip);
 		if (y >= server_config.start_ip && y <= server_config.end_ip) {
@@ -202,7 +203,7 @@ void FAST_FUNC read_leases(const char *file)
 					lease.hostname, sizeof(lease.hostname)
 				) == 0
 			) {
-				bb_error_msg("too many leases while loading %s", file);
+				printf("too many leases while loading %s", file);
 				break;
 			}
 #if defined CONFIG_UDHCP_DEBUG && CONFIG_UDHCP_DEBUG >= 1

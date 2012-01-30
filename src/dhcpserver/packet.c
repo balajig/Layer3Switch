@@ -8,9 +8,6 @@
  */
 #include "common.h"
 #include "dhcpd.h"
-#include <netinet/in.h>
-#include <netinet/if_ether.h>
-#include <netpacket/packet.h>
 
 void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)
 {
@@ -84,7 +81,7 @@ int FAST_FUNC udhcp_recv_kernel_packet(struct dhcp_packet *packet, int fd)
 	unsigned char *vendor;
 
 	memset(packet, 0, sizeof(*packet));
-	bytes = safe_read(fd, packet, sizeof(*packet));
+	bytes = read(fd, packet, sizeof(*packet));
 	if (bytes < 0) {
 		log1("Packet read error, ignoring");
 		return bytes; /* returns -1 */
@@ -171,6 +168,7 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	int result = -1;
 	const char *msg;
 
+#if 0
 	fd = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP));
 	if (fd < 0) {
 		msg = "socket(%s)";
@@ -203,19 +201,19 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	 */
 	padding = DHCP_OPTIONS_BUFSIZE - 1 - udhcp_end_option(packet.data.options);
 
-	packet.ip.protocol = IPPROTO_UDP;
-	packet.ip.saddr = source_nip;
-	packet.ip.daddr = dest_nip;
+	packet.ip._proto = IPPROTO_UDP;
+	packet.ip.src = source_nip;
+	packet.ip.dest = dest_nip;
 	packet.udp.source = htons(source_port);
 	packet.udp.dest = htons(dest_port);
 	/* size, excluding IP header: */
 	packet.udp.len = htons(UDP_DHCP_SIZE - padding);
 	/* for UDP checksumming, ip.len is set to UDP packet len */
-	packet.ip.tot_len = packet.udp.len;
+	packet.ip._len = packet.udp.len;
 	packet.udp.check = udhcp_checksum(&packet, IP_UDP_DHCP_SIZE - padding);
 	/* but for sending, it is set to IP packet len */
-	packet.ip.tot_len = htons(IP_UDP_DHCP_SIZE - padding);
-	packet.ip.ihl = sizeof(packet.ip) >> 2;
+	packet.ip._len = htons(IP_UDP_DHCP_SIZE - padding);
+	packet.ip._v_hl_tos = sizeof(packet.ip) >> 2;
 	packet.ip.version = IPVERSION;
 	packet.ip.ttl = IPDEFTTL;
 	packet.ip.check = udhcp_checksum(&packet.ip, sizeof(packet.ip));
@@ -230,6 +228,7 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
  ret_msg:
 		bb_perror_msg(msg, "PACKET");
 	}
+#endif
 	return result;
 }
 
@@ -272,7 +271,7 @@ int FAST_FUNC udhcp_send_kernel_packet(struct dhcp_packet *dhcp_pkt,
 	udhcp_dump_packet(dhcp_pkt);
 
 	padding = DHCP_OPTIONS_BUFSIZE - 1 - udhcp_end_option(dhcp_pkt->options);
-	result = safe_write(fd, dhcp_pkt, DHCP_SIZE - padding);
+	result = write(fd, dhcp_pkt, DHCP_SIZE - padding);
 	msg = "write";
  ret_close:
 	close(fd);

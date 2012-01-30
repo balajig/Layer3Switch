@@ -10,7 +10,7 @@ PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
 struct client_config_t {
 	uint8_t client_mac[6];          /* Our mac address */
 	char no_default_options;        /* Do not include default options in request */
-	IF_FEATURE_UDHCP_PORT(uint16_t port;)
+	uint16_t port;
 	int ifindex;                    /* Index number of the interface to use */
 	uint8_t opt_mask[256 / 8];      /* Bitmask of options to send (-O option) */
 	const char *interface;          /* The name of the interface to use */
@@ -26,14 +26,13 @@ struct client_config_t {
 	uint16_t last_secs;
 } FIX_ALIASING;
 
+#if 0
 /* server_config sits in 1st half of bb_common_bufsiz1 */
 #define client_config (*(struct client_config_t*)(&bb_common_bufsiz1[COMMON_BUFSIZE / 2]))
-
-#if ENABLE_FEATURE_UDHCP_PORT
-#define CLIENT_PORT (client_config.port)
-#else
-#define CLIENT_PORT 68
 #endif
+#define client_config
+
+#define CLIENT_PORT 68
 
 POP_SAVED_FUNCTION_VISIBILITY
 

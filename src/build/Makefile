@@ -96,4 +96,4 @@ clean: clean-custom
 	make clean -C $(CODE_DIR)/sockets
 	make clean -C $(CODE_DIR)/telnetd
 	make clean -C $(CODE_DIR)/utils
-	#make clean -C $(CODE_DIR)/dhcpserver
+	make clean -C $(CODE_DIR)/dhcpserver

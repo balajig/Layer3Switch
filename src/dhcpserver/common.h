@@ -7,12 +7,32 @@
  */
 #ifndef UDHCP_COMMON_H
 #define UDHCP_COMMON_H 1
+#include "common_types.h"
+#include "opt.h"
+#include "stats.h"
+#include "mem.h"
+#include "udp.h"
+#include "ip_addr.h"
+#include "netif.h"
+#include "def.h"
+#include "sys.h"
+#include "dhcp.h"
+#include "autoip.h"
+#include "dns.h"
+#include "netif/etharp.h"
+#include "socks.h"
 
-#include <netinet/udp.h>
-#include <netinet/ip.h>
 
 #define FAST_FUNC
 #define PACKED
+#define ALIGN2
+#define ALIGN1
+#define NOINLINE
+#define ALIGNED(x)
+#define PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
+#define POP_SAVED_FUNCTION_VISIBILITY
+#define FIX_ALIASING
+
 
 extern const uint8_t MAC_BCAST_ADDR[6]; /* six all-ones */
 
@@ -52,13 +72,13 @@ struct dhcp_packet {
 #define DHCP_PKT_FILE_LEN_STR "128"
 
 struct ip_udp_dhcp_packet {
-	struct iphdr ip;
-	struct udphdr udp;
+	struct ip_hdr ip;
+	struct udp_hdr udp;
 	struct dhcp_packet data;
 } PACKED;
 
 struct udp_dhcp_packet {
-	struct udphdr udp;
+	struct udp_hdr udp;
 	struct dhcp_packet data;
 } PACKED;
 

@@ -31,9 +31,8 @@ struct xid_item {
 	uint32_t xid;
 	struct sockaddr_in ip;
 	struct xid_item *next;
-} FIX_ALIASING;
+}dhcprelay_xid_list;
 
-#define dhcprelay_xid_list (*(struct xid_item*)&bb_common_bufsiz1)
 
 static struct xid_item *xid_add(uint32_t xid, struct sockaddr_in *ip, int client)
 {
@@ -248,7 +247,7 @@ static void pass_to_client(struct dhcp_packet *p, int packet_len, int *fds)
 	xid_del(p->xid);
 }
 
-int dhcprelay_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
+int dhcprelay_main(int argc, char **argv);
 int dhcprelay_main(int argc, char **argv)
 {
 	struct sockaddr_in server_addr;

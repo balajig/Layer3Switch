@@ -170,6 +170,21 @@ static void log_option(const char *pfx, const uint8_t *opt)
 # define log_option(pfx, opt) ((void)0)
 #endif
 
+int FAST_FUNC index_in_strings(const char *strings, const char *key)
+{
+    int idx = 0;
+
+    while (*strings) {
+        if (strcmp(strings, key) == 0) {
+            return idx;
+        }
+        strings += strlen(strings) + 1; /* skip NUL */
+        idx++;
+    }
+    return -1;
+}
+
+
 unsigned FAST_FUNC udhcp_option_idx(const char *name)
 {
 	int n = index_in_strings(dhcp_option_strings, name);
@@ -185,7 +200,7 @@ unsigned FAST_FUNC udhcp_option_idx(const char *name)
 			s++;
 		}
 		*d = '\0';
-		bb_error_msg_and_die("unknown option '%s', known options: %s", name, buf);
+		printf("unknown option '%s', known options: %s", name, buf);
 	}
 }
 
@@ -206,7 +221,7 @@ uint8_t* FAST_FUNC udhcp_get_option(struct dhcp_packet *packet, int code)
 	rem = sizeof(packet->options);
 	while (1) {
 		if (rem <= 0) {
-			bb_error_msg("bad packet, malformed option field");
+			printf("bad packet, malformed option field");
 			return NULL;
 		}
 		if (optionptr[OPT_CODE] == DHCP_PADDING) {
@@ -279,7 +294,7 @@ void FAST_FUNC udhcp_add_binary_option(struct dhcp_packet *packet, uint8_t *addo
 	/* end position + (option code/length + addopt length) + end option */
 	if (end + len + 1 >= DHCP_OPTIONS_BUFSIZE) {
 //TODO: learn how to use overflow option if we exhaust packet->options[]
-		bb_error_msg("option 0x%02x did not fit into the packet",
+		printf("option 0x%02x did not fit into the packet",
 				addopt[OPT_CODE]);
 		return;
 	}
@@ -309,7 +324,7 @@ void FAST_FUNC udhcp_add_simple_option(struct dhcp_packet *packet, uint8_t code,
 		}
 	}
 
-	bb_error_msg("can't add option 0x%02x", code);
+	printf("can't add option 0x%02x", code);
 }
 
 /* Find option 'code' in opt_list */
@@ -326,6 +341,7 @@ struct option_set* FAST_FUNC udhcp_find_option(struct option_set *opt_list, uint
 /* Parse string to IP in network order */
 int FAST_FUNC udhcp_str2nip(const char *str, void *arg)
 {
+#if 0
 	len_and_sockaddr *lsa;
 
 	lsa = host_and_af2sockaddr(str, 0, AF_INET);
@@ -333,6 +349,7 @@ int FAST_FUNC udhcp_str2nip(const char *str, void *arg)
 		return 0;
 	*(uint32_t*)arg = lsa->u.sin.sin_addr.s_addr;
 	free(lsa);
+#endif
 	return 1;
 }
 
@@ -353,7 +370,7 @@ static char *allocate_tempopt_if_needed(
 		allocated = xstrdup(buffer); /* more than enough */
 		end = hex2bin(allocated, buffer, 255);
 		if (errno)
-			bb_error_msg_and_die("malformed hex string '%s'", buffer);
+			printf_and_die("malformed hex string '%s'", buffer);
 		*length_p = end - allocated;
 	}
 	return allocated;
