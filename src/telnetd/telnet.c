@@ -150,8 +150,7 @@ void sendopt(struct termstate *ts, int code, int option)
 {
 	unsigned char buf[3];
 
-	return;
-
+	return 0;
 	buf[0] = TELNET_IAC;
 	buf[1] = (unsigned char) code;
 	buf[2] = (unsigned char) option;
@@ -214,9 +213,10 @@ void parse(struct termstate *ts, int c)
 	switch (ts->state) 
 	{
 		case STATE_NORMAL:
-			if (c == TELNET_IAC)
+			if (c == TELNET_IAC) {
 				read (ts->sock, c, 1);
 				ts->state = STATE_IAC;
+			}
 			break;
 
 		case STATE_IAC:

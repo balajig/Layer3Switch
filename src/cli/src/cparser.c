@@ -642,7 +642,7 @@ cparser_run (cparser_t *parser)
     if (!VALID_PARSER(parser)) return CPARSER_ERR_INVALID_PARAMS;
 
     parser->cfg.io_init(parser);
-    //show_login_prompt ();
+    show_login_prompt ();
     cparser_print_prompt(parser);
     parser->done = 0;
 

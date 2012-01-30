@@ -289,7 +289,7 @@ void write_string (const char *str)
 		write (this_cli[this_session].parser.cfg.fd , str, strlen(str));
 		fflush (stdout);
 	} else {
-		lwip_write (this_cli[this_session].parser.cfg.fd , str, strlen(str));
+		lwip_write (this_cli[this_session].parser.cfg.fd , str, strlen(str) + 2);
 	}
 	return;
 }
@@ -536,6 +536,10 @@ int cli_printf  (char *fmt, ...)
 		va_end(ap);
 		/* If that worked, return the string. */
 		if (n > -1 && n < size) {
+#if 1
+			p[n + 1] = '\n';
+			p[n + 2] = '\r';
+#endif
 			write_string (p);
 			free (p);
 			return 0;
@@ -545,7 +549,7 @@ int cli_printf  (char *fmt, ...)
 			size = n+1; /* precisely what is needed */
 		else           /* glibc 2.0 */
 			size *= 2;  /* twice the old size */
-		if ((np = realloc (p, size)) == NULL) {
+		if ((np = realloc (p, size + 2)) == NULL) {
 			free(p);
 			return NULL;
 		} else {
