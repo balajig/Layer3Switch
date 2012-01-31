@@ -187,8 +187,8 @@ connected_up_ipv4 (struct interface *ifp, struct connected *ifc)
 
 /* Add connected IPv4 route to the interface. */
 void
-connected_add_ipv4 (struct interface *ifp, int flags, struct in_addr *addr, 
-		    u_char prefixlen, struct in_addr *broad, 
+connected_add_ipv4 (struct interface *ifp, int flags, uint32_t *host_addr, 
+		    u_char prefixlen, uint32_t *bcast_addr, 
 		    const char *label)
 {
   struct prefix_ipv4 *p;
@@ -202,38 +202,39 @@ connected_add_ipv4 (struct interface *ifp, int flags, struct in_addr *addr,
   /* Allocate new connected address. */
   p = prefix_ipv4_new ();
   p->family = AF_INET;
-  p->prefix = *addr;
+  p->prefix.s_addr = *host_addr;
   p->prefixlen = prefixlen;
   ifc->address = (struct prefix *) p;
   
   /* If there is broadcast or peer address. */
-  if (broad)
+  if (bcast_addr)
     {
       p = prefix_ipv4_new ();
       p->family = AF_INET;
-      p->prefix = *broad;
+      p->prefix.s_addr = *bcast_addr;
       p->prefixlen = prefixlen;
       ifc->destination = (struct prefix *) p;
 
       /* validate the destination address */
       if (CONNECTED_PEER(ifc))
         {
-	  if (IPV4_ADDR_SAME(addr,broad))
+	  if (IPV4_ADDR_SAME(&host_addr,&bcast_addr))
+	    /*FIXME */
 	    warn("warning: interface %s has same local and peer "
-		      "address %s, routing protocols may malfunction",
-		      ifp->ifDescr,inet_ntoa(*addr));
+		      "address , routing protocols may malfunction",
+		      ifp->ifDescr);//,inet_ntoa(*addr));
         }
       else
         {
-	  if (broad->s_addr != ipv4_broadcast_addr(addr->s_addr,prefixlen))
+	  if (*bcast_addr != ipv4_broadcast_addr(*host_addr,prefixlen))
 	    {
 	      char buf[2][INET_ADDRSTRLEN];
 	      struct in_addr bcalc;
-	      bcalc.s_addr = ipv4_broadcast_addr(addr->s_addr,prefixlen);
+	      bcalc.s_addr = ipv4_broadcast_addr(*bcast_addr,prefixlen);
 	      warn("warning: interface %s broadcast addr %s/%d != "
 	       		"calculated %s, routing protocols may malfunction",
 	    		ifp->ifDescr,
-			inet_ntop (AF_INET, broad, buf[0], sizeof(buf[0])),
+			inet_ntop (AF_INET, &bcast_addr, buf[0], sizeof(buf[0])),
 			prefixlen,
 			inet_ntop (AF_INET, &bcalc, buf[1], sizeof(buf[1])));
 	    }
@@ -252,8 +253,9 @@ connected_add_ipv4 (struct interface *ifp, int flags, struct in_addr *addr,
 
       /* no broadcast or destination address was supplied */
       if ((prefixlen == IPV4_MAX_PREFIXLEN) && if_is_pointopoint(ifp))
-	warn("warning: PtP interface %s with addr %s/%d needs a "
-		  "peer address",ifp->ifDescr,inet_ntoa(*addr),prefixlen);
+	warn("warning: PtP interface %s with addr ");
+	/*warn("warning: PtP interface %s with addr %s/%d needs a "
+		  "peer address",ifp->ifDescr,inet_ntoa(&host_addr),prefixlen); */
     }
 
   /* Label of this address. */

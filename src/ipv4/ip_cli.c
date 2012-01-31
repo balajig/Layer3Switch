@@ -14,6 +14,7 @@
 #include "ip.h"
 #include "cparser.h"
 #include "cparser_tree.h"
+#include "rtm.h"
 
 
 cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
@@ -26,7 +27,13 @@ cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
 	{
 		uint8_t addr[4];
 	 	uint32_2_ipstring (ntohl(*addr_ptr), &addr);
+#ifndef ZEBRA_RTM_SUPPORT
 		route_add_if (addr, u32ip_masklen (ntohl(*mask_ptr)),IF_INFO(port));
+#else
+		connected_add_ipv4 (IF_INFO(port), ZEBRA_IFA_PEER, addr_ptr,  
+		    mask_ptr, ipv4_broadcast_addr(addr_ptr, mask_ptr),
+		    NULL);
+#endif
 		return CPARSER_OK;
 	}
 	return CPARSER_NOT_OK;
