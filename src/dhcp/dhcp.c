@@ -1180,7 +1180,7 @@ dhcp_bind (struct interface *netif)
 	    uint32_2_ipstring ((gw_addr.addr), &gateway);
 	    int masklen = u32ip_masklen ((sn_mask.addr));
 	     
-	    route_add_if (addr, masklen, netif);
+	    connected_route_add (netif, &dhcp->offered_ip_addr, &sn_mask);
 	    route_add_gateway (addr, masklen, gateway);
     }
     /* bring the interface up */

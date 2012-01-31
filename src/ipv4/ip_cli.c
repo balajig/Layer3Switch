@@ -23,17 +23,12 @@ cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
 {
 	int port = cli_get_port ();
 
-	if (!set_ip_address (cli_get_port (), ntohl(*addr_ptr), ntohl(*mask_ptr)))
+	*addr_ptr = ntohl (*addr_ptr);
+	*mask_ptr = ntohl (*mask_ptr);
+
+	if (!set_ip_address (port, *addr_ptr, *mask_ptr))
 	{
-		uint8_t addr[4];
-	 	uint32_2_ipstring (ntohl(*addr_ptr), &addr);
-#ifndef ZEBRA_RTM_SUPPORT
-		route_add_if (addr, u32ip_masklen (ntohl(*mask_ptr)),IF_INFO(port));
-#else
-		connected_add_ipv4 (IF_INFO(port), ZEBRA_IFA_PEER, addr_ptr,  
-		    mask_ptr, ipv4_broadcast_addr(addr_ptr, mask_ptr),
-		    NULL);
-#endif
+		connected_route_add (IF_INFO (port), addr_ptr, mask_ptr, 0);
 		return CPARSER_OK;
 	}
 	return CPARSER_NOT_OK;
@@ -76,3 +71,4 @@ cparser_result_t cparser_cmd_ping_hostname(cparser_context_t *context, char **ho
 {
 	ping_me (*hostname_ptr);
 }
+

@@ -33,6 +33,84 @@
 #include "memory.h"
 #include "table.h"
 
+/* For interface multicast configuration. */
+#define IF_ZEBRA_MULTICAST_UNSPEC 0
+#define IF_ZEBRA_MULTICAST_ON     1
+#define IF_ZEBRA_MULTICAST_OFF    2
+    
+/* For interface shutdown configuration. */
+#define IF_ZEBRA_SHUTDOWN_UNSPEC 0
+#define IF_ZEBRA_SHUTDOWN_ON     1
+#define IF_ZEBRA_SHUTDOWN_OFF    2
+
+
+/* Called when new interface is added. */
+int if_zebra_new_hook (struct interface *ifp)
+{
+  struct zebra_if *zebra_if;
+
+  zebra_if = XCALLOC (MTYPE_TMP, sizeof (struct zebra_if));
+
+  zebra_if->multicast = IF_ZEBRA_MULTICAST_UNSPEC;
+  zebra_if->shutdown = IF_ZEBRA_SHUTDOWN_UNSPEC;
+
+#ifdef RTADV
+  {
+    /* Set default router advertise values. */
+    struct rtadvconf *rtadv;
+
+    rtadv = &zebra_if->rtadv;
+
+    rtadv->AdvSendAdvertisements = 0;
+    rtadv->MaxRtrAdvInterval = RTADV_MAX_RTR_ADV_INTERVAL;
+    rtadv->MinRtrAdvInterval = RTADV_MIN_RTR_ADV_INTERVAL;
+    rtadv->AdvIntervalTimer = 0;
+    rtadv->AdvManagedFlag = 0;
+    rtadv->AdvOtherConfigFlag = 0;
+    rtadv->AdvHomeAgentFlag = 0;
+    rtadv->AdvLinkMTU = 0;
+    rtadv->AdvReachableTime = 0;
+    rtadv->AdvRetransTimer = 0;
+    rtadv->AdvCurHopLimit = 0;
+    rtadv->AdvDefaultLifetime = RTADV_ADV_DEFAULT_LIFETIME;
+    rtadv->HomeAgentPreference = 0;
+    rtadv->HomeAgentLifetime = RTADV_ADV_DEFAULT_LIFETIME;
+    rtadv->AdvIntervalOption = 0;
+    rtadv->DefaultPreference = RTADV_PREF_MEDIUM;
+
+    rtadv->AdvPrefixList = list_new ();
+  }    
+#endif /* RTADV */
+
+  /* Initialize installed address chains tree. */
+  zebra_if->ipv4_subnets = route_table_init ();
+
+  ifp->info = zebra_if;
+  return 0;
+}
+
+/* Called when interface is deleted. */
+static int
+if_zebra_delete_hook (struct interface *ifp)
+{
+  struct zebra_if *zebra_if;
+  
+  if (ifp->info)
+    {
+      zebra_if = ifp->info;
+
+      /* Free installed address chains tree. */
+      if (zebra_if->ipv4_subnets)
+	route_table_finish (zebra_if->ipv4_subnets);
+
+      XFREE (zebra_if);
+    }
+
+  return 0;
+}
+
+
+
 /* Compare interface names, returning an integer greater than, equal to, or
  * less than 0, (following the strcmp convention), according to the
  * relationship between ifp1 and ifp2.  Interface names consist of an
@@ -354,6 +432,20 @@ if_indextoname (unsigned int ifindex, char *name)
   return ifp->ifDescr;
 }
 #endif
+
+int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags) 
+{
+		int masklen = u32ip_masklen (*mask);
+#if ZEBRA_RTM_SUPPORT
+		uint32_t  bcastaddr = ipv4_broadcast_addr(*addr, masklen);
+		connected_add_ipv4 (ifp, ZEBRA_IFA_PEER, addr, masklen, &bcastaddr, NULL);
+#else
+		uint8_t address[4];
+	 	uint32_2_ipstring (*addr, &address);
+		route_add_if (address, masklen, ifp);
+#endif
+		return 0;
+}
 
 #if 0 /* this route_table of struct connected's is unused
        * however, it would be good to use a route_table rather than

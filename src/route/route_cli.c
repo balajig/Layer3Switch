@@ -32,7 +32,7 @@ cparser_result_t cparser_cmd_config_ip_route_network_mask_gateway(cparser_contex
 	uint8_t gateway[4];
 	char* prefix_str;
 
-#ifdef ZEBRA_RTM_SUPPORT
+#if ZEBRA_RTM_SUPPORT
 	convert_uint32_str_ip_mask(prefix_str,*network_ptr,*mask_ptr);
 
 	if (!zebra_static_ipv4(1,prefix_str,NULL,gateway,NULL,NULL))

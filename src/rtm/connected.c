@@ -218,8 +218,7 @@ connected_add_ipv4 (struct interface *ifp, int flags, uint32_t *host_addr,
       /* validate the destination address */
       if (CONNECTED_PEER(ifc))
         {
-	  if (IPV4_ADDR_SAME(&host_addr,&bcast_addr))
-	    /*FIXME */
+	  if (IPV4_ADDR_SAME(host_addr,&bcast_addr))
 	    warn("warning: interface %s has same local and peer "
 		      "address , routing protocols may malfunction",
 		      ifp->ifDescr);//,inet_ntoa(*addr));

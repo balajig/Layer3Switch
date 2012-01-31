@@ -114,6 +114,8 @@ void interface_init (struct interface *netif, void *state, if_input_fn input)
 
     ethernetif_init (netif);
 
+    if_zebra_new_hook (netif);
+
 #if 0
     /* call user specified initialization function for netif */
     if (init (netif) != ERR_OK)
