@@ -61,12 +61,12 @@ int cli_show_interfaces (int port)
 
 	const char *state[]  = {"UNKNWN", "UP", "DOWN"};
 
-	printf (" Port      Name       MTU    Type    Admin    Oper   LastChange\n");
-	printf (" ----     -----      -----  ------   ------  -----   ----------\n");
+	cli_printf (" Port      Name       MTU    Type    Admin    Oper   LastChange\n");
+	cli_printf (" ----     -----      -----  ------   ------  -----   ----------\n");
 	while (++idx < get_max_ports ()) {
 		if (port_cdb[idx].ifIndex < 0)
 			break;
-		printf (" %-3d       %-8s   %-5d   %-6s  %-4s    %-4s        %-4d\n",
+		cli_printf (" %-3d       %-8s   %-5d   %-6s  %-4s    %-4s        %-4d\n",
 		idx+1, port_cdb[idx].ifDescr,
 		port_cdb[idx].ifMtu, "ETH", state[port_cdb[idx].ifAdminStatus],
 		state[port_cdb[idx].ifOperStatus], port_cdb[idx].ifLastChange);

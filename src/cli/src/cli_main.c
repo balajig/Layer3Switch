@@ -1,16 +1,13 @@
-/***********************************************************
- * Author : TechMinds
+/*
+ *  Author:
+ *  Sasikanth.V        <sasikanth@email.com>
  *
- * GPLv2 licen
- ***********************************************************/
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-#include <termios.h>
-#include <unistd.h>
-#include <termio.h>
 #include "common_types.h"
 #include "defs.h"
 #include "cparser.h"
@@ -23,6 +20,7 @@
 #define DEFAULT_USER_NAME  "guest"
 
 struct cli {
+	tmtaskid_t taskid;
 	int session;
 	int priv_level;
 	int in;
@@ -41,10 +39,10 @@ struct cli {
 
 
 static void spawn_cli_thread (int);
-static void *cmdinterface(void *unused);
+void *cmdinterface(void *unused);
 void handle_segfault (int );
 int cli_init(const char *prmt);
-int cli_session_init(const char *prmt, int this_session);
+int cli_session_init(const char *prmt, int this_session, int fd);
 int start_cli_task(void);
 void install_signal_handler(int signo, void (*handler)(int));
 int set_prompt_internal(char *pmt, int len);
@@ -74,7 +72,6 @@ int exit_mode(void);
 
 
 struct cli this_cli[MAX_CLI_SESSION];
-int this_session = -1;
 int clitskid = 0;
 static int gfd = 1;
 int login_sucessfull = 0;
@@ -103,30 +100,83 @@ struct modes mode_p[] = { {GLOBAL_CONFIG_MODE, change_config_mode},
 
 int cli_init (const char *prmt) 
 {
-	this_session = 0;
+	int i = 1;
+        user_db_init ();
+
+	while (i < MAX_CLI_SESSION) {
+		this_cli[i].session = -1;
+		i++;
+	}
+	cli_session_init (prmt, 0, STDOUT_FILENO);
         cli_set_vlan_id (1);
-	cli_session_init (prmt, 0);
 	return 0;
 }
-int cli_session_init (const char *prmt, int this_session) 
-{
 
+struct cli * cli_get_new_session (void)
+{
+	int i = 1;
+	while (i < MAX_CLI_SESSION) {
+		if (this_cli[i].session == -1) {
+			this_cli[i].session = 1;
+			return &this_cli[i];
+		}
+		i++;
+	}
+
+	return NULL;
+}
+int cli_session_init (const char *prmt, int this_session, int fd) 
+{
 	memset(&this_cli[this_session].parser, 0, sizeof(this_cli[this_session].parser));
         memcpy (this_cli[this_session].hostname, prmt, strlen(prmt));
-
-        set_prompt_internal (this_cli[this_session].hostname,
-                        strlen(this_cli[this_session].hostname));
+	sprintf (this_cli[this_session].prmpt, "%s%s ", prmt, "#");
         strcpy (this_cli[this_session].username, DEFAULT_USER_NAME);
 	this_cli[this_session].parser.cfg.root = &cparser_root;
 	this_cli[this_session].parser.cfg.ch_complete = '\t';
 	this_cli[this_session].parser.cfg.ch_erase = '\b';
 	this_cli[this_session].parser.cfg.ch_help = '?';
 	this_cli[this_session].parser.cfg.flags = 0;
-	get_prompt (this_cli[this_session].parser.cfg.prompt);
 	cparser_io_config(&this_cli[this_session].parser);
-	this_cli[this_session].parser.cfg.fd = STDOUT_FILENO;
-        user_db_init ();
+	this_cli[this_session].parser.cfg.fd = fd;
 	return 0;
+}
+
+int cli_get_cli_session_id (void)
+{
+	int i = 0;
+	tmtaskid_t tskid = tsk_selfid ();
+
+	while (i < MAX_CLI_SESSION) {
+		if (this_cli[i].taskid == tskid) {
+			return i;
+		}
+		i++;
+	}
+	return -1;
+
+}
+
+int cli_telnet_session_init (char *prmt, int fd)
+{
+	struct cli *cli_session = NULL;
+
+	cli_session = cli_get_new_session ();
+	
+	if (cli_session) {
+		memset(&cli_session->parser, 0, sizeof(cli_session->parser));
+		memcpy (cli_session->hostname, prmt, strlen(prmt));
+		sprintf (cli_session->prmpt, "%s%s ", prmt, "#");
+		strcpy (cli_session->username, DEFAULT_USER_NAME);
+		cli_session->parser.cfg.root = &cparser_root;
+		cli_session->parser.cfg.ch_complete = '\t';
+		cli_session->parser.cfg.ch_erase = '\b';
+		cli_session->parser.cfg.ch_help = '?';
+		cli_session->parser.cfg.flags = 0;
+		cparser_telnet_io_config (&cli_session->parser);
+		cli_session->parser.cfg.fd = fd;
+		return cli_session->session;
+	}
+	return -1;
 }
 
 int start_cli_task (void)
@@ -134,9 +184,34 @@ int start_cli_task (void)
 	set_curr_mode (USER_EXEC_MODE);
 
 	/*finally kick-start the shell thread*/
-	spawn_cli_thread (this_session);
+	spawn_cli_thread (0);
 
 	return 0;
+}
+
+int cli_start_session (int session)
+{
+	if (session < 0 || session > MAX_CLI_SESSION)
+		return -1;
+
+	this_cli[session].taskid = tsk_selfid ();
+
+	get_prompt (this_cli[session].parser.cfg.prompt);
+
+        cparser_init(&this_cli[session].parser.cfg, &this_cli[session].parser);
+
+	this_cli[session].parser.cfg.io_init(&this_cli[session].parser);
+	//show_login_prompt ();
+	cparser_print_prompt(&this_cli[session].parser);
+
+	this_cli[session].parser.done = 0;
+
+	return 0;
+}
+
+cparser_feed (int session, int ch)
+{
+	cparser_input(&this_cli[session].parser, ch, 1);
 }
 
 void install_signal_handler (int signo, void (*handler)(int))
@@ -149,10 +224,14 @@ static void spawn_cli_thread (int this_session)
 	task_create ("CLI", 10, 3, 32000, cmdinterface, NULL, this_session, &clitskid);
 }
 
-static void *cmdinterface(void *unused)
+void *cmdinterface(void *unused)
 {
 	int session = (int)unused;
 	cparser_result_t rc;
+
+	this_cli[session].taskid = tsk_selfid ();
+
+	get_prompt (this_cli[session].parser.cfg.prompt);
 
 	rc = cparser_init(&this_cli[session].parser.cfg, &this_cli[session].parser);
 
@@ -163,16 +242,20 @@ static void *cmdinterface(void *unused)
 
 int set_prompt_internal (char *pmt, int len)
 {
-	if (len > MAX_PMP_LEN || !pmt) {
+	int this_session = cli_get_cli_session_id ();
+	if (len > MAX_PMP_LEN || !pmt || (this_session < 0)) {
 		return -1;
 	}
+	
 	sprintf (this_cli[this_session].prmpt, "%s%s ", pmt, "#");
 	return 0;
 }
 
 int  get_prompt (char *pmt)
 {
-	if (!pmt)
+	int this_session = cli_get_cli_session_id ();
+
+	if (!pmt || (this_session < 0))
 		return -1;
 	memcpy (pmt, this_cli[this_session].prmpt, MAX_PMP_LEN);
 	return 0;
@@ -180,6 +263,7 @@ int  get_prompt (char *pmt)
 
 void print_prompt (void)
 {
+	int this_session = cli_get_cli_session_id ();
 	write(gfd, this_cli[this_session].prmpt, 
 			strlen(this_cli[this_session].prmpt));
 	fflush (stdout);
@@ -194,8 +278,20 @@ int write_input_on_screen(char c)
 
 void write_string (const char *str)
 {
-	write (gfd, str, strlen(str));
-	fflush (stdout);
+	int this_session = cli_get_cli_session_id ();
+
+	if (this_session < 0) {
+		write (gfd, str, strlen(str));
+		return;
+	}
+
+	if (this_session == 0) {
+		write (this_cli[this_session].parser.cfg.fd , str, strlen(str));
+		fflush (stdout);
+	} else {
+		lwip_write (this_cli[this_session].parser.cfg.fd , str, strlen(str) + 2);
+	}
+	return;
 }
 
 
@@ -209,22 +305,36 @@ void handle_segfault (int signo)
 
 int get_curr_priv_level (void)
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
 	return this_cli[this_session].current_priv_level;
 }
 
 int get_curr_mode ()
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
 	return this_cli[this_session].current_mode;
 }
 
 int set_curr_mode (int mode)
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
+
 	this_cli[this_session].current_mode = mode;
 	return 0;
 }
 
 void set_curr_priv_level (int level)
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
+
 	this_cli[this_session].current_priv_level = level;
 }
 
@@ -233,6 +343,10 @@ int set_prompt (const char *prmpt_new)
 	char gprompt[MAX_PMP_LEN];
 
 	char sprompt[MAX_PMP_LEN];
+	int this_session = cli_get_cli_session_id ();
+
+	if (this_session  < 0)
+		return -1;
 
 	memset (sprompt, 0, MAX_PMP_LEN);
 	memset (gprompt, 0, MAX_PMP_LEN);
@@ -246,30 +360,49 @@ int set_prompt (const char *prmpt_new)
 
 void cli_set_port (int port)
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
+
 	this_cli[this_session].port_no = port;
 }
 
 int cli_get_vlan_id ()
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
 	return this_cli[this_session].vlanid;
 }
 
 void cli_set_vlan_id (int vlan_id)
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
 	this_cli[this_session].vlanid = vlan_id;
 }
 int cli_get_port ()
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
 	return this_cli[this_session].port_no;
 }
 
 int get_current_user_name (char *user)
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
 	strcpy (user, this_cli[this_session].username);
 	return 0;
 }
 int set_current_user_name (char *user)
 {
+	int this_session = cli_get_cli_session_id ();
+	if (this_session  < 0)
+		return -1;
 	strcpy (this_cli[this_session].username, user);
 	return 0;
 }
@@ -277,9 +410,26 @@ int set_current_user_name (char *user)
 char read_input ()
 {
         char c = 0;
-        while (read (fileno(stdin), &c, 1) == -1) {
-                continue;
-        }
+	int this_session = cli_get_cli_session_id ();
+
+	if (this_session < 0) {
+		while (read (fileno(stdin), &c, 1) == -1) {
+			continue;
+		}
+		return c;
+	}
+
+	if (this_session == 0) {
+		while (read (this_cli[this_session].parser.cfg.fd, &c, 1) == -1) {
+			continue;
+		}
+		return c;
+	} else {
+		while (lwip_read (this_cli[this_session].parser.cfg.fd , &c, 1) == -1)
+			continue;
+		return c;
+	}
+
         return c;
 }
 
@@ -368,4 +518,42 @@ int exit_mode ()
 			return -1;
         }
 	return 0;
+}
+
+int cli_printf  (char *fmt, ...)
+{
+	int n, size = 100;
+	char *p, *np;
+	va_list ap;
+
+	if ((p = malloc(size)) == NULL)
+		return NULL;
+
+	while (1) {
+		/* Try to print in the allocated space. */
+		va_start(ap, fmt);
+		n = vsnprintf(p, size, fmt, ap);
+		va_end(ap);
+		/* If that worked, return the string. */
+		if (n > -1 && n < size) {
+#if 1
+			p[n + 1] = '\n';
+			p[n + 2] = '\r';
+#endif
+			write_string (p);
+			free (p);
+			return 0;
+		}
+		/* Else try again with more space. */
+		if (n > -1)    /* glibc 2.1 */
+			size = n+1; /* precisely what is needed */
+		else           /* glibc 2.0 */
+			size *= 2;  /* twice the old size */
+		if ((np = realloc (p, size + 2)) == NULL) {
+			free(p);
+			return NULL;
+		} else {
+			p = np;
+		}
+	}
 }

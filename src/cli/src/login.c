@@ -30,9 +30,9 @@ int process_logout()
 
 void show_login_prompt()
 {     
-	write_string("************************************************************\n");
-	write_string("*       $$      Open Source Switch Solution     $$         *\n");
-	write_string("************************************************************");
+	cli_printf("************************************************************\n");
+	cli_printf("*       $$      Open Source Switch Solution     $$         *\n");
+	cli_printf("************************************************************");
 	process_login ();
 }
 
@@ -44,18 +44,16 @@ int process_lock (void)
 	memset (user, 0, sizeof(user));
 	memset(pword,0, sizeof(pword));
 
-	write_string ("\n");
-
 	get_current_user_name (user);
 retry:
-	write_string("\rEnter Password To UnLock The Console:");
+	cli_printf("\rEnter Password To UnLock The Console:");
 	read_username_password (pword, 0);
 
 	if (validate_username_password (user, pword)  < 0) {
 		goto retry;
 	}
 
-	write_string ("\n");
+	cli_printf ("\n");
 
 	return 0;
 }
@@ -78,18 +76,18 @@ retry:
 	}
 	else {
 login:
-		write_string ("\nlogin:");
+		cli_printf ("\nlogin:");
 		read_username_password (user, 1);
-		write_string ("\nPassword:");
+		cli_printf ("\nPassword:");
 		read_username_password (pword, 0);
 		if (validate_username_password (user, pword)  < 0) {
-			write_string ("\nIncorrect Login, Please try again");
+			cli_printf ("\nIncorrect Login, Please try again");
 			u1count++;
 			goto retry;
 		}
 		set_current_user_name (user);
 	}
-	write_string ("\n");
+	cli_printf ("\n");
 	return 0;
 }
 
@@ -106,7 +104,7 @@ void read_username_password (char *pword, int flag)
 				i--;
 				pword[i] = '\0';
 				if (flag)
-					write_string ("\b \b");
+					cli_printf ("\b \b");
 			}
 		}
 		else {

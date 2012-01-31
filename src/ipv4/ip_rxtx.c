@@ -567,7 +567,7 @@ ip_input (struct pbuf * p, struct interface * inp)
 #if LWIP_TCP
             case IP_PROTO_TCP:
                 snmp_inc_ipindelivers ();
-                //tcp_input (p, inp);
+                tcp_input (p, inp);
                 break;
 #endif /* LWIP_TCP */
 #if LWIP_ICMP

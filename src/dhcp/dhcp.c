@@ -170,6 +170,7 @@ static void         dhcp_option_short (struct dhcp *dhcp, u16_t value);
 static void         dhcp_option_long (struct dhcp *dhcp, u32_t value);
 /* always add the DHCP options trailer to end and pad */
 static void         dhcp_option_trailer (struct dhcp *dhcp);
+int dhcp_queue_packet (struct interface *netif, void *data);
 
 /**
  * Back-off the DHCP client (because of a received NAK response).
@@ -365,6 +366,7 @@ dhcp_select (struct interface *netif)
     return result;
 }
 
+
 /**
  * The DHCP timer that checks for lease renewal/rebind timeouts.
  */
@@ -532,7 +534,6 @@ dhcp_t2_timeout (struct interface *netif)
         dhcp_rebind (netif);
     }
 }
-
 /**
  * Handle a DHCP ACK packet
  *
@@ -1817,8 +1818,9 @@ dhcp_recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t * addr,
                   ip4_addr1_16 (addr), ip4_addr2_16 (addr), ip4_addr3_16 (addr),
                   ip4_addr4_16 (addr), port));
 
-    /*TODO: post event or message*/
-    dhcp_process (netif, p);
+    if (dhcp_queue_packet (netif, p) < 0) {
+	   pbuf_free (p);
+    }
 }
 
 /**

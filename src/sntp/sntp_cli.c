@@ -34,7 +34,7 @@ cparser_result_t cparser_cmd_show_clock(cparser_context_t *context)
 	printf("%s\n", buf);                                               
 	return 0;          
 }
-cparser_result_t cparser_cmd_config_ntp_server_servername(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_ntp_server_hostname_servername(cparser_context_t *context,
  							   char **servername_ptr)
 {
 
@@ -42,6 +42,16 @@ cparser_result_t cparser_cmd_config_ntp_server_servername(cparser_context_t *con
 cparser_result_t cparser_cmd_config_ntp_server_serveripaddr(cparser_context_t *context,
  							   uint32_t *serveripaddr_ptr)
 {
+        uint8_t  addr[4];
+        uint8_t  str[10];
+
+        uint32_2_ipstring (ntohl(*serveripaddr_ptr), addr);
+
+        sprintf (str, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
+
+	if (!set_sntp_server (str))
+		return CPARSER_NOT_OK;
+	return CPARSER_OK;
 }
 cparser_result_t cparser_cmd_config_ntp_source_portnum(cparser_context_t *context,
  							int32_t *portnum_ptr)
@@ -69,6 +79,7 @@ cparser_result_t cparser_cmd_config_clock_set_hours_mintues_secs_date_month_year
 }
 cparser_result_t cparser_cmd_config_ntp_client_enable(cparser_context_t *context)
 {
+	return CPARSER_OK;
 }
 cparser_result_t cparser_cmd_config_ntp_client_disable(cparser_context_t *context)
 {

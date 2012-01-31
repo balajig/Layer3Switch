@@ -12,6 +12,34 @@
 #include <sys/times.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <stdarg.h>
+
+
+#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN
+# define BB_BIG_ENDIAN 1
+# define BB_LITTLE_ENDIAN 0
+#elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN
+# define BB_BIG_ENDIAN 0
+# define BB_LITTLE_ENDIAN 1
+#elif defined(_BYTE_ORDER) && _BYTE_ORDER == _BIG_ENDIAN
+# define BB_BIG_ENDIAN 1
+# define BB_LITTLE_ENDIAN 0
+#elif defined(_BYTE_ORDER) && _BYTE_ORDER == _LITTLE_ENDIAN
+# define BB_BIG_ENDIAN 0
+# define BB_LITTLE_ENDIAN 1
+#elif defined(BYTE_ORDER) && BYTE_ORDER == BIG_ENDIAN
+# define BB_BIG_ENDIAN 1
+# define BB_LITTLE_ENDIAN 0
+#elif defined(BYTE_ORDER) && BYTE_ORDER == LITTLE_ENDIAN
+# define BB_BIG_ENDIAN 0
+# define BB_LITTLE_ENDIAN 1
+#elif defined(__386__)
+# define BB_BIG_ENDIAN 0
+# define BB_LITTLE_ENDIAN 1
+#else
+# error "Can't determine endianness"
+#endif
+
 
 /* Types of sockets.  */
 enum __socket_type
@@ -308,6 +336,11 @@ typedef struct mac_addr
         unsigned char   addr[6];
 }MACADDRESS;
 
+struct ether_addr
+{       
+  u_int8_t ether_addr_octet[ETH_ALEN];
+} __attribute__ ((__packed__));
+        
 struct ether_hdr
 {
 	MACADDRESS  dmac;      /* destination eth addr */

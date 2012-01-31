@@ -32,11 +32,11 @@ static struct  user_db userdb[MAX_USERS];
 int user_db_init (void)
 {
 	if (create_user ((char *)"guest", (char *)"Guest1", 5)  < 0) {
-		write_string ("Default User \"guest\" creation failed\n");
+		cli_printf ("Default User \"guest\" creation failed\n");
 		return -1;
 	}
 	if (create_user ((char *)"admin", (char *)"Admin123", 0) < 0) {
-		write_string ("Default User \"admin\" creation failed\n");
+		cli_printf ("Default User \"admin\" creation failed\n");
 		return -1;
 	}
 	return 0;
@@ -79,17 +79,17 @@ int create_user (char *username, char *password, int priv_level)
 	int i = MAX_USERS;
 
 	if (!username || !password) {
-		write_string("Error!!! Creating Username and Password...\n");
+		cli_printf("Error!!! Creating Username and Password...\n");
 		return -1;
 	}
 
 	if (password_validation (password) < 0) {
-		write_string("Error!!! Passwords should be AlphaNumberic... eg: \"PassWord123\"\n");
+		cli_printf("Error!!! Passwords should be AlphaNumberic... eg: \"PassWord123\"\n");
 		return -1;
 	}
 
 	if (priv_level < 0 || priv_level > 5) {
-		write_string("Error!!! Priority Level Range Between 0 to 5\n");
+		cli_printf("Error!!! Priority Level Range Between 0 to 5\n");
 		return -1;
 	}
 
@@ -109,7 +109,7 @@ int create_user (char *username, char *password, int priv_level)
 		}
 	}
 	
-	write_string("Oops!!! Unable to Create User\n"); 	
+	cli_printf("Oops!!! Unable to Create User\n"); 	
 	return -1;
 }
 
