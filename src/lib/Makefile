@@ -32,6 +32,7 @@ LIBS_SRCS += $(LIBS_SRCC_DIR)/prefix.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/vector.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/hash.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/pqueue.c
+LIBS_SRCS += $(LIBS_SRCC_DIR)/libtelnet.c
 
 
 CFLAGS += -I$(LIBS_INC_DIR)
