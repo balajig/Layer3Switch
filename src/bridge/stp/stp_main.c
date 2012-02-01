@@ -784,7 +784,7 @@ void stp_send_tcn_bpdu(struct stp_port_entry *p)
 	buf[2] = 0;
 	buf[3] = BPDU_TC_TYPE;
 
-	stp_send_bpdu(p, buf, 4);
+	stp_send_bpdu(p, p_out, 4 + sizeof (LLCHDR));
 }
 
 int compare_ether_addr(const uint8_t *addr1, const uint8_t *addr2)
