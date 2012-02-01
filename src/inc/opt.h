@@ -38,8 +38,6 @@
 #ifndef __LWIP_OPT_H__
 #define __LWIP_OPT_H__
 
-#include "common_types.h"
-
 #define LWIP_DEBUG 1
 
 
@@ -2046,6 +2044,5 @@
  * will be set to standard values. Override anything you dont like!
  */
 #include "debug.h"
-
 
 #endif /* __LWIP_OPT_H__ */

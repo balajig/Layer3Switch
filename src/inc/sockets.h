@@ -47,20 +47,55 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* members are in network byte order */
-struct sockaddr_in {
-  u8_t sin_len;
-  u8_t sin_family;
-  u16_t sin_port;
-  struct in_addr sin_addr;
-  char sin_zero[8];
+
+
+struct sockaddr_ll
+  {     
+    unsigned short int sll_family;
+    unsigned short int sll_protocol;
+    int sll_ifindex;
+    unsigned short int sll_hatype; 
+    unsigned char sll_pkttype;
+    unsigned char sll_halen; 
+    unsigned char sll_addr[8];
+  };                    
+
+
+/* Types of sockets.  */
+enum __socket_type
+{
+  SOCK_STREAM = 1,              /* Sequenced, reliable, connection-based
+                                   byte streams.  */
+#define SOCK_STREAM SOCK_STREAM
+  SOCK_DGRAM = 2,               /* Connectionless, unreliable datagrams
+                                   of fixed maximum length.  */
+#define SOCK_DGRAM SOCK_DGRAM
+  SOCK_RAW = 3,                 /* Raw protocol interface.  */
+#define SOCK_RAW SOCK_RAW
+  SOCK_RDM = 4,                 /* Reliably-delivered messages.  */
+#define SOCK_RDM SOCK_RDM
+  SOCK_SEQPACKET = 5,           /* Sequenced, reliable, connection-based,
+                                   datagrams of fixed maximum length.  */
+#define SOCK_SEQPACKET SOCK_SEQPACKET
+  SOCK_DCCP = 6,                /* Datagram Congestion Control Protocol.  */
+#define SOCK_DCCP SOCK_DCCP
+  SOCK_PACKET = 10,             /* Linux specific way of getting packets
+                                   at the dev level.  For writing rarp and
+                                   other similar things on the user level. */
+#define SOCK_PACKET SOCK_PACKET
+
+  /* Flags to be ORed into the type parameter of socket and socketpair and
+ *      used for the flags parameter of paccept.  */
+
+  SOCK_CLOEXEC = 02000000,      /* Atomically set close-on-exec flag for the
+                                   new descriptor(s).  */
+#define SOCK_CLOEXEC SOCK_CLOEXEC
+  SOCK_NONBLOCK = 04000         /* Atomically mark descriptor(s) as
+                                   non-blocking.  */
+#define SOCK_NONBLOCK SOCK_NONBLOCK
 };
 
-struct sockaddr {
-  u8_t sa_len;
-  u8_t sa_family;
-  char sa_data[14];
-};
+
 
 #ifndef socklen_t
 #  define socklen_t u32_t
@@ -328,34 +363,6 @@ int lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptse
                 struct timeval *timeout);
 int lwip_ioctl(int s, long cmd, void *argp);
 int lwip_fcntl(int s, int cmd, int val);
-
-#if 0
-#if LWIP_COMPAT_SOCKETS
-#define accept(a,b,c)         lwip_accept(a,b,c)
-#define bind(a,b,c)           lwip_bind(a,b,c)
-#define shutdown(a,b)         lwip_shutdown(a,b)
-#define closesocket(s)        lwip_close(s)
-#define connect(a,b,c)        lwip_connect(a,b,c)
-#define getsockname(a,b,c)    lwip_getsockname(a,b,c)
-#define getpeername(a,b,c)    lwip_getpeername(a,b,c)
-#define setsockopt(a,b,c,d,e) lwip_setsockopt(a,b,c,d,e)
-#define getsockopt(a,b,c,d,e) lwip_getsockopt(a,b,c,d,e)
-#define listen(a,b)           lwip_listen(a,b)
-#define recv(a,b,c,d)         lwip_recv(a,b,c,d)
-#define recvfrom(a,b,c,d,e,f) lwip_recvfrom(a,b,c,d,e,f)
-#define send(a,b,c,d)         lwip_send(a,b,c,d)
-#define sendto(a,b,c,d,e,f)   lwip_sendto(a,b,c,d,e,f)
-#define socket(a,b,c)         lwip_socket(a,b,c)
-#define select(a,b,c,d,e)     lwip_select(a,b,c,d,e)
-#define ioctlsocket(a,b,c)    lwip_ioctl(a,b,c)
-
-#if LWIP_POSIX_SOCKETS_IO_NAMES
-#define read(a,b,c)           lwip_read(a,b,c)
-#define write(a,b,c)          lwip_write(a,b,c)
-#define close(s)              lwip_close(s)
-#endif /* LWIP_POSIX_SOCKETS_IO_NAMES */
-#endif
-#endif /* LWIP_COMPAT_SOCKETS */
 
 #ifdef __cplusplus
 }

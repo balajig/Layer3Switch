@@ -37,6 +37,7 @@
  */
 
 #include "opt.h"
+#include "common_types.h"
 
 #include "def.h"
 #include "ip_addr.h"

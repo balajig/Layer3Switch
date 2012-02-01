@@ -40,8 +40,10 @@
 
 #define LWIP_PROVIDE_ERRNO
 
-#include "common_types.h"
 #include "opt.h"
+#include "common_types.h"
+#include "sockets.h"
+#include "socks.h"
 
 #if LWIP_SOCKET                    /* don't build if not configured for use in lwipopts.h */
 

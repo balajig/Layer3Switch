@@ -1,5 +1,3 @@
-#include "rbtree.h"
-
 #define MAX_MTU 1500
 #define  MAX_MAC_ENTRIES   1024 /*1K Mac-entries*/
 #define PKT_PROCESSED 1

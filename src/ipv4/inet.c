@@ -36,6 +36,3 @@
  *
  */
 
-#include "opt.h"
-
-#include "inet.h"

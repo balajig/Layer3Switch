@@ -41,15 +41,22 @@ void * packet_processing_task (void *unused)
 
 int rcv_pkt (int sockid, void *buf)
 {
+	int len = 0;
+#if 0
         struct sockaddr_ll sl;
         socklen_t slen = sizeof sl;
 
-	int len = recvfrom (sockid, buf, MAX_MTU, 0, (struct sockaddr *) &sl, &slen);
+	len = recvfrom (sockid, buf, MAX_MTU, 0, (struct sockaddr *) &sl, &slen);
 #ifdef PKT_DBG
         printf("\nReceive Src ifindex %d %02x:%02x:%02x:%02x:%02x:%02x",
                sl.sll_ifindex,
                sl.sll_addr[0], sl.sll_addr[1], sl.sll_addr[2],
                sl.sll_addr[3], sl.sll_addr[4], sl.sll_addr[5]);
+#endif
+
+#else
+
+	len = read (sockid, buf, MAX_MTU);
 #endif
 	return len;
 }

@@ -34,6 +34,7 @@
 #define __LWIP_MEMP_H__
 
 #include "opt.h"
+#include "common_types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -21,6 +21,7 @@
 
 #define TM_VIRT_PORT 9000
 #define tm_inst_port(inst)  TM_VIRT_PORT  + inst
+#define DBG 1
 
 void vlink_processing_task (void *unused);
 void tx_pkt (void *buf, int dest, int len);
@@ -299,6 +300,10 @@ int rcv_pkt (void *buf)
          return len;
 }
 void switch_to_os_threading (void);
+
+ipaddr_aton ()
+{
+}
 int main (int argc, char **argv)
 {
 	int tid = 0;

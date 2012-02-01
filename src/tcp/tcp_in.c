@@ -42,6 +42,7 @@
  */
 
 #include "opt.h"
+#include "common_types.h"
 
 #if LWIP_TCP                    /* don't build if not configured for use in lwipopts.h */
 

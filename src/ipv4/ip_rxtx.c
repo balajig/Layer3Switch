@@ -39,6 +39,7 @@
  */
 
 #include "opt.h"
+#include "common_types.h"
 #include "ip_hdr.h"
 #include "def.h"
 #include "mem.h"

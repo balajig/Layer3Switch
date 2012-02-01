@@ -44,6 +44,7 @@
  */
 
 #include "opt.h"
+#include "common_types.h"
 
 #if LWIP_ARP || LWIP_ETHERNET
 

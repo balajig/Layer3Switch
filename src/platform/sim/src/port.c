@@ -11,12 +11,12 @@ if_t port_cdb[MAX_PORTS];
 
 int port_init (void)
 {
-	int idx = get_max_ports ();
+	int idx = 0;
 
-	while (idx--) {
+	while (idx  < get_max_ports ()) {
 		interface_init (&port_cdb[idx], NULL, NULL);
-		port_cdb[idx].ifIndex = idx;
 		sprintf ((char *)port_cdb[idx].ifDescr, "%s%d","port",idx);
+		port_cdb[idx].ifIndex = idx + 1;
 		port_cdb[idx].ifType = 0;
 		port_cdb[idx].ifMtu = 1500;
 		port_cdb[idx].ifSpeed = 10;
@@ -36,6 +36,7 @@ int port_init (void)
 		port_cdb[idx].flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
 		if_connect_init (&port_cdb[idx]);
 		read_port_mac_address (idx, &port_cdb[idx].ifPhysAddress[0]); 
+		idx++;
 	}
 	return 0;
 }

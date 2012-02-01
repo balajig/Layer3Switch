@@ -39,6 +39,7 @@
  */
 
 #include "opt.h"
+#include "common_types.h"
 #include "ip_frag.h"
 #include "def.h"
 #include "inet_chksum.h"

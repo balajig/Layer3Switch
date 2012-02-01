@@ -11,6 +11,12 @@
 #include <termios.h>
 #include <unistd.h>
 #include <termio.h>
+#include <semaphore.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+
 #include "rbtree.h"
 #include "list.h"
 #include "cmd.h"

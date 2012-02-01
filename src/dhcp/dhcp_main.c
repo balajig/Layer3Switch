@@ -12,7 +12,6 @@
 
 
 int dhcp_init (void);
-int dhcp_queue_packet (struct interface *netif, void *data);
 void dhcp_process (struct interface *netif, void *p);
 
 

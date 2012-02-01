@@ -43,6 +43,7 @@
  */
 
 #include "opt.h"
+#include "common_types.h"
 
 #if LWIP_SNMP                    /* don't build if not configured for use in lwipopts.h */
 

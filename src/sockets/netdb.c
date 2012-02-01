@@ -33,6 +33,7 @@
  *
  */
 
+#include "common_types.h"
 #define LWIP_PROVIDE_ERRNO
 #include "arch.h"
 #include "sockets.h"

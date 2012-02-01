@@ -40,6 +40,7 @@
    the application */
 
 #include "opt.h"
+#include "common_types.h"
 
 #if LWIP_NETCONN                /* don't build if not configured for use in lwipopts.h */
 #include "sys.h"

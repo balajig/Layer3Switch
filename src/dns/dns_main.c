@@ -10,6 +10,7 @@
 
 
 #include "opt.h"
+#include "common_types.h"
 #include "ip_addr.h"
 #include "dns.h"
 

@@ -108,7 +108,6 @@ int cli_init (const char *prmt)
 		i++;
 	}
 	cli_session_init (prmt, 0, STDOUT_FILENO);
-        cli_set_vlan_id (1);
 	return 0;
 }
 
@@ -198,6 +197,8 @@ int cli_start_session (int session)
 
 	get_prompt (this_cli[session].parser.cfg.prompt);
 
+        cli_set_vlan_id (1);
+
         cparser_init(&this_cli[session].parser.cfg, &this_cli[session].parser);
 
 	this_cli[session].parser.cfg.io_init(&this_cli[session].parser);
@@ -232,6 +233,8 @@ void *cmdinterface(void *unused)
 	this_cli[session].taskid = tsk_selfid ();
 
 	get_prompt (this_cli[session].parser.cfg.prompt);
+
+        cli_set_vlan_id (1);
 
 	rc = cparser_init(&this_cli[session].parser.cfg, &this_cli[session].parser);
 

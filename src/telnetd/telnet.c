@@ -32,6 +32,7 @@
 // 
 
 #include "common_types.h"
+#include "sockets.h"
 #include "socks.h"
 #include "api.h"
 //

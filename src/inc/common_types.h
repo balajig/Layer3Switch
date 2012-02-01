@@ -41,40 +41,6 @@
 #endif
 
 
-/* Types of sockets.  */
-enum __socket_type
-{
-  SOCK_STREAM = 1,              /* Sequenced, reliable, connection-based
-                                   byte streams.  */
-#define SOCK_STREAM SOCK_STREAM
-  SOCK_DGRAM = 2,               /* Connectionless, unreliable datagrams
-                                   of fixed maximum length.  */
-#define SOCK_DGRAM SOCK_DGRAM
-  SOCK_RAW = 3,                 /* Raw protocol interface.  */
-#define SOCK_RAW SOCK_RAW
-  SOCK_RDM = 4,                 /* Reliably-delivered messages.  */
-#define SOCK_RDM SOCK_RDM
-  SOCK_SEQPACKET = 5,           /* Sequenced, reliable, connection-based,
-                                   datagrams of fixed maximum length.  */
-#define SOCK_SEQPACKET SOCK_SEQPACKET
-  SOCK_DCCP = 6,                /* Datagram Congestion Control Protocol.  */
-#define SOCK_DCCP SOCK_DCCP
-  SOCK_PACKET = 10,             /* Linux specific way of getting packets
-                                   at the dev level.  For writing rarp and
-                                   other similar things on the user level. */
-#define SOCK_PACKET SOCK_PACKET
-
-  /* Flags to be ORed into the type parameter of socket and socketpair and
- *      used for the flags parameter of paccept.  */
-
-  SOCK_CLOEXEC = 02000000,      /* Atomically set close-on-exec flag for the
-                                   new descriptor(s).  */
-#define SOCK_CLOEXEC SOCK_CLOEXEC
-  SOCK_NONBLOCK = 04000         /* Atomically mark descriptor(s) as
-                                   non-blocking.  */
-#define SOCK_NONBLOCK SOCK_NONBLOCK
-};
-
 /* Protocol families.  */
 #define PF_UNSPEC       0       /* Unspecified.  */
 #define PF_LOCAL        1       /* Local to host (pipes and file-domain).  */
@@ -157,17 +123,6 @@ enum __socket_type
 #define AF_IEEE802154   PF_IEEE802154
 #define AF_MAX          PF_MAX
 
-struct sockaddr_ll
-  {     
-    unsigned short int sll_family;
-    unsigned short int sll_protocol;
-    int sll_ifindex;
-    unsigned short int sll_hatype; 
-    unsigned char sll_pkttype;
-    unsigned char sll_halen; 
-    unsigned char sll_addr[8];
-  };                    
-
 /* Packet types.  */    
                 
 #define PACKET_HOST             0               /* To us.  */
@@ -183,6 +138,17 @@ struct sockaddr_ll
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
+typedef uint8_t u8_t;
+typedef int8_t s8_t;
+typedef uint16_t u16_t;
+typedef int16_t  s16_t;
+typedef uint32_t u32_t;
+typedef int32_t s32_t;
+typedef unsigned long  mem_ptr_t;
+
+
+
+
 
 typedef uint32_t in_addr_t;
 
@@ -208,6 +174,23 @@ struct sockaddr_in6
 	uint32_t sin6_flowinfo; /* IPv6 flow information */ 
 	struct in6_addr sin6_addr; /* IPv6 address */ 
 }; 
+
+
+/* members are in network byte order */
+struct sockaddr_in {
+  u8_t sin_len;
+  u8_t sin_family;
+  u16_t sin_port;
+  struct in_addr sin_addr;
+  char sin_zero[8];
+};
+
+struct sockaddr {
+  u8_t sa_len;
+  u8_t sa_family;
+  char sa_data[14];
+};
+
 
 
 #define MAX_PORT_NAME 16 
@@ -322,24 +305,11 @@ struct sockaddr_in6
 #define ARPOP_InREPLY   9               /* InARP reply                  */
 #define ARPOP_NAK       10              /* (ATM)ARP NAK                 */
 
-typedef uint8_t u8_t;
-typedef int8_t s8_t;
-typedef uint16_t u16_t;
-typedef int16_t  s16_t;
-typedef uint32_t u32_t;
-typedef int32_t s32_t;
-typedef unsigned long  mem_ptr_t;
-
-
 typedef struct mac_addr
 {       
         unsigned char   addr[6];
 }MACADDRESS;
 
-struct ether_addr
-{       
-  u_int8_t ether_addr_octet[ETH_ALEN];
-} __attribute__ ((__packed__));
         
 struct ether_hdr
 {
@@ -352,12 +322,20 @@ typedef struct {
     uint8_t octet[6];
 } cparser_macaddr_t;
 
-struct ether_header
+struct ethernet_hdr
 {
   u_int8_t  ether_dhost[ETH_ALEN];      /* destination eth addr */
   u_int8_t  ether_shost[ETH_ALEN];      /* source ether addr    */
   u_int16_t ether_type;                 /* packet type ID field */
 } __attribute__ ((__packed__));
+
+
+#if 0
+struct ether_addr
+{       
+  u_int8_t ether_addr_octet[ETH_ALEN];
+} __attribute__ ((__packed__));
+#endif
 
 typedef struct bridge_id
 {       
@@ -517,5 +495,4 @@ int read_port_mac_address (int port, uint8_t *p);
 int get_max_ports (void);
 
 #include "libproto.h"
-#include "sockets.h"
 #endif

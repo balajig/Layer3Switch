@@ -208,7 +208,7 @@ struct bstp_cb_ops {
 
 /* configuration bridge protocol data unit */
 struct bstp_cbpdu {
-	struct ether_header eth_hdr;
+	struct ethernet_hdr eth_hdr;
 	uint8_t		cbu_dsap;		/* LLC: destination sap */
 	uint8_t		cbu_ssap;		/* LLC: source sap */
 	uint8_t		cbu_ctl;		/* LLC: control */
@@ -239,7 +239,7 @@ struct bstp_cbpdu {
 
 /* topology change notification bridge protocol data unit */
 struct bstp_tbpdu {
-	struct ether_header eth_hdr;
+	struct ethernet_hdr eth_hdr;
 	uint8_t		tbu_dsap;		/* LLC: destination sap */
 	uint8_t		tbu_ssap;		/* LLC: source sap */
 	uint8_t		tbu_ctl;		/* LLC: control */

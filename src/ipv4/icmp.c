@@ -40,6 +40,7 @@
    is not implemented. */
 
 #include "opt.h"
+#include "common_types.h"
 #define LWIP_ICMP 1
 #if LWIP_ICMP                    /* don't build if not configured for use in lwipopts.h */
 

@@ -68,6 +68,7 @@
 #include "netdb.h"
 #include "icmp.h"
 #include "signal.h"
+#include "sockets.h"
 #include "socks.h"
 
 #define MAXHOSTNAMELEN  64      /* max length of hostname */

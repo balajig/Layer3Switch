@@ -11,12 +11,15 @@
 
 #include "common_types.h"
 #include "ifmgmt.h"
+#include "sockets.h"
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <mqueue.h>
 #include <stdint.h>
 #include <getopt.h>
 #include <linux/if.h>
+#include <net/ethernet.h> /* the L2 protocols */
+
 
 #include "nt.h"
 

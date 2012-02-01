@@ -37,6 +37,7 @@
  */
 
 #include "opt.h"
+#include  "common_types.h"
 
 #include "inet_chksum.h"
 #include "def.h"

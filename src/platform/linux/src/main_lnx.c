@@ -1,6 +1,23 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>      
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <mqueue.h>
+#include <stdint.h>
+#include <getopt.h>
 #include "common_types.h"
 #include "ifmgmt.h"
 #include "cli.h"
+#include "sockets.h"
+#include <mqueue.h>
+#include <stdint.h>
+#include <getopt.h>
+#include <net/ethernet.h> /* the L2 protocols */
+
 
 int parse_cmdline (int argc, char *argv[]);
 void * packet_processing_task (void *unused);
@@ -87,10 +104,6 @@ int spawn_pkt_processing_task (void)
 
 int create_raw_sock_for_pkt_capture (void)
 {
-	struct sockaddr_in si_me;
-
-	memset((char *) &si_me, 0, sizeof(si_me));
-
 	if ((sockid_pkt =socket(AF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
 		perror ("SOCKET");
 		return -1;
