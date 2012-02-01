@@ -933,8 +933,8 @@ static telnet_error_t _buffer_byte(telnet_t *telnet,
 static void _process(telnet_t *telnet, const char *buffer, size_t size) {
 	telnet_event_t ev;
 	unsigned char byte;
-	size_t i, start;
-	for (i = start = 0; i != size; ++i) {
+	size_t i = 0, start = 0;
+	for (i = 0; i != size; ++i) {
 		byte = buffer[i];
 		switch (telnet->state) {
 		/* regular data */
@@ -1345,6 +1345,46 @@ void telnet_begin_compress2(telnet_t *telnet) {
 #endif /* defined(HAVE_ZLIB) */
 }
 
+/* send formatted data with \r and \n translation in addition to IAC IAC */
+int telnet_prints (telnet_t *telnet, const char *buffer, int len) {
+    static const char CRLF[] = { '\r', '\n' };
+    static const char CRNUL[] = { '\r', '\0' };
+	char *output = buffer;
+	int i, l;
+	/* send */
+	for (l = i = 0; i != len; ++i) {
+		/* special characters */
+		if (output[i] == (char)TELNET_IAC || output[i] == '\r' ||
+				output[i] == '\n') {
+			/* dump prior portion of text */
+			if (i != l)
+				_send(telnet, output + l, i - l);
+			l = i + 1;
+
+			/* IAC -> IAC IAC */
+			if (output[i] == (char)TELNET_IAC)
+				telnet_iac(telnet, TELNET_IAC);
+			/* automatic translation of \r -> CRNUL */
+			else if (output[i] == '\r')
+				_send(telnet, CRNUL, 2);
+			/* automatic translation of \n -> CRLF */
+			else if (output[i] == '\n')
+				_send(telnet, CRLF, 2);
+		}
+	}
+
+	/* send whatever portion of output is left */
+	if (i != l) {
+		_send(telnet, output + l, i - l);
+	}
+
+	/* free allocated memory, if any */
+	if (output != buffer) {
+		free(output);
+	}
+
+	return i;
+}
 /* send formatted data with \r and \n translation in addition to IAC IAC */
 int telnet_printf(telnet_t *telnet, const char *fmt, ...) {
     static const char CRLF[] = { '\r', '\n' };

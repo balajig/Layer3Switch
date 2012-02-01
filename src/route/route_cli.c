@@ -19,7 +19,7 @@ cparser_result_t cparser_cmd_config_ip_default_gateway_addr(cparser_context_t *c
 
 	if (!route_add_gateway ("0.0.0.0", 0, addr))
 		return CPARSER_OK;
-	printf ("Couldn't find any vaild interface\n");
+	cli_printf ("Couldn't find any vaild interface\n");
 	return CPARSER_NOT_OK;
 }
 
@@ -44,6 +44,6 @@ cparser_result_t cparser_cmd_config_ip_route_network_mask_gateway(cparser_contex
 	if (!route_add_gateway (addr, u32ip_masklen (ntohl(*mask_ptr)), gateway))
 		return CPARSER_OK;
 #endif
-	printf ("No vaild interface\n");
+	cli_printf ("No vaild interface\n");
 	return CPARSER_NOT_OK;
 }

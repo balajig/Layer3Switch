@@ -333,7 +333,7 @@ int  cli_show_ip_route (void)
 	    {
 	     if (first)
 	       {
-		 fprintf (stdout, SHOW_ROUTE_V4_HEADER);
+		 cli_printf (SHOW_ROUTE_V4_HEADER);
 		 first = 0;
 	       }
 	     show_ip_route (rn, rib);
@@ -344,8 +344,8 @@ int  cli_show_ip_route (void)
 #else
 	route_t *r;
 
-        printf ("%-20s    %-16s      %-10s\n", "Destination", "Gateway","Iface");
-	printf ("%-20s    %-16s      %-10s\n","-----------","---------","--------");
+       cli_printf ("%-20s    %-16s      %-10s\n", "Destination", "Gateway","Iface");
+	cli_printf ("%-20s    %-16s      %-10s\n","-----------","---------","--------");
 
 	for (r=route; r; r=r->next) {
 		uint8_t  network[20];
@@ -354,7 +354,7 @@ int  cli_show_ip_route (void)
 			continue;
 		sprintf (network, "%d.%d.%d.%d/%d", r->netaddr[0], r->netaddr[1], r->netaddr[2], r->netaddr[3], r->masklen);
 		sprintf (gateway, "%d.%d.%d.%d",  r->gateway[0],r->gateway[1],r->gateway[2],r->gateway[3]);
-		printf ("%-20s    %-16s      %-10s\n", network,gateway,r->netif->ifDescr);
+		cli_printf ("%-20s    %-16s      %-10s\n", network,gateway,r->netif->ifDescr);
 	}
 	return 0;
 #endif

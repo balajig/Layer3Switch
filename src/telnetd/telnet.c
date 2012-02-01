@@ -429,15 +429,13 @@ static const telnet_telopt_t telopts[] = {
 	{ -1, 0, 0 }
 };
 
-struct user_t {
-	char *name;
+struct telnet_session_t {
 	int sock;
 	telnet_t *telnet;
 	char linebuf[256];
 	int linepos;
 };
 
-static struct user_t users[MAX_USERS];
 
 static void linebuffer_push(char *buffer, size_t size, int *linepos,
 		char ch, void (*cb)(const char *line, int overflow, void *ud),
@@ -470,15 +468,6 @@ static void linebuffer_push(char *buffer, size_t size, int *linepos,
 	}
 }
 
-static void _message(const char *from, const char *msg) {
-	int i;
-	for (i = 0; i != MAX_USERS; ++i) {
-		if (users[i].sock != -1) {
-			telnet_printf(users[i].telnet, "%s: %s\n", from, msg);
-		}
-	}
-}
-
 static void _send(int sock, const char *buffer, unsigned int size) {
 	int rs;
 
@@ -508,56 +497,28 @@ static void _send(int sock, const char *buffer, unsigned int size) {
 
 /* process input line */
 static void _online(const char *line, int overflow, void *ud) {
-	struct user_t *user = (struct user_t*)ud;
+	struct telnet_session_t *user = (struct telnet_session_t*)ud;
 	int i;
-
-	/* if the user has no name, this is his "login" */
-	if (user->name == 0) {
-		/* must not be empty, must be at least 32 chars */
-		if (strlen(line) == 0 || strlen(line) > 32) {
-			telnet_printf(user->telnet, "Invalid name.\nEnter name: ");
-			return;
-		}
-
-		/* must not already be in use */
-		for (i = 0; i != MAX_USERS; ++i) {
-			if (users[i].name != 0 && strcmp(users[i].name, line) == 0) {
-				telnet_printf(user->telnet, "Name in use.\nEnter name: ");
-				return;
-			}
-		}
-
-		/* keep name */
-		user->name = strdup(line);
-		telnet_printf(user->telnet, "Welcome, %s!\n", line);
-		return;
-	}
-
 	/* if line is "quit" then, well, quit */
 	if (strcmp(line, "quit") == 0) {
 		close(user->sock);
-		user->sock = -1;
-		_message(user->name, "** HAS QUIT **");
-		free(user->name);
-		user->name = 0;
+		free(user);
 		return;
 	}
-
-	/* just a message -- send to all users */
-	_message(user->name, line);
 }
 
-static void _input(struct user_t *user, const char *buffer,
+static void _input(struct telnet_session_t *user, const char *buffer,
 		unsigned int size) {
 	unsigned int i;
-	for (i = 0; i != size; ++i)
-		linebuffer_push(user->linebuf, sizeof(user->linebuf), &user->linepos,
-				(char)buffer[i], _online, user);
+	for (i = 0; i != size; ++i) {
+			if (buffer[i] != '\r')
+			cparser_feed (1, (char)buffer[i]);
+	}
 }
 
 static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 		void *user_data) {
-	struct user_t *user = (struct user_t*)user_data;
+	struct telnet_session_t *user = (struct telnet_session_t*)user_data;
 
 	switch (ev->type) {
 	/* data received */
@@ -577,11 +538,6 @@ static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 	case TELNET_EV_ERROR:
 		close(user->sock);
 		user->sock = -1;
-		if (user->name != 0) {
-			_message(user->name, "** HAS HAD AN ERROR **");
-			free(user->name);
-			user->name = 0;
-		}
 		telnet_free(user->telnet);
 		break;
 	default:
@@ -590,28 +546,51 @@ static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 	}
 }
 
-void * telnetd (void *arg) {
+void telnet_task (void *arg)
+{
+	int s = (int) arg;
+	int session = -1;
+	telnet_t *telnet = NULL;
+	struct telnet_session_t  *new = calloc (1, sizeof (struct telnet_session_t));
 	char buffer[512];
+	int rs = 0;
+
+	telnet = telnet_client_init (telopts, _event_handler, 0, new);
+
+	new->telnet = telnet;
+	new->sock = s;
+	if ((session = cli_telnet_session_init ("telent@OpenSwitch",  s, telnet)) < 0)
+		return -1;
+
+	telnet_negotiate(telnet, TELNET_WILL, TELNET_TELOPT_COMPRESS2);
+
+	cli_start_session (session);
+
+	telnet_printf(telnet, "telnet@OpenSwitch# ");
+
+	while (1) {
+		memset (buffer, 0, sizeof(buffer));
+		if ((rs = recv(s, buffer, sizeof(buffer), 0)) > 0) {
+			telnet_recv(telnet, buffer, s);
+		} else if (rs == 0) {
+			close(s);
+			telnet_free(telnet);
+			break;
+		}
+	}
+}
+
+
+void * telnetd (void *arg) 
+{
 	short listen_port;
 	int listen_sock;
 	int rs;
 	int i;
 	struct sockaddr_in addr;
 	socklen_t addrlen;
-	struct pollfd pfd[MAX_USERS + 1];
+	int  hthread = -1;
 
-	/* initialize Winsock */
-#if defined(_WIN32)
-	WSADATA wsd;
-	WSAStartup(MAKEWORD(2, 2), &wsd);
-#endif
-	/* initialize data structures */
-	memset(&pfd, 0, sizeof(pfd));
-	memset(users, 0, sizeof(users));
-	for (i = 0; i != MAX_USERS; ++i)
-		users[i].sock = -1;
-
-	/* parse listening port */
 	listen_port = 23;
 
 	/* create listening socket */
@@ -640,90 +619,26 @@ void * telnetd (void *arg) {
 		return 1;
 	}
 
-	/* initialize listening descriptors */
-	pfd[MAX_USERS].fd = listen_sock;
-	pfd[MAX_USERS].events = POLLIN;
-
 	/* loop for ever */
 	for (;;) {
-		/* prepare for poll */
-		for (i = 0; i != MAX_USERS; ++i) {
-			if (users[i].sock != -1) {
-				pfd[i].fd = users[i].sock;
-				pfd[i].events = POLLIN;
-			} else {
-				pfd[i].fd = -1;
-				pfd[i].events = 0;
-			}
-		}
 
-		/* poll */
-		rs = poll(pfd, MAX_USERS + 1, -1);
-		if (rs == -1 && errno != EINTR) {
-			fprintf(stderr, "poll() failed: %s\n", strerror(errno));
+		addrlen = sizeof(addr);
+
+		if ((rs = accept(listen_sock, (struct sockaddr *)&addr,
+						&addrlen)) == -1) {
+			fprintf(stderr, "accept() failed: %s\n", strerror(errno));
 			return 1;
 		}
 
-		/* new connection */
-		if (pfd[MAX_USERS].revents & POLLIN) {
-			/* acept the sock */
-			addrlen = sizeof(addr);
-			if ((rs = accept(listen_sock, (struct sockaddr *)&addr,
-					&addrlen)) == -1) {
-				fprintf(stderr, "accept() failed: %s\n", strerror(errno));
-				return 1;
-			}
-
-			/* find a free user */
-			for (i = 0; i != MAX_USERS; ++i)
-				if (users[i].sock == -1)
-					break;
-			if (i == MAX_USERS) {
-				printf("  rejected (too many users)\n");
-				_send(rs, "Too many users.\r\n", 14);
-				close(rs);
-			}
-
-			/* init, welcome */
-			users[i].sock = rs;
-			users[i].telnet = telnet_client_init(telopts, _event_handler, 0,
-					&users[i]);
-			telnet_negotiate(users[i].telnet, TELNET_WILL,
-					TELNET_TELOPT_COMPRESS2);
-			telnet_printf(users[i].telnet, "Enter name: ");
-		}
-
-		/* read from client */
-		for (i = 0; i != MAX_USERS; ++i) {
-			/* skip users that aren't actually connected */
-			if (users[i].sock == -1)
-				continue;
-
-			if (pfd[i].revents & POLLIN) {
-				if ((rs = recv(users[i].sock, buffer, sizeof(buffer), 0)) > 0) {
-					telnet_recv(users[i].telnet, buffer, rs);
-				} else if (rs == 0) {
-					close(users[i].sock);
-					if (users[i].name != 0) {
-						_message(users[i].name, "** HAS DISCONNECTED **");
-						free(users[i].name);
-						users[i].name = 0;
-					}
-					telnet_free(users[i].telnet);
-					users[i].sock = -1;
-					break;
-				} else if (errno != EINTR) {
-					fprintf(stderr, "recv(client) failed: %s\n",
-							strerror(errno));
-					exit(1);
-				}
-			}
+		if (task_create ("telent", 30, 3, 48 * 1024, telnet_task, NULL, (void *)rs, 
+					&hthread) == 0) {
+			printf ("Task creation failed : %s\n", "telnet");
 		}
 	}
-
 	/* not that we can reach this, but GCC will cry if it's not here */
 	return 0;
 }
+
 #endif
 int telnet_init (void)
 {
@@ -734,4 +649,3 @@ int telnet_init (void)
 		return -1;
 	}
 }
-

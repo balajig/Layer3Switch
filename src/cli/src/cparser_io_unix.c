@@ -175,15 +175,7 @@ cparser_telnet_unix_printc (const cparser_t *parser, const char ch)
     ssize_t wsize;
     char buf[4];
     assert(parser);
-#if 1
-    buf[0] = ch;
-    buf[1] = '\0';
-    buf[2] = '\n';
-    buf[3] = '\r';
-    wsize = lwip_write (parser->cfg.fd, buf, 4);
-#else
-    wsize = lwip_write (parser->cfg.fd, &ch, 1);
-#endif
+    wsize = telnet_prints (parser->session_data, &ch, 1);
 }
 
 static void
@@ -192,7 +184,7 @@ cparser_telent_unix_prints (const cparser_t *parser, const char *s)
     ssize_t wsize;
     assert(parser);
     if (s) {
-        wsize = lwip_write(parser->cfg.fd, s, strlen(s));
+        wsize = telnet_prints (parser->session_data, s, strlen(s));
     }
 }
 void

@@ -55,8 +55,8 @@ cparser_result_t cparser_cmd_show_dhcp_client_lease(cparser_context_t *context)
 {
 	int i = 0;
 
-	printf ("DHCP Client lease information\n");
-	printf ("-----------------------------\n");	
+	cli_printf ("DHCP Client lease information\n");
+	cli_printf ("-----------------------------\n");	
 
 	while (i < get_max_ports ()) {
 	
@@ -67,29 +67,29 @@ cparser_result_t cparser_cmd_show_dhcp_client_lease(cparser_context_t *context)
 			uint8_t temp[4];
 			uint8_t *addr = &temp[0];
 
-			printf  ("%s :\n", netif->ifDescr);
+			cli_printf  ("%s :\n", netif->ifDescr);
 
-			printf  ("\tInternet address is ");
+			cli_printf  ("\tInternet address is ");
 			uint32_2_ipstring (p->offered_ip_addr.addr, addr);
-			printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
+			cli_printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
 
-			printf  (", subnet mask is ");
+			cli_printf  (", subnet mask is ");
 			uint32_2_ipstring (p->offered_sn_mask.addr, addr);
-			printf("%u.%u.%u.%u\n", addr[0], addr[1],addr[2],addr[3]);
+			cli_printf("%u.%u.%u.%u\n", addr[0], addr[1],addr[2],addr[3]);
 
-			printf ("\tdefault-gateway addr: ");
+			cli_printf ("\tdefault-gateway addr: ");
 			uint32_2_ipstring (p->offered_gw_addr.addr, addr);
-			printf("%u.%u.%u.%u\n", addr[0], addr[1],addr[2],addr[3]);
+			cli_printf("%u.%u.%u.%u\n", addr[0], addr[1],addr[2],addr[3]);
 
-			printf ("\tDHCP Lease server: ");
+			cli_printf ("\tDHCP Lease server: ");
 			uint32_2_ipstring (p->server_ip_addr.addr, addr);
-			printf("%u.%u.%u.%u\n", addr[0], addr[1],addr[2],addr[3]);
-			printf ("\tRetries: %d\n", p->tries);
-		        printf ("\tLease: %u secs, Renewal: %u secs, Rebind: %u secs\n",
+			cli_printf("%u.%u.%u.%u\n", addr[0], addr[1],addr[2],addr[3]);
+			cli_printf ("\tRetries: %d\n", p->tries);
+		        cli_printf ("\tLease: %u secs, Renewal: %u secs, Rebind: %u secs\n",
 				p->offered_t0_lease, p->offered_t1_renew, p->offered_t2_rebind);
 
 			if (netif->hostname[0])
-				printf ("\tHostname: %s\n", netif->hostname);
+				cli_printf ("\tHostname: %s\n", netif->hostname);
 		}
 		i++;
 	}
@@ -107,6 +107,6 @@ cparser_result_t cparser_cmd_if_ip_dhcp_client_lease_days_hours_mins(cparser_con
     int32_t *hours_ptr,
     int32_t *mins_ptr)
 {
-	printf ("Not Implemented\n");
+	cli_printf ("Not Implemented\n");
 	return CPARSER_OK;
 }

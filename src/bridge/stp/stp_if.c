@@ -185,13 +185,13 @@ int stp_set_bridge_hello_time (int hello , uint16_t vlan_id)
 
 	if (!br)	
 	{
-		printf("Spanning tree not enabled\n");
+		cli_printf("Spanning tree not enabled\n");
 		return -1;
 	}
 
 	if (hello < STP_MIN_HELLO_TIME || hello > STP_MAX_HELLO_TIME)
 	{
-		printf ("Invaild Spanning tree Hello time. Valid range %d-%d\n",
+		cli_printf ("Invaild Spanning tree Hello time. Valid range %d-%d\n",
 			STP_MIN_HELLO_TIME, STP_MAX_HELLO_TIME);
 		return -1;
 	}
@@ -213,13 +213,13 @@ int stp_set_bridge_forward_delay (int fwd_dly , uint16_t vlan_id)
 
 	if (!br)	
 	{
-		printf("Spanning tree not enabled\n");
+		cli_printf("Spanning tree not enabled\n");
 		return -1;
 	}
 
 	if (fwd_dly < STP_MIN_FORWARD_DELAY || fwd_dly > STP_MAX_FORWARD_DELAY)
 	{
-		printf ("Invaild Spanning tree Forward Delay. Valid range %d-%d\n",
+		cli_printf ("Invaild Spanning tree Forward Delay. Valid range %d-%d\n",
 			STP_MIN_FORWARD_DELAY, STP_MAX_FORWARD_DELAY);
 		return -1;
 	}
@@ -241,13 +241,13 @@ int stp_set_bridge_max_age (int max_age , uint16_t vlan_id)
 
 	if (!br)	
 	{
-		printf("Spanning tree not enabled\n");
+		cli_printf("Spanning tree not enabled\n");
 		return -1;
 	}
 
 	if (max_age < STP_MIN_MAX_AGE || max_age > STP_MAX_MAX_AGE)
 	{
-		printf ("Invaild Spanning tree max age. Valid range %d-%d\n",
+		cli_printf ("Invaild Spanning tree max age. Valid range %d-%d\n",
 			STP_MIN_MAX_AGE, STP_MAX_MAX_AGE);
 		return -1;
 	}
@@ -268,7 +268,7 @@ int stp_set_bridge_times (int fdly, int maxage, int htime, uint16_t vlan_id)
 
         if (!br)
         {
-                printf("Spanning tree not enabled\n");
+                cli_printf("Spanning tree not enabled\n");
                 return -1;
         }
 

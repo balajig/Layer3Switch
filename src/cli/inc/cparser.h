@@ -856,6 +856,8 @@ struct cparser_ {
     cparser_result_t  last_rc;
     /** End node of the command. NULL if the command is invalid. */
     cparser_node_t    *last_end_node;
+
+    void              *session_data;
 }__attribute__ ((__packed__));
 
 typedef cparser_result_t (*cparser_glue_fn)(cparser_t *parser);

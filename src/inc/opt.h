@@ -1420,7 +1420,7 @@
  * If LWIP_SO_RCVBUF is used, this is the default value for recv_bufsize.
  */
 #ifndef RECV_BUFSIZE_DEFAULT
-#define RECV_BUFSIZE_DEFAULT            8192
+#define RECV_BUFSIZE_DEFAULT            0x8000
 #endif
 
 /**

@@ -49,14 +49,14 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_hello_time_htimesecs_forw
 
         if (*htimesecs_ptr < BSTP_MIN_HELLO_TIME || *htimesecs_ptr > BSTP_MAX_HELLO_TIME)
         {
-                printf ("Invaild Rapid Spanning tree Hello time. Valid range %d-%d\n",
+                cli_printf ("Invaild Rapid Spanning tree Hello time. Valid range %d-%d\n",
                         BSTP_MIN_HELLO_TIME, BSTP_MAX_HELLO_TIME);
 		return CPARSER_NOT_OK;
         }
 
 	if (fdlysecs_ptr) {
 		if (*fdlysecs_ptr < BSTP_MIN_FORWARD_DELAY || *fdlysecs_ptr > BSTP_MAX_FORWARD_DELAY) {
-			printf ("Invaild Rapid Spanning tree Forward Delay. Valid range %d-%d\n",
+			cli_printf ("Invaild Rapid Spanning tree Forward Delay. Valid range %d-%d\n",
 				BSTP_MIN_FORWARD_DELAY, BSTP_MAX_FORWARD_DELAY);
 			return CPARSER_NOT_OK;
 		}
@@ -64,7 +64,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_hello_time_htimesecs_forw
 	
 	if (maxagesecs_ptr) {
 		if (*maxagesecs_ptr < BSTP_MIN_MAX_AGE || *maxagesecs_ptr > BSTP_MAX_MAX_AGE) {
-			printf ("Invaild Rapid Spanning tree max age. Valid range %d-%d\n",
+			cli_printf ("Invaild Rapid Spanning tree max age. Valid range %d-%d\n",
 				BSTP_MIN_MAX_AGE, BSTP_MAX_MAX_AGE);
 			return CPARSER_NOT_OK;
 		}
@@ -90,7 +90,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_forward_delay_fdlysecs_ma
 	}
 
 	if (*fdlysecs_ptr < BSTP_MIN_FORWARD_DELAY || *fdlysecs_ptr > BSTP_MAX_FORWARD_DELAY) {
-		printf ("Invaild Rapid Spanning tree Forward Delay. Valid range %d-%d\n",
+		cli_printf ("Invaild Rapid Spanning tree Forward Delay. Valid range %d-%d\n",
 			BSTP_MIN_FORWARD_DELAY, BSTP_MAX_FORWARD_DELAY);
 		return CPARSER_NOT_OK;
 	}
@@ -99,7 +99,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_forward_delay_fdlysecs_ma
 	if (htimesecs_ptr) {
 		if (*htimesecs_ptr < BSTP_MIN_HELLO_TIME || *htimesecs_ptr > BSTP_MAX_HELLO_TIME)
 		{
-			printf ("Invaild Rapid Spanning tree Hello time. Valid range %d-%d\n",
+			cli_printf ("Invaild Rapid Spanning tree Hello time. Valid range %d-%d\n",
 					BSTP_MIN_HELLO_TIME, BSTP_MAX_HELLO_TIME);
 			return CPARSER_NOT_OK;
 		}
@@ -108,7 +108,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_forward_delay_fdlysecs_ma
 	
 	if (maxagesecs_ptr) {
 		if (*maxagesecs_ptr < BSTP_MIN_MAX_AGE || *maxagesecs_ptr > BSTP_MAX_MAX_AGE) {
-			printf ("Invaild Rapid Spanning tree max age. Valid range %d-%d\n",
+			cli_printf ("Invaild Rapid Spanning tree max age. Valid range %d-%d\n",
 				BSTP_MIN_MAX_AGE, BSTP_MAX_MAX_AGE);
 			return CPARSER_NOT_OK;
 		}
@@ -133,14 +133,14 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_max_age_maxagesecs_forwar
         }
 
 	if (*maxagesecs_ptr < BSTP_MIN_MAX_AGE || *maxagesecs_ptr > BSTP_MAX_MAX_AGE)         {
-		printf ("Invaild Rapid Spanning tree max age. Valid range %d-%d\n",
+		cli_printf ("Invaild Rapid Spanning tree max age. Valid range %d-%d\n",
 				BSTP_MIN_MAX_AGE, BSTP_MAX_MAX_AGE);
 		return CPARSER_NOT_OK;
 	}
 
         if (fdlysecs_ptr) {
                 if (*fdlysecs_ptr < BSTP_MIN_FORWARD_DELAY || *fdlysecs_ptr > BSTP_MAX_FORWARD_DELAY) {
-                        printf ("Invaild Rapid Spanning tree Forward Delay. Valid range %d-%d\n",
+                        cli_printf ("Invaild Rapid Spanning tree Forward Delay. Valid range %d-%d\n",
                                 BSTP_MIN_FORWARD_DELAY, BSTP_MAX_FORWARD_DELAY);
                         return CPARSER_NOT_OK;
                 }
@@ -149,7 +149,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_max_age_maxagesecs_forwar
         if (htimesecs_ptr) {
                 if (*htimesecs_ptr < BSTP_MIN_HELLO_TIME || *htimesecs_ptr > BSTP_MAX_HELLO_TIME)
                 {
-                        printf ("Invaild Rapid Spanning tree Hello time. Valid range %d-%d\n",
+                        cli_printf ("Invaild Rapid Spanning tree Hello time. Valid range %d-%d\n",
                                         BSTP_MIN_HELLO_TIME, BSTP_MAX_HELLO_TIME);
                         return CPARSER_NOT_OK;
                 }
@@ -194,13 +194,13 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_admin_ed
 
 	if (!pinst)
 	{
-		printf ("Rapid spanning not enabled\n");
+		cli_printf ("Rapid spanning not enabled\n");
 		return CPARSER_NOT_OK;
 	}
 
 	if (!(p = rstp_get_port_entry (pinst, *portnum_ptr)))
 	{
-		printf ("Invalid Port Number\n");
+		cli_printf ("Invalid Port Number\n");
 		return CPARSER_NOT_OK;
 	}
 
@@ -218,13 +218,13 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_admin_pt
 
 	if (!pinst)
 	{
-		printf ("Rapid spanning not enabled\n");
+		cli_printf ("Rapid spanning not enabled\n");
 		return CPARSER_NOT_OK;
 	}
 
 	if (!(p = rstp_get_port_entry (pinst, *portnum_ptr)))
 	{
-		printf ("Invalid Port Number\n");
+		cli_printf ("Invalid Port Number\n");
 		return CPARSER_NOT_OK;
 	}
 
@@ -247,37 +247,37 @@ int show_spanning_tree_8021w (void)
 			uint8_t              mac[6];
 			int                 is_root = rstp_is_root_bridge (pstp_inst);
 
-			printf ("\n  Rapid Spanning tree enabled protocol ieee on\n");
-			printf ("  ------------------------------------------ \n\n");
+			cli_printf ("\n  Rapid Spanning tree enabled protocol ieee on\n");
+			cli_printf ("  ------------------------------------------ \n\n");
 
-			printf ("  VLAN  : %d\n\n", pstp_inst->vlan_id);
+			cli_printf ("  VLAN  : %d\n\n", pstp_inst->vlan_id);
 
-			printf ("  Root ID\n\tPriority    %d\n",
+			cli_printf ("  Root ID\n\tPriority    %d\n",
 					(uint32_t)(pstp_inst->bs_root_pv.pv_root_id >> 48));
 
 			PV2ADDR(pstp_inst->bs_root_pv.pv_root_id, mac);
 
-			printf ("\tAddress     %02x:%02x:%02x:%02x:%02x:%02x\n",
+			cli_printf ("\tAddress     %02x:%02x:%02x:%02x:%02x:%02x\n",
 					mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
 			if (is_root)
 			{
-				printf ("\tThis bridge is the root\n");
+				cli_printf ("\tThis bridge is the root\n");
 			}
 
-			printf
+			cli_printf
 				("\tHello Time  %d sec  Max Age %d sec  Forward Delay %d sec\n\n",
 				 pstp_inst->bs_root_htime, pstp_inst->bs_root_max_age,
 				 pstp_inst->bs_root_fdelay);
 
-			printf ("  Bridge ID\n\tPriority    %d\n", (uint32_t)(pstp_inst->bs_bridge_pv.pv_root_id >> 48));
+			cli_printf ("  Bridge ID\n\tPriority    %d\n", (uint32_t)(pstp_inst->bs_bridge_pv.pv_root_id >> 48));
 
 			PV2ADDR(pstp_inst->bs_bridge_pv.pv_root_id, mac);
 
-			printf ("\tAddress     %02x:%02x:%02x:%02x:%02x:%02x\n",
+			cli_printf ("\tAddress     %02x:%02x:%02x:%02x:%02x:%02x\n",
 					mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-			printf
+			cli_printf
 				("\tHello Time  %d sec  Max Age %d sec  Forward Delay %d sec\n\n",
 				 pstp_inst->bs_bridge_htime,
 				 pstp_inst->bs_bridge_max_age,
@@ -286,7 +286,7 @@ int show_spanning_tree_8021w (void)
 #if 0
 			if (!is_root)
 			{
-				printf ("\n\tRoot Port : %d\n", pstp_inst->root_port);
+				cli_printf ("\n\tRoot Port : %d\n", pstp_inst->root_port);
 			}
 #endif
 			if (!list_empty(&pstp_inst->bs_bplist))
@@ -295,13 +295,13 @@ int show_spanning_tree_8021w (void)
 				const char     *role[] = { "DISABLED", "ROOT", "DESIGNATED","ALTERNATE", "BACKUP"};
 				const char     *state[] = { "DISABLED", "LISTENING", "LEARNING","FORWARDING","BLOCKING","DISCARDING"};
 
-				printf
+				cli_printf
 				     ("\nPort     Cost       Role        State           Bridge Id    \n");
-				printf
+				cli_printf
 					("----   ------     --------    ----------     -----------------  \n");
 				list_for_each_entry(p, &pstp_inst->bs_bplist, bp_next) {
 					PV2ADDR(p->bp_desg_pv.pv_dbridge_id, mac);
-					printf
+					cli_printf
 						("%2d   %8d   %10s    %10s     %02x:%02x:%02x:%02x:%02x:%02x\n",
 						 p->bp_ifp, 20000, role[p->bp_role], state[p->bp_state],mac[0], mac[1],
 						 mac[2], mac[3], mac[4], mac[5]);
@@ -310,8 +310,8 @@ int show_spanning_tree_8021w (void)
 		}
 		else
 		{
-			printf ("\n Rapid Spanning tree not enabled on");
-			printf (" VLAN  : %d\n\n", pstp_inst->vlan_id);
+			cli_printf ("\n Rapid Spanning tree not enabled on");
+			cli_printf (" VLAN  : %d\n\n", pstp_inst->vlan_id);
 		}
 	}
 
@@ -335,19 +335,19 @@ int set_spanning_8021w_port_path_cost (uint32_t path_cost, int portnum)
 
 	if (!pinst)
 	{
-		printf ("Rapid spanning not enabled\n");
+		cli_printf ("Rapid spanning not enabled\n");
 		return -1;
 	}
 
 	if (!(p = rstp_get_port_entry (pinst, portnum)))
 	{
-		printf ("Invalid Port Number\n");
+		cli_printf ("Invalid Port Number\n");
 		return -1;
 	}
 
 	if (path_cost > BSTP_MAX_PATH_COST)
 	{
-		printf ("Invaild Rapid spanning tree port path-cost. Valid range 0-%d\n", 
+		cli_printf ("Invaild Rapid spanning tree port path-cost. Valid range 0-%d\n", 
 			BSTP_MAX_PATH_COST);
 		return -1;
 	}
@@ -362,19 +362,19 @@ int set_spanning_8021w_port_prio (uint32_t prio, int portnum)
 
 	if (!pinst)
 	{
-		printf ("Rapid spanning not enabled\n");
+		cli_printf ("Rapid spanning not enabled\n");
 		return -1;
 	}
 
 	if (!(p = rstp_get_port_entry (pinst, portnum)))
 	{
-		printf ("Invalid Port Number\n");
+		cli_printf ("Invalid Port Number\n");
 		return -1;
 	}
 
 	if (prio > BSTP_MAX_PORT_PRIORITY)
 	{
-		printf ("Invaild spanning tree port priority. Valid Range 0-240\n");
+		cli_printf ("Invaild spanning tree port priority. Valid Range 0-240\n");
 		return -1;
 	}
 

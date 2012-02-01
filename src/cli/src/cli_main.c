@@ -35,6 +35,7 @@ struct cli {
 	char prmpt_prev[MAX_PMP_LEN];
 	char username[MAX_USER_NAME];
 	cparser_t parser;
+	void *telnet;
 }__attribute__ ((__packed__));
 
 
@@ -155,7 +156,7 @@ int cli_get_cli_session_id (void)
 
 }
 
-int cli_telnet_session_init (char *prmt, int fd)
+int cli_telnet_session_init (char *prmt, int fd, void *data)
 {
 	struct cli *cli_session = NULL;
 
@@ -173,6 +174,7 @@ int cli_telnet_session_init (char *prmt, int fd)
 		cli_session->parser.cfg.flags = 0;
 		cparser_telnet_io_config (&cli_session->parser);
 		cli_session->parser.cfg.fd = fd;
+		cli_session->parser.session_data = data;
 		return cli_session->session;
 	}
 	return -1;
@@ -292,7 +294,7 @@ void write_string (const char *str)
 		write (this_cli[this_session].parser.cfg.fd , str, strlen(str));
 		fflush (stdout);
 	} else {
-		lwip_write (this_cli[this_session].parser.cfg.fd , str, strlen(str) + 2);
+		telnet_prints (this_cli[this_session].parser.session_data , str, strlen(str));
 	}
 	return;
 }
@@ -539,10 +541,6 @@ int cli_printf  (char *fmt, ...)
 		va_end(ap);
 		/* If that worked, return the string. */
 		if (n > -1 && n < size) {
-#if 1
-			p[n + 1] = '\n';
-			p[n + 2] = '\r';
-#endif
 			write_string (p);
 			free (p);
 			return 0;
@@ -552,7 +550,7 @@ int cli_printf  (char *fmt, ...)
 			size = n+1; /* precisely what is needed */
 		else           /* glibc 2.0 */
 			size *= 2;  /* twice the old size */
-		if ((np = realloc (p, size + 2)) == NULL) {
+		if ((np = realloc (p, size)) == NULL) {
 			free(p);
 			return NULL;
 		} else {

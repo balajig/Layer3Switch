@@ -3074,7 +3074,7 @@ show_ip_route (struct route_node *rn, struct rib *rib)
       if (nexthop == rib->nexthop)
 	{
 	  /* Prefix information. */
-	  fprintf (stdout, "%c%c%c %s/%d",
+	  cli_printf ("%c%c%c %s/%d",
 			 zebra_route_char (rib->type),
 			 CHECK_FLAG (rib->flags, ZEBRA_FLAG_SELECTED)
 			 ? '>' : ' ',
@@ -3086,7 +3086,7 @@ show_ip_route (struct route_node *rn, struct rib *rib)
 	  /* Distance and metric display. */
 	  if (rib->type != ZEBRA_ROUTE_CONNECT 
 	      && rib->type != ZEBRA_ROUTE_KERNEL)
-	     fprintf (stdout, " [%d/%d]", rib->distance,
+	     cli_printf (" [%d/%d]", rib->distance,
 			    rib->metric);
 	}
       else
@@ -3099,39 +3099,39 @@ show_ip_route (struct route_node *rn, struct rib *rib)
 	{
 	case NEXTHOP_TYPE_IPV4:
 	case NEXTHOP_TYPE_IPV4_IFINDEX:
-	  fprintf (stdout, " via %s", inet_ntoa (nexthop->gate.ipv4));
+	  cli_printf (" via %s", inet_ntoa (nexthop->gate.ipv4));
 	  if (nexthop->ifindex)
-	    fprintf (stdout, ", %s", ifindex2ifname (nexthop->ifindex));
+	    cli_printf (", %s", ifindex2ifname (nexthop->ifindex));
 	  break;
 	case NEXTHOP_TYPE_IFINDEX:
-	  fprintf (stdout, " is directly connected, %s",
+	  cli_printf (" is directly connected, %s",
 		   ifindex2ifname (nexthop->ifindex));
 	  break;
 	case NEXTHOP_TYPE_IFNAME:
-	  fprintf (stdout, " is directly connected, %s", nexthop->ifname);
+	  cli_printf (" is directly connected, %s", nexthop->ifname);
 	  break;
 	case NEXTHOP_TYPE_BLACKHOLE:
-	  fprintf (stdout, " is directly connected, Null0");
+	  cli_printf (" is directly connected, Null0");
 	  break;
 	default:
 	  break;
 	}
       if (! CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_ACTIVE))
-	fprintf (stdout, " inactive");
+	cli_printf (" inactive");
 
       if (CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_RECURSIVE))
 	{
-	  fprintf (stdout, " (recursive");
+	  cli_printf (" (recursive");
 		
 	  switch (nexthop->rtype)
 	    {
 	    case NEXTHOP_TYPE_IPV4:
 	    case NEXTHOP_TYPE_IPV4_IFINDEX:
-	      fprintf (stdout, " via %s)", inet_ntoa (nexthop->rgate.ipv4));
+	      cli_printf (" via %s)", inet_ntoa (nexthop->rgate.ipv4));
 	      break;
 	    case NEXTHOP_TYPE_IFINDEX:
 	    case NEXTHOP_TYPE_IFNAME:
-	      fprintf (stdout, " is directly connected, %s)",
+	      cli_printf (" is directly connected, %s)",
 		       ifindex2ifname (nexthop->rifindex));
 	      break;
 	    default:
@@ -3146,7 +3146,7 @@ show_ip_route (struct route_node *rn, struct rib *rib)
             if (nexthop->src.ipv4.s_addr)
               {
 		if (inet_ntop(AF_INET, &nexthop->src.ipv4, buf, sizeof buf))
-                  fprintf (stdout, ", src %s", buf);
+                  cli_printf (", src %s", buf);
               }
             break;
 #ifdef HAVE_IPV6
@@ -3165,9 +3165,9 @@ show_ip_route (struct route_node *rn, struct rib *rib)
         }
 
       if (CHECK_FLAG (rib->flags, ZEBRA_FLAG_BLACKHOLE))
-               fprintf (stdout, ", bh");
+               cli_printf (", bh");
       if (CHECK_FLAG (rib->flags, ZEBRA_FLAG_REJECT))
-               fprintf (stdout, ", rej");
+               cli_printf (", rej");
 
       if (rib->type == ZEBRA_ROUTE_RIP
 	  || rib->type == ZEBRA_ROUTE_OSPF
@@ -3185,16 +3185,16 @@ show_ip_route (struct route_node *rn, struct rib *rib)
 #define ONE_WEEK_SECOND 60*60*24*7
 
 	  if (uptime < ONE_DAY_SECOND)
-	    fprintf (stdout,  ", %02d:%02d:%02d", 
+	    cli_printf ( ", %02d:%02d:%02d", 
 		     tm->tm_hour, tm->tm_min, tm->tm_sec);
 	  else if (uptime < ONE_WEEK_SECOND)
-	    fprintf (stdout, ", %dd%02dh%02dm", 
+	    cli_printf (", %dd%02dh%02dm", 
 		     tm->tm_yday, tm->tm_hour, tm->tm_min);
 	  else
-	    fprintf (stdout, ", %02dw%dd%02dh", 
+	    cli_printf (", %02dw%dd%02dh", 
 		     tm->tm_yday/7,
 		     tm->tm_yday - ((tm->tm_yday/7) * 7), tm->tm_hour);
 	}
-      fprintf (stdout, "\n");
+      cli_printf ("\n");
     }
 }

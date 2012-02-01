@@ -20,9 +20,9 @@
 cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context)
 {
 	int i = 0;
-	printf ("The default DNS domain name is: openswitch\n");
-        printf ("%-20s    %-16s\n", "DNS name server", "status");
-	printf ("%-20s    %-16s\n","---------------","-------");
+	cli_printf ("The default DNS domain name is: openswitch\n");
+        cli_printf ("%-20s    %-16s\n", "DNS name server", "status");
+	cli_printf ("%-20s    %-16s\n","---------------","-------");
 
 	while (i < DNS_MAX_SERVERS) {
 		if (dns_servers[i].status) {
@@ -30,7 +30,7 @@ cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context)
 			uint8_t  saddr[16];
 			uint32_2_ipstring (dns_servers[i].addr.addr, &addr);
 			sprintf (saddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
-			printf ("%-20s    %-16s\n", saddr, !i? "primary":"");
+			cli_printf ("%-20s    %-16s\n", saddr, !i? "primary":"");
 		}
 		i++;
 	}
@@ -40,7 +40,7 @@ cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context)
 
 cparser_result_t cparser_cmd_config_ip_dns_domain_name_domainname(cparser_context_t *context, char **domainname_ptr)
 {
-	printf ("Not Implemented\n");
+	cli_printf ("Not Implemented\n");
 	return CPARSER_OK;
 }
 

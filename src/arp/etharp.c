@@ -1577,16 +1577,16 @@ int etharp_init (void)
 int show_arp_entries (void)
 {
 	int i = 0;
-	printf ("ARP Entries\n");
-	printf ("-----------\n");
+	cli_printf ("ARP Entries\n");
+	cli_printf ("-----------\n");
 	for (i = 0; i < ARP_TABLE_SIZE; ++i)
 	{
 		u8_t                state = arp_table[i].state;
 		if (state != ETHARP_STATE_EMPTY) {
 			uint8_t addr[4];
 		 	uint32_2_ipstring (arp_table[i].ipaddr.addr, &addr);
-			printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
-			printf(" at %02x:%02x:%02x:%02x:%02x:%02x on %s\n",
+			cli_printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
+			cli_printf(" at %02x:%02x:%02x:%02x:%02x:%02x on %s\n",
 				arp_table[i].ethaddr.addr[0],arp_table[i].ethaddr.addr[1],
 				arp_table[i].ethaddr.addr[2],arp_table[i].ethaddr.addr[3],
 				arp_table[i].ethaddr.addr[4],arp_table[i].ethaddr.addr[5],

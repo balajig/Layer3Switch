@@ -176,7 +176,7 @@ void display_fdb_entry (void *data)
 
 	mac = p->mac_addr.addr;
 
-        printf ("  %-4d    %02x:%02x:%02x:%02x:%02x:%02x    %-10s    %-lu.%-2lu\n", p->port,
+        cli_printf ("  %-4d    %02x:%02x:%02x:%02x:%02x:%02x    %-10s    %-lu.%-2lu\n", p->port,
 		mac[0],mac[1],mac[2],mac[3],mac[4],mac[5], p->is_static?"static": "dynamic",
 		time / tm_get_ticks_per_second (), time % tm_get_ticks_per_second());
 
@@ -184,13 +184,13 @@ void display_fdb_entry (void *data)
 
 int show_mac_table (void)
 {
-	printf ("  %-6s   %-10s         %-10s   %-10s\n",
+	cli_printf ("  %-6s   %-10s         %-10s   %-10s\n",
 	        "port", "mac address", "type", "aging(secs)");
-	printf ("  %-6s   %-10s         %-10s   %-10s\n",
+	cli_printf ("  %-6s   %-10s         %-10s   %-10s\n",
 		"----", "-----------", "------","-------");
 	hash_walk (fdb_hash_table, display_fdb_entry); 
 
-	printf ("Mac Entries Dropped: %d\n", tbridge.dot1dTpLearnedEntryDiscards);
+	cli_printf ("Mac Entries Dropped: %d\n", tbridge.dot1dTpLearnedEntryDiscards);
 	
 	return 0;
 }
