@@ -640,8 +640,6 @@ void * telnetd (void *arg) {
 		return 1;
 	}
 
-	printf("LISTENING ON PORT %d\n", listen_port);
-
 	/* initialize listening descriptors */
 	pfd[MAX_USERS].fd = listen_sock;
 	pfd[MAX_USERS].events = POLLIN;
@@ -676,8 +674,6 @@ void * telnetd (void *arg) {
 				return 1;
 			}
 
-			printf("Connection received.\n");
-
 			/* find a free user */
 			for (i = 0; i != MAX_USERS; ++i)
 				if (users[i].sock == -1)
@@ -707,7 +703,6 @@ void * telnetd (void *arg) {
 				if ((rs = recv(users[i].sock, buffer, sizeof(buffer), 0)) > 0) {
 					telnet_recv(users[i].telnet, buffer, rs);
 				} else if (rs == 0) {
-					printf("Connection closed.\n");
 					close(users[i].sock);
 					if (users[i].name != 0) {
 						_message(users[i].name, "** HAS DISCONNECTED **");
