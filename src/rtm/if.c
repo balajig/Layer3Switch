@@ -446,6 +446,15 @@ int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask,
 #endif
 		return 0;
 }
+
+int connected_route_delete (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags) 
+{
+		int masklen = u32ip_masklen (*mask);
+		uint32_t  bcastaddr = ipv4_broadcast_addr(*addr, masklen);
+		if(connected_delete_ipv4 (ifp, ZEBRA_IFA_PEER, addr, masklen, &bcastaddr, NULL))
+		  return 1;
+		return 0;
+}
 
 #if 0 /* this route_table of struct connected's is unused
        * however, it would be good to use a route_table rather than
