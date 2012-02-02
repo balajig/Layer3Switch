@@ -195,7 +195,7 @@ connected_add_ipv4 (struct interface *ifp, int flags, uint32_t *host_addr,
   struct connected *ifc;
 
   /* Make connected structure. */
-  ifc = connected_new ();
+  ifc = XCALLOC (MTYPE_CONNECTED, sizeof (struct connected));
   ifc->ifp = ifp;
   ifc->flags = flags;
 
@@ -221,7 +221,7 @@ connected_add_ipv4 (struct interface *ifp, int flags, uint32_t *host_addr,
 	  if (IPV4_ADDR_SAME(host_addr,&bcast_addr))
 	    warn("warning: interface %s has same local and peer "
 		      "address , routing protocols may malfunction",
-		      ifp->ifDescr);//,inet_ntoa(*addr));
+		      ifp->ifDescr,inet_ntoa(p->prefix.s_addr));
         }
       else
         {
