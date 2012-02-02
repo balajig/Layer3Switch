@@ -293,7 +293,7 @@ connected_down_ipv4 (struct interface *ifp, struct connected *ifc)
 }
 
 /* Delete connected IPv4 route to the interface. */
-void
+int
 connected_delete_ipv4 (struct interface *ifp, int flags, struct in_addr *addr,
 		       u_char prefixlen, struct in_addr *broad)
 {
@@ -307,11 +307,13 @@ connected_delete_ipv4 (struct interface *ifp, int flags, struct in_addr *addr,
 
   ifc = connected_check (ifp, (struct prefix *) &p);
   if (! ifc)
-    return;
+    return 1;
     
   connected_withdraw (ifc);
 
   rib_update();
+
+  return 0;
 }
 
 #ifdef HAVE_IPV6
