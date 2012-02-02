@@ -90,6 +90,9 @@ disable
 //Configures IP address on Interface
 ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
 
+//Removes the IP address on Interface
+no ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
+
 #include "../clicmds/dhcpclient.cli"
 
 //Exit from the mode
