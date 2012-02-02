@@ -1351,6 +1351,7 @@ int telnet_prints (telnet_t *telnet, const char *buffer, int len) {
     static const char CRNUL[] = { '\r', '\0' };
 	char *output = buffer;
 	int i, l;
+#if 0
 	/* send */
 	for (l = i = 0; i != len; ++i) {
 		/* special characters */
@@ -1377,7 +1378,8 @@ int telnet_prints (telnet_t *telnet, const char *buffer, int len) {
 	if (i != l) {
 		_send(telnet, output + l, i - l);
 	}
-
+#endif
+	telnet_send(telnet, output, len);
 	/* free allocated memory, if any */
 	if (output != buffer) {
 		free(output);

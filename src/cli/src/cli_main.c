@@ -204,7 +204,9 @@ int cli_start_session (int session)
         cparser_init(&this_cli[session].parser.cfg, &this_cli[session].parser);
 
 	this_cli[session].parser.cfg.io_init(&this_cli[session].parser);
+
 	//show_login_prompt ();
+
 	cparser_print_prompt(&this_cli[session].parser);
 
 	this_cli[session].parser.done = 0;
@@ -430,7 +432,7 @@ char read_input ()
 		}
 		return c;
 	} else {
-		while (lwip_read (this_cli[this_session].parser.cfg.fd , &c, 1) == -1)
+		while (read (this_cli[this_session].parser.cfg.fd , &c, 1) == -1)
 			continue;
 		return c;
 	}

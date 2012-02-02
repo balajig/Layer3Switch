@@ -188,16 +188,16 @@ int show_mem_pool (void)
         struct list_head *p = NULL;
         struct mem_info  *pmem = NULL;
 
-        printf ("Memory Pool Information\n");
-        printf (" %-8s %-8s  %-10s  %-10s   %-10s  %-10s  %-20s\n", 
+        cli_printf ("Memory Pool Information\n");
+        cli_printf (" %-8s %-8s  %-10s  %-10s   %-10s  %-10s  %-20s\n", 
 		"Pool ID", "Pool Name", "Total Blks","Used Blks", "Free Blks", "Size(Bytes)", "Start Addr");
-	printf (" %-8s %-8s  %-10s  %-10s   %-10s  %-10s  %-20s\n", 
+	cli_printf (" %-8s %-8s  %-10s  %-10s   %-10s  %-10s  %-20s\n", 
 		"-------", "---------", "-----------", "---------", "--------", "---------", "-----------");
         list_for_each (p, head) 
 	{
                 pmem = list_entry (p, struct mem_info, n) ;
 		sync_lock (&pmem->lock);
-	        printf ("   %-8d %-8s  %-10d    %-10d %-10d  %-10d  %-20p\n", pmem->memid,
+	        cli_printf ("   %-8d %-8s  %-10d    %-10d %-10d  %-10d  %-20p\n", pmem->memid,
                         pmem->pool_name,pmem->nblks, pmem->useblks, pmem->fblks, 
 			pmem->size - sizeof (uint8_t), pmem->saddr);
 		sync_unlock (&pmem->lock);

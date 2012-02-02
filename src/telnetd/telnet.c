@@ -511,7 +511,7 @@ static void _input(struct telnet_session_t *user, const char *buffer,
 		unsigned int size) {
 	unsigned int i;
 	for (i = 0; i != size; ++i) {
-			if (buffer[i] != '\r')
+		if (buffer[i] != '\r' && (int)buffer[i] != 0)
 			cparser_feed (1, (char)buffer[i]);
 	}
 }
@@ -566,12 +566,12 @@ void telnet_task (void *arg)
 
 	cli_start_session (session);
 
-	telnet_printf(telnet, "telnet@OpenSwitch# ");
+	//telnet_printf(telnet, "telnet@OpenSwitch# ");
 
 	while (1) {
 		memset (buffer, 0, sizeof(buffer));
-		if ((rs = recv(s, buffer, sizeof(buffer), 0)) > 0) {
-			telnet_recv(telnet, buffer, s);
+		if ((rs = recv(s, buffer, 1, 0)) > 0) {
+			telnet_recv(telnet, buffer, rs);
 		} else if (rs == 0) {
 			close(s);
 			telnet_free(telnet);
