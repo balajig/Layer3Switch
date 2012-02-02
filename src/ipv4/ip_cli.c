@@ -34,6 +34,20 @@ cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
 	return CPARSER_NOT_OK;
 }
 
+cparser_result_t cparser_cmd_if_no_ip_address_addr_mask(cparser_context_t *context,
+    uint32_t *addr_ptr,
+    uint32_t *mask_ptr)
+{
+	int port = cli_get_port ();
+
+	*addr_ptr = ntohl (*addr_ptr);
+	*mask_ptr = ntohl (*mask_ptr);
+
+	if(!connected_route_delete (IF_INFO (port), addr_ptr, mask_ptr, 0))
+		return CPARSER_OK;
+  	return CPARSER_NOT_OK;
+}
+
 
 cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context)
 {
