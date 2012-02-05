@@ -10,10 +10,6 @@
 
 #include "inc.h"
 
-#define SYS_MAX_TICKS_IN_SEC    100 /*Since tick timer runs for 10ms: 1 sec = 1000ms (10ms * 100) */
-#define TICK_TIMER_GRANULARITY  10  /*10 milli secs*/
-
-#define MILLISEC_2_NANOSEC(msec)  msec * 1000 * 1000
 
 void * tick_service (void *unused) ;
 void * tick_clock (void *unused);

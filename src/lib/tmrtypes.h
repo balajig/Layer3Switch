@@ -91,7 +91,7 @@ typedef struct app_timer {
 #define MIN_BITS_OFFSET (SEC_BITS_OFFSET + SECS_BITS)
 #define HRS_BITS_OFFSET (MIN_BITS_OFFSET + MINS_BITS)
 
-#define SET_TICK(ct, t)  ct |= (t % tm_get_ticks_per_second())
+#define SET_TICK(ct, t)  ct |= (t)
 #define SET_SECS(ct, t)  ct |= ((t % 60) << SEC_BITS_OFFSET)
 #define SET_MINS(ct, t)  ct |= ((t % 60) << MIN_BITS_OFFSET)
 #define SET_HRS(ct, t)   ct |= (t << HRS_BITS_OFFSET)
@@ -108,6 +108,11 @@ typedef struct app_timer {
 #define IS_NXT_SEC_HAPPEND     !(clk[TICK] % tm_get_ticks_per_second ())
 #define IS_NXT_MIN_HAPPEND     !(clk[SEC] ? (clk[SEC] % 60) : 1)
 #define IS_NXT_HR_HAPPEND      !(clk[MIN] ? (clk[MIN] % 60) : 1)
+
+#define SYS_MAX_TICKS_IN_SEC    100 /*Since tick timer runs for 10ms: 1 sec = 1000ms (10ms * 100) */
+#define TICK_TIMER_GRANULARITY  10  /*10 milli secs*/
+
+#define MILLISEC_2_NANOSEC(msec)  msec * 1000 * 1000
 
 extern struct active_timers  tmrrq;
 extern struct list_head expd_tmrs;
