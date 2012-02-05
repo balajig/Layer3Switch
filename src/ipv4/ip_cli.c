@@ -85,4 +85,3 @@ cparser_result_t cparser_cmd_ping_hostname(cparser_context_t *context, char **ho
 {
 	ping_me (*hostname_ptr);
 }
-

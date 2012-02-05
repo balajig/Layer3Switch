@@ -1,28 +1,7 @@
-//Clears the screen
-clear screen
-
-//Locks the Console
-lock
-
-//logout from current session
-logout
-
+#include "../clicmds/gen.cli"
 #include "../clicmds/showcmds.cli"
 #include "../sntp/sntpshow.cli"
 #include "../clicmds/debug.cli"
-
-// Enable privileged mode
-enable privileged-mode
-
-// Run the configuration script
-run-script <STRING:filename>
-
-//ping host ip address
-ping <IPV4ADDR:hostaddr>
-
-//ping host
-ping <STRING:hostname>
-
 //configuration mode
 configure terminal
 
