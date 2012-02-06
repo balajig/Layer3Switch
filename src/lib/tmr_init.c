@@ -63,8 +63,11 @@ static void calc_time (APP_TIMER_T * ptmr)
 	unsigned int mins = secs / 60;
 	unsigned int hrs =  mins / 60;
 	unsigned int tick_offset = 0;
+	unsigned int secs_offset = 0;
+	unsigned int mins_offset = 0;
 
 	SET_TICK (ptmr->ctime,  tick % SYS_MAX_TICKS_IN_SEC);
+
 	if (secs) {
 		tick_offset = get_ticks () % SYS_MAX_TICKS_IN_SEC;
 		if (tick_offset) {
@@ -74,10 +77,28 @@ static void calc_time (APP_TIMER_T * ptmr)
 		}
 		SET_SECS (ptmr->ctime,  secs);
 	}
-	SET_MINS (ptmr->ctime,  mins);
-	SET_HRS  (ptmr->ctime,  hrs);
 
-	ptmr->timer->exp = tick + clk[TICK];
+	if (mins) {
+		secs_offset = get_secs () % 60;
+		if (secs_offset) {
+			secs += secs_offset;
+			SET_SECS (ptmr->ctime,  secs);
+			mins = secs / 60;
+		}
+		SET_MINS (ptmr->ctime,  mins);
+	}
+
+	if (hrs) {
+		mins_offset = get_mins () % 60;
+		if (mins_offset) {
+			mins += mins_offset;
+			SET_SECS (ptmr->ctime,  mins);
+			hrs = mins / 60;
+		}
+		SET_HRS  (ptmr->ctime,  hrs);
+	}
+
+	ptmr->timer->exp = tick + clk[TICK] - tick_offset;
 
 #ifdef TIMER_DEBUG
 	printf ("secs : %d ticks %d tick offset : %d curr ticks : %d expiry : %d act : %d\n", 

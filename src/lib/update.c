@@ -20,6 +20,9 @@ static inline void timer_expiry_action (APP_TIMER_T * ptmr)
 		DEC_TIMER_COUNT ();
 		ptmr->timer->is_running = 0;
 		list_add_tail (&ptmr->elist, &expd_tmrs);
+#ifdef TIMER_DEBUG
+		printf ("runtime : %d curr ticks : %d expiry : %d \n", ptmr->timer->rmt, get_ticks (), ptmr->timer->exp);
+#endif
 	}
 	else
 		find_tmr_slot_and_place (ptmr);
