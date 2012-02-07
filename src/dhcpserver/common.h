@@ -8,6 +8,7 @@
 #ifndef UDHCP_COMMON_H
 #define UDHCP_COMMON_H 1
 #include "common_types.h"
+#include "platform.h"
 #include "opt.h"
 #include "stats.h"
 #include "mem.h"
@@ -32,6 +33,11 @@
 #define PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
 #define POP_SAVED_FUNCTION_VISIBILITY
 #define FIX_ALIASING
+#define xmalloc malloc
+#define xrealloc realloc
+#define xfree    free
+#define xstrdup  strdup
+#define xzalloc   malloc
 
 
 extern const uint8_t MAC_BCAST_ADDR[6]; /* six all-ones */
@@ -269,16 +275,16 @@ struct option_set *udhcp_find_option(struct option_set *opt_list, uint8_t code) 
 
 #if defined CONFIG_UDHCP_DEBUG && CONFIG_UDHCP_DEBUG >= 1
 extern unsigned dhcp_verbose;
-# define log1(...) do { if (dhcp_verbose >= 1) bb_info_msg(__VA_ARGS__); } while (0)
+# define log1(...) do { if (dhcp_verbose >= 1) printf(__VA_ARGS__); } while (0)
 # if CONFIG_UDHCP_DEBUG >= 2
 void udhcp_dump_packet(struct dhcp_packet *packet) FAST_FUNC;
-#  define log2(...) do { if (dhcp_verbose >= 2) bb_info_msg(__VA_ARGS__); } while (0)
+#  define log2(...) do { if (dhcp_verbose >= 2) printf(__VA_ARGS__); } while (0)
 # else
 #  define udhcp_dump_packet(...) ((void)0)
 #  define log2(...) ((void)0)
 # endif
 # if CONFIG_UDHCP_DEBUG >= 3
-#  define log3(...) do { if (dhcp_verbose >= 3) bb_info_msg(__VA_ARGS__); } while (0)
+#  define log3(...) do { if (dhcp_verbose >= 3) printf(__VA_ARGS__); } while (0)
 # else
 #  define log3(...) ((void)0)
 # endif

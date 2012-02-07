@@ -56,7 +56,7 @@ SNTP:
 BGP:
 #	make -C $(CODE_DIR)/bgp
 DHCPSRV:
-	#make -C $(CODE_DIR)/dhcpserver
+	make -C $(CODE_DIR)/dhcpserver
 SOCK:
 	make -C $(CODE_DIR)/sockets
 TELNETD:

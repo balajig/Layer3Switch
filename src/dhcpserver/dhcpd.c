@@ -211,7 +211,7 @@ static NOINLINE void send_offer(struct dhcp_packet *oldpacket,
 	add_server_options(&packet);
 
 	addr.s_addr = packet.yiaddr;
-	bb_info_msg("Sending OFFER of %s", inet_ntoa(addr));
+	printf("Sending OFFER of %s", inet_ntoa(addr));
 	/* send_dhcp_packet emits error message itself if it detects failure */
 	send_dhcp_packet(&packet, /*force_bcast:*/ 0);
 }
@@ -244,7 +244,7 @@ static NOINLINE void send_ACK(struct dhcp_packet *oldpacket, uint32_t yiaddr)
 	add_server_options(&packet);
 
 	addr.s_addr = yiaddr;
-	bb_info_msg("Sending ACK to %s", inet_ntoa(addr));
+	printf("Sending ACK to %s", inet_ntoa(addr));
 	send_dhcp_packet(&packet, /*force_bcast:*/ 0);
 
 	p_host_name = (const char*) udhcp_get_option(oldpacket, DHCP_HOST_NAME);
@@ -327,7 +327,7 @@ int dhcpd_process_packet (struct dhcp_packet *packet)
 	/* Look for a static/dynamic lease */
 	static_lease_nip = get_static_nip_by_mac(server_config.static_leases, &packet->chaddr);
 	if (static_lease_nip) {
-		bb_info_msg("Found static lease: %x", static_lease_nip);
+		printf("Found static lease: %x", static_lease_nip);
 		memcpy(&fake_lease.lease_mac, &packet->chaddr, 6);
 		fake_lease.lease_nip = static_lease_nip;
 		fake_lease.expires = 0;

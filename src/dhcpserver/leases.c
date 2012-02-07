@@ -64,7 +64,7 @@ struct dyn_lease* FAST_FUNC add_lease(
 			hostname_len++; /* include NUL */
 			if (hostname_len > sizeof(oldest->hostname))
 				hostname_len = sizeof(oldest->hostname);
-			p = safe_strncpy(oldest->hostname, hostname, hostname_len);
+			p = strncpy(oldest->hostname, hostname, hostname_len);
 			/* sanitization (s/non-ASCII/^/g) */
 			while (*p) {
 				if (*p < ' ' || *p > 126)
@@ -125,7 +125,7 @@ static int nobody_responds_to_arp(uint32_t nip, const uint8_t *safe_mac)
 		return r;
 
 	temp.s_addr = nip;
-	bb_info_msg("%s belongs to someone, reserving it for %u seconds",
+	printf("%s belongs to someone, reserving it for %u seconds",
 		inet_ntoa(temp), (unsigned)server_config.conflict_time);
 	add_lease(NULL, nip, server_config.conflict_time, NULL, 0);
 	return 0;

@@ -107,3 +107,38 @@ uint32_t u32ipv4_network_addr (uint32_t hostaddr, int masklen)
 	u32masklen2ip (masklen, &mask);
 	return hostaddr & mask;
 }
+
+/* Convert "[x]x[:][x]x[:][x]x[:][x]x" hex string to binary, no more than COUNT bytes */
+char*  hex2bin(char *dst, const char *str, int count)
+{
+    errno = EINVAL;
+    while (*str && count) {
+        uint8_t val;
+        uint8_t c = *str++;
+        if (isdigit(c))
+            val = c - '0';
+        else if ((c|0x20) >= 'a' && (c|0x20) <= 'f')
+            val = (c|0x20) - ('a' - 10);
+        else
+            return NULL;
+        val <<= 4;
+        c = *str;
+        if (isdigit(c))
+            val |= c - '0';
+        else if ((c|0x20) >= 'a' && (c|0x20) <= 'f')
+            val |= (c|0x20) - ('a' - 10);
+        else if (c == ':' || c == '\0')
+            val >>= 4;
+        else
+            return NULL;
+
+        *dst++ = val;
+        if (c != '\0')
+            str++;
+        if (*str == ':')
+            str++;
+        count--;
+    }
+    errno = (*str ? ERANGE : 0);
+    return dst;
+}

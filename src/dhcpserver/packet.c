@@ -7,6 +7,7 @@
  * Licensed under GPLv2, see file LICENSE in this source tree.
  */
 #include "common.h"
+#include "sockets.h"
 #include "dhcpd.h"
 
 void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)
@@ -35,7 +36,7 @@ void FAST_FUNC udhcp_dump_packet(struct dhcp_packet *packet)
 	if (dhcp_verbose < 2)
 		return;
 
-	bb_info_msg(
+	printf(
 		//" op %x"
 		//" htype %x"
 		" hlen %x"
@@ -70,7 +71,7 @@ void FAST_FUNC udhcp_dump_packet(struct dhcp_packet *packet)
 		//, packet->options[]
 	);
 	*bin2hex(buf, (void *) packet->chaddr, sizeof(packet->chaddr)) = '\0';
-	bb_info_msg(" chaddr %s", buf);
+	printf(" chaddr %s", buf);
 }
 #endif
 
@@ -88,7 +89,7 @@ int FAST_FUNC udhcp_recv_kernel_packet(struct dhcp_packet *packet, int fd)
 	}
 
 	if (packet->cookie != htonl(DHCP_MAGIC)) {
-		bb_info_msg("Packet with bad magic, ignoring");
+		printf("Packet with bad magic, ignoring");
 		return -2;
 	}
 	log1("Received a packet");
@@ -226,10 +227,23 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	close(fd);
 	if (result < 0) {
  ret_msg:
-		bb_perror_msg(msg, "PACKET");
+		perror(msg);
 	}
 #endif
 	return result;
+}
+const int const_int_1 = 1;
+/* explicitly = 0, otherwise gcc may make it a common variable
+ *  * and it will end up in bss */
+const int const_int_0 = 0;
+
+void FAST_FUNC setsockopt_reuseaddr(int fd)
+{
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &const_int_1, sizeof(const_int_1));
+}
+int FAST_FUNC setsockopt_broadcast(int fd)
+{
+    return setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &const_int_1, sizeof(const_int_1));
 }
 
 /* Let the kernel do all the work for packet generation */
@@ -277,7 +291,31 @@ int FAST_FUNC udhcp_send_kernel_packet(struct dhcp_packet *dhcp_pkt,
 	close(fd);
 	if (result < 0) {
  ret_msg:
-		bb_perror_msg(msg, "UDP");
+		perror(msg);
 	}
 	return result;
+}
+
+/* 1. None of the callers expects it to ever fail */
+/* 2. ip was always INADDR_ANY */
+int FAST_FUNC udhcp_listen_socket(/*uint32_t ip,*/ int port, const char *inf)
+{
+	int fd;
+	struct sockaddr_in addr;
+
+	log1("Opening listen socket on *:%d %s", port, inf);
+	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	setsockopt_reuseaddr(fd);
+	if (setsockopt_broadcast(fd) == -1) {
+		perror ("SO_BROADCAST");
+		return -1;
+	}
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	/* addr.sin_addr.s_addr = ip; - all-zeros is INADDR_ANY */
+	bind(fd, (struct sockaddr *)&addr, sizeof(addr));
+
+	return fd;
 }

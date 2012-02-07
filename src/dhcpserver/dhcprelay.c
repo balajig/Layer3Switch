@@ -45,7 +45,7 @@ static struct xid_item *xid_add(uint32_t xid, struct sockaddr_in *ip, int client
 	item->ip = *ip;
 	item->xid = xid;
 	item->client = client;
-	item->timestamp = monotonic_sec();
+	item->timestamp = get_secs ();
 	item->next = dhcprelay_xid_list.next;
 	dhcprelay_xid_list.next = item;
 
@@ -56,7 +56,7 @@ static void xid_expire(void)
 {
 	struct xid_item *item = dhcprelay_xid_list.next;
 	struct xid_item *last = &dhcprelay_xid_list;
-	unsigned current_time = monotonic_sec();
+	unsigned current_time = get_secs();
 
 	while (item != NULL) {
 		if ((current_time - item->timestamp) > MAX_LIFETIME) {
@@ -180,7 +180,7 @@ static int sendto_ip4(int sock, const void *msg, int msg_len, struct sockaddr_in
 	err = sendto(sock, msg, msg_len, 0, (struct sockaddr*) to, sizeof(*to));
 	err -= msg_len;
 	if (err)
-		bb_perror_msg("sendto");
+		perror("sendto");
 	return err;
 }
 
@@ -262,12 +262,11 @@ int dhcprelay_main(int argc, char **argv)
 
 	/* dhcprelay CLIENT_IFACE1[,CLIENT_IFACE2...] SERVER_IFACE [SERVER_IP] */
 	if (argc == 4) {
-		if (!inet_aton(argv[3], &server_addr.sin_addr))
-			bb_perror_msg_and_die("bad server IP");
-	} else if (argc != 3) {
-		bb_show_usage();
-	}
-
+		if (!inet_aton(argv[3], &server_addr.sin_addr)) {
+			perror("bad server IP");
+			return -1;
+		}
+	} 
 	iface_list = make_iface_list(argv + 1, &num_sockets);
 
 	fds = xmalloc(num_sockets * sizeof(fds[0]));
@@ -275,9 +274,11 @@ int dhcprelay_main(int argc, char **argv)
 	/* Create sockets and bind one to every iface */
 	max_socket = init_sockets(iface_list, num_sockets, fds);
 
+#if 0
 	/* Get our IP on server_iface */
 	if (udhcp_read_interface(argv[2], NULL, &our_nip, NULL))
 		return 1;
+#endif
 
 	/* Main loop */
 	while (1) {
@@ -356,7 +357,8 @@ int dhcprelay_main(int argc, char **argv)
 //   of the 'giaddr' field does not match one of the relay agent's
 //   directly-connected logical interfaces, the BOOTREPLY messsage MUST be
 //   silently discarded.
-				if (udhcp_read_interface(iface_list[i], NULL, &dhcp_msg.gateway_nip, NULL)) {
+			//	if (udhcp_read_interface(iface_list[i], NULL, &dhcp_msg.gateway_nip, NULL)) 
+				{
 					/* Fall back to our IP on server iface */
 // this makes more sense!
 					dhcp_msg.gateway_nip = our_nip;

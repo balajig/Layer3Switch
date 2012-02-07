@@ -163,7 +163,7 @@ static void log_option(const char *pfx, const uint8_t *opt)
 	if (dhcp_verbose >= 2) {
 		char buf[256 * 2 + 2];
 		*bin2hex(buf, (void*) (opt + OPT_DATA), opt[OPT_LEN]) = '\0';
-		bb_info_msg("%s: 0x%02x %s", pfx, opt[OPT_CODE], buf);
+		printf("%s: 0x%02x %s", pfx, opt[OPT_CODE], buf);
 	}
 }
 #else
@@ -369,8 +369,10 @@ static char *allocate_tempopt_if_needed(
 		const char *end;
 		allocated = xstrdup(buffer); /* more than enough */
 		end = hex2bin(allocated, buffer, 255);
-		if (errno)
-			printf_and_die("malformed hex string '%s'", buffer);
+		if (errno) {
+			printf("malformed hex string '%s'", buffer);
+			return NULL;
+		}
 		*length_p = end - allocated;
 	}
 	return allocated;
@@ -461,7 +463,7 @@ int FAST_FUNC udhcp_str2optset(const char *const_str, void *arg)
 	if (!opt)
 		return 0;
 
-	optcode = bb_strtou(opt, NULL, 0);
+	optcode = strtoul(opt, NULL, 0);
 	if (!errno && optcode < 255) {
 		/* Raw (numeric) option code */
 		bin_optflag.flags = OPTION_BIN;

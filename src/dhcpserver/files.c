@@ -10,6 +10,12 @@
 #include "common.h"
 #include "dhcpd.h"
 
+struct ether_addr
+{       
+  u_int8_t ether_addr_octet[ETH_ALEN];
+} __attribute__ ((__packed__));
+
+
 /* on these functions, make sure your datatype matches */
 static int FAST_FUNC read_str(const char *line, void *arg)
 {
@@ -22,7 +28,7 @@ static int FAST_FUNC read_str(const char *line, void *arg)
 
 static int FAST_FUNC read_u32(const char *line, void *arg)
 {
-	*(uint32_t*)arg = bb_strtou32(line, NULL, 10);
+	*(uint32_t*)arg = strtoul(line, NULL, 10);
 	return errno == 0;
 }
 
@@ -125,7 +131,7 @@ void FAST_FUNC write_leases(void)
 	leasetime_t curr;
 	int64_t written_at;
 
-	fd = open_or_warn(server_config.lease_file, O_WRONLY|O_CREAT|O_TRUNC);
+	fd = open(server_config.lease_file, O_WRONLY|O_CREAT|O_TRUNC);
 	if (fd < 0)
 		return;
 
@@ -162,7 +168,6 @@ void FAST_FUNC write_leases(void)
 		argv[0] = server_config.notify_file;
 		argv[1] = server_config.lease_file;
 		argv[2] = NULL;
-		spawn_and_wait(argv);
 	}
 }
 
@@ -175,7 +180,7 @@ void FAST_FUNC read_leases(const char *file)
 	unsigned i = 0;
 #endif
 
-	fd = open_or_warn(file, O_RDONLY);
+	fd = open(file, O_RDONLY);
 	if (fd < 0)
 		return;
 
