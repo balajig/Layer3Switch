@@ -9,6 +9,7 @@
  * all present and future rights to this code under copyright law. 
  */
 
+#if 0
 #if !defined(_WIN32)
 #	if !defined(_POSIX_SOURCE)
 #		define _POSIX_SOURCE
@@ -32,14 +33,17 @@
 #	define strdup _strdup
 #	define ECONNRESET WSAECONNRESET
 #endif
-
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#endif
 
+#include "common_types.h"
 #include "libtelnet.h"
+#include "sockets.h"
+#include "socks.h"
 
 #define MAX_USERS 64
 #define LINEBUFFER_SIZE 256
@@ -233,7 +237,7 @@ void * telnetd (void *arg)
 int telnet_init (void)
 {
 	int  hthread = -1;
-	if (task_create ("telentd", 30, 3, 20 * 1024, telnetd, NULL, NULL, 
+	if (task_create ("telnetd", 30, 3, 20 * 1024, telnetd, NULL, NULL, 
 				&hthread) == 0) {
 		printf ("Task creation failed : %s\n", "telnetd");
 		return -1;
