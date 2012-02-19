@@ -457,8 +457,6 @@ static void ping(const char *host)
 		   inet_ntoa(*(struct in_addr *) &pingaddr.sin_addr.s_addr),
 		   datalen);
 
-	//signal(SIGINT, pingstats);
-
 	/* start the ping's going ... */
 
 	/* listen for replies */
@@ -482,9 +480,6 @@ static void ping(const char *host)
 	}
 	pingstats(0);
 	lwip_close (pingsock);
-}
-usage (int k)
-{
 }
 int ping_me (char *host)
 {
