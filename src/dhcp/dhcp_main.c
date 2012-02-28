@@ -77,7 +77,7 @@ int dhcp_init (void)
 
         dhcpqpool = mem_pool_create ("DHCP", DHCP_PQ_MSG * sizeof (struct dhcp_msg), 
                                      DHCP_PQ_MSG, 0);
-        if (dhcp_pqid < 0) {
+        if (dhcpqpool < 0) {
 		pqueue_destroy (dhcp_pqid);
                 return -1;
         }
