@@ -443,14 +443,14 @@ static void ping(const char *host)
 	hostname = buf;
 
 	/* enable broadcast pings */
-	sockopt = 1;
-	setsockopt(pingsock, SOL_SOCKET, SO_BROADCAST, (char *) &sockopt,
-			   sizeof(sockopt));
+//	sockopt = 1;
+//	setsockopt(pingsock, SOL_SOCKET, SO_BROADCAST, (char *) &sockopt,
+//			   sizeof(sockopt));
 
 	/* set recv buf for broadcast pings */
-	sockopt = 48 * 1024;
-	setsockopt(pingsock, SOL_SOCKET, SO_RCVBUF, (char *) &sockopt,
-			   sizeof(sockopt));
+//	sockopt = 48 * 1024;
+//	setsockopt(pingsock, SOL_SOCKET, SO_RCVBUF, (char *) &sockopt,
+//			   sizeof(sockopt));
 
 	printf("PING %s (%s): %d data bytes\n",
 		   hostname,
@@ -465,7 +465,6 @@ static void ping(const char *host)
 		socklen_t fromlen = (socklen_t) sizeof(from);
 		int c;
 		sendping(0);
-		sleep (1);
 		if ((c = recvfrom(pingsock, packet, sizeof(packet), 0,
 						  (struct sockaddr *) &from, &fromlen)) < 0) {
 			if (errno == EINTR)
