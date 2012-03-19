@@ -35,6 +35,13 @@ cparser_result_t cparser_cmd_config_spanning_tree_priority_priority(cparser_cont
 	return CPARSER_NOT_OK;
 }
 
+cparser_result_t cparser_cmd_config_no_spanning_tree_priority_priority(cparser_context_t *context, int32_t *priority_ptr)
+{
+	if (!stp_set_bridge_priority (STP_DEF_PRIORITY, cli_get_vlan_id ()))
+		return CPARSER_OK;
+	return CPARSER_NOT_OK;
+}
+
 cparser_result_t cparser_cmd_config_spanning_tree_hello_time_htimesecs_forward_delay_fdlysecs_max_age_maxagesecs (
     cparser_context_t *context,
     int32_t *htimesecs_ptr,

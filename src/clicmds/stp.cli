@@ -7,6 +7,9 @@ no spanning-tree
 //Sets Spanning Priority <0-65535>
 spanning-tree priority <INT:priority>
 
+//ReSets Spanning Priority to default
+no spanning-tree priority <INT:priority>
+
 //Sets Spanning Hello time <1-10 secs>
 spanning-tree hello-time <INT:htimesecs> { forward-delay <INT:fdlysecs> } { max-age <INT:maxagesecs> }
 
