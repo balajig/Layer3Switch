@@ -1413,14 +1413,14 @@
  * LWIP_SO_RCVBUF==1: Enable SO_RCVBUF processing.
  */
 #ifndef LWIP_SO_RCVBUF
-#define LWIP_SO_RCVBUF                  1
+#define LWIP_SO_RCVBUF                  0
 #endif
 
 /**
  * If LWIP_SO_RCVBUF is used, this is the default value for recv_bufsize.
  */
 #ifndef RECV_BUFSIZE_DEFAULT
-#define RECV_BUFSIZE_DEFAULT            0x8000
+#define RECV_BUFSIZE_DEFAULT            0x8000 /*XXX: It should be INT_MAX */
 #endif
 
 /**
@@ -2036,7 +2036,7 @@
  * ZEBRA_RTM_SUPPORT: Enable Zebra RTM Support.
  */
 #ifndef ZEBRA_RTM_SUPPORT
-#define ZEBRA_RTM_SUPPORT			1
+#define ZEBRA_RTM_SUPPORT			0
 #endif
 
 /*
