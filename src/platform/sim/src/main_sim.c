@@ -34,7 +34,7 @@ int main (int argc, char **argv)
 
 	parse_cmdline (argc, argv);
 
-	switch_mac[5] = atoi (argv[1]);
+	switch_mac[4] = atoi (argv[1]);
 
 	layer3switch_init ();
 
