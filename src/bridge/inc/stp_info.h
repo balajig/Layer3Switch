@@ -55,6 +55,7 @@ enum STP_PROTO_SPEC {
 #define debug_stp(fmt)   if (1) printf("STP: %s", fmt);
 
 struct stp_instance {
+	sync_lock_t br_lock;
 	int64_t     tolpolgy_changes;
 	struct list_head next;
 	struct list_head port_list;

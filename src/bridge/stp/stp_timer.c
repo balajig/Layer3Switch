@@ -29,9 +29,13 @@ static void stp_hello_timer_expired(void *arg)
 {
 	struct stp_instance *br = (struct stp_instance *)arg;
 
+	sync_lock (&br->br_lock);
+
 	stp_config_bpdu_generation(br);
 
 	mod_timer (br->hello_timer, br->hello_time * tm_get_ticks_per_second ());
+
+	sync_unlock (&br->br_lock);
 }
 
 static void stp_message_age_timer_expired(void *arg)
@@ -43,6 +47,11 @@ static void stp_message_age_timer_expired(void *arg)
 	if (p->state == DISABLED)
 		return;
 
+	sync_lock (&br->br_lock);
+	if (p->state == DISABLED) {
+		sync_unlock (&br->br_lock);
+		return;
+	}
 	p->is_own_bpdu = 0;
 	was_root = stp_is_root_bridge(br);
 
@@ -51,6 +60,7 @@ static void stp_message_age_timer_expired(void *arg)
 	stp_port_state_selection(br);
 	if (stp_is_root_bridge(br) && !was_root)
 		stp_become_root_bridge(br);
+	sync_unlock (&br->br_lock);
 }
 
 static void stp_forward_delay_timer_expired(void *arg)
@@ -58,6 +68,7 @@ static void stp_forward_delay_timer_expired(void *arg)
 	struct stp_port_entry *p = (struct stp_port_entry *) arg;
 	struct stp_instance *br = p->br;
 
+	sync_lock (&br->br_lock);
 	if (p->state == LISTENING) {
 		p->state = LEARNING;
 		mod_timer(p->forward_delay_timer,  br->forward_delay * tm_get_ticks_per_second ());
@@ -66,30 +77,37 @@ static void stp_forward_delay_timer_expired(void *arg)
 		if (stp_is_designated_for_some_port(br))
 			stp_topology_change_detection(br);
 	}
+	sync_unlock (&br->br_lock);
 }
 
 static void stp_tcn_timer_expired(void *arg)
 {
 	struct stp_instance *br = (struct stp_instance *) arg;
 
+	sync_lock (&br->br_lock);
 	stp_transmit_tcn(br);
 	mod_timer(br->tcn_timer, br->bridge_hello_time * tm_get_ticks_per_second ());
+	sync_unlock (&br->br_lock);
 }
 
 static void stp_topology_change_timer_expired(void * arg)
 {
 	struct stp_instance *br = (struct stp_instance *) arg;
 
+	sync_lock (&br->br_lock);
 	br->topology_change_detected = 0;
 	br->topology_change = 0;
+	sync_unlock (&br->br_lock);
 }
 
 static void stp_hold_timer_expired(void *arg)
 {
 	struct stp_port_entry *p = (struct stp_port_entry *) arg;
 
+	sync_lock (&p->br->br_lock);
 	if (p->config_pending)
 		stp_transmit_config(p);
+	sync_unlock (&p->br->br_lock);
 }
 
 void stp_timer_init(struct stp_instance *br)

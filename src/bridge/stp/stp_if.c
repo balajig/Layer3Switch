@@ -93,6 +93,7 @@ void stp_enable (struct stp_instance *br)
 {
 	struct stp_port_entry *p;
 
+	sync_lock (&br->br_lock);
 	br->stp_enabled = STP_ENABLED;
 
 	mod_timer(br->hello_timer,  br->hello_time * tm_get_ticks_per_second ());
@@ -102,12 +103,14 @@ void stp_enable (struct stp_instance *br)
 	list_for_each_entry(p, &br->port_list, list) {
 		stp_enable_port(p);
 	}
+        sync_unlock (&br->br_lock);
 }
 
 void stp_disable (struct stp_instance *br)
 {
 	struct stp_port_entry *p, *n;
 
+	sync_lock (&br->br_lock);
 	list_for_each_entry_safe(p, n, &br->port_list, list) {
 		if (p->state != DISABLED)
 			stp_disable_port(p);
@@ -121,6 +124,7 @@ void stp_disable (struct stp_instance *br)
 	del_timer(br->hello_timer);
 	del_timer(br->topology_change_timer);
 	del_timer(br->tcn_timer);
+        sync_unlock (&br->br_lock);
 }
 
 void stp_change_bridge_id(struct stp_instance *br, const char *addr)

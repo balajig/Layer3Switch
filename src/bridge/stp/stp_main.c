@@ -72,6 +72,9 @@ static int stp_init_stp_instance (struct stp_instance  *new, uint16_t vlan_id)
         new->topology_change = FALSE;
         new->topology_change_detected = TRUE;
 
+	create_sync_lock (&new->br_lock);
+	sync_unlock (&new->br_lock);
+
 	stp_timer_init (new);
 
 	return 0;
@@ -396,7 +399,7 @@ static inline void stp_record_config_information(struct stp_port_entry *p,
 	p->designated_cost = bpdu->root_path_cost;
 	p->designated_bridge = bpdu->bridge_id;
 	p->designated_port = bpdu->port_id;
-	mod_timer(p->message_age_timer, (p->br->max_age - bpdu->message_age) * tm_get_ticks_per_second ());
+	mod_timer(p->message_age_timer,  bpdu->message_age * tm_get_ticks_per_second ());
 }
 
 static inline void stp_record_config_timeout_values(struct stp_instance *br,
@@ -640,6 +643,8 @@ void stp_received_config_bpdu(struct stp_port_entry *p, STP_BPDU_T *bpdu)
 
 	br = p->br;
 
+	sync_lock (&br->br_lock);
+
 	was_root = stp_is_root_bridge(br);
 
 	p->is_own_bpdu = 0;
@@ -667,14 +672,17 @@ void stp_received_config_bpdu(struct stp_port_entry *p, STP_BPDU_T *bpdu)
 	} else if (stp_is_designated_port(p)) {
 		stp_reply(p);
 	}
+	sync_unlock (&br->br_lock);
 }
 
 void stp_received_tcn_bpdu(struct stp_port_entry *p)
 {
+	sync_lock (&p->br->br_lock);
 	if (stp_is_designated_port(p)) {
 		stp_topology_change_detection(p->br);
 		stp_topology_change_acknowledge(p);
 	}
+	sync_unlock (&p->br->br_lock);
 }
 
 int stp_is_designated_port(const struct stp_port_entry *p)
