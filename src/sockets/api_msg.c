@@ -570,6 +570,8 @@ netconn_alloc(enum netconn_type t, netconn_callback callback)
     return NULL;
   }
 
+ memset (conn, 0, sizeof (struct netconn));
+
   conn->last_err = ERR_OK;
   conn->type = t;
   conn->pcb.tcp = NULL;
@@ -652,13 +654,12 @@ netconn_free(struct netconn *conn)
     !pqueue_valid(conn->acceptmbox));
 #endif /* LWIP_TCP */
 
-  destroy_sync_lock (&conn->op_completed);
 
   if (pqueue_valid(conn->acceptmbox))
 	pqueue_destroy(conn->acceptmbox);
   if (pqueue_valid(conn->recvmbox))
 	pqueue_destroy(conn->recvmbox);
-
+  destroy_sync_lock (&conn->op_completed);
   memp_free(MEMP_NETCONN, conn);
 }
 

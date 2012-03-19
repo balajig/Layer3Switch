@@ -1550,7 +1550,7 @@ low_level_output (struct interface *netif, struct pbuf *p)
     pbuf_header (p, ETH_PAD_SIZE);    /* reclaim the padding word */
 #endif
 
-   free (p);
+   free (packet);
 
     return ERR_OK;
 }
