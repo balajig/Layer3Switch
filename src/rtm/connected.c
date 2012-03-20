@@ -28,6 +28,12 @@
 #include "memory.h"
 #include "memtypes.h"
 
+struct connected *connected_check(struct interface *ifp, struct prefix *p);
+void connected_up_ipv4(struct interface *ifp, struct connected *ifc);
+void connected_add_ipv4(struct interface *ifp, int flags, uint32_t *host_addr, u_char prefixlen, uint32_t *bcast_addr, const char *label);
+void connected_down_ipv4(struct interface *ifp, struct connected *ifc);
+int connected_delete_ipv4(struct interface *ifp, int flags, struct in_addr *addr, u_char prefixlen, struct in_addr *broad);
+
 /* withdraw a connected address */
 static void
 connected_withdraw (struct connected *ifc)

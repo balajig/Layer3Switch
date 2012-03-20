@@ -14,7 +14,7 @@ endif
 
 COMMON_INC= $(CODE_DIR)/inc  -I$(CODE_DIR)/lib -I$(CODE_DIR)/cli/inc -I$(CODE_DIR)/cli/src
 
-CC   = echo $(notdir $<);$(CROSS_COMPILE)gcc
+CC   = echo $(notdir $<);$(CROSS_COMPILE)gcc 
 CXXFLAGS = $(CXXINCS)  
 RM = rm -f
 DEBUG_FLAGS = -g -DDEBUG

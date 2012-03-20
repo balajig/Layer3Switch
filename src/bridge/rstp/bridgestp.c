@@ -2276,7 +2276,7 @@ int rstp_set_bridge_priority (uint16_t newprio, uint16_t vlan_id)
 	return bstp_set_priority (pinst, newprio);
 }
 
-inline int bridge_timer_relation (int fdelay, int max_age, int hello)
+int bridge_timer_relation (int fdelay, int max_age, int hello)
 {
 	/* To support interoperability with legacy Bridges, 
    	   a Bridge shall enforce the following relationships

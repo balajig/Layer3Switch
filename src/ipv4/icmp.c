@@ -381,14 +381,7 @@ icmp_send_response (struct pbuf *p, u8_t type, u8_t code)
 
 static int ntransmitted  = 0;
 
-int ping_IP (uint32_t ipaddr)
-{
-	ip_addr_t destip;
-	destip.addr = ipaddr;
-	
-	pinger (ipaddr);
 
-}
 void pinger (ip_addr_t destip)
 {
     struct pbuf        *q;
@@ -426,5 +419,12 @@ void pinger (ip_addr_t destip)
     snmp_inc_icmpouttimeexcds ();
     ip_output (q, NULL, &destip, ICMP_TTL, 0, IP_PROTO_ICMP);
     pbuf_free (q);
+}
+int ping_IP (uint32_t ipaddr)
+{
+	ip_addr_t destip;
+	destip.addr = ipaddr;
+	
+	pinger (destip);
 }
 #endif /* LWIP_ICMP */
