@@ -112,14 +112,14 @@ void send_packet (void *buf, uint16_t port, int len)
 {
 	char pkt[MAX_MTU];
 
-	tx_pkt_for_capture (buf, len);
-
 	memset (pkt, 0, MAX_MTU);
 
 	pkt[0] = tm_inst;
 	pkt[1] = (uint8_t)port;
 
 	memcpy (&pkt[2], buf, len);
+
+	tx_pkt_for_capture (&pkt[2], len);
 
 	tx_pkt (pkt, len + sizeof(inst_t));
 }

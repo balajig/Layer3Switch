@@ -39,15 +39,15 @@ struct wait_tmr {
 
 typedef struct tm_timer
 {
+	void           *data;
+	void           *apptimer;
+ 	void           (*time_out_handler)(void *);
 	unsigned int    rmt;
 	unsigned int    exp;
 	int             wheel;
 	int 	        idx;
 	int	        flags;
 	int 		is_running;
-	void           *data;
-	void           *apptimer;
- 	void           (*time_out_handler)(void *);
 }TIMER_T;
 
 typedef struct app_timer {
@@ -119,7 +119,6 @@ extern struct list_head expd_tmrs;
 extern unsigned int clk[];
 
 int tm_process_tick_and_update_timers (void);
-void process_expd_timers (void);
 void free_timer_id ();
 int find_tmr_slot_and_place (APP_TIMER_T * ptmr);
 void timer_del (APP_TIMER_T *n, struct rb_root *root);

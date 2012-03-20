@@ -4,6 +4,7 @@ enum ACCEPTABLE_FRAME_TYPES {
 };
 
 struct dot1q_port_vlan_stats {
+	struct     list_head next;
 	uint32_t   port;
 	uint32_t   in_frames;
 	uint32_t   out_frames;
@@ -11,22 +12,21 @@ struct dot1q_port_vlan_stats {
 	uint32_t   in_overflow_frames;
 	uint32_t   out_overflow_frames;
 	uint32_t   in_overflow_discards;
-	struct     list_head next;
 };
 
 struct vlan_static_entry {
-	uint16_t vlan_id;
+	void     *stp_instance;
+	void     *rstp_instance;
+	struct list_head port_vlan_stats;
+	struct list_head next;
 	char	 Name[MAX_VLAN_NAME];
+	uint16_t vlan_id;
 	PORTLIST egress_ports;
 	PORTLIST forbidden_egress_ports;
 	PORTLIST untagged_ports;
 	uint8_t	 row_status;
 	uint8_t  stp_enabled;
 	uint8_t  stp_mode;
-	void     *stp_instance;
-	void     *rstp_instance;
-	struct list_head port_vlan_stats;
-	struct list_head next;
 };
 
 struct dot1q_port_vlan_entry {
