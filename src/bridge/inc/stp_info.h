@@ -102,6 +102,7 @@ struct stp_port_entry {
         uint8_t	    config_pending;
 	uint8_t     is_own_bpdu;
         uint8_t     enabled;
+	int32_t     designated_age;
 };
 
 #pragma pack(push)  /* push current alignment to stack */

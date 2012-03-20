@@ -374,8 +374,7 @@ void stp_transmit_config(struct stp_port_entry *p)
 		bpdu.message_age = 0;
 	else {
 		struct stp_port_entry *root = stp_get_port(br, br->root_port);
-		int rmt = (timer_get_remaining_time (root->message_age_timer)) / tm_get_ticks_per_second ();
-		bpdu.message_age = br->max_age - rmt + MESSAGE_AGE_INCR;
+		bpdu.message_age = (get_secs () - root->designated_age) + MESSAGE_AGE_INCR;
 	}
 	bpdu.max_age = br->max_age;
 	bpdu.hello_time = br->hello_time;
@@ -399,7 +398,10 @@ static inline void stp_record_config_information(struct stp_port_entry *p,
 	p->designated_cost = bpdu->root_path_cost;
 	p->designated_bridge = bpdu->bridge_id;
 	p->designated_port = bpdu->port_id;
-	mod_timer(p->message_age_timer,  bpdu->message_age * tm_get_ticks_per_second ());
+	p->designated_age = get_secs() - bpdu->message_age;
+	printf ("SECS : %d message age : %d designated_age : %d\n", get_secs (), bpdu->message_age, p->designated_age);
+
+	mod_timer(&p->message_age_timer,  (p->br->max_age - bpdu->message_age) * tm_get_ticks_per_second ());
 }
 
 static inline void stp_record_config_timeout_values(struct stp_instance *br,
