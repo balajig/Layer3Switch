@@ -54,6 +54,9 @@ enum STP_PROTO_SPEC {
 #define STP_MAX_PORTS	(1 << STP_PORT_BITS)
 #define debug_stp(fmt)   if (1) printf("STP: %s", fmt);
 
+#pragma pack(push)  /* push current alignment to stack */
+#pragma pack(1)     /* set alignment to 1 byte boundary */
+
 struct stp_instance {
 	sync_lock_t br_lock;
 	int64_t     tolpolgy_changes;
@@ -86,6 +89,7 @@ struct stp_port_entry {
         uint64_t    fwdtransitions;
 	struct list_head list;
 	struct stp_instance *br;
+	int32_t     designated_age;
         int32_t     priority;
         int32_t     state;
         int32_t     designated_cost;
@@ -102,11 +106,8 @@ struct stp_port_entry {
         uint8_t	    config_pending;
 	uint8_t     is_own_bpdu;
         uint8_t     enabled;
-	int32_t     designated_age;
 };
 
-#pragma pack(push)  /* push current alignment to stack */
-#pragma pack(1)     /* set alignment to 1 byte boundary */
 struct stp_hdr {
   uint16_t protocol;
   uint8_t  version;

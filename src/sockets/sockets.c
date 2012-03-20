@@ -85,7 +85,7 @@ struct lwip_sock
     int                 err;
   /** counter of how many threads are waiting for this socket using select */
     int                 select_waiting;
-};
+}__attribute__ ((packed));
 
 /** Description for a task waiting in select */
 struct lwip_select_cb
@@ -104,7 +104,7 @@ struct lwip_select_cb
     int                 sem_signalled;
   /** semaphore to wake up a task waiting for select */
     sync_lock_t           sem;
-};
+}__attribute__ ((packed));
 
 /** This struct is used to pass data to the set/getsockopt_internal
  * functions running in tcpip_thread context (only a void* is allowed) */
@@ -127,7 +127,7 @@ struct lwip_setgetsockopt_data
     socklen_t          *optlen;
   /** if an error occures, it is temporarily stored here */
     err_t               err;
-};
+}__attribute__ ((packed));
 
 /** The global array of available sockets */
 static struct lwip_sock sockets[NUM_SOCKETS];

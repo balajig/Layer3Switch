@@ -65,7 +65,7 @@ struct dhcp
   u8_t autoip_coop_state;
 #endif
   u8_t subnet_mask_given;
-};
+}__attribute__ ((packed));
 
 /* MUST be compiled with "pack structs" or equivalent! */
 #ifdef PACK_STRUCT_USE_INCLUDES

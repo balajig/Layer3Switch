@@ -81,7 +81,7 @@ struct rib
   u_char nexthop_num;
   u_char nexthop_active_num;
   u_char nexthop_fib_num;
-};
+}__attribute__ ((packed));
 
 /* meta-queue structure:
  * sub-queue 0: connected, kernel
@@ -126,7 +126,7 @@ struct static_ipv4
  see ZEBRA_FLAG_REJECT
      ZEBRA_FLAG_BLACKHOLE
  */
-};
+}__attribute__ ((packed));
 
 #ifdef HAVE_IPV6
 /* Static route information. */
@@ -155,7 +155,7 @@ struct static_ipv6
  see ZEBRA_FLAG_REJECT
      ZEBRA_FLAG_BLACKHOLE
  */
-};
+}__attribute__ ((packed));
 #endif /* HAVE_IPV6 */
 
 enum nexthop_types_t
@@ -196,7 +196,7 @@ struct nexthop
   unsigned int rifindex;
   union g_addr rgate;
   union g_addr src;
-};
+}__attribute__ ((packed));
 
 /* Routing table instance.  */
 struct vrf
@@ -218,7 +218,7 @@ struct vrf
 
   /* Static route configuration.  */
   struct route_table *stable[AFI_MAX][SAFI_MAX];
-};
+}__attribute__ ((packed));
 
 extern struct nexthop *nexthop_ifindex_add (struct rib *, unsigned int);
 extern struct nexthop *nexthop_ifname_add (struct rib *, char *);

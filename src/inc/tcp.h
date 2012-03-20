@@ -277,7 +277,7 @@ struct tcp_pcb {
 
   /* KEEPALIVE counter */
   u8_t keep_cnt_sent;
-};
+}__attribute__ ((packed));
 
 struct tcp_pcb_listen {  
 /* Common members of all PCB types */
@@ -289,7 +289,7 @@ struct tcp_pcb_listen {
   u8_t backlog;
   u8_t accepts_pending;
 #endif /* TCP_LISTEN_BACKLOG */
-};
+}__attribute__ ((packed));
 
 #if LWIP_EVENT_API
 

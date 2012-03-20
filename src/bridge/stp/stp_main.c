@@ -399,9 +399,8 @@ static inline void stp_record_config_information(struct stp_port_entry *p,
 	p->designated_bridge = bpdu->bridge_id;
 	p->designated_port = bpdu->port_id;
 	p->designated_age = get_secs() - bpdu->message_age;
-	printf ("SECS : %d message age : %d designated_age : %d\n", get_secs (), bpdu->message_age, p->designated_age);
 
-	mod_timer(&p->message_age_timer,  (p->br->max_age - bpdu->message_age) * tm_get_ticks_per_second ());
+	mod_timer(p->message_age_timer,  (p->br->max_age - bpdu->message_age) * tm_get_ticks_per_second ());
 }
 
 static inline void stp_record_config_timeout_values(struct stp_instance *br,

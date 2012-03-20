@@ -112,7 +112,7 @@ struct api_msg_msg {
     } lb;
 #endif /* TCP_LISTEN_BACKLOG */
   } msg;
-};
+}__attribute__ ((packed));
 
 /** This struct contains a function to execute in another thread context and
     a struct api_msg_msg that serves as an argument for this function.
@@ -139,7 +139,7 @@ struct dns_api_msg {
   sync_lock_t *sem;
   /** Errors are given back here */
   err_t *err;
-};
+}__attribute__ ((packed));
 #endif /* LWIP_DNS */
 
 void do_newconn         ( struct api_msg_msg *msg);

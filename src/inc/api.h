@@ -186,7 +186,7 @@ struct netconn {
 #endif /* LWIP_TCP */
   /** A callback function that is informed about events for this netconn */
   netconn_callback callback;
-};
+}__attribute__ ((packed));
 
 /** Register an Network connection event */
 #define API_EVENT(c,e,l) if (c->callback) {         \

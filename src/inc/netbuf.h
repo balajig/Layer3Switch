@@ -58,7 +58,7 @@ struct netbuf {
   ip_addr_t toaddr;
 #endif /* LWIP_NETBUF_RECVINFO */
 #endif /* LWIP_NETBUF_RECVINFO || LWIP_CHECKSUM_ON_COPY */
-};
+}__attribute__ ((packed));
 
 /* Network buffer functions: */
 struct netbuf *   netbuf_new      (void);

@@ -12,7 +12,7 @@ typedef struct _route_t {
 	unsigned char	gateway [4];
 	unsigned char	gwifaddr [4];
 	unsigned char	masklen;
-} route_t;
+} __attribute__ ((packed))route_t;
 
 if_t *route_lookup (uint32_t ip);
 if_t *route_lookup_internal (unsigned char *ipaddr, unsigned char **gateway, unsigned char **if_ipaddr);
