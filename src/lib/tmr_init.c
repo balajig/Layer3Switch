@@ -212,7 +212,7 @@ int mod_timer (void *timer, unsigned int ticks)
 		return -1;
 
 	timer_lock ();
-
+	
 	apptimer = tm_calloc (1, sizeof(APP_TIMER_T));
 
 	if (!apptimer) {
@@ -304,8 +304,12 @@ int del_timer (void *timer)
 {
 	TIMER_T  *p = (TIMER_T *)timer;
 
-	if (p && p->apptimer && p->is_running)
-		stop_timer (p);
+	timer_lock ();
+
+	p->flags |= TIMER_DELETE;
+
+	timer_unlock ();
+
 	return 0;
 }
 

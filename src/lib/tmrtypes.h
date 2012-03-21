@@ -36,11 +36,12 @@ struct wait_tmr {
 	unsigned int count;
 };
 
+struct app_timer;
 
 typedef struct tm_timer
 {
 	void           *data;
-	void           *apptimer;
+	struct app_timer *apptimer;
  	void           (*time_out_handler)(void *);
 	unsigned int    rmt;
 	unsigned int    exp;
@@ -72,6 +73,7 @@ typedef struct app_timer {
 #define TIMER_ONCE  	0x1
 #define TIMER_REPEAT  	0x2 
 #define TIMER_FOREVER   0x4
+#define TIMER_DELETE    0x8
 
 
 /*
