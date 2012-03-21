@@ -11,18 +11,18 @@
 #include "inc.h"
 
 struct list_head expd_tmrs;
+static void process_expd_timers (void);
 
 void btm_hlf (void)
 {
-#ifdef SFS_WANTED
-	tm_process_tick_and_update_timers ();
-#endif
+	tmr_expiry_lock ();
 	if (!list_empty (&expd_tmrs)) {
 		process_expd_timers ();
 	}
+	tmr_expiry_unlock ();
 }
 
-void process_expd_timers (void)
+static void process_expd_timers (void)
 {
 	APP_TIMER_T		  *ptmr = NULL;
 	struct list_head  *pnode = NULL;
@@ -52,3 +52,4 @@ void process_expd_timers (void)
 		free (ptmr);
 	}
 }
+

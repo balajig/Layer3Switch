@@ -43,6 +43,8 @@ static int stp_init_stp_instance (struct stp_instance  *new, uint16_t vlan_id)
 
 	int j = 0;
 
+	create_sync_lock (&new->br_lock);
+
 	INIT_LIST_HEAD (&new->next);
 	INIT_LIST_HEAD (&new->port_list);
 
@@ -72,10 +74,9 @@ static int stp_init_stp_instance (struct stp_instance  *new, uint16_t vlan_id)
         new->topology_change = FALSE;
         new->topology_change_detected = TRUE;
 
-	create_sync_lock (&new->br_lock);
-	sync_unlock (&new->br_lock);
-
 	stp_timer_init (new);
+
+	sync_unlock (&new->br_lock);
 
 	return 0;
 }
@@ -137,6 +138,8 @@ int  stp_create_port (struct stp_instance *stp_inst, int port)
 	struct stp_port_entry *p = NULL;
 	int j  = 0;
 
+	sync_lock (&stp_inst->br_lock);
+
 	p = tm_malloc (sizeof (struct stp_port_entry));
 
 	if (p) {
@@ -159,6 +162,7 @@ int  stp_create_port (struct stp_instance *stp_inst, int port)
 		list_add_tail (&p->list, &p->br->port_list);
 		rval = 0;
 	}
+	sync_unlock (&stp_inst->br_lock);
 	return rval;
 }	
 
@@ -817,10 +821,12 @@ static void stp_encode_bpdu (STP_BPDU_T *cpdu)
 	cpdu->root_id.prio   = htons(cpdu->root_id.prio);
 	cpdu->bridge_id.prio = htons(cpdu->bridge_id.prio);
 	cpdu->root_path_cost = htonl(cpdu->root_path_cost);
+#if 0
 	cpdu->message_age    = htons(cpdu->message_age);
 	cpdu->max_age        = htons(cpdu->max_age);
 	cpdu->hello_time     = htons(cpdu->hello_time);
 	cpdu->forward_delay  = htons(cpdu->forward_delay);
+#endif
 }
 
 static void stp_decode_bpdu (STP_BPDU_T *cpdu)
@@ -828,9 +834,11 @@ static void stp_decode_bpdu (STP_BPDU_T *cpdu)
 	cpdu->root_id.prio   = ntohs(cpdu->root_id.prio);
 	cpdu->bridge_id.prio = ntohs(cpdu->bridge_id.prio);
 	cpdu->root_path_cost = ntohl(cpdu->root_path_cost);
+#if 0
 	cpdu->message_age    = ntohs(cpdu->message_age);
 	cpdu->max_age        = ntohs(cpdu->max_age);
 	cpdu->hello_time     = ntohs(cpdu->hello_time);
 	cpdu->forward_delay  = ntohs(cpdu->forward_delay);
+#endif
 	cpdu->port_id        = ntohs(cpdu->port_id);
 }
