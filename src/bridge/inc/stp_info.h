@@ -89,6 +89,10 @@ struct stp_port_entry {
         uint64_t    fwdtransitions;
 	struct list_head list;
 	struct stp_instance *br;
+        TIMER_ID    forward_delay_timer;
+        TIMER_ID    hold_timer;
+        TIMER_ID    message_age_timer;
+        PORT        port_no;
 	int32_t     designated_age;
         int32_t     priority;
         int32_t     state;
@@ -96,12 +100,8 @@ struct stp_port_entry {
         int32_t     path_cost;
         BRIDGEID    designated_root;
         BRIDGEID    designated_bridge;
-        TIMER_ID    forward_delay_timer;
-        TIMER_ID    hold_timer;
-        TIMER_ID    message_age_timer;
         uint16_t    designated_port;
 	uint16_t    port_id;
-        PORT        port_no;
 	uint8_t     topology_change_ack;
         uint8_t	    config_pending;
 	uint8_t     is_own_bpdu;
