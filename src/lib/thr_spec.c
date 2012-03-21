@@ -94,8 +94,8 @@ static inline void timer_rq_init (void)
 int init_timer_mgr (void)
 {
 	int i = TIMER_WHEEL;
-	static tmtaskid_t btmhlftask_id = 0;
-	static tmtaskid_t task_id = 0;
+	tmtaskid_t btmhlftask_id = 0;
+	tmtaskid_t task_id = 0;
 
 	timer_rq_init ();
 
