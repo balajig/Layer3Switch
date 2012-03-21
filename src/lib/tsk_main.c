@@ -12,8 +12,6 @@
 
 #include "common_types.h"
 
-int                 g_tsks_crtd = 0;
-
 LIST_HEAD(tsk_hd);
 
 tmtaskid_t          curtskid;
@@ -29,32 +27,23 @@ void * tsk_wrap (void *ptskarg);
  */
 
 retval_t task_create (const char tskname[], int tsk_prio, int sched_alg, int stk_size,
-	              void *(*start_routine) (void *), void (*exit_routine) (),
-		      void *arg, tmtaskid_t * rettskid)
+		void *(*start_routine) (void *), void (*exit_routine) (),
+		void *arg, tmtaskid_t * rettskid)
 {
 	retval_t            Ret_val = TSK_FAILURE;
-	tmtask_t           *ptsk_info = NULL;
+	tmtask_t           ptsk_info;
 
-	Ret_val = validate_tsk_params (tskname, sched_alg, stk_size, start_routine);
+	fill_tsk_info (tskname, tsk_prio, sched_alg, stk_size,
+			start_routine, exit_routine, arg, &ptsk_info);
+
+	Ret_val = init_tsk (&ptsk_info);
 
 	if (Ret_val != TSK_FAILURE)
 	{
+		Ret_val = start_task (&ptsk_info, rettskid) ;
 
-		ptsk_info = (tmtask_t *) tsk_alloc (sizeof (tmtask_t), 1);
-
-		if (!ptsk_info)
-			return TSK_FAILURE;
-
-		fill_tsk_info (tskname, tsk_prio, sched_alg, stk_size,
-				start_routine, exit_routine, arg, ptsk_info);
-
-		Ret_val = init_tsk (ptsk_info);
-
-		if (Ret_val != TSK_FAILURE)
-		{
-			++g_tsks_crtd;
-
-			return start_task (ptsk_info, rettskid);
+		if (Ret_val == TSK_FAILURE) {
+			deinit_tsk (&ptsk_info);
 		}
 	}
 	return Ret_val;
@@ -65,47 +54,6 @@ retval_t init_tsk (tmtask_t * ptskinfo)
 	init_tsk_attr (ptskinfo);
 
 	init_tsk_mtx_and_cond (ptskinfo);
-
-	return TSK_SUCCESS;
-}
-
-void * tsk_wrap (void *ptskarg)
-{
-	tmtask_t           *ptsk = (tmtask_t *) ptskarg;
-
-	ptsk->tsk_pid = get_tsk_pid ();
-
-	ptsk->tsk_strt_tk = times (NULL);
-
-	ptsk->tsk_state = TSK_RUNNING;
-
-	tsk_node_add (ptsk);
-
-	ptsk->start_routine (ptsk->tskarg);
-
-	return NULL;
-}
-
-retval_t task_delete (char tskname[], tmtaskid_t tskid)
-{
-	tmtask_t           *ptskinfo = get_tsk_info (tskname, tskid);
-
-	if (!ptskinfo)
-		return TSK_FAILURE;
-
-	if (istsk_selftsk (ptskinfo))
-		return TSK_FAILURE;
-
-	deinit_tsk (ptskinfo);
-
-	tsk_node_del (ptskinfo);
-
-	if (ptskinfo->exit_routine)
-		ptskinfo->exit_routine ();
-
-	tsk_cancel (ptskinfo->task_id);
-
-	tsk_dealloc ((void *) ptskinfo);
 
 	return TSK_SUCCESS;
 }

@@ -38,12 +38,11 @@ deinit_tsk_mtx_and_cond (tmtask_t * ptskinfo)
 retval_t
 start_task (tmtask_t * ptskinfo, tmtaskid_t * ptskid)
 {
-    if (pthread_create (ptskid, &ptskinfo->tsk_attr, tsk_wrap,
-                        (void *) ptskinfo))
+    if (pthread_create (ptskid, &ptskinfo->tsk_attr, ptskinfo->start_routine,
+                        (void *) ptskinfo->tskarg))
     {
         return TSK_FAILURE;
     }
-    ptskinfo->task_id = *ptskid;
     return TSK_SUCCESS;
 }
 
@@ -124,41 +123,4 @@ void tsk_mdelay (int msecs)
 pid_t get_tsk_pid ()
 {
     return syscall (SYS_gettid);
-}
-
-int
-evt_rx (tmtaskid_t tskid, int *pevent, int event)
-{
-    tmtask_t           *tskinfo = get_tsk_info_frm_id (tskid);
-
-    if (!tskinfo)
-        return TSK_FAILURE;
-
-    pthread_mutex_lock (&tskinfo->evt_mtx);
-
-    while (1)
-    {
-        if (tskinfo->curr_evt & event)
-        {
-            *pevent = tskinfo->curr_evt;
-            tskinfo->curr_evt &= 0;
-            pthread_mutex_unlock (&tskinfo->evt_mtx);
-            return TSK_SUCCESS;
-        }
-        pthread_cond_wait (&tskinfo->tsk_cnd, &tskinfo->evt_mtx);
-    }
-}
-
-void
-evt_snd (tmtaskid_t tskid, int event)
-{
-    tmtask_t           *tskinfo = get_tsk_info_frm_id (tskid);
-
-    pthread_mutex_lock (&tskinfo->evt_mtx);
-
-    tskinfo->prev_evt = tskinfo->curr_evt;
-    tskinfo->curr_evt |= event;
-
-    pthread_cond_signal (&tskinfo->tsk_cnd);
-    pthread_mutex_unlock (&tskinfo->evt_mtx);
 }
