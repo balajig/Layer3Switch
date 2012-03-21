@@ -113,7 +113,9 @@ int init_timer_mgr (void)
 		sync_unlock (&tmrrq.root[i].lock);
 	}
 
-	tmr_expiry_lock_init ();
+	timer_lock_create ();
+
+	bh_timer_lock_create ();
 
 	return SUCCESS;
 }

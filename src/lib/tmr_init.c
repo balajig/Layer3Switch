@@ -17,6 +17,8 @@ static TIMER_T * alloc_timer (void);
 static int alloc_timer_id (void);
 void show_uptime (void);
 
+static sync_lock_t core_timer;
+
 
 /************* Private Variable Declaration *********************/
 static int indx = 0;
@@ -26,6 +28,22 @@ static int indx = 0;
 struct active_timers  tmrrq;
 unsigned  int clk[TIMER_WHEEL];
 /****************************************************************/
+
+void timer_lock (void)
+{
+	sync_lock (&core_timer);
+}
+
+void timer_unlock (void)
+{
+	sync_unlock (&core_timer);
+}
+
+void timer_lock_create (void)
+{
+	create_sync_lock (&core_timer);
+	timer_unlock ();
+}
 
 static inline void update_wheel (TIMER_T *p, int wheel)
 {
@@ -113,8 +131,11 @@ void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), in
 	APP_TIMER_T *apptimer = NULL;
 	int idx = 0;
 
+	timer_lock ();
+
 	if ( !(idx = alloc_timer_id ())  || 
              !(new = alloc_timer ())) {
+		timer_unlock ();
 		return NULL;
 	}
 
@@ -132,6 +153,7 @@ void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), in
 
 	if (!apptimer) {
 		free_timer (new);
+		timer_unlock ();
 		return NULL;
 	}
 
@@ -147,6 +169,8 @@ void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), in
 
 	INC_TIMER_COUNT ();
 
+	timer_unlock ();
+
 	return (void *)new;
 }
 
@@ -154,9 +178,12 @@ int setup_timer (void **p, void (*handler) (void *), void *data)
 {
 	TIMER_T  *new = NULL;
 	int idx = 0;
+	
+	timer_lock ();
 
 	if ( !(idx = alloc_timer_id ())  || 
              !(new = alloc_timer ())) {
+		timer_unlock ();
 		return -1;
 	}
 
@@ -171,6 +198,8 @@ int setup_timer (void **p, void (*handler) (void *), void *data)
 
 	*(TIMER_T **)p = new;
 
+	timer_unlock ();
+
 	return 0;
 }
 
@@ -181,6 +210,8 @@ int mod_timer (void *timer, unsigned int ticks)
 
 	if (!p)
 		return -1;
+
+	timer_lock ();
 
 	apptimer = tm_calloc (1, sizeof(APP_TIMER_T));
 
@@ -201,6 +232,8 @@ int mod_timer (void *timer, unsigned int ticks)
 	find_tmr_slot_and_place (apptimer);
 
 	INC_TIMER_COUNT ();
+	
+	timer_unlock ();
 
 	return 0;
 }
@@ -218,6 +251,8 @@ int timer_restart  (TIMER_T *p)
 		return -1;
 	}
 
+	timer_lock ();
+
 	INIT_LIST_HEAD (&apptimer->elist);
 
 	p->apptimer = apptimer;
@@ -227,6 +262,8 @@ int timer_restart  (TIMER_T *p)
 	find_tmr_slot_and_place (apptimer);
 
 	INC_TIMER_COUNT ();
+
+	timer_unlock ();
 
 	return 0;
 }
@@ -244,6 +281,8 @@ int stop_timer (void *timer)
 {
 	TIMER_T  *p = (TIMER_T *)timer;
 
+	timer_lock ();
+
 	if (p && p->apptimer && p->is_running) {
 
 		timer_del (p->apptimer, &tmrrq.root[p->wheel]);
@@ -251,9 +290,13 @@ int stop_timer (void *timer)
 		p->is_running = 0;
 
 		free (p->apptimer);
+
+		p->apptimer = NULL;
 	
 		DEC_TIMER_COUNT ();
 	}
+
+	timer_unlock ();
 	return 0;
 }
 
@@ -302,6 +345,8 @@ service_req:
 
 void update_times ()
 {
+	timer_lock ();
+
 	if (!(++clk[TICK] % tm_get_ticks_per_second ())) {
 
 		if (!((++clk[SEC]) % 60) && !((++clk[MIN]) % 60)) {
@@ -311,6 +356,8 @@ void update_times ()
 	if (timers_pending_for_service ()) {
 		service_timers ();
 	}
+
+	timer_unlock ();
 }
 
 unsigned int get_secs (void)

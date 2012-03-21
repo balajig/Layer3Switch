@@ -14,32 +14,16 @@ static APP_TIMER_T * timer_tree_walk (struct rb_root  *root, unsigned int key, c
 
 #define IS_TMR_EXPD(ptmr)               !ptmr->ctime 
 
-static sync_lock_t  expiry;
-
-void tmr_expiry_lock (void)
-{
-	sync_lock (&expiry);
-}
-
-void tmr_expiry_unlock (void)
-{
-	sync_unlock (&expiry);
-}
-
-void tmr_expiry_lock_init (void)
-{
-	create_sync_lock (&expiry);
-	tmr_expiry_unlock ();
-}
-
 static inline void timer_expiry_action (APP_TIMER_T * ptmr)
 {
 	if (IS_TMR_EXPD (ptmr)) {
 		DEC_TIMER_COUNT ();
 		ptmr->timer->is_running = 0;
-		tmr_expiry_lock ();
+		timer_unlock ();
+		bh_timer_lock ();
 		list_add_tail (&ptmr->elist, &expd_tmrs);
-		tmr_expiry_unlock ();
+		bh_timer_unlock ();
+		timer_lock ();
 #ifdef TIMER_DEBUG
 		printf ("runtime : %d curr ticks : %d expiry : %d \n", ptmr->timer->rmt, get_ticks (), ptmr->timer->exp);
 #endif

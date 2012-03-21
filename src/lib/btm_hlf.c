@@ -12,14 +12,32 @@
 
 struct list_head expd_tmrs;
 static void process_expd_timers (void);
+static sync_lock_t bh_timer;
+
+void bh_timer_lock (void)
+{
+	sync_lock (&bh_timer);
+}
+
+void bh_timer_unlock (void)
+{
+	sync_unlock (&bh_timer);
+}
+
+void bh_timer_lock_create (void)
+{
+	create_sync_lock (&bh_timer);
+	bh_timer_unlock ();
+}
+
 
 void btm_hlf (void)
 {
-	tmr_expiry_lock ();
+	bh_timer_lock ();
 	if (!list_empty (&expd_tmrs)) {
 		process_expd_timers ();
 	}
-	tmr_expiry_unlock ();
+	bh_timer_unlock  ();
 }
 
 static void process_expd_timers (void)
