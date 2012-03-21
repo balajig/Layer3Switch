@@ -87,8 +87,8 @@ int mem_pool_create (const char *name, size_t size, int n_blks, int flags)
 	if (!name || !name[0] || !size  || !n_blks)
 		return -1;
 
-	/*Allocate 1 byte blk status to indicate free or not*/
-	size++;
+	/*Allocate 4 byte blk status to for house-keeping info*/
+	size += 4;
 
 	bytes = size * n_blks;  
 
@@ -243,8 +243,8 @@ void * alloc_block (int memid)
 	}
 
 	if (p->addr_cache) {
-		*(uint8_t *)p->addr_cache = ALLOCATED;
-		retaddr = ((uint8_t *)p->addr_cache + sizeof (uint8_t));
+		*(uint32_t *)p->addr_cache = ALLOCATED;
+		retaddr = ((uint8_t *)p->addr_cache + sizeof (uint32_t));
 		p->fblks--;
 		p->useblks++;
 		p->addr_cache = NULL;
@@ -285,7 +285,7 @@ int free_blk (int memid, void *addr)
 	sync_lock (&p->lock);
 
 	/*Move pointer 1 byte backwards to access the status flag*/
-	addr  = (uint8_t *)addr - sizeof (uint8_t); 
+	addr  = (uint8_t *)addr - sizeof (uint32_t); 
 
 	if (!in_range (p->saddr, (p->saddr + (p->size * p->nblks)), p->size, 
 		       (uint8_t *)addr)) 
