@@ -14,7 +14,7 @@ COMPILATION_SWITCH += -DWIN32_WANTED
 endif
 
 COMMON_INC= $(CODE_DIR)/TechMindsLib/cmn
-COMMON_INC= $(CODE_DIR)/../src/inc  -I$(CODE_DIR)/../src/lib
+COMMON_INC= $(CODE_DIR)/../src/inc  -I$(CODE_DIR)/../src/lib -I$(CODE_DIR)/../src/platform/inc/linux
 
 INC_DIR = $(CODE_DIR)/inc
 SRC_DIR = $(CODE_DIR)/src

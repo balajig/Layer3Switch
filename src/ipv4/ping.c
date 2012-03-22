@@ -398,6 +398,7 @@ static void ping(const char *host)
 		socklen_t fromlen = (socklen_t) sizeof(from);
 		int c;
 		sendping(0);
+		sleep (1);
 		if ((c = recvfrom(pingsock, packet, sizeof(packet), 0,
 						  (struct sockaddr *) &from, &fromlen)) < 0) {
 			if (errno == EINTR)

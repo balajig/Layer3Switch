@@ -1,6 +1,9 @@
 #!/bin/sh
 
 export FINAL_OBJ=$PWD/obj/
+export PLATFORM_EXE=sim
+export PLATFORM_OS=linux
+
 
 if [ "$1" = "" ]; then
 	echo "Building TM Virtual Lib"

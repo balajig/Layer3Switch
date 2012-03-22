@@ -684,7 +684,7 @@ lwip_recvfrom (int s, void *mem, size_t len, int flags,
                 /* We should really do some error checking here. */
                 LWIP_DEBUGF (SOCKETS_DEBUG,
                              ("lwip_recvfrom(%d): buf == NULL, error is \"%s\"!\n",
-                              s, lwip_strerr (err)));
+                              s, strerror (err)));
                 sock_set_errno (sock, err_to_errno (err));
                 if (err == ERR_CLSD)
                 {

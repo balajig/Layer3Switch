@@ -9,37 +9,6 @@
  * all present and future rights to this code under copyright law. 
  */
 
-#if 0
-#if !defined(_WIN32)
-#	if !defined(_POSIX_SOURCE)
-#		define _POSIX_SOURCE
-#	endif
-#	if !defined(_BSD_SOURCE)
-#		define _BSD_SOURCE
-#	endif
-
-#	include <sys/socket.h>
-#	include <netinet/in.h>
-#	include <arpa/inet.h>
-#	include <poll.h>
-#	include <unistd.h>
-#else
-#	include <winsock2.h>
-#	include <ws2tcpip.h>
-
-#	define snprintf _snprintf
-#	define poll WSAPoll
-#	define close closesocket
-#	define strdup _strdup
-#	define ECONNRESET WSAECONNRESET
-#endif
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#endif
-
 #include "common_types.h"
 #include "libtelnet.h"
 #include "sockets.h"

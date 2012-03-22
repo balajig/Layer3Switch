@@ -9,31 +9,11 @@
  * all present and future rights to this code under copyright law.
  */
 
-#if !defined(_POSIX_SOURCE)
-# define _POSIX_SOURCE
-#endif
-#if !defined(_BSD_SOURCE)
-# define _BSD_SOURCE
-#endif
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <poll.h>
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <termios.h>
-#include <unistd.h>
-
-#ifdef HAVE_ZLIB
-#include "zlib.h"
-#endif
-
+#include "common_types.h"
 #include "libtelnet.h"
+#include "sockets.h"
+#include "socks.h"
+#include <termios.h>
 
 static struct termios orig_tios;
 static telnet_t *telnet;
@@ -159,14 +139,13 @@ int telnet_to (char *host, char *port)
 	int rs;
 	int sock;
 	struct sockaddr_in addr;
-	struct pollfd pfd[2];
 	struct addrinfo *ai;
 	struct addrinfo hints;
 	struct termios tios;
 
 	/* look up server host */
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
+	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 	if ((rs = getaddrinfo(host, "23", &hints, &ai)) != 0) {
 		fprintf(stderr, "getaddrinfo() failed for %s: %s\n", host,
@@ -213,17 +192,19 @@ int telnet_to (char *host, char *port)
 	/* initialize telnet box */
 	telnet = telnet_init(telopts, _event_handler, 0, &sock);
 
-	/* initialize poll descriptors */
-	memset(pfd, 0, sizeof(pfd));
-	pfd[0].fd = STDIN_FILENO;
-	pfd[0].events = POLLIN;
-	pfd[1].fd = sock;
-	pfd[1].events = POLLIN;
-
 	/* loop while both connections are open */
-	while (poll(pfd, 2, -1) != -1) {
+	while (1) {
+		fd_set rfds;
+
+		/* Watch stdin (fd 0) to see when it has input. */
+		FD_ZERO(&rfds);
+		FD_SET(STDIN_FILENO, &rfds);
+		FD_SET(sock, &rfds);
+
+		if (select(sock + 1, &rfds, NULL, NULL, NULL) < 0)
+			continue;
 		/* read from stdin */
-		if (pfd[0].revents & POLLIN) {
+		if (FD_ISSET (STDIN_FILENO, &rfds)) {
 			if ((rs = read(STDIN_FILENO, buffer, sizeof(buffer))) > 0) {
 				_input(buffer, rs);
 			} else if (rs == 0) {
@@ -236,7 +217,7 @@ int telnet_to (char *host, char *port)
 		}
 
 		/* read from client */
-		if (pfd[1].revents & POLLIN) {
+		if (FD_ISSET (sock, &rfds)) {
 			if ((rs = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
 				telnet_recv(telnet, buffer, rs);
 			} else if (rs == 0) {

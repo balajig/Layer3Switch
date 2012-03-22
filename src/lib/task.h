@@ -19,6 +19,7 @@
 #define  NO_TASK_ID    1
 #define  TSK_SUCCESS 1
 #define  TSK_FAILURE 0
+#define  MAX_TASK_NAME       16 
 
 typedef long int retval_t;
 

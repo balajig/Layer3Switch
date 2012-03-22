@@ -10,6 +10,7 @@ vmgr_OBJ_DIR = $(vmgr_CODE_DIR)/obj
 vmgr_OBJS += $(vmgr_OBJ_DIR)/main.o
 vmgr_OBJS += $(vmgr_OBJ_DIR)/cli_main.o
 vmgr_OBJS += $(vmgr_OBJ_DIR)/cmd_parser.o
+vmgr_OBJS += $(vmgr_OBJ_DIR)/arch_os.o
 
 all: all-before  obj $(vmgr_OBJS) tmvirtual all-after
 
@@ -27,6 +28,10 @@ $(vmgr_OBJ_DIR)/cli_main.o: $(vmgr_SRCC_DIR)/cli_main.c
 
 $(vmgr_OBJ_DIR)/cmd_parser.o: $(vmgr_SRCC_DIR)/cmd_parser.c
 	$(CC) -c $(COMPILATION_SWITCH) $(vmgr_SRCC_DIR)/cmd_parser.c -o $(vmgr_OBJ_DIR)/cmd_parser.o $(CFLAGS) -I$(vmgr_INC_DIR)
+
+$(vmgr_OBJ_DIR)/arch_os.o: $(vmgr_SRCC_DIR)/arch_os.c
+	$(CC) -c $(COMPILATION_SWITCH) $(vmgr_SRCC_DIR)/arch_os.c -o $(vmgr_OBJ_DIR)/arch_os.o $(CFLAGS) -I$(vmgr_INC_DIR)
+
 
 tmvirtual:
 	gcc -o tmvirtual $(FINAL_OBJ)/*  $(LIB)

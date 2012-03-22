@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <semaphore.h>
+#include <os_defs.h>
 #include "rbtree.h"
 #include "list.h"
 #include "cmd.h"

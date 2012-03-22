@@ -15,8 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-
+#include <os_defs.h>
 #include "rbtree.h"
 #include "list.h"
 #include "cmd.h"

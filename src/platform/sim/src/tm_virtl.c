@@ -1,12 +1,25 @@
-#include "common_types.h"
-#include "ifmgmt.h"
-#include "sockets.h"
-#include "types_sim.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/types.h>      
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <netpacket/packet.h>
+#include <net/ethernet.h> /* the L2 protocols */
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <mqueue.h>
-#include <linux/if.h>
-#include <net/ethernet.h> /* the L2 protocols */
+#include <net/if.h>
+#include <arpa/inet.h>
+#include <stdint.h>
+#include <getopt.h>
+#include <asm/types.h>
+#include "os_defs.h"
+#include "list.h"
+#include "task.h"
+#include "types_sim.h"
+#include <sys/ioctl.h>
 
 #define ARPHRD_ETHER    1
 

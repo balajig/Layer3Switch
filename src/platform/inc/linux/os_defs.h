@@ -16,7 +16,6 @@
 #include <semaphore.h>
 
 #define  MIN_THREAD_STACK_SIZE   20000  /*should be atleast PTHREAD_STACK_MIN (bits/local_lim.h)*/
-#define  MAX_TASK_NAME       16 
 #define  MAX_TSKS            100
 
 typedef sem_t               sync_lock_t;
