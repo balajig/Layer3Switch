@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <semaphore.h>
 #include "common_types.h"
+#include "err.h"
 
 tmtaskid_t tsk_selfid ();
 tmtask_t           * get_tsk_info_frm_id (tmtaskid_t tskid);
@@ -194,4 +195,135 @@ void tsk_mdelay (int msecs)
 pid_t get_tsk_pid ()
 {
     return syscall (SYS_gettid);
+}
+
+int EventInit (EVT_T *p)
+{
+	if (!p)
+		return -1;
+
+	pthread_cond_init (&p->evt_cnd, NULL);
+	pthread_mutex_init (&p->evt_mtx, NULL);
+	return 0;
+}
+
+int EventDeInit (EVT_T *p)
+{
+	if (!p)
+		return -1;
+
+	pthread_cond_destroy (&p->evt_cnd);
+	pthread_mutex_destroy (&p->evt_mtx);
+	return 0;
+}
+
+
+int EvtRx (EVT_T *evt, int *pevent, int event)
+{
+	pthread_mutex_lock (&evt->evt_mtx);
+
+	while (1)
+	{
+		if (evt->event & event)
+		{
+			*pevent = evt->event;
+			evt->event &= 0;
+			pthread_mutex_unlock (&evt->evt_mtx);
+			return 0;
+		}
+		pthread_cond_wait (&evt->evt_cnd, &evt->evt_mtx);
+	}
+
+	return -1;
+}
+
+int EvtRx_timed_wait (EVT_T *evt, int *pevent, int event, int secs, int nsecs)
+{
+	struct timespec ts;
+	int    err = 0;
+
+	pthread_mutex_lock (&evt->evt_mtx);
+
+	clock_gettime(CLOCK_REALTIME, &ts);
+
+	ts.tv_sec  += secs;
+	ts.tv_nsec += nsecs;
+
+	while (1)
+	{
+		if (evt->event & event)
+		{
+			*pevent = evt->event;
+			evt->event &= 0;
+			pthread_mutex_unlock (&evt->evt_mtx);
+			return 0;
+		}
+		err =  pthread_cond_timedwait (&evt->evt_cnd, &evt->evt_mtx, &ts);
+		if (err == ETIMEDOUT) {
+			pthread_mutex_unlock (&evt->evt_mtx);
+			return ERR_TIMEOUT;
+		}
+	}
+
+	return -1;
+}
+
+
+void EvtSnd (EVT_T *evt, int event)
+{
+
+	pthread_mutex_lock (&evt->evt_mtx);
+
+	evt->event |= event;
+
+	pthread_cond_signal (&evt->evt_cnd);
+	pthread_mutex_unlock (&evt->evt_mtx);
+
+	return;
+}
+int EvtLock (EVT_T *evt)
+{
+	if (!evt)
+		return -1;
+
+	return pthread_mutex_lock (&evt->evt_mtx);
+}
+
+int EvtUnLock (EVT_T *evt)
+{
+	if (!evt)
+		return -1;
+
+	return pthread_mutex_unlock (&evt->evt_mtx);
+}
+
+int EvtWaitOn (EVT_T *evt)
+{
+	if (!evt)
+		return -1;
+	return pthread_cond_wait (&evt->evt_cnd, &evt->evt_mtx);
+}
+
+int EvtWaitOnTimed (EVT_T *evt, int secs, int nsecs)
+{
+	struct timespec ts;
+
+	if (!evt)
+		return -1;
+
+	clock_gettime(CLOCK_REALTIME, &ts);
+
+	ts.tv_sec  += secs;
+	ts.tv_nsec += nsecs;
+
+	return pthread_cond_timedwait (&evt->evt_cnd, &evt->evt_mtx, &ts);
+}
+
+
+void EvtSignal (EVT_T *evt)
+{
+	if (!evt)
+		return;
+	pthread_cond_signal (&evt->evt_cnd);
+	pthread_mutex_unlock (&evt->evt_mtx);
 }

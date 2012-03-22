@@ -18,7 +18,6 @@ LIBS_SRCS += $(LIBS_SRCC_DIR)/thr_spec.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/btm_hlf.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/mem_main.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/tsk_main.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/event.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/memp.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/mem.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/pbuf.c
