@@ -13,7 +13,6 @@
 
 #ifndef TASK_H
 #define TASK_H
-#include "os_defs.h"
 #include "list.h"
 
 #define  NONE          0

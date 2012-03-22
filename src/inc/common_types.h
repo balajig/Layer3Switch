@@ -7,12 +7,11 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/times.h>
-#include <sys/time.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <stdint.h>
+#include <getopt.h>
+#include "os_defs.h"
 
 #ifndef STDIN_FILENO
 # define STDIN_FILENO    0

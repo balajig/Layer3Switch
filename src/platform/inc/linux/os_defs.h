@@ -8,7 +8,10 @@
  *  2 of the License, or (at your option) any later version.
  *
  */
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/times.h>
+#include <sys/time.h>
 #include <pthread.h>
 #include <semaphore.h>
 
