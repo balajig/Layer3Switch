@@ -39,8 +39,7 @@ struct Q {
 	int size;
 	int mpool_id;
 	int flags;
-        tskmtx_t q_mtx;
-        tskcnd_t q_cnd;
+	EVT_T  q_evt;
 	struct list_head msg_list;
 };
 
@@ -98,8 +97,7 @@ int msg_create_Q (const char *name, int maxmsg, int size)
 	Queue[qid].size = size;
 	Queue[qid].flags = MQ_ACTIVE;
 
-	pthread_cond_init (&Queue[qid].q_cnd, NULL);
-	pthread_mutex_init (&Queue[qid].q_mtx, NULL);
+	EventInit (&Queue[qid].q_evt);
 
 	return qid;
 }
@@ -109,7 +107,7 @@ int msg_rcv (mqd_t qid, char **msg, int size)
 {
 	struct msg * p = NULL;
 	
-	pthread_mutex_lock (&Queue[qid].q_mtx);
+	EvtLock (&Queue[qid].q_evt);
 
 	while (1) {
 		if (!list_empty (&Queue[qid].msg_list)) {
@@ -118,10 +116,10 @@ int msg_rcv (mqd_t qid, char **msg, int size)
 			*msg = p->msg; 
 			list_del (&p->next);
 			free_blk (Queue[qid].mpool_id, p);
-			pthread_mutex_unlock (&Queue[qid].q_mtx);
+			EvtUnLock (&Queue[qid].q_evt);
 			return 0;
 		}
-		pthread_cond_wait (&Queue[qid].q_cnd, &Queue[qid].q_mtx);
+		EvtWaitOn (&Queue[qid].q_evt);
 	}
 	return -1;
 }
@@ -129,15 +127,15 @@ int msg_rcv (mqd_t qid, char **msg, int size)
 int msg_send (mqd_t qid, void *msg, int size)
 {
 	struct msg * p = NULL;
-	pthread_mutex_lock (&Queue[qid].q_mtx);
-	
+
+	EvtLock (&Queue[qid].q_evt);
+
 	if ((p = alloc_block (Queue[qid].mpool_id))) {
 		INIT_LIST_HEAD (&p->next);
 		p->msg = msg;
 		list_add_tail (&p->next, &Queue[qid].msg_list);
 	}
 
-	pthread_cond_signal (&Queue[qid].q_cnd);
-	pthread_mutex_unlock (&Queue[qid].q_mtx);
+	EvtSignal (&Queue[qid].q_evt);
 	return 0;
 }
