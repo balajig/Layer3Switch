@@ -12,6 +12,7 @@ SIM_OBJ_DIR = $(SIM_CODE_DIR)/obj
 SIM_OBJS += $(SIM_OBJ_DIR)/main_sim.o
 SIM_OBJS += $(SIM_OBJ_DIR)/tm_virtl.o
 SIM_OBJS += $(SIM_OBJ_DIR)/hal_cli.o
+SIM_OBJS += $(SIM_OBJ_DIR)/arch_os.o
 SIM_OBJS += $(SIM_OBJ_DIR)/hal.o
 SIM_OBJS += $(SIM_OBJ_DIR)/port.o
 
@@ -31,6 +32,9 @@ $(SIM_OBJ_DIR)/tm_virtl.o: $(SIM_SRCC_DIR)/tm_virtl.c
 
 $(SIM_OBJ_DIR)/port.o: $(SIM_SRCC_DIR)/port.c
 	$(CC) -c $(COMPILATION_SWITCH) $(SIM_SRCC_DIR)/port.c -o $(SIM_OBJ_DIR)/port.o $(CFLAGS) -I$(SIM_INC_DIR)
+
+$(SIM_OBJ_DIR)/arch_os.o: $(CODE_DIR)/platform/linux/src/arch_os.c
+	$(CC) -c $(COMPILATION_SWITCH) $(CODE_DIR)/platform/linux/src/arch_os.c -o $(SIM_OBJ_DIR)/arch_os.o $(CFLAGS) -I$(SIM_INC_DIR)
 
 $(SIM_OBJ_DIR)/hal_cli.o: $(HAL_CODE_DIR)/hal_cli.c
 	$(CC) -c $(COMPILATION_SWITCH) $(HAL_CODE_DIR)/hal_cli.c -o $(SIM_OBJ_DIR)/hal_cli.o $(CFLAGS) -I$(SIM_INC_DIR)

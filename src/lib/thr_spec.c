@@ -49,15 +49,13 @@ void tm_free (void *p , size_t size)
 
 void * tick_clock (void *unused)
 {
-	struct timespec     req = {0, MILLISEC_2_NANOSEC
-			          (TICK_TIMER_GRANULARITY)};
 	register clock_t    start, end;
 	register int        tick = 0;
 
 	for (;;) {
 
 		start = times (NULL);
-		nanosleep (&req, NULL);
+		tsk_delay (0, MILLISEC_2_NANOSEC (TICK_TIMER_GRANULARITY));
 		end = times (NULL);
 		
 		tick = end - start;

@@ -1,20 +1,91 @@
 /*
- *  Authors:
+ *  Author:
  *  Sasikanth.V        <sasikanth@email.com>
- *
- *  $Id: tsk_lnx.c,v 1.4 2011/01/16 20:00:18 Sasi Exp $
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
+ *
  */
 
+#include <stdio.h>
+#include <setjmp.h>
+#include <time.h>
+#include <sys/time.h>
+#include <signal.h>
+#include <errno.h>
+#include <semaphore.h>
 #include "common_types.h"
 
 tmtaskid_t tsk_selfid ();
 tmtask_t           * get_tsk_info_frm_id (tmtaskid_t tskid);
 void * tsk_wrap (void *ptskarg);
+
+int create_sync_lock (sync_lock_t *slock)
+{
+	if (!slock)
+		return -1;
+	if (sem_init(slock, 0, 0) < 0) {
+		perror ("SEM_INIT: ");
+		return -1;
+	}
+	return 0;
+}
+
+int destroy_sync_lock (sync_lock_t *slock)
+{
+	if (!slock)
+		return -1;
+	if (sem_destroy(slock) < 0) {
+		perror ("SEM_DESTROY: ");
+		return -1;
+	}
+	return 0;
+}
+
+
+int sync_lock (sync_lock_t *slock)
+{
+	while (sem_wait (slock) < 0)  {
+		/*signal interrupts*/
+		if (errno == EINTR) {
+			continue;
+		}
+	}
+
+	return 0;
+}
+
+int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs)
+{
+	struct timespec abs_timeout;
+
+	abs_timeout.tv_sec = secs;
+	abs_timeout.tv_nsec = nanosecs;
+
+	while (sem_timedwait (slock, &abs_timeout) < 0)  {
+		/*signal interrupts*/
+		if (errno == EINTR) {
+			continue;
+		}
+		if (errno == ETIMEDOUT) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+int sync_unlock (sync_lock_t *slock)
+{
+	if (sem_post (slock) < 0) {
+		perror ("SEM_POST: ");
+		return -1;
+	}
+	return 0;
+}
+
 
 retval_t deinit_tsk_attr (tmtask_t * ptskinfo)
 {
