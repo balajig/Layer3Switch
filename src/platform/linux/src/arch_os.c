@@ -88,27 +88,7 @@ int sync_unlock (sync_lock_t *slock)
 }
 
 
-retval_t deinit_tsk_attr (tmtask_t * ptskinfo)
-{
-    pthread_attr_init (&ptskinfo->tsk_attr);
-
-    return TSK_SUCCESS;
-}
-
-retval_t
-deinit_tsk_mtx_and_cond (tmtask_t * ptskinfo)
-{
-    pthread_cond_destroy (&ptskinfo->tsk_cnd);
-
-    pthread_mutex_destroy (&ptskinfo->tsk_mtx);
-
-    pthread_mutex_destroy (&ptskinfo->evt_mtx);
-
-    return TSK_SUCCESS;
-}
-
-retval_t
-start_task (tmtask_t * ptskinfo, tmtaskid_t * ptskid)
+retval_t start_task (tmtask_t * ptskinfo, tmtaskid_t * ptskid)
 {
     if (pthread_create (ptskid, &ptskinfo->tsk_attr, ptskinfo->start_routine,
                         (void *) ptskinfo->tskarg))
@@ -129,21 +109,12 @@ tsk_cancel (tmtaskid_t task_id)
     pthread_cancel (task_id);
 }
 
-retval_t
-init_tsk_mtx_and_cond (tmtask_t * ptskinfo)
+retval_t deinit_tsk_attr (tmtask_t * ptskinfo)
 {
-    pthread_cond_init (&ptskinfo->tsk_cnd, NULL);
-
-    pthread_mutex_init (&ptskinfo->tsk_mtx, NULL);
-
-    pthread_mutex_init (&ptskinfo->evt_mtx, NULL);
-
-    return TSK_SUCCESS;
-
+    pthread_attr_destroy (&ptskinfo->tsk_attr);
 }
 
-retval_t
-init_tsk_attr (tmtask_t * ptskinfo)
+retval_t init_tsk_attr (tmtask_t * ptskinfo)
 {
     struct sched_param  param;
 

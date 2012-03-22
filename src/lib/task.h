@@ -43,17 +43,6 @@ enum
     TSK_SCHED_RR
 }tsk_sched_alg;
 
-enum {
-    TSK_NOT_CREATED = 0, 
-    TSK_RUNNING,
-    TSK_SLEEPING,
-    TSK_SUSPENDED
-}TASK_STATE;  
-
-enum {
-    TSK_RESUME = 4
-}TASK_SIG;
-
 struct pstat
 {
 	long unsigned int utime;
@@ -66,32 +55,17 @@ typedef struct __task_tm__ {
     struct list_head     tsk_node;
     char            task_name[MAX_TASK_NAME];
     tmtaskid_t       task_id;
-#if 0
-    tmsemid_t       sem_id; /*Currently not used */
-#endif
     tmclktk_t       tsk_strt_tk;
-#ifndef SFS_WANTED
-    tskmtx_t        tsk_mtx;
-    tskmtx_t        evt_mtx;
-    tskcnd_t        tsk_cnd;
-#endif
     tskattr_t       tsk_attr;
     int             tsk_pid;
-    int             tsk_state;
     int 	    stksze;
     int             prio;
     int             schedalgo;
-    int             curr_evt;
-    int             prev_evt;
-    int             sig;
     struct pstat    cpu_stats;
     void            *(*start_routine)(void*);
     void            (*exit_routine)();
     void            *tskarg;
 }tmtask_t;
-
-extern int                 g_tsks_crtd;
-extern tmtask_t            gtskinfo[];
 
 retval_t init_tsk (tmtask_t *);
 retval_t start_tsk(tmtask_t *, tmtaskid_t *);
@@ -101,10 +75,6 @@ void fill_tsk_info (const char *tskname, int tsk_prio, int sched_alg, int stk_si
                void *arg, tmtask_t * ptskinfo);
 retval_t validate_tsk_params (const char *tskname, int sched_alg, int stk_size,
                      void *(*start_routine) (void *));
-void tsk_dealloc (void *dptr);
-void * tsk_alloc (int size, int cnt);
-void tsk_node_add (tmtask_t * ptskinfo);
-void tsk_node_del (tmtask_t * ptskinfo);
 tmtaskid_t tsk_get_tskid (char *tskname);
 retval_t deinit_tsk_attr (tmtask_t * ptskinfo);
 retval_t deinit_tsk_mtx_and_cond (tmtask_t * ptskinfo);

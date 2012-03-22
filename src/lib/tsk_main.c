@@ -36,45 +36,25 @@ retval_t task_create (const char tskname[], int tsk_prio, int sched_alg, int stk
 	fill_tsk_info (tskname, tsk_prio, sched_alg, stk_size,
 			start_routine, exit_routine, arg, &ptsk_info);
 
-	Ret_val = init_tsk (&ptsk_info);
+	Ret_val = init_tsk_attr (&ptsk_info);
 
 	if (Ret_val != TSK_FAILURE)
 	{
 		Ret_val = start_task (&ptsk_info, rettskid) ;
 
 		if (Ret_val == TSK_FAILURE) {
-			deinit_tsk (&ptsk_info);
+			deinit_tsk_attr (&ptsk_info);
 		}
 	}
 	return Ret_val;
 }
 
-retval_t init_tsk (tmtask_t * ptskinfo)
-{
-	init_tsk_attr (ptskinfo);
-
-	init_tsk_mtx_and_cond (ptskinfo);
-
-	return TSK_SUCCESS;
-}
-
-retval_t deinit_tsk (tmtask_t * ptskinfo)
-{
-	deinit_tsk_attr (ptskinfo);
-
-	deinit_tsk_mtx_and_cond (ptskinfo);
-
-	return TSK_SUCCESS;
-}
 
 void fill_tsk_info (const char *tskname, int tsk_prio, int sched_alg, int stk_size,
                void *(*start_routine) (void *), void (*exit_routine) (),
                void *arg, tmtask_t * ptskinfo)
 {
     memcpy (ptskinfo->task_name, tskname, MAX_TASK_NAME);
-    ptskinfo->tsk_state = TSK_NOT_CREATED;
-    ptskinfo->curr_evt = NONE;
-    ptskinfo->prev_evt = NONE;
     ptskinfo->prio = tsk_prio;
     ptskinfo->schedalgo = sched_alg;
     ptskinfo->stksze = stk_size;
