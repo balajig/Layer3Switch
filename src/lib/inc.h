@@ -9,24 +9,6 @@
  *  2 of the License, or (at your option) any later version.
  */
 
-#include <stdio.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <fcntl.h>
-#include <termio.h>
-#include <sys/types.h>     /* standard system types       */
-#include <semaphore.h>
 #include "common_types.h"
 #include "list.h"
 #include "rbtree.h"

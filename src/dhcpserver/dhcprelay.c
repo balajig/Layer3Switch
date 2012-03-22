@@ -16,6 +16,8 @@
 //usage:       "Relay DHCP requests between clients and server"
 
 #include "common.h"
+#include "sockets.h"
+#include "socks.h"
 
 #define SERVER_PORT    67
 

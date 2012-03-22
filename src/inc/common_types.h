@@ -14,6 +14,15 @@
 #include <fcntl.h>
 #include <stdarg.h>
 
+#ifndef STDIN_FILENO
+# define STDIN_FILENO    0
+#endif
+#ifndef STDOUT_FILENO
+# define STDOUT_FILENO   1
+#endif
+#ifndef STDERR_FILENO
+# define STDERR_FILENO   2
+#endif
 
 #if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN
 # define BB_BIG_ENDIAN 1

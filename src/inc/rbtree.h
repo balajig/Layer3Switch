@@ -47,7 +47,7 @@ struct rb_node
 struct rb_root
 {
 	struct rb_node *rb_node;
-	sem_t lock;
+	sync_lock_t lock;
 };
 
 

@@ -12,7 +12,7 @@ ifeq ($(TARGET_OS), WINDOWS)
 COMPILATION_SWITCH += -DWIN32_WANTED
 endif
 
-COMMON_INC= $(CODE_DIR)/inc  -I$(CODE_DIR)/lib -I$(CODE_DIR)/cli/inc -I$(CODE_DIR)/cli/src
+COMMON_INC= $(CODE_DIR)/inc  -I$(CODE_DIR)/lib -I$(CODE_DIR)/cli/inc -I$(CODE_DIR)/cli/src -I$(CODE_DIR)/platform/inc/$(PLATFORM_OS)/
 
 CC   = echo $(notdir $<);$(CROSS_COMPILE)gcc 
 CXXFLAGS = $(CXXINCS)  

@@ -16,6 +16,8 @@
 #include <signal.h>
 #include <errno.h>
 #include <semaphore.h>
+#include <unistd.h>
+#include <sys/syscall.h>   /* For SYS_xxx definitions */
 #include "common_types.h"
 #include "err.h"
 
