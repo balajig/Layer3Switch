@@ -51,14 +51,14 @@ static void process_expd_timers (void)
 
 		ptmr = list_entry (pnode, APP_TIMER_T, elist);
 
+		if (ptmr->timer->flags & TIMER_DELETE) {
+			ptmr->timer->flags &= ~TIMER_DELETE;
+			goto deltimer;
+		}
 
 		if (ptmr->timer->time_out_handler) {
 			ptmr->timer->time_out_handler (ptmr->timer->data);
 		}
-
-		list_del (&ptmr->elist);
-
-		ptmr->timer->apptimer = NULL;
 
 		if (ptmr->timer->flags & TIMER_ONCE) {
 			free_timer (ptmr->timer);
@@ -66,6 +66,10 @@ static void process_expd_timers (void)
 		else if (ptmr->timer->flags & TIMER_REPEAT) {
 			timer_restart (ptmr->timer);
 		}
+deltimer:
+		list_del (&ptmr->elist);
+
+		ptmr->timer->apptimer = NULL;
 
 		free (ptmr);
 	}

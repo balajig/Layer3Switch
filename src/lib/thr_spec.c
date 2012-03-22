@@ -15,8 +15,7 @@ void * tick_service (void *unused) ;
 void * tick_clock (void *unused);
 int init_timer_mgr (void);
 
-static tmtaskid_t btmhlftask_id = 0;
-static tmtaskid_t task_id = 0;
+static EVT_T timer_event;
 
 unsigned int tm_get_ticks_per_second (void) 
 {
@@ -78,7 +77,7 @@ void * tick_service (void *unused)
 	int evt = 0;
 
 	while (1) {
-		evt_rx (btmhlftask_id, &evt, TMR_SERVE_TIMERS);
+		EvtRx (&timer_event, &evt, TMR_SERVE_TIMERS);
 
 		if (evt & TMR_SERVE_TIMERS)
 			btm_hlf ();
@@ -95,8 +94,12 @@ static inline void timer_rq_init (void)
 int init_timer_mgr (void)
 {
 	int i = TIMER_WHEEL;
+	tmtaskid_t btmhlftask_id = 0;
+	tmtaskid_t task_id = 0;
 
 	timer_rq_init ();
+
+	EventInit (&timer_event);
 
 	if (task_create ("TMRBHF", 99, TSK_SCHED_RR, 32000,
 	  		  tick_service, NULL, NULL, &btmhlftask_id) == TSK_FAILURE) {
@@ -124,6 +127,6 @@ int init_timer_mgr (void)
 void service_timers (void)
 {
         if (tm_process_tick_and_update_timers ()) {
-		evt_snd (btmhlftask_id, TMR_SERVE_TIMERS);
+		EvtSnd (&timer_event, TMR_SERVE_TIMERS);
 	}
 }

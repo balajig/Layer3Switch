@@ -120,12 +120,9 @@ int stp_delete_stp_instance (struct stp_instance *p)
 {
 	struct stp_port_entry *port = NULL, *next;
 
-	list_del (&p->next);
+	stp_disable (p);
 
-	list_for_each_entry_safe(port, next, &p->port_list, list) {
-		list_del (&port->list);
-		tm_free (port, sizeof(*port));
-	}
+	list_del (&p->next);
 
 	tm_free (p, sizeof(*p));
 	

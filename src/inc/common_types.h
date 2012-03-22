@@ -341,14 +341,14 @@ typedef struct bridge_id
 {       
         uint16_t   prio;
         unsigned char   addr[6];
-}BRIDGEID;
+} __attribute__ ((__packed__))BRIDGEID;
 
 /* Un-numbered PDU format (3 bytes in length) */
 struct llc_pdu_un {
         uint8_t dsap;
         uint8_t ssap;
         uint8_t ctrl_1;
-};
+} __attribute__ ((__packed__));
 
 
 typedef uint16_t PORTID;
