@@ -202,44 +202,13 @@ static const char rcsid[] =
  *     Tue Dec 20 03:50:13 PST 1988
  */
 
-#include <sys/param.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#include <sys/socket.h>
-#ifdef HAVE_SYS_SYSCTL_H
-#include <sys/sysctl.h>
-#endif
-#include <sys/time.h>
-
-
-#include <arpa/inet.h>
-
-#ifdef	IPSEC
-#include <net/route.h>
-#include <netinet6/ipsec.h>	/* XXX */
-#endif	/* IPSEC */
-
-#include <ctype.h>
-#include <err.h>
-#include <errno.h>
-#include <fcntl.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <memory.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#include "gnuc.h"
-#ifdef HAVE_OS_PROTO_H
-#include "os-proto.h"
-#endif
+#include "common_types.h"
+#include "ip_hdr.h"
+#include "netdb.h"
+#include "icmp.h"
+#include "signal.h"
+#include "sockets.h"
+#include "socks.h"
 
 /* rfc1716 */
 #ifndef ICMP_UNREACH_FILTER_PROHIB
@@ -252,9 +221,6 @@ static const char rcsid[] =
 #define ICMP_UNREACH_PRECEDENCE_CUTOFF	15	/* precedence cutoff */
 #endif
 
-#include "findsaddr.h"
-#include "ifaddrlist.h"
-#include "traceroute.h"
 
 /* Maximum number of gateways (include room for one noop) */
 #define NGATEWAYS ((int)((MAX_IPOPTLEN - IPOPT_MINOFF - 1) / sizeof(u_int32_t)))
@@ -467,14 +433,6 @@ main(int argc, char **argv)
 	int sump = 0;
 	int sockerrno = 0;
 
-	/* Insure the socket fds won't be 0, 1 or 2 */
-	if (open(devnull, O_RDONLY) < 0 ||
-	    open(devnull, O_RDONLY) < 0 ||
-	    open(devnull, O_RDONLY) < 0) {
-		Fprintf(stderr, "%s: open \"%s\": %s\n",
-		    prog, devnull, strerror(errno));
-		exit(1);
-	}
 	/*
 	 * Do the setuid-required stuff first, then lose priveleges ASAP.
 	 * Do error checking for these two calls where they appeared in
@@ -489,21 +447,7 @@ main(int argc, char **argv)
 			sockerrno = errno;
 	}
 
-	setuid(getuid());
-
-#ifdef IPCTL_DEFTTL
-	{
-		int mib[4] = { CTL_NET, PF_INET, IPPROTO_IP, IPCTL_DEFTTL };
-		size_t sz = sizeof(max_ttl);
-
-		if (sysctl(mib, 4, &max_ttl, &sz, NULL, 0) == -1) {
-			perror("sysctl(net.inet.ip.ttl)");
-			exit(1);
-		}
-	}
-#else
 	max_ttl = 30;
-#endif
 
 	if (argv[0] == NULL)
 		prog = "traceroute";
@@ -723,9 +667,6 @@ main(int argc, char **argv)
 		Fprintf(stderr, "%s: icmp socket: %s\n", prog, strerror(errno));
 		exit(1);
 	}
-	if (options & SO_DEBUG)
-		(void)setsockopt(s, SOL_SOCKET, SO_DEBUG, (char *)&on,
-		    sizeof(on));
 	if (options & SO_DONTROUTE)
 		(void)setsockopt(s, SOL_SOCKET, SO_DONTROUTE, (char *)&on,
 		    sizeof(on));
