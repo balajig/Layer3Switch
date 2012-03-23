@@ -53,15 +53,16 @@ int vlan_create_default_vlan (int vlan_id)
 
 int vlan_create_vlan (uint16_t vlan_id)
 {
-	struct vlan_static_entry *new_vlan = get_vlan_entry (vlan_id);
+	struct vlan_static_entry *new_vlan = NULL;
 
 	if (VLAN_IS_NOT_IN_RANGE (vlan_id)) {
 		return -1;
 	}
+	
+	new_vlan = get_vlan_entry (vlan_id);
 
-	if (new_vlan && (new_vlan->vlan_id == vlan_id))  {
+	if (new_vlan)
 		return 0;
-	}
 
 	new_vlan = alloc_block (vlan_mem_id);
 

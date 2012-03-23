@@ -234,6 +234,11 @@ void * alloc_block (int memid)
 	int i = 0;
 	uint8_t *retaddr = NULL;
 
+	if (!p) {
+		warn ("-ERR- : Invalid POOL ID\n");
+		return NULL;
+	}
+
 	sync_lock (&p->lock);
 
 	if (!p->fblks) {
@@ -268,6 +273,7 @@ void * alloc_block (int memid)
 		return (void *)retaddr;
 	}
 
+	sync_unlock (&p->lock);
 	debug_mem_pool (p, "Allocated failed .. No New Block");
 	return NULL;	
 }
@@ -315,7 +321,7 @@ invalid_address:
 /* alloc_mem  is the final routine to allocate memory*/
 static void * alloc_mem (size_t size)
 {
-	return malloc (size);
+	return calloc (1, size);
 }
 
 static inline void free_mem(void *mem)
