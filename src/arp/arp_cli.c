@@ -37,4 +37,3 @@ cparser_result_t cparser_cmd_config_arp_ipaddr_hostmacaddr(cparser_context_t *co
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
-

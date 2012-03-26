@@ -41,7 +41,7 @@ static void _send(int sock, const char *buffer, unsigned int size) {
 		if ((rs = send(sock, buffer, size, 0)) == -1) {
 			if (errno != EINTR && errno != ECONNRESET) {
 				fprintf(stderr, "send() failed: %s\n", strerror(errno));
-				exit(1);
+				//exit(1);
 			} else {
 				return;
 			}
@@ -137,9 +137,11 @@ void telnet_task (void *arg)
 		if ((rs = recv(s, buffer, 1, 0)) > 0) {
 			telnet_recv(telnet, buffer, rs);
 		} else if (rs == 0) {
+#if 0
 			close(s);
 			telnet_free(telnet);
 			break;
+#endif
 		}
 	}
 }

@@ -92,7 +92,7 @@ int queue_packet (unsigned long qblk , uint8_t *buf, int len)
 	queue_cb_t * p = (queue_cb_t *)qblk;
 	socket_queue_t  *qbuf = NULL;
 
-	if (!p)
+	if (!p || !buf)
 		return -1;
 
 	qbuf = malloc (sizeof(socket_queue_t));

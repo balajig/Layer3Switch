@@ -13,6 +13,7 @@
 #include "libtelnet.h"
 #include "sockets.h"
 #include "socks.h"
+#include "netdb.h"
 #include <termios.h>
 
 static struct termios orig_tios;
@@ -60,10 +61,10 @@ static void _send(int sock, const char *buffer, size_t size) {
 	while (size > 0) {
 		if ((rs = send(sock, buffer, size, 0)) == -1) {
 			fprintf(stderr, "send() failed: %s\n", strerror(errno));
-			exit(1);
+			//exit(1);
 		} else if (rs == 0) {
 			fprintf(stderr, "send() unexpectedly returned 0\n");
-			exit(1);
+			//exit(1);
 		}
 
 		/* update pointer and size to see if we've got more to send */
@@ -122,16 +123,6 @@ static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 			break;
 	}
 }
-struct addrinfo {
-    int               ai_flags;      /* Input flags. */
-    int               ai_family;     /* Address family of socket. */
-    int               ai_socktype;   /* Socket type. */
-    int               ai_protocol;   /* Protocol of socket. */
-    socklen_t         ai_addrlen;    /* Length of socket address. */
-    struct sockaddr  *ai_addr;       /* Socket address of socket. */
-    char             *ai_canonname;  /* Canonical name of service location. */
-    struct addrinfo  *ai_next;       /* Pointer to next in list. */
-};
 
 int telnet_to (char *host, char *port) 
 {
@@ -180,17 +171,18 @@ int telnet_to (char *host, char *port)
 	/* get current terminal settings, set raw mode, make sure we
 	 * register atexit handler to restore terminal settings
 	 */
+#if 0
 	tcgetattr(STDOUT_FILENO, &orig_tios);
 	atexit(_cleanup);
 	tios = orig_tios;
 	cfmakeraw(&tios);
 	tcsetattr(STDOUT_FILENO, TCSADRAIN, &tios);
-
+#endif
 	/* set input echoing on by default */
 	do_echo = 1;
 
 	/* initialize telnet box */
-	telnet = telnet_init(telopts, _event_handler, 0, &sock);
+	telnet = telnet_client_init (telopts, _event_handler, 0, &sock);
 
 	/* loop while both connections are open */
 	while (1) {
@@ -204,28 +196,17 @@ int telnet_to (char *host, char *port)
 		if (select(sock + 1, &rfds, NULL, NULL, NULL) < 0)
 			continue;
 		/* read from stdin */
-		if (FD_ISSET (STDIN_FILENO, &rfds)) {
-			if ((rs = read(STDIN_FILENO, buffer, sizeof(buffer))) > 0) {
+	//	if (FD_ISSET (STDIN_FILENO, &rfds)) 
+		{
+#undef read
+			if ((rs = read(STDIN_FILENO, buffer, sizeof(buffer))) > 0) 
 				_input(buffer, rs);
-			} else if (rs == 0) {
-				break;
-			} else {
-				fprintf(stderr, "recv(server) failed: %s\n",
-						strerror(errno));
-				return (1);
-			}
 		}
 
 		/* read from client */
 		if (FD_ISSET (sock, &rfds)) {
 			if ((rs = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
 				telnet_recv(telnet, buffer, rs);
-			} else if (rs == 0) {
-				break;
-			} else {
-				fprintf(stderr, "recv(client) failed: %s\n",
-						strerror(errno));
-				return (1);
 			}
 		}
 	}
