@@ -40,7 +40,7 @@ static void _send(int sock, const char *buffer, unsigned int size) {
 	while (size > 0) {
 		if ((rs = send(sock, buffer, size, 0)) == -1) {
 			if (errno != EINTR && errno != ECONNRESET) {
-				fprintf(stderr, "send() failed: %s\n", strerror(errno));
+			//	fprintf(stderr, "send() failed: %s\n", strerror(errno));
 				//exit(1);
 			} else {
 				return;

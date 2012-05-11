@@ -60,7 +60,7 @@ static void _send(int sock, const char *buffer, size_t size) {
 	/* send data */
 	while (size > 0) {
 		if ((rs = send(sock, buffer, size, 0)) == -1) {
-			fprintf(stderr, "send() failed: %s\n", strerror(errno));
+		//	fprintf(stderr, "send() failed: %s\n", strerror(errno));
 			//exit(1);
 		} else if (rs == 0) {
 			fprintf(stderr, "send() unexpectedly returned 0\n");
