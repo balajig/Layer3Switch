@@ -43,6 +43,8 @@ struct zebra_t zebrad;
  */
 int rib_process_hold_time = 10;
 
+void *rib_timer = NULL;
+
 /* Each route type's string and default distance value. */
 static const struct
 {  
@@ -1207,8 +1209,8 @@ process_subq (struct list * subq, u_char qindex)
  * a non-empty sub-queue with lowest priority. wq is equal to zebra->ribq and data
  * is pointed to the meta queue structure.
  */
-static wq_item_status
-meta_queue_process (struct work_queue *dummy, void *data)
+static void
+meta_queue_process (void *data)
 {
   struct meta_queue * mq = data;
   unsigned i;
@@ -1219,7 +1221,8 @@ meta_queue_process (struct work_queue *dummy, void *data)
 	mq->size--;
 	break;
       }
-  return mq->size ? WQ_REQUEUE : WQ_SUCCESS;
+
+   mod_timer(rib_timer, rib_process_hold_time * tm_get_ticks_per_second ());
 }
 
 /* Map from rib types to queue type (priority) in meta queue */
@@ -1328,6 +1331,10 @@ rib_queue_init (struct zebra_t *zebra)
 {
   if (!(zebra->mq = meta_queue_new ()))
     zlog_err ("%s: could not initialise meta queue!", __func__);
+
+   setup_timer (&rib_timer, meta_queue_process, zebra->mq);
+
+   mod_timer(rib_timer, rib_process_hold_time * tm_get_ticks_per_second ());
 }
 
 /* RIB updates are processed via a queue of pointers to route_nodes.
@@ -3026,6 +3033,22 @@ zebra_static_ipv4 (int add_cmd, const char *dest_str,
 
     return 0;
   }
+
+  /* When gateway is A.B.C.D format, gate is treated as nexthop
+ *      address other case gate is treated as interface name. */
+  ret = inet_aton (gate_str, &gate);
+  if (ret)
+    ifname = NULL;
+  else
+    ifname = gate_str;
+
+  if (add_cmd)
+    static_add_ipv4 (&p, ifname ? NULL : &gate, ifname, flag, distance, 0);
+  else
+    static_delete_ipv4 (&p, ifname ? NULL : &gate, ifname, distance, 0);
+
+  return 0;
+
 }
 static const struct zebra_desc_table unknown = { 0, "unknown", '?' };
 
