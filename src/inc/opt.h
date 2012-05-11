@@ -2036,7 +2036,7 @@
  * ZEBRA_RTM_SUPPORT: Enable Zebra RTM Support.
  */
 #ifndef ZEBRA_RTM_SUPPORT
-#define ZEBRA_RTM_SUPPORT			0
+#define ZEBRA_RTM_SUPPORT			1
 #endif
 
 /*
