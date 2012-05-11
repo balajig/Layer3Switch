@@ -171,6 +171,19 @@ int  route_add_gateway (unsigned char *ipaddr, unsigned char masklen, unsigned c
  */
 if_t *route_lookup (uint32_t ip)
 {
+#if ZEBRA_RTM_SUPPORT
+	struct in_addr addr;
+	struct rib * rib_new;
+	
+	addr.s_addr = ip;
+
+	rib_new = rib_match_ipv4 (addr);
+
+	if (!rib_new)
+		return NULL;
+
+	return if_lookup_by_index (rib_new->nexthop->ifindex);
+#else
 	route_t *r, *best;
 	unsigned char ipaddr[4];
 
@@ -201,6 +214,7 @@ if_t *route_lookup (uint32_t ip)
 		return 0;
 
 	return best->netif;
+#endif
 }
 
 /*
