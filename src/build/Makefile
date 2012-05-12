@@ -1,6 +1,6 @@
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before lib INIT CLI ROUTE BRIDGE STP PORT  RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD TC VRRP TCP UDP SOCK SNMP SNTP RTM BGP UTIL LIB PLATFORM SWITCH all-after
+all: all-before lib INIT CLI BRIDGE STP PORT  RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD TC VRRP TCP UDP SOCK SNMP SNTP RTM BGP UTIL LIB PLATFORM SWITCH all-after
 
 include make.h
 
@@ -37,8 +37,6 @@ VRRP:
 
 UDP:
 	make -C $(CODE_DIR)/udp
-ROUTE:
-	make -C $(CODE_DIR)/route
 RTM:
 	make -C $(CODE_DIR)/rtm
 TCP:
@@ -65,7 +63,7 @@ UTIL:
 	make -C $(CODE_DIR)/utils
 
 
-SWITCH:  lib INIT CLI ROUTE BRIDGE STP PORT RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD TC VRRP TCP UDP RTM BGP SNMP UTIL SNTP LIB PLATFORM
+SWITCH:  lib INIT CLI BRIDGE STP PORT RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD TC VRRP TCP UDP RTM BGP SNMP UTIL SNTP LIB PLATFORM
 	$(CROSS_COMPILE)gcc -o Switch.exe obj/*.o $(PLATFORM_EXE)_obj/*.o -lpthread -lrt  -Xlinker -Map=output.map
 
 clean: clean-custom
@@ -83,7 +81,6 @@ clean: clean-custom
 	make clean -C $(CODE_DIR)/platform
 	make clean -C $(CODE_DIR)/vrrp
 	make clean -C $(CODE_DIR)/udp
-	make clean -C $(CODE_DIR)/route
 	make clean -C $(CODE_DIR)/rtm
 	make clean -C $(CODE_DIR)/init
 	make clean -C $(CODE_DIR)/tcp

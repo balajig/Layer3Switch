@@ -856,7 +856,7 @@ nexthop_active_check (struct route_node *rn, struct rib *rib,
     return CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_ACTIVE);
 
   rmap = 0;
- /*FIXME:*/
+ /*FIXME: SASI*/
 #if 0
   if (rib->type >= 0 && rib->type < ZEBRA_ROUTE_MAX &&
         	proto_rm[family][rib->type])
@@ -910,7 +910,7 @@ rib_install_kernel (struct route_node *rn, struct rib *rib)
 {
   int ret = 0;
   struct nexthop *nexthop;
-	/*TODO: move to platfrom*/
+	/*TODO: SASI move to platfrom*/
 #if 0
 
   switch (PREFIX_FAMILY (&rn->p))
@@ -941,7 +941,7 @@ rib_uninstall_kernel (struct route_node *rn, struct rib *rib)
   int ret = 0;
   struct nexthop *nexthop;
 
-	/*TODO: move to platfrom*/
+	/*TODO: SASI move to platfrom*/
 #if 0
   switch (PREFIX_FAMILY (&rn->p))
     {
@@ -2018,7 +2018,6 @@ static_install_ipv4 (struct prefix *p, struct static_ipv4 *si)
 
       /* Link this rib to the tree. */
       rib_addnode (rn, rib);
-      fprintf(stdout,"Route Added Successfully\n");
     }
 }
 

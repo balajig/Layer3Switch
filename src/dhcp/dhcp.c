@@ -1174,14 +1174,12 @@ dhcp_bind (struct interface *netif)
 
     if_set_addr (netif, &dhcp->offered_ip_addr, &sn_mask, &gw_addr);
     {
-	    uint8_t addr[4];
-	    uint8_t gateway[4];
-	    uint32_2_ipstring ((dhcp->offered_ip_addr.addr), &addr);
-	    uint32_2_ipstring ((gw_addr.addr), &gateway);
-	    int masklen = u32ip_masklen ((sn_mask.addr));
-	     
 	    connected_route_add (netif, &dhcp->offered_ip_addr, &sn_mask);
-	    route_add_gateway (addr, masklen, gateway);
+	    #if 0
+	    /*FIXME: Does this require - SASI*/
+	    route_add_gateway (dhcp->offered_ip_addr.addr, sn_mask.addr, 
+				gw_addr.addr);
+	   #endif
     }
     /* bring the interface up */
     if_set_up (netif);

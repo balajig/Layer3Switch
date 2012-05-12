@@ -436,14 +436,8 @@ if_indextoname (unsigned int ifindex, char *name)
 int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags) 
 {
 		int masklen = u32ip_masklen (*mask);
-#if ZEBRA_RTM_SUPPORT
 		uint32_t  bcastaddr = ipv4_broadcast_addr(*addr, masklen);
 		connected_add_ipv4 (ifp, ZEBRA_IFA_PEER, addr, masklen, &bcastaddr, NULL);
-#else
-		uint8_t address[4];
-	 	uint32_2_ipstring (*addr, &address);
-		route_add_if (address, masklen, ifp);
-#endif
 		return 0;
 }
 
