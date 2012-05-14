@@ -52,7 +52,7 @@ struct prefix
       struct in_addr adv_router;
     } lp;
     u_char val[8];
-  } u __attribute__ ((packed));
+  } u __attribute__ ((aligned (8)));
 }__attribute__ ((packed));
 
 /* IPv4 prefix structure. */
