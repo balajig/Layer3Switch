@@ -345,28 +345,27 @@ static void ping(const char *host)
 	char packet[datalen + MAXIPLEN + MAXICMPLEN];
 	int sockopt;
 
-	if ((pingsock = lwip_socket (AF_INET, SOCK_RAW,IP_PROTO_ICMP)) < 0) {	/* 1 == ICMP */
-		if (errno == EPERM) {
-			fprintf(stderr, "ping: permission denied. (are you root?)\n");
-		} else {
-			perror("ping: creating a raw socket");
+	if (pingsock < 0) {
+		if ((pingsock = lwip_socket (AF_INET, SOCK_RAW,IP_PROTO_ICMP)) < 0) {	/* 1 == ICMP */
+			if (errno == EPERM) {
+				fprintf(stderr, "ping: permission denied. (are you root?)\n");
+			} else {
+				perror("ping: creating a raw socket");
+			}
+			return -1;
 		}
-		return -1;
 	}
-
 	memset(&pingaddr, 0, sizeof(struct sockaddr_in));
 
 	pingaddr.sin_family = AF_INET;
 	if (!(h = gethostbyname(host))) {
 		fprintf(stderr, "ping: unknown host %s\n", host);
-		lwip_close (pingsock);
 		return -1;
 	}
 
 	if (h->h_addrtype != AF_INET) {
 		fprintf(stderr,
 				"ping: unknown address type; only AF_INET is currently supported.\n");
-		lwip_close (pingsock);
 		return -1;
 	}
 
@@ -398,7 +397,6 @@ static void ping(const char *host)
 		socklen_t fromlen = (socklen_t) sizeof(from);
 		int c;
 		sendping(0);
-		sleep (1);
 		if ((c = recvfrom(pingsock, packet, sizeof(packet), 0,
 						  (struct sockaddr *) &from, &fromlen)) < 0) {
 			if (errno == EINTR)
@@ -412,7 +410,6 @@ static void ping(const char *host)
 			break;
 	}
 	pingstats(0);
-	lwip_close (pingsock);
 }
 int ping_me (char *host)
 {
