@@ -1,0 +1,4 @@
+*.o
+*.exe
+tags
+cscope.out
