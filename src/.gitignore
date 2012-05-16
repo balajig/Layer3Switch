@@ -2,3 +2,5 @@
 *.exe
 tags
 cscope.out
+cli/src/cparser_tree.c
+cli/src/cparser_tree.h
