@@ -7,15 +7,18 @@ LIBS_CODE_DIR = $(CODE_DIR)/lib
 LIBS_INC_DIR =  $(LIBS_CODE_DIR)/ -I$(COMMON_INC)
 LIBS_SRCC_DIR = $(LIBS_CODE_DIR)
 
+#Update this alone to point LW means lightwight timers none means
+#normaltimers
+TIMER_TAG=
+
 TIMERS_SRCS += $(LIBS_SRCC_DIR)/tmr_init.c
 TIMERS_SRCS += $(LIBS_SRCC_DIR)/update.c
 TIMERS_SRCS += $(LIBS_SRCC_DIR)/thr_spec.c
 TIMERS_SRCS += $(LIBS_SRCC_DIR)/btm_hlf.c
 
-LW_TIMERS_SRCS += $(LIBS_SRCC_DIR)/lwtimer.c
+LWTIMERS_SRCS += $(LIBS_SRCC_DIR)/lwtimers.c
 
-#Update this alone to point Lightwight timers or normal timers
-LIBS_SRCS += $(TIMERS_SRCS)
+LIBS_SRCS += $(${TIMER_TAG}TIMERS_SRCS)
 
 LIBS_SRCS += $(LIBS_SRCC_DIR)/libinit.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/util.c
