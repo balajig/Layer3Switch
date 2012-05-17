@@ -10,6 +10,7 @@
 
 #include "inc.h"
 
+#ifdef TIMER_BTM_HALF
 struct list_head expd_tmrs;
 static void process_expd_timers (void);
 static sync_lock_t bh_timer;
@@ -50,28 +51,12 @@ static void process_expd_timers (void)
 	list_for_each_safe (pnode, next, head) {
 
 		ptmr = list_entry (pnode, APP_TIMER_T, elist);
+	
+		handle_expired_timer(ptmr);
 
-		if (ptmr->timer->flags & TIMER_DELETE) {
-			ptmr->timer->flags &= ~TIMER_DELETE;
-			goto deltimer;
-		}
-
-		if (ptmr->timer->time_out_handler) {
-			ptmr->timer->time_out_handler (ptmr->timer->data);
-		}
-
-		if (ptmr->timer->flags & TIMER_ONCE) {
-			free_timer (ptmr->timer);
-		} 
-		else if (ptmr->timer->flags & TIMER_REPEAT) {
-			timer_restart (ptmr->timer);
-		}
-deltimer:
 		list_del (&ptmr->elist);
-
-		ptmr->timer->apptimer = NULL;
 
 		free (ptmr);
 	}
 }
-
+#endif

@@ -14,6 +14,28 @@ static APP_TIMER_T * timer_tree_walk (struct rb_root  *root, unsigned int key, c
 
 #define IS_TMR_EXPD(ptmr)               !ptmr->ctime 
 
+void handle_expired_timer (APP_TIMER_T *ptmr)
+{
+	if (ptmr->timer->flags & TIMER_DELETE) {
+		ptmr->timer->flags &= ~TIMER_DELETE;
+		return;
+	}
+
+	if (ptmr->timer->time_out_handler) {
+		ptmr->timer->time_out_handler (ptmr->timer->data);
+	}
+
+	if (ptmr->timer->flags & TIMER_ONCE) {
+		free_timer (ptmr->timer);
+	} 
+	else if (ptmr->timer->flags & TIMER_REPEAT) {
+		timer_restart (ptmr->timer);
+	}
+
+	ptmr->timer->apptimer = NULL;
+}
+
+#ifdef TIMER_BTM_HALF
 static inline void timer_expiry_action (APP_TIMER_T * ptmr)
 {
 	if (IS_TMR_EXPD (ptmr)) {
@@ -31,6 +53,24 @@ static inline void timer_expiry_action (APP_TIMER_T * ptmr)
 	else
 		find_tmr_slot_and_place (ptmr);
 }
+#else
+static inline void timer_expiry_action (APP_TIMER_T * ptmr)
+{
+	if (IS_TMR_EXPD (ptmr)) {
+		DEC_TIMER_COUNT ();
+		ptmr->timer->is_running = 0;
+		timer_unlock ();
+		handle_expired_timer (ptmr);
+		timer_lock ();
+#ifdef TIMER_DEBUG
+		printf ("runtime : %d curr ticks : %d expiry : %d \n", ptmr->timer->rmt, get_ticks (), ptmr->timer->exp);
+#endif
+	}
+	else
+		find_tmr_slot_and_place (ptmr);
+}
+#endif
+
 
 static inline void clear_wheel_timer (APP_TIMER_T *p)
 {

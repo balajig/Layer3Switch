@@ -31,7 +31,7 @@ LIBS_SRCS += $(LIBS_SRCC_DIR)/pqueue.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/libtelnet.c
 
 
-CFLAGS += -I$(LIBS_INC_DIR)
+CFLAGS += -I$(LIBS_INC_DIR) -DTIMER_BTM_HALF
 
 LIB_OBJ = $(LIBS_SRCS:.c=.o)
 
