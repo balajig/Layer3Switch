@@ -7,15 +7,21 @@ LIBS_CODE_DIR = $(CODE_DIR)/lib
 LIBS_INC_DIR =  $(LIBS_CODE_DIR)/ -I$(COMMON_INC)
 LIBS_SRCC_DIR = $(LIBS_CODE_DIR)
 
+TIMERS_SRCS += $(LIBS_SRCC_DIR)/tmr_init.c
+TIMERS_SRCS += $(LIBS_SRCC_DIR)/update.c
+TIMERS_SRCS += $(LIBS_SRCC_DIR)/thr_spec.c
+TIMERS_SRCS += $(LIBS_SRCC_DIR)/btm_hlf.c
+
+LW_TIMERS_SRCS += $(LIBS_SRCC_DIR)/lwtimer.c
+
+#Update this alone to point Lightwight timers or normal timers
+LIBS_SRCS += $(TIMERS_SRCS)
+
 LIBS_SRCS += $(LIBS_SRCC_DIR)/libinit.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/util.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/msg_queue.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/hashlib.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/rbtree.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/tmr_init.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/update.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/thr_spec.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/btm_hlf.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/mem_main.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/tsk_main.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/memp.c
