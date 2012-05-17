@@ -27,26 +27,6 @@ unsigned int milli_secs_to_ticks (unsigned int msecs)
 	return (msecs / TICK_TIMER_GRANULARITY);
 }
 
-size_t alloc_size = 0;
-
-void *tm_calloc(size_t nmemb, size_t size)
-{
-	alloc_size += size;
-
-	return calloc (nmemb, size);
-}
-
-void * tm_malloc (size_t size)
-{
-	return tm_calloc (1, size);
-}
-
-void tm_free (void *p , size_t size)
-{
-	alloc_size -= size;
-	free (p);
-}
-
 void * tick_clock (void *unused)
 {
 	register clock_t    start, end;

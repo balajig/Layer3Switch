@@ -42,6 +42,8 @@
 #define   debug_mem_pool(p, fmt)                   if (p->debug_enabled || debug_all)\
 							printf ("%s-MEM_POOL_MGR: %s\n", p->pool_name, fmt);
 
+size_t alloc_size = 0;
+
 struct mem_info {
 	struct list_head n;
 	sync_lock_t  lock;
@@ -328,3 +330,22 @@ static inline void free_mem(void *mem)
 {
 	free (mem);
 }
+
+void *tm_calloc(size_t nmemb, size_t size)
+{
+	alloc_size += size;
+
+	return calloc (nmemb, size);
+}
+
+void * tm_malloc (size_t size)
+{
+	return tm_calloc (1, size);
+}
+
+void tm_free (void *p , size_t size)
+{
+	alloc_size -= size;
+	free (p);
+}
+
