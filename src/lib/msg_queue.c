@@ -134,8 +134,10 @@ int msg_send (mqd_t qid, void *msg, int size)
 		INIT_LIST_HEAD (&p->next);
 		p->msg = msg;
 		list_add_tail (&p->next, &Queue[qid].msg_list);
+		EvtSignal (&Queue[qid].q_evt);
+		return 0;
 	}
 
-	EvtSignal (&Queue[qid].q_evt);
-	return 0;
+	EvtUnLock (&Queue[qid].q_evt);
+	return -1;
 }
