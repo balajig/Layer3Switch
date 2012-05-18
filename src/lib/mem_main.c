@@ -65,7 +65,7 @@ int                      mem_init          (void);
 static struct mem_info * get_next_free_mcb (int *memid);
 static struct mem_info * get_mem_info      (int memid);
 static void   *          alloc_mem         (size_t size);
-static void              free_mem          (void *mem);
+static void              free_mem          (void *mem, size_t size);
 int                      debug_memory_pool (int pool_id, int set);
 
 static struct list_head hd_mcb;
@@ -145,8 +145,8 @@ int mem_pool_delete (int pool_id)
 	sync_lock (&p->lock);
 	list_del (&p->n);
 	sync_unlock (&p->lock);
-	free_mem (p->saddr);
-	free_mem (p);
+	free_mem (p->saddr, p->size);
+	free_mem (p, sizeof (*p));
 	return 0;
 }	
 
@@ -323,12 +323,12 @@ invalid_address:
 /* alloc_mem  is the final routine to allocate memory*/
 static void * alloc_mem (size_t size)
 {
-	return calloc (1, size);
+	return tm_calloc (1, size);
 }
 
-static inline void free_mem(void *mem)
+static inline void free_mem(void *mem, size_t size)
 {
-	free (mem);
+	tm_free (mem, size);
 }
 
 void *tm_calloc(size_t nmemb, size_t size)
