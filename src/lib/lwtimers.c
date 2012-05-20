@@ -20,14 +20,21 @@
 #define    TIMER_REPEAT  	0x2 
 #define    TIMER_FOREVER        0x4
 #define    TIMER_DELETE         0x8
+#define    SYS_MAX_TICKS_IN_SEC    100 /*Since tick timer runs for 10ms: 1 sec = 1000ms (10ms * 100) */
+#define    TICK_TIMER_GRANULARITY  10  /*10 milli secs*/
+#define    SUCCESS                 0
+#define    FAILURE                 1
+
+#define MILLISEC_2_NANOSEC(msec)  msec * 1000 * 1000
 
 typedef struct tm_timer
 {
 	struct  list_head next;
+	struct  list_head elist;
 	void           *data;
  	void           (*time_out_handler)(void *);
-	unsigned int    rmt;
 	unsigned int    exp;
+	unsigned int    time;
 	int 	        idx;
 	int	        flags;
 	int 		is_running;
@@ -40,6 +47,7 @@ void             show_uptime    (void);
 void    *        tick_service   (void *unused) ;
 void    *        tick_clock     (void *unused);
 int              init_timer_mgr (void);
+static inline void timer_expiry_action (TIMER_T * ptmr);
 /****************************************************************/
 
 /************* Private Variable Declaration *********************/
@@ -47,9 +55,11 @@ static   int          indx = 0;
 static   EVT_T        timer_event;
 static   sync_lock_t  core_timer;
 static   LIST_HEAD    (timers_list);
+static   LIST_HEAD    (expd_tmrs);
 /****************************************************************/
 
-unsigned long ticks = 0;
+volatile unsigned long ticks = 0;
+volatile unsigned long next_expiry = 0;
 
 static void timer_lock (void)
 {
@@ -67,7 +77,55 @@ static void timer_lock_create (void)
 	timer_unlock ();
 }
 
-void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), int flags)
+static void debug_timers (void)
+{
+	TIMER_T *p = NULL;
+
+	printf ("\n\n");
+	list_for_each_entry (p, &timers_list, next) {
+		printf ("Timer value : %d\n", p->exp);
+	}
+	printf ("\n\n");
+}
+
+static void timer_add_sort (TIMER_T *new)
+{
+	TIMER_T *p = NULL;
+	int add = 0;
+
+debug_timers ();
+	list_for_each_entry (p, &timers_list, next) {
+		if (p->exp > new->exp) {
+			add = 1;
+			new->next.next = &p->next;
+			new->next.prev = p->next.prev;
+			p->next.prev->next = &new->next;
+			break;
+		}
+		if (p->exp == new->exp) {
+			add = 1;
+			new->next.next = p->next.next;
+			new->next.prev = &p->next;
+			p->next.next = &new->next;
+			break;
+		}
+	}
+	if (!add)
+		list_add_tail (&new->next, &timers_list); 
+debug_timers ();
+}
+
+static void timer_add (TIMER_T *p)
+{
+	if (!next_expiry || next_expiry > p->exp) {
+		next_expiry = p->exp;
+		list_add (&p->next, &timers_list);
+	} else {
+		timer_add_sort (p);
+	}
+}
+
+void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int flags)
 {
 	TIMER_T  *new = NULL;
 	int idx = 0;
@@ -78,20 +136,21 @@ void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), in
 		return NULL;
 	}
 
+	INIT_LIST_HEAD (&new->next);
 	new->idx = idx;
-	new->rmt = ticks;
 	new->data = data;
 	new->time_out_handler = handler;
+	new->exp = ticks + tick;
+	new->time = tick;
 
 	if (flags)
 		new->flags = flags;
 	else
 		new->flags = TIMER_ONCE;
 
-
 	timer_lock ();
 
-	INC_TIMER_COUNT ();
+	timer_add (new);
 
 	timer_unlock ();
 
@@ -110,41 +169,28 @@ int setup_timer (void **p, void (*handler) (void *), void *data)
 	}
 
 	new->idx = idx;
-	new->rmt = 0;
 	new->data = data;
 	new->time_out_handler = handler;
-
 	new->flags = TIMER_FOREVER;
 
 	*(TIMER_T **)p = new;
 
-	timer_lock ();
-
-	timer_unlock ();
-
 	return 0;
 }
 
-int mod_timer (void *timer, unsigned int ticks)
+int mod_timer (void *timer, unsigned int tick)
 {
 	TIMER_T  *p = (TIMER_T *)timer;
 
 	if (!p)
 		return -1;
 
+	p->exp = ticks + tick;
+	p->time =  tick;
+
 	timer_lock ();
 
-
-	timer_unlock ();
-
-
-	return 0;
-}
-
-int timer_restart  (TIMER_T *p)
-{
-	timer_lock ();
-
+	timer_add (p);
 
 	timer_unlock ();
 
@@ -154,9 +200,6 @@ int timer_restart  (TIMER_T *p)
 
 static int alloc_timer_id (void)
 {
-	if (TIMER_COUNT() > MAX_TIMERS) {
-		return 0;
-	}
 	return ++indx;
 }
 
@@ -166,11 +209,9 @@ int stop_timer (void *timer)
 
 	timer_lock ();
 
-	if (p && p->apptimer && p->is_running) {
-
+	if (p && p->is_running) {
 		p->is_running = 0;
-	
-		DEC_TIMER_COUNT ();
+		list_del (&p->next);
 	}
 
 	timer_unlock ();
@@ -183,7 +224,10 @@ int del_timer (void *timer)
 
 	timer_lock ();
 
-	p->flags |= TIMER_DELETE;
+	if (p->is_running) {
+		p->is_running = 0;
+		list_del (&p->next);
+	}
 
 	timer_unlock ();
 
@@ -202,11 +246,10 @@ void free_timer (TIMER_T *p)
 
 static inline int timers_pending_for_service (void)
 {
-	if (TIMER_COUNT ()) {
+	if (next_expiry == ticks)  {
+		return 1;
 	}
-	return 0;
-service_req:	
-        return 1;
+        return 0;
 }
 
 void update_times ()
@@ -218,26 +261,25 @@ void update_times ()
 	if (timers_pending_for_service ()) {
 		service_timers ();
 	}
-
 	timer_unlock ();
 }
 
 unsigned int get_secs (void)
 {
+	return ticks / 100;
 }
 unsigned int get_ticks (void)
 {
+	return ticks;
 }
 
 unsigned int get_mins (void)
 {
+	return get_secs() / 60;
 }
 unsigned int get_hrs (void)
 {
-}
-unsigned int get_timers_count (void)
-{
-	return TIMER_COUNT();
+	return get_mins () / (24);
 }
 
 void show_uptime (void)
@@ -250,6 +292,7 @@ void tm_test_timers_latency (void *unused)
 	show_uptime ();
 	start_timer (1 * tm_get_ticks_per_second (), NULL, tm_test_timers_latency , 0);
 }
+
 unsigned int tm_get_ticks_per_second (void) 
 {
 	return SYS_MAX_TICKS_IN_SEC;
@@ -259,7 +302,6 @@ unsigned int milli_secs_to_ticks (unsigned int msecs)
 {
 	return (msecs / TICK_TIMER_GRANULARITY);
 }
-
 
 void * tick_clock (void *unused)
 {
@@ -299,25 +341,14 @@ void * tick_service (void *unused)
 }
 #endif
 
-static inline void timer_rq_init (void)
-{
-#ifdef TIMER_BTM_HALF
-	INIT_LIST_HEAD (&expd_tmrs);
-#endif
-	tmrrq.count = 0;
-}
-
 int init_timer_mgr (void)
 {
-	int i = TIMER_WHEEL;
 	tmtaskid_t btmhlftask_id = 0;
 	tmtaskid_t task_id = 0;
 
-	timer_rq_init ();
-
+#ifdef TIMER_BTM_HALF
 	EventInit (&timer_event);
 
-#ifdef TIMER_BTM_HALF
 	if (task_create ("TMRBHF", 99, TSK_SCHED_RR, 32000,
 	  		  tick_service, NULL, NULL, &btmhlftask_id) == TSK_FAILURE) {
 		return FAILURE;
@@ -348,4 +379,116 @@ void service_timers (void)
 #endif
 		return;
 	}
+}
+
+int timer_restart  (TIMER_T *p)
+{
+	timer_lock ();
+
+	p->exp = p->time + ticks;
+	
+	timer_add (p);
+
+	p->is_running = 1;
+
+	timer_unlock ();
+
+	return 0;
+}
+
+
+void handle_expired_timer (TIMER_T *ptmr)
+{
+	if (ptmr->time_out_handler) {
+		ptmr->time_out_handler (ptmr->data);
+	}
+
+	if (ptmr->flags & TIMER_ONCE) {
+		free_timer (ptmr);
+	} 
+	else if (ptmr->flags & TIMER_REPEAT) {
+		timer_restart (ptmr);
+	}
+}
+
+#ifdef TIMER_BTM_HALF
+static inline void timer_expiry_action (TIMER_T * ptmr)
+{
+	timer->is_running = 0;
+	timer_unlock ();
+	bh_timer_lock ();
+	list_add_tail (&ptmr->elist, &expd_tmrs);
+	bh_timer_unlock ();
+	timer_lock ();
+}
+#else
+void timer_expiry_action (TIMER_T * ptmr)
+{
+	ptmr->is_running = 0;
+	timer_unlock ();
+	handle_expired_timer (ptmr);
+	timer_lock ();
+}
+#endif
+
+
+int tm_process_tick_and_update_timers (void)
+{
+	int timers_exp = 0;
+	int i = 0;
+	TIMER_T *p, *n;
+
+	list_for_each_entry_safe(p, n, &timers_list, next) {
+		if (p->exp == ticks) {
+			list_del (&p->next);
+			INIT_LIST_HEAD (&p->elist);
+			list_add_tail (&p->elist, &expd_tmrs);
+			timers_exp++;
+			next_expiry = 0;
+			continue;
+		} 
+	}
+
+	if (!timers_exp) {
+		p = NULL;
+		p = list_first_entry (&timers_list, TIMER_T , next);
+		if (p)
+			next_expiry = p->exp;
+	}
+
+	list_for_each_entry_safe(p, n, &expd_tmrs, elist) {
+		list_del (&p->elist);
+		INIT_LIST_HEAD (&p->elist);
+		timer_expiry_action (p);
+	}
+
+	return timers_exp;
+}
+int timer_pending (void *timer)
+{
+	TIMER_T  *p = (TIMER_T *)timer;
+
+        if (!p)
+                return 0;
+
+        return p->is_running;
+}
+
+unsigned int timer_get_remaining_time (void *timer)
+{
+	TIMER_T  *p = (TIMER_T *)timer;
+	int t = 0;
+
+        if (!p || !p->is_running) {
+                return 0;
+        }
+
+        t = p->exp - get_ticks();
+
+        if (t < 0) {
+                printf ("\nTIMERS : Oopss negative remainiting time %s\n",__FUNCTION__);
+                t = 0;
+        }
+
+        return t;
 }
