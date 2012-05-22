@@ -9,7 +9,7 @@ LIBS_SRCC_DIR = $(LIBS_CODE_DIR)
 
 #Update this alone to point LW means lightwight timers none means
 #normaltimers
-TIMER_TAG=LW
+TIMER_TAG=
 
 TIMERS_SRCS += $(LIBS_SRCC_DIR)/tmr_init.c
 TIMERS_SRCS += $(LIBS_SRCC_DIR)/update.c
@@ -40,7 +40,7 @@ LIBS_SRCS += $(LIBS_SRCC_DIR)/pqueue.c
 LIBS_SRCS += $(LIBS_SRCC_DIR)/libtelnet.c
 
 
-CFLAGS += -I$(LIBS_INC_DIR) -UTIMER_BTM_HALF
+CFLAGS += -I$(LIBS_INC_DIR) -DTIMER_BTM_HALF
 
 LIB_OBJ = $(LIBS_SRCS:.c=.o)
 

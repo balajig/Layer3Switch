@@ -86,6 +86,7 @@ static void debug_timers (void)
 		printf ("Timer value : %d\n", p->exp);
 	}
 	printf ("\n\n");
+	fflush (stdout);
 }
 
 static void timer_add_sort (TIMER_T *new)
@@ -93,7 +94,6 @@ static void timer_add_sort (TIMER_T *new)
 	TIMER_T *p = NULL;
 	int add = 0;
 
-debug_timers ();
 	list_for_each_entry (p, &timers_list, next) {
 		if (p->exp > new->exp) {
 			add = 1;
@@ -112,17 +112,18 @@ debug_timers ();
 	}
 	if (!add)
 		list_add_tail (&new->next, &timers_list); 
-debug_timers ();
 }
 
 static void timer_add (TIMER_T *p)
 {
+debug_timers ();
 	if (!next_expiry || next_expiry > p->exp) {
 		next_expiry = p->exp;
 		list_add (&p->next, &timers_list);
 	} else {
 		timer_add_sort (p);
 	}
+debug_timers ();
 }
 
 void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int flags)
@@ -439,7 +440,7 @@ int tm_process_tick_and_update_timers (void)
 	TIMER_T *p, *n;
 
 	list_for_each_entry_safe(p, n, &timers_list, next) {
-		if (p->exp == ticks) {
+		if (p->exp <= ticks) {
 			list_del (&p->next);
 			INIT_LIST_HEAD (&p->elist);
 			list_add_tail (&p->elist, &expd_tmrs);
