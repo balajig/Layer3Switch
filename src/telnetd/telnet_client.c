@@ -124,15 +124,36 @@ static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 	}
 }
 
+void telnet2_task (void *arg)
+{
+	int sock = (int)arg;
+	int rs;
+	char buffer[512];
+	while (1) {
+		fd_set rfds;
+		FD_ZERO(&rfds);
+		FD_SET(sock, &rfds);
+
+		if (select(sock + 1, &rfds, NULL, NULL, NULL) < 0)
+			continue;
+		if (FD_ISSET (sock, &rfds)) {
+			if ((rs = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
+				telnet_recv(telnet, buffer, rs);
+			}
+		}
+	}
+}
+
 int telnet_to (char *host, char *port) 
 {
-	char buffer[512];
 	int rs;
 	int sock;
 	struct sockaddr_in addr;
 	struct addrinfo *ai;
 	struct addrinfo hints;
 	struct termios tios;
+	tmtaskid_t hthread = -1;
+	char buffer[512];
 
 	/* look up server host */
 	memset(&hints, 0, sizeof(hints));
@@ -184,34 +205,22 @@ int telnet_to (char *host, char *port)
 	/* initialize telnet box */
 	telnet = telnet_client_init (telopts, _event_handler, 0, &sock);
 
+	if (!task_create ("telnet2", 30, 3, 16 * 1024, telnet2_task, NULL, (void *)sock, 
+				&hthread)) {
+		printf ("Task creation failed : %s\n", "telnet");
+		return -1;
+	}
+
+
 	/* loop while both connections are open */
 	while (1) {
-		fd_set rfds;
-
-		/* Watch stdin (fd 0) to see when it has input. */
-		FD_ZERO(&rfds);
-		FD_SET(STDIN_FILENO, &rfds);
-		FD_SET(sock, &rfds);
-
-		if (select(sock + 1, &rfds, NULL, NULL, NULL) < 0)
-			continue;
-		/* read from stdin */
-	//	if (FD_ISSET (STDIN_FILENO, &rfds)) 
-		{
 #undef read
-			if ((rs = read(STDIN_FILENO, buffer, sizeof(buffer))) > 0) 
-				_input(buffer, rs);
-		}
-
-		/* read from client */
-		if (FD_ISSET (sock, &rfds)) {
-			if ((rs = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
-				telnet_recv(telnet, buffer, rs);
-			}
-		}
+		if ((rs = read(STDIN_FILENO, buffer, sizeof(buffer))) > 0) 
+			_input(buffer, rs);
 	}
 
 	/* clean up */
+	tsk_cancel (hthread);
 	telnet_free(telnet);
 	close(sock);
 

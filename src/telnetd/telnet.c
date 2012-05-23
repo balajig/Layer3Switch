@@ -208,7 +208,6 @@ void * telnetd (void *arg)
 int telnet_init (void)
 {
 	int  hthread = -1;
-	return 0;
 	if (task_create ("telnetd", 30, 3, 20 * 1024, telnetd, NULL, NULL, 
 				&hthread) == 0) {
 		printf ("Task creation failed : %s\n", "telnetd");
