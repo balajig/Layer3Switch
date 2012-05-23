@@ -226,7 +226,7 @@ void install_signal_handler (int signo, void (*handler)(int))
 
 static void spawn_cli_thread (int this_session)
 {
-	task_create ("CLI", 10, 3, 32000, cmdinterface, NULL, this_session, &clitskid);
+	task_create ("CLI", 10, 3, 48000, cmdinterface, NULL, this_session, &clitskid);
 }
 
 void *cmdinterface(void *unused)
