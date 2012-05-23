@@ -101,7 +101,7 @@ struct pbuf {
    * the stack itself, or pbuf->next pointers from a chain.
    */
   u16_t ref;
-};
+}__attribute__ ((packed));
 
 #if LWIP_SUPPORT_CUSTOM_PBUF
 /** Prototype for a function to free a custom pbuf */
