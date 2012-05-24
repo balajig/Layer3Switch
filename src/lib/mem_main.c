@@ -255,7 +255,7 @@ void * alloc_block (int memid)
 		p->fblks--;
 		p->useblks++;
 		p->addr_cache = NULL;
-		debug_mem_pool (p, "Allocated NEW block");
+		debug_mem_pool (p, "Allocated Cached block");
 		sync_unlock (&p->lock);
 		return retaddr;
 	}
@@ -269,7 +269,7 @@ void * alloc_block (int memid)
 		p->fblks--;
 		p->useblks++;
 		*retaddr = ALLOCATED;
-		retaddr += sizeof (uint8_t);
+		retaddr += sizeof (uint32_t);
 		debug_mem_pool (p, "Allocated NEW block");
 		sync_unlock (&p->lock);
 		return (void *)retaddr;
@@ -292,7 +292,7 @@ int free_blk (int memid, void *addr)
 
 	sync_lock (&p->lock);
 
-	/*Move pointer 1 byte backwards to access the status flag*/
+	/*Move pointer 4 byte backwards to access the status flag*/
 	addr  = (uint8_t *)addr - sizeof (uint32_t); 
 
 	if (!in_range (p->saddr, (p->saddr + (p->size * p->nblks)), p->size, 
@@ -315,7 +315,8 @@ int free_blk (int memid, void *addr)
 	return 0;
 
 invalid_address:
-	//printf ("-ERR- : Trying to free invaild address\n");
+	printf ("%%ERROR : %s-MEM_POOL_MGR: Trying to free invaild address\n", p->pool_name);
+	dump_stack ();
 	sync_unlock (&p->lock);
 	return -1;
 }
