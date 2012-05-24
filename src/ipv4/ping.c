@@ -189,16 +189,16 @@ static void pingstats(int ign)
 {
 	//signal(SIGINT, SIG_IGN);
 
-	printf("\n--- %s ping statistics ---\n", hostname);
-	printf("%ld packets transmitted, ", ntransmitted);
-	printf("%ld packets received, ", nreceived);
+	cli_printf("\n--- %s ping statistics ---\n", hostname);
+	cli_printf("%ld packets transmitted, ", ntransmitted);
+	cli_printf("%ld packets received, ", nreceived);
 	if (nrepeats)
-		printf("%ld duplicates, ", nrepeats);
+		cli_printf("%ld duplicates, ", nrepeats);
 	if (ntransmitted)
-		printf("%ld%% packet loss\n",
+		cli_printf("%ld%% packet loss\n",
 			   (ntransmitted - nreceived) * 100 / ntransmitted);
 	if (nreceived)
-		printf("round-trip min/avg/max = %lu.%lu/%lu.%lu/%lu.%lu ms\n",
+		cli_printf("round-trip min/avg/max = %lu.%lu/%lu.%lu/%lu.%lu ms\n",
 			   tmin / 10, tmin % 10,
 			   (tsum / (nreceived + nrepeats)) / 10,
 			   (tsum / (nreceived + nrepeats)) % 10, tmax / 10, tmax % 10);
@@ -323,18 +323,17 @@ static void unpack(char *buf, int sz, struct sockaddr_in *from)
 		if (options & O_QUIET)
 			return;
 
-		printf("%d bytes from %s: icmp_seq=%u", sz,
+		cli_printf("%d bytes from %s: icmp_seq=%u", sz,
 			   inet_ntoa(*(struct in_addr *) &from->sin_addr.s_addr),
 			   icmppkt->icmp_seq);
-		printf(" ttl=%d", iphdr->_ttl);
-		printf(" time=%lu.%lu ms", triptime / 10, triptime % 10);
+		cli_printf(" ttl=%d", iphdr->_ttl);
+		cli_printf(" time=%lu.%lu ms", triptime / 10, triptime % 10);
 		if (dupflag)
-			printf(" (DUP!)");
+			cli_printf(" (DUP!)");
 		printf("\n");
 	} else 
 		if (icmppkt->icmp_type != ICMP_ECHO)
-			fprintf(stderr,
-					"Warning: Got ICMP %d (%s)\n",
+			cli_fprintf("Warning: Got ICMP %d (%s)\n",
 					icmppkt->icmp_type, icmp_type_name (icmppkt->icmp_type));
 }
 
@@ -347,11 +346,6 @@ static void ping(const char *host)
 
 	if (pingsock < 0) {
 		if ((pingsock = lwip_socket (AF_INET, SOCK_RAW,IP_PROTO_ICMP)) < 0) {	/* 1 == ICMP */
-			if (errno == EPERM) {
-				fprintf(stderr, "ping: permission denied. (are you root?)\n");
-			} else {
-				perror("ping: creating a raw socket");
-			}
 			return -1;
 		}
 	}
@@ -359,13 +353,12 @@ static void ping(const char *host)
 
 	pingaddr.sin_family = AF_INET;
 	if (!(h = gethostbyname(host))) {
-		fprintf(stderr, "ping: unknown host %s\n", host);
+		cli_printf("ping: unknown host %s\n", host);
 		return -1;
 	}
 
 	if (h->h_addrtype != AF_INET) {
-		fprintf(stderr,
-				"ping: unknown address type; only AF_INET is currently supported.\n");
+		cli_printf("ping: unknown address type; only AF_INET is currently supported.\n");
 		return -1;
 	}
 
@@ -384,7 +377,7 @@ static void ping(const char *host)
 //	setsockopt(pingsock, SOL_SOCKET, SO_RCVBUF, (char *) &sockopt,
 //			   sizeof(sockopt));
 
-	printf("PING %s (%s): %d data bytes\n",
+	cli_printf("PING %s (%s): %d data bytes\n",
 		   hostname,
 		   inet_ntoa(*(struct in_addr *) &pingaddr.sin_addr.s_addr),
 		   datalen);

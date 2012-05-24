@@ -191,11 +191,11 @@ static char * decrypt_password (char *password)
 int show_users (void)
 {
 	int  i = -1;
-	printf (" %-16s   %-16s    %-16s\n","Username","Password","Level");
-	printf (" %-16s   %-16s    %-16s\n","--------","--------", "--------");
+	cli_printf (" %-16s   %-16s    %-16s\n","Username","Password","Level");
+	cli_printf (" %-16s   %-16s    %-16s\n","--------","--------", "--------");
 	while (++i < MAX_USERS) {
 		if (userdb[i].status)
-			printf (" %-16s   %-16s    %4d\n",
+			cli_printf (" %-16s   %-16s    %4d\n",
 				userdb[i].user_name, "******", userdb[i].priv_level);
 	}
 	return 0;

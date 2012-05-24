@@ -60,7 +60,7 @@ cparser_result_t cparser_cmd_enable_privileged_mode(cparser_context_t *context)
 	int rc;
 
 	if (cparser_is_in_privileged_mode(context->parser)) {
-		printf ("Already in privileged mode.\n");
+		cli_printf ("Already in privileged mode.\n");
 		return CPARSER_NOT_OK;
 	}
 
@@ -105,7 +105,7 @@ cparser_result_t cparser_cmd_exit(cparser_context_t *context)
 cparser_result_t cparser_cmd_disable_privileged_mode(cparser_context_t *context)
 {
 	if (!cparser_is_in_privileged_mode(context->parser)) {
-		printf ("Not in privileged mode.\n");
+		cli_printf ("Not in privileged mode.\n");
 		return CPARSER_NOT_OK;
 	}
 
@@ -141,9 +141,9 @@ static cparser_result_t
 cparser_cmd_enter_privileged_mode (cparser_t *parser, char *buf, int buf_size)
 {
     if (strncmp(buf, "HELLO", buf_size)) {
-        printf("\nPassword incorrect. Should enter 'HELLO'.\n");
+        cli_printf("\nPassword incorrect. Should enter 'HELLO'.\n");
     } else {
-        printf("\nEnter privileged mode.\n");
+        cli_printf("\nEnter privileged mode.\n");
         cparser_set_privileged_mode(parser, 1);
     }
     return CPARSER_OK;
@@ -156,7 +156,7 @@ cparser_result_t cparser_cmd_run_script_filename(cparser_context_t *context, cha
 	int do_echo = 0;
 
 	if (!fp) {
-		printf ("Unable to open file :  %s\n", *filename_ptr);
+		cli_printf ("Unable to open file :  %s\n", *filename_ptr);
 		return CPARSER_NOT_OK;
 	}
 
@@ -175,9 +175,8 @@ cparser_result_t cparser_cmd_run_script_filename(cparser_context_t *context, cha
 
 cparser_result_t cparser_cmd_clear_screen (cparser_context_t *context)
 {
-	printf("\033[2J");
-	printf("\033[0;0f");
-	fflush (stdout);
+	cli_printf("\033[2J");
+	cli_printf("\033[0;0f");
 	return CPARSER_OK;
 }
 
