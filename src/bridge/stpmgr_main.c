@@ -15,11 +15,11 @@ static int stp_Q_pool_id = 0;
 static int stp_Q_id = 0;
 
 struct stp_msg {
+	void *msg;
 	int  type;
 	int  port;
 	int  vlanid;
 	int len;
-	void *msg;
 };
 
 enum stp_msg_types {
@@ -62,6 +62,7 @@ void *stpmgr_task (void *arg)
 		switch (msg->type) {
 			case STP_MSG_TYPE_BPDU:
 				process_bpdu (msg->msg, msg->port, msg->vlanid, msg->len);
+				free (msg->msg);
 				break;
 			case STP_MSG_TYPE_EVENTS:
 				if (stp_process_events (msg->port, (uint8_t)
