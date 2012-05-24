@@ -72,7 +72,7 @@ static int stp_init_stp_instance (struct stp_instance  *new, uint16_t vlan_id)
         new->bridge_hello_time = STP_DEF_HELLO_TIME;
         new->bridge_forward_delay = STP_DEF_FWD_DELAY;
         new->topology_change = FALSE;
-        new->topology_change_detected = TRUE;
+        new->topology_change_detected = FALSE;
 
 	stp_timer_init (new);
 
@@ -237,6 +237,8 @@ int stp_process_bpdu (STP_BPDU_T *bpdu, uint16_t port)
 			return -1;
 		}
 		stp_decode_bpdu (bpdu);
+		if (bpdu->message_age > bpdu->max_age)
+			return -1;
 		stp_received_config_bpdu (stp_port, bpdu);		
 
 	} else if (bpdu->type == BPDU_TC_TYPE) {
@@ -376,7 +378,6 @@ void stp_transmit_config(struct stp_port_entry *p)
 	else {
 		struct stp_port_entry *root = stp_get_port(br, br->root_port);
 		bpdu.message_age = (get_secs () - root->designated_age) + MESSAGE_AGE_INCR;
-		printf ("message age : %d\n", bpdu.message_age);
 	}
 	bpdu.max_age = br->max_age;
 	bpdu.hello_time = br->hello_time;
