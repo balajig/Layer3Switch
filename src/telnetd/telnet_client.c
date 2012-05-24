@@ -42,7 +42,6 @@ static void _input(char *buffer, int size) {
 		 * mode we get LF instead (not sure why)
 		 */
 		if (buffer[i] == '\r' || buffer[i] == '\n') {
-			printf("\r\n");
 			telnet_send(telnet, crlf, 2);
 		} else {
 			telnet_send(telnet, buffer + i, 1);
@@ -191,7 +190,7 @@ int telnet_to (char *host, char *port)
 	/* initialize telnet box */
 	telnet = telnet_client_init (telopts, _event_handler, 0, &sock);
 
-	if (!task_create ("telnet2", 30, 3, 16 * 1024, telnet2_task, NULL, (void *)sock, 
+	if (!task_create ("telnet2", 30, 3, 32 * 1024, telnet2_task, NULL, (void *)sock, 
 				&hthread)) {
 		printf ("Task creation failed : %s\n", "telnet");
 		return -1;
