@@ -20,6 +20,7 @@ void handle_expired_timer (APP_TIMER_T *ptmr)
 		ptmr->timer->flags &= ~TIMER_DELETE;
 		return;
 	}
+	timer_unlock ();
 
 	if (ptmr->timer->time_out_handler) {
 		ptmr->timer->time_out_handler (ptmr->timer->data);
@@ -33,6 +34,7 @@ void handle_expired_timer (APP_TIMER_T *ptmr)
 	}
 
 	ptmr->timer->apptimer = NULL;
+	timer_lock ();
 }
 
 #ifdef TIMER_BTM_HALF
@@ -59,9 +61,7 @@ static inline void timer_expiry_action (APP_TIMER_T * ptmr)
 	if (IS_TMR_EXPD (ptmr)) {
 		DEC_TIMER_COUNT ();
 		ptmr->timer->is_running = 0;
-		timer_unlock ();
 		handle_expired_timer (ptmr);
-		timer_lock ();
 #ifdef TIMER_DEBUG
 		printf ("runtime : %d curr ticks : %d expiry : %d \n", ptmr->timer->rmt, get_ticks (), ptmr->timer->exp);
 #endif
