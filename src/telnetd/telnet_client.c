@@ -42,12 +42,9 @@ static void _input(char *buffer, int size) {
 		 * mode we get LF instead (not sure why)
 		 */
 		if (buffer[i] == '\r' || buffer[i] == '\n') {
-			if (do_echo)
-				printf("\r\n");
+			printf("\r\n");
 			telnet_send(telnet, crlf, 2);
 		} else {
-			if (do_echo)
-				putchar(buffer[i]);
 			telnet_send(telnet, buffer + i, 1);
 		}
 	}
@@ -165,22 +162,11 @@ int telnet_to (char *host, char *port)
 		return 1;
 	}
 
-	/* create server socket */
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		fprintf(stderr, "socket() failed: %s\n", strerror(errno));
 		return 1;
 	}
 
-	/* bind server socket */
-#if 0
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-		fprintf(stderr, "bind() failed: %s\n", strerror(errno));
-		return 1;
-	}
-
-#endif	/* connect */
 	if (connect(sock, ai->ai_addr, ai->ai_addrlen) == -1) {
 		fprintf(stderr, "server() failed: %s\n", strerror(errno));
 		return 1;
@@ -200,7 +186,7 @@ int telnet_to (char *host, char *port)
 	tcsetattr(STDOUT_FILENO, TCSADRAIN, &tios);
 #endif
 	/* set input echoing on by default */
-	do_echo = 1;
+	do_echo = 0;
 
 	/* initialize telnet box */
 	telnet = telnet_client_init (telopts, _event_handler, 0, &sock);

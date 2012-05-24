@@ -315,7 +315,7 @@ int free_blk (int memid, void *addr)
 	return 0;
 
 invalid_address:
-	printf ("-ERR- : Trying to free invaild address\n");
+	//printf ("-ERR- : Trying to free invaild address\n");
 	sync_unlock (&p->lock);
 	return -1;
 }
