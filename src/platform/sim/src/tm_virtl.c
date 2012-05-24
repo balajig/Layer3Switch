@@ -87,7 +87,7 @@ void * packet_processing_task (void *unused)
 			continue;
 		}
 
-		pkt_buf = tm_malloc (len - sizeof(inst_t));
+		pkt_buf = malloc (len - sizeof(inst_t));
 
 		if (!pkt_buf) {
 			printf ("Out of memory\n");
