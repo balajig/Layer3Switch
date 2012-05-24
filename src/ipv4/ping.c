@@ -333,7 +333,7 @@ static void unpack(char *buf, int sz, struct sockaddr_in *from)
 		printf("\n");
 	} else 
 		if (icmppkt->icmp_type != ICMP_ECHO)
-			cli_fprintf("Warning: Got ICMP %d (%s)\n",
+			cli_printf("Warning: Got ICMP %d (%s)\n",
 					icmppkt->icmp_type, icmp_type_name (icmppkt->icmp_type));
 }
 
