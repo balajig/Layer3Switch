@@ -33,7 +33,6 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "sockunion.h"
 #include "plist.h"
 #include "thread.h"
-#include "workqueue.h"
 
 #include "bgpd.h"
 #include "bgp_table.h"

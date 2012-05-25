@@ -31,7 +31,6 @@
 #include "routemap.h"
 #include "rib.h"
 #include "vector.h"
-#include "workqueue.h"
 #include "rtm.h"
 
 /* Default rtm_table for all clients */
