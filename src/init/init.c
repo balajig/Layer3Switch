@@ -25,6 +25,10 @@ void layer3switch_init (void)
 
         cli_init ("OpenSwitch");
 
+#ifdef ZEBRA_RTM_SUPPORT
+	rtm_init ();
+#endif  /* RTM_SUPPORT */
+
         port_init ();
 
         ip_init ();
@@ -78,11 +82,6 @@ void layer3switch_init (void)
 #if LWIP_TIMERS
 	sys_timeouts_init ();
 #endif /* LWIP_TIMERS */
-
-#ifdef ZEBRA_RTM_SUPPORT
-	rtm_init ();
-#endif  /* RTM_SUPPORT */
-
 	telnet_init ();
 
         spawn_pkt_processing_task ();

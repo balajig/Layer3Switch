@@ -44,6 +44,30 @@ int get_max_ports (void)
 	return idx;
 }
 
+static int new_port_init (int idx)
+{
+	interface_init (&port_cdb[idx], NULL, NULL);
+	port_cdb[idx].ifType = 0;
+	port_cdb[idx].ifMtu = 1500;
+	port_cdb[idx].ifSpeed = 10;
+	port_cdb[idx].ifAdminStatus = IF_DOWN;
+	port_cdb[idx].ifOperStatus = IF_DOWN;
+	port_cdb[idx].ifLastChange = 0;
+	port_cdb[idx].ifInOctets = 0;
+	port_cdb[idx].ifInUcastPkts = 0;
+	port_cdb[idx].ifInDiscards = 0;
+	port_cdb[idx].ifInErrors = 0;
+	port_cdb[idx].ifInUnknownProtos = 0;
+	port_cdb[idx].ifOutOctets = 0;
+	port_cdb[idx].ifOutUcastPkts = 0;
+	port_cdb[idx].ifOutDiscards = 0;
+	port_cdb[idx].ifOutErrors = 0;
+	port_cdb[idx].pstp_info = NULL;
+	port_cdb[idx].flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
+	if_connect_init (&port_cdb[idx]);
+}
+
+
 static int create_raw_sock (char *name)
 {
 	int sd = -1;
@@ -82,11 +106,11 @@ static int create_raw_sock (char *name)
 
 static if_t *add_if_info(char *name)
 {
+    new_port_init (idx);
+
     strncpy(IF_DESCR(idx + 1), name, IFNAMSIZ);
 
     create_raw_sock (name);
-
-    if_connect_init (IF_INFO(idx + 1));
 
     fetch_and_update_if_info (IF_INFO(idx + 1));
 
@@ -240,12 +264,7 @@ int fetch_and_update_if_info (if_t *ife)
 		} 
 		if (!set_ip_address (idx + 1, sin->sin_addr.s_addr,  mask->sin_addr.s_addr))
 		{
-			if(strncmp (ifname, "lo", strlen ("lo"))) {
-				uint8_t addr[4];
-				uint32_2_ipstring (sin->sin_addr.s_addr, addr);
-				connected_route_add (ife, &sin->sin_addr.s_addr, &mask->sin_addr.s_addr, 0);
-
-			}
+			connected_route_add (ife, &sin->sin_addr.s_addr, &mask->sin_addr.s_addr, 0);
 		}
 
 	}  	

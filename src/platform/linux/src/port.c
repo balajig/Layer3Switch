@@ -17,24 +17,6 @@ int port_init (void)
 
 	read_interfaces ();
 
-	idx = get_max_ports ();
-
-	while (idx--) {
-		interface_init (&port_cdb[idx], NULL, NULL);
-		port_cdb[idx].ifLastChange = 0;
-		port_cdb[idx].ifInOctets = 0;
-		port_cdb[idx].ifInUcastPkts = 0;
-		port_cdb[idx].ifInDiscards = 0;
-		port_cdb[idx].ifInErrors = 0;
-		port_cdb[idx].ifInUnknownProtos = 0;
-		port_cdb[idx].ifOutOctets = 0;
-		port_cdb[idx].ifOutUcastPkts = 0;
-		port_cdb[idx].ifOutDiscards = 0;
-		port_cdb[idx].ifOutErrors = 0;
-		port_cdb[idx].pstp_info = NULL;
-		port_cdb[idx].flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
-		if_connect_init (&port_cdb[idx]);
-	}
 	return 0;
 }
 
