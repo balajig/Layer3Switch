@@ -89,8 +89,15 @@ void send_packet (void *buf, uint16_t port, int len);
 
 /*EVENT Layer*/
 int EventInit (EVT_T *p);
+int EventDeInit (EVT_T *p);
 int EvtRx (EVT_T *evt, int *pevent, int event);
+int EvtRx_timed_wait (EVT_T *evt, int *pevent, int event, int secs, int nsecs);
 void EvtSnd (EVT_T *evt, int event);
+int EvtLock (EVT_T *evt);
+int EvtUnLock (EVT_T *evt);
+int EvtWaitOn (EVT_T *evt);
+int EvtWaitOnTimed (EVT_T *evt, int secs, int nsecs);
+void EvtSignal (EVT_T *evt);
 
 /*Pqueue lib*/
 

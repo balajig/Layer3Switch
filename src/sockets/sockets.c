@@ -2390,7 +2390,7 @@ lwip_setsockopt_internal (void *arg)
     int                 s;
 #endif /* LWIP_DEBUG */
     int                 level, optname;
-    const void         *optval;
+    void         *optval;
     struct lwip_setgetsockopt_data *data;
 
     LWIP_ASSERT ("arg != NULL", arg != NULL);
