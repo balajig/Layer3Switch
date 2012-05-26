@@ -3087,7 +3087,7 @@ show_ip_route (struct route_node *rn, struct rib *rib)
 {
   struct nexthop *nexthop;
   int len = 0;
-  char buf[BUFSIZ];
+  char buf[INET_ADDRSTRLEN];
 
   /* Nexthop information. */
   for (nexthop = rib->nexthop; nexthop; nexthop = nexthop->next)
@@ -3101,7 +3101,7 @@ show_ip_route (struct route_node *rn, struct rib *rib)
 			 ? '>' : ' ',
 			 CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB)
 			 ? '*' : ' ',
-			 inet_ntop (AF_INET, &rn->p.u.prefix, buf, BUFSIZ),
+			 inet_ntop (AF_INET, &rn->p.u.prefix, buf, INET_ADDRSTRLEN),
 			 rn->p.prefixlen);
 		
 	  /* Distance and metric display. */
