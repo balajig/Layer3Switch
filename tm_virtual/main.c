@@ -143,7 +143,7 @@ int create_virtual_link (char *args[], int count)
 	list_add_tail (&p->next, &vlink);
 
 	fprintf (stdout, "New V-Link Created Successfully [inst %d]p%-d <-----> p%-d[inst %d] \n", 
-		 inst[0], port[0], inst[1], port[1]);
+		 inst[0], port[0], port[1], inst[1]);
 
 	return 0;
 }
