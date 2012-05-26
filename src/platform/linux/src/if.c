@@ -225,8 +225,6 @@ int fetch_and_update_if_info (if_t *ife)
 	if (ioctl(fd, SIOCGIFMTU, (char *)&ifr) == 0)
 		ife->ifMtu = ifr.ifr_mtu;
 
-
-#if 0
 	if (ioctl(fd, SIOCGIFADDR, (char *)&ifr) == 0) {
 		struct ifreq ifr_tmp;
 		struct sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
@@ -248,7 +246,6 @@ int fetch_and_update_if_info (if_t *ife)
 		}
 
 	}  	
-#endif
 
 	if (ioctl(fd, SIOCGIFFLAGS, &ifr) == 0)  {
 		ife->ifAdminStatus = (ifr.ifr_flags & IFF_UP)? IF_UP: IF_DOWN;
