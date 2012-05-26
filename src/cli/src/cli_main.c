@@ -527,7 +527,7 @@ int exit_mode ()
 	return 0;
 }
 
-int cli_printf  (char *fmt, ...)
+int cli_printf  (const char *fmt, ...)
 {
 	int n, size = 100;
 	char *p, *np;
