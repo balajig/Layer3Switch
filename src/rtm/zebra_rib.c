@@ -3111,7 +3111,7 @@ show_ip_route (struct route_node *rn, struct rib *rib)
 			    rib->metric);
 	}
       else
-	cli_printf (stdout,"  %c%*c",
+	cli_printf ("  %c%*c",
 		 CHECK_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB)
 		 ? '*' : ' ',
 		 len - 3, ' ');
