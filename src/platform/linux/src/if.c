@@ -86,7 +86,9 @@ static if_t *add_if_info(char *name)
 
     create_raw_sock (name);
 
-     fetch_and_update_if_info (IF_INFO(idx + 1));
+    if_connect_init (IF_INFO(idx + 1));
+
+    fetch_and_update_if_info (IF_INFO(idx + 1));
 
     return IF_INFO(idx + 1);
 }
@@ -241,7 +243,8 @@ int fetch_and_update_if_info (if_t *ife)
 			if(strncmp (ifname, "lo", strlen ("lo"))) {
 				uint8_t addr[4];
 				uint32_2_ipstring (sin->sin_addr.s_addr, addr);
-				route_add_if (addr, u32ip_masklen (mask->sin_addr.s_addr),IF_INFO(idx + 1));
+				connected_route_add (ife, &sin->sin_addr.s_addr, &mask->sin_addr.s_addr, 0);
+
 			}
 		}
 
