@@ -71,6 +71,7 @@
 #include "sockets.h"
 #include "socks.h"
 
+int ping_me (char *host);
 
 struct icmp_ra_addr
 {
@@ -251,7 +252,7 @@ static void sendping(int ign)
 #endif
 }
 
-static char *icmp_type_name (int id)
+static const char *icmp_type_name (int id)
 {
 	switch (id) {
 	case ICMP_ECHOREPLY: 		return "Echo Reply";
@@ -342,11 +343,11 @@ static void ping(const char *host)
 	struct hostent *h;
 	char buf[MAXHOSTNAMELEN];
 	char packet[datalen + MAXIPLEN + MAXICMPLEN];
-	int sockopt;
+	//int sockopt;
 
 	if (pingsock < 0) {
 		if ((pingsock = lwip_socket (AF_INET, SOCK_RAW,IP_PROTO_ICMP)) < 0) {	/* 1 == ICMP */
-			return -1;
+			return;
 		}
 	}
 	memset(&pingaddr, 0, sizeof(struct sockaddr_in));
@@ -354,12 +355,12 @@ static void ping(const char *host)
 	pingaddr.sin_family = AF_INET;
 	if (!(h = gethostbyname(host))) {
 		cli_printf("ping: unknown host %s\n", host);
-		return -1;
+		return;
 	}
 
 	if (h->h_addrtype != AF_INET) {
 		cli_printf("ping: unknown address type; only AF_INET is currently supported.\n");
-		return -1;
+		return;
 	}
 
 	pingaddr.sin_family = AF_INET;	/* h->h_addrtype */

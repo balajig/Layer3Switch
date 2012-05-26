@@ -145,10 +145,12 @@ struct linger {
 #define  SOL_SOCKET  0xfff    /* options for socket level */
 
 
+#if 0
 #define IPPROTO_IP      0
 #define IPPROTO_TCP     6
 #define IPPROTO_UDP     17
 #define IPPROTO_UDPLITE 136
+#endif
 
 /* Flags we can use with send and recv. */
 #define MSG_PEEK       0x01    /* Peeks at an incoming message */

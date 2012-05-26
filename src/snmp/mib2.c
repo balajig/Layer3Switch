@@ -147,7 +147,7 @@ static u8_t         snmp_set_test (struct obj_def *od, u16_t len, void *value);
 static void         snmp_set_value (struct obj_def *od, u16_t len, void *value);
 
 /* snmp .1.3.6.1.2.1.11 */
-const mib_scalar_node snmp_scalar = {
+mib_scalar_node snmp_scalar = {
     &snmp_get_object_def,
     &snmp_get_value,
     &snmp_set_test,
