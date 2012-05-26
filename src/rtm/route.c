@@ -4,6 +4,10 @@
 #include "zebra.h"
 #include "table.h"
 
+struct rib * rib_match_ipv4 (struct in_addr addr);
+void show_ip_route (struct route_node *rn, struct rib *rib);
+
+
 /*
  * Search the network interface and gateway address to forward the packet.
  * Return also the IP adress of the interface,

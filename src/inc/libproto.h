@@ -99,4 +99,16 @@ int  pqueue_destroy (unsigned long pcb);
 int  pqueue_valid (unsigned long pcb);
 int queue_packet (unsigned long qblk , uint8_t *buf, int len);
 int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs, int nsecs);
+
+/*LIB */
+uint32_t ip_2_uint32 (uint8_t *ipaddress, int byte_order);
+void convert_uint32_str_ip_mask (char *str, uint32_t ip, uint32_t mask);
+void convert_uint32_str_ip (char *str, uint32_t ip);
+void uint32_2_ipstring (uint32_t ipAddress, uint8_t *addr);
+void u32masklen2ip (int masklen, uint32_t *netmask);
+u_char u32ip_masklen (uint32_t netmask);
+uint32_t u32ipv4_network_addr (uint32_t hostaddr, int masklen);
+char*  hex2bin(char *dst, const char *str, int count);
+void dump_stack (void);
+
 #endif
