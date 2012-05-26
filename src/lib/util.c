@@ -174,7 +174,6 @@ void dump_stack (void)
 	free(strings);
 }
 
-#if 0
 #ifndef IN6ADDRSZ
 #define IN6ADDRSZ   16   /* IPv6 T_AAAA */                 
 #endif
@@ -375,4 +374,3 @@ inet_ntop6(const u_char *src, char *dst, size_t size)
 	strlcpy(dst, tmp, size);
 	return (dst);
 }
-#endif
