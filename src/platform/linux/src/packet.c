@@ -34,7 +34,6 @@ void * packet_processing_task (void *unused)
 #endif
 			process_pkt (buf, len, ifport + 1);
 		}
-		free (buf);
 	}
 	return 0;
 }
