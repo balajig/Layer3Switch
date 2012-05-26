@@ -117,5 +117,7 @@ u_char u32ip_masklen (uint32_t netmask);
 uint32_t u32ipv4_network_addr (uint32_t hostaddr, int masklen);
 char*  hex2bin(char *dst, const char *str, int count);
 void dump_stack (void);
+const char * inet_ntop(int af, const void *src, char *dst, size_t size);
+size_t strlcpy(char *dst, const char *src, size_t siz);
 
 #endif
