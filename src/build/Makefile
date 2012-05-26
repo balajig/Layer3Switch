@@ -64,7 +64,7 @@ UTIL:
 
 
 SWITCH:  lib INIT CLI BRIDGE STP PORT RSTP VLAN DHCP DHCPSRV DNS ARP IPV4 TELNETD TC VRRP TCP UDP RTM BGP SNMP UTIL SNTP LIB PLATFORM
-	$(CROSS_COMPILE)gcc -o Switch.exe obj/*.o $(PLATFORM_EXE)_obj/*.o -lpthread -lrt  -Xlinker -Map=output.map
+	$(CC) $(CFLAGS) $(LDFLAGS) -o Switch.exe obj/*.o $(PLATFORM_EXE)_obj/*.o -lpthread -lrt  -Xlinker -Map=output.map
 
 clean: clean-custom
 	$(RM) obj/*.o
