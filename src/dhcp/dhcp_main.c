@@ -18,7 +18,7 @@ void dhcp_process (struct interface *netif, void *p);
 #define DHCP_RX_PKT      0x1
 #define DHCP_PQ_MSG      32
 
-struct dhcp_msg {
+struct dhcpd_msg {
 	int32_t            msg_type;
 	void               *data;
 	struct  interface  *netif;
@@ -30,17 +30,17 @@ static unsigned long dhcp_pqid = -1;
 
 void * dhcp_task (void *arg)
 {
-	struct dhcp_msg *msg = NULL;
+	struct dhcpd_msg *msg = NULL;
 	
-	void (*dhcp_msg_call_back[]) (struct interface *, void *p) = {NULL, dhcp_process};
+	void (*dhcpd_msg_call_back[]) (struct interface *, void *p) = {NULL, dhcp_process};
 									
 	while (1) {
 
 		if (dequeue_packet (dhcp_pqid, (void *)&msg, sizeof (msg), 0, 0) < 0)
 			continue;
 
-		if (dhcp_msg_call_back [msg->msg_type])
-			dhcp_msg_call_back[msg->msg_type] (msg->netif, msg->data);
+		if (dhcpd_msg_call_back [msg->msg_type])
+			dhcpd_msg_call_back[msg->msg_type] (msg->netif, msg->data);
 		
 		free_blk (dhcpqpool, msg);
 	}
@@ -48,7 +48,7 @@ void * dhcp_task (void *arg)
 
 int dhcp_queue_packet (struct interface *netif, void *data)
 {
-	struct dhcp_msg *new = NULL;	
+	struct dhcpd_msg *new = NULL;	
 
 	new = alloc_block (dhcpqpool);
 
@@ -75,7 +75,7 @@ int dhcp_init (void)
 		return -1;
 	}
 
-        dhcpqpool = mem_pool_create ("DHCP", DHCP_PQ_MSG * sizeof (struct dhcp_msg), 
+        dhcpqpool = mem_pool_create ("DHCP", DHCP_PQ_MSG * sizeof (struct dhcpd_msg), 
                                      DHCP_PQ_MSG, 0);
         if (dhcpqpool < 0) {
 		pqueue_destroy (dhcp_pqid);

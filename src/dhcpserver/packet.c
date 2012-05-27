@@ -6,6 +6,7 @@
  *
  * Licensed under GPLv2, see file LICENSE in this source tree.
  */
+#include "common_types.h"
 #include "common.h"
 #include "sockets.h"
 #include "dhcpd.h"
@@ -168,8 +169,8 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	int fd;
 	int result = -1;
 	const char *msg;
+ 	ip_addr_p_t src, dest;
 
-#if 0
 	fd = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP));
 	if (fd < 0) {
 		msg = "socket(%s)";
@@ -203,21 +204,22 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	padding = DHCP_OPTIONS_BUFSIZE - 1 - udhcp_end_option(packet.data.options);
 
 	packet.ip._proto = IPPROTO_UDP;
-	packet.ip.src = source_nip;
-	packet.ip.dest = dest_nip;
-	packet.udp.source = htons(source_port);
+	src.addr = source_nip;
+	packet.ip.src = src;
+	dest.addr = dest_nip;
+	packet.ip.dest = dest;
+	packet.udp.src = htons(source_port);
 	packet.udp.dest = htons(dest_port);
 	/* size, excluding IP header: */
 	packet.udp.len = htons(UDP_DHCP_SIZE - padding);
 	/* for UDP checksumming, ip.len is set to UDP packet len */
 	packet.ip._len = packet.udp.len;
-	packet.udp.check = udhcp_checksum(&packet, IP_UDP_DHCP_SIZE - padding);
+	packet.udp.chksum = udhcp_checksum(&packet, IP_UDP_DHCP_SIZE - padding);
 	/* but for sending, it is set to IP packet len */
 	packet.ip._len = htons(IP_UDP_DHCP_SIZE - padding);
-	packet.ip._v_hl_tos = sizeof(packet.ip) >> 2;
-	packet.ip.version = IPVERSION;
-	packet.ip.ttl = IPDEFTTL;
-	packet.ip.check = udhcp_checksum(&packet.ip, sizeof(packet.ip));
+	IPH_VHLTOS_SET(&packet.ip, IPVERSION, sizeof(packet.ip) >> 2, 0);
+	packet.ip._ttl = IPDEFTTL;
+	packet.ip._chksum = udhcp_checksum(&packet.ip, sizeof(packet.ip));
 
 	udhcp_dump_packet(dhcp_pkt);
 	result = sendto(fd, &packet, IP_UDP_DHCP_SIZE - padding, /*flags:*/ 0,
@@ -229,7 +231,6 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
  ret_msg:
 		perror(msg);
 	}
-#endif
 	return result;
 }
 const int const_int_1 = 1;

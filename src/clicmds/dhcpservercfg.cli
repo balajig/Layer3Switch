@@ -1,4 +1,4 @@
-//Enables the Cisco IOS DHCP server and relay features on your router
+//Enables the DHCP server and relay features
 service dhcp
 
 //Specifies the IP addresses that the DHCP Server should not assign to DHCP clients

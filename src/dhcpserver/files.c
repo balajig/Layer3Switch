@@ -90,12 +90,11 @@ static const struct config_keyword keywords[] = {
 	{"boot_file"    , read_str        , &server_config.boot_file    , NULL},
 	{"static_lease" , read_staticlease, &server_config.static_leases, ""},
 };
+#define ARRAY_SIZE(k)  sizeof(k) / sizeof (k[0])
 #define KWS_WITH_DEFAULTS  (ARRAY_SIZE(keywords) - 6)
 
 void FAST_FUNC read_config(const char *file)
 {
-#if 0
-	parser_t *parser;
 	const struct config_keyword *k;
 	unsigned i;
 	char *token[2];
@@ -103,6 +102,8 @@ void FAST_FUNC read_config(const char *file)
 	for (i = 0; i < KWS_WITH_DEFAULTS; i++)
 		keywords[i].handler(keywords[i].def, keywords[i].var);
 
+#if 0
+	parser_t *parser;
 	parser = config_open(file);
 	while (config_read(parser, token, 2, 2, "# \t", PARSE_NORMAL)) {
 		for (k = keywords, i = 0; i < ARRAY_SIZE(keywords); k++, i++) {

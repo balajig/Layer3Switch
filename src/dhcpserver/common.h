@@ -71,7 +71,7 @@ struct dhcp_packet {
 	uint8_t file[128];    /* boot file name (ASCIZ) */
 	uint32_t cookie;      /* fixed first four option bytes (99,130,83,99 dec) */
 	uint8_t options[DHCP_OPTIONS_BUFSIZE];
-} PACKED;
+} __attribute__ ((packed));
 #define DHCP_PKT_SNAME_LEN      64
 #define DHCP_PKT_FILE_LEN      128
 #define DHCP_PKT_SNAME_LEN_STR "64"

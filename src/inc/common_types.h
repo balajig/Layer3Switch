@@ -48,6 +48,16 @@
 # error "Can't determine endianness"
 #endif
 
+#define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
+#define	IPVERSION	4               /* IP version number */
+#define	MAXTTL		255		/* maximum time to live (seconds) */
+#define	IPDEFTTL	64		/* default ttl, from RFC 1340 */
+#define	IPFRAGTTL	60		/* time to live for frags, slowhz */
+#define	IPTTLDEC	1		/* subtracted when forwarding */
+
+#define	IP_MSS		576		/* default maximum segment size */
+
+
 
 /* Protocol families.  */
 #define PF_UNSPEC       0       /* Unspecified.  */
