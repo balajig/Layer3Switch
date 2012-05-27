@@ -258,6 +258,21 @@ int set_prompt_internal (char *pmt, int len)
 	return 0;
 }
 
+int set_hostname (const char *Hostname)
+{
+      int this_session = cli_get_cli_session_id ();
+
+      if (this_session  < 0)
+              return -1;
+
+      sprintf (this_cli[this_session].hostname, "%s", Hostname);
+
+      set_prompt ("(config)");
+      get_prompt (this_cli[this_session].parser.cfg.prompt);
+
+      return 0;
+}
+
 int  get_prompt (char *pmt)
 {
 	int this_session = cli_get_cli_session_id ();

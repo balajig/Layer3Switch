@@ -207,3 +207,14 @@ cparser_result_t cparser_cmd_no_debug_mem_pool_poolid(cparser_context_t *context
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
+cparser_result_t cparser_cmd_config_set_hostname_hostname(cparser_context_t *context,
+    char **hostname_ptr)
+{
+	char prompt[CPARSER_MAX_PROMPT];
+
+	if (set_hostname (*hostname_ptr))
+		return CPARSER_NOT_OK;
+	get_prompt (prompt);
+	cparser_set_prompt (context->parser, prompt);
+	return CPARSER_OK;
+}

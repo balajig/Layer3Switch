@@ -729,6 +729,18 @@ cparser_submode_enter (cparser_t *parser, void *cookie, char *prompt)
 }
 
 cparser_result_t
+cparser_set_prompt (cparser_t *parser, const char *prompt)
+{
+    if (!parser) {
+        return CPARSER_ERR_INVALID_PARAMS;
+    }
+    snprintf(parser->prompt[parser->root_level],
+             sizeof(parser->prompt[parser->root_level]), "%s", prompt);
+
+    return CPARSER_OK;
+}
+
+cparser_result_t
 cparser_submode_exit (cparser_t *parser)
 {
     if (!parser) {

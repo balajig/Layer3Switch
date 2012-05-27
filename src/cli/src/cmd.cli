@@ -7,6 +7,9 @@ configure terminal
 
 #submode "config"
 
+//Sets hostname
+set hostname <STRING:hostname>
+
 //Add new user 
 user add <STRING:username> <STRING:password> <INT:level>
 
