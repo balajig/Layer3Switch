@@ -48,11 +48,11 @@ generate()
 
 # (Re)generate include/applets.h
 s=`sed -n 's@^//applet:@@p' "$srctree"/*/*.c "$srctree"/*/*/*.c`
-generate \
-	"$srctree/include/applets.src.h" \
-	"include/applets.h" \
-	"/* DO NOT EDIT. This file is generated from applets.src.h */" \
-	"${s}"
+#generate \
+#	"$srctree/include/applets.src.h" \
+#	"include/applets.h" \
+#	"/* DO NOT EDIT. This file is generated from applets.src.h */" \
+#	"${s}"
 
 # (Re)generate include/usage.h
 # We add line continuation backslash after each line,
@@ -60,11 +60,11 @@ generate \
 # with space or tab
 # (note: we need to use \\\\ because of ``)
 s=`sed -n -e 's@^//usage:\([ \t].*\)$@\1 \\\\@p' -e 's@^//usage:\([^ \t].*\)$@\n\1 \\\\@p' "$srctree"/*/*.c "$srctree"/*/*/*.c`
-generate \
-	"$srctree/include/usage.src.h" \
-	"include/usage.h" \
-	"/* DO NOT EDIT. This file is generated from usage.src.h */" \
-	"${s}"
+#generate \
+#	"$srctree/include/usage.src.h" \
+#	"include/usage.h" \
+#	"/* DO NOT EDIT. This file is generated from usage.src.h */" \
+#	"${s}"
 
 # (Re)generate */Kbuild and */Config.in
 { cd -- "$srctree" && find . -type d; } | while read -r d; do
