@@ -220,6 +220,7 @@ nexthop_ipv4_add (struct rib *rib, struct in_addr *ipv4, struct in_addr *src)
   if (src)
     nexthop->src.ipv4 = *src;
 
+  SET_FLAG (nexthop->flags, NEXTHOP_FLAG_FIB);
   nexthop_add (rib, nexthop);
 
   return nexthop;

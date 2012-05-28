@@ -60,7 +60,7 @@ static void * dhcpd_task (void *arg)
 	struct dhcpd_msg *msg = NULL;
 	
 	void (*dhcpd_msg_call_back[]) (void *p) = {NULL, dhcpd_process_packet};
-									
+
 	while (1) {
 
 		if (dequeue_packet (dhcp_pqid, (void *)&msg, sizeof (msg), 0, 0) < 0)
@@ -80,6 +80,7 @@ int dhcpd_start (void)
 	udp_connect (pcb, IP_ADDR_ANY, DHCP_CLIENT_PORT);
 	udp_recv (pcb, dhcpd_recv, NULL);
 
+	udhcpd_init ();
 	read_config (NULL);
 	return 0;
 }
