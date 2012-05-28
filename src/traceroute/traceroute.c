@@ -204,22 +204,16 @@ static const char rcsid[] =
 
 #include "common_types.h"
 #include "ip_hdr.h"
+#include "tcp_impl.h"
+#include "udp.h"
 #include "netdb.h"
+#include "ip_icmp.h"
 #include "icmp.h"
 #include "signal.h"
 #include "sockets.h"
 #include "socks.h"
 
 /* rfc1716 */
-#ifndef ICMP_UNREACH_FILTER_PROHIB
-#define ICMP_UNREACH_FILTER_PROHIB	13	/* admin prohibited filter */
-#endif
-#ifndef ICMP_UNREACH_HOST_PRECEDENCE
-#define ICMP_UNREACH_HOST_PRECEDENCE	14	/* host precedence violation */
-#endif
-#ifndef ICMP_UNREACH_PRECEDENCE_CUTOFF
-#define ICMP_UNREACH_PRECEDENCE_CUTOFF	15	/* precedence cutoff */
-#endif
 
 
 /* Maximum number of gateways (include room for one noop) */
@@ -231,6 +225,7 @@ static const char rcsid[] =
 
 #define Fprintf (void)fprintf
 #define Printf (void)printf
+
 
 /* What a GRE packet header looks like */
 struct grehdr {
@@ -270,7 +265,7 @@ struct my_pmtu {
 
 u_char	packet[512];		/* last inbound (icmp) packet */
 
-struct ip *outip;		/* last output ip packet */
+struct ip_hdr *outip;		/* last output ip packet */
 u_char *outp;		/* last output inner protocol packet */
 
 /* loose source route gateway list (including room for final destination) */
@@ -324,7 +319,7 @@ struct	hostinfo *gethostinfo(char *);
 u_short	in_cksum(u_short *, int);
 char	*inetname(struct in_addr);
 int	main(int, char **);
-u_short p_cksum(struct ip *, u_short *, int);
+u_short p_cksum(struct ip_hdr *, u_short *, int);
 int	packet_ok(u_char *, int, struct sockaddr_in *, int);
 char	*pr_type(u_char);
 void	print(u_char *, int, struct sockaddr_in *);
@@ -332,7 +327,6 @@ void	print(u_char *, int, struct sockaddr_in *);
 int	setpolicy __P((int so, char *policy));
 #endif
 void	send_probe(int, int);
-struct outproto *setproto(char *);
 int	str2val(const char *, const char *, int, int);
 void	tvsub(struct timeval *, struct timeval *);
 void usage(void);
@@ -367,10 +361,11 @@ struct outproto {
 /* List of supported protocols. The first one is the default. The last
    one is the handler for generic protocols not explicitly listed. */
 struct	outproto protos[] = {
+#if 0
 	{
 		"udp",
 		IPPROTO_UDP,
-		sizeof(struct udphdr),
+		sizeof(struct udp_hdr),
 		32768 + 666,
 		udp_prep,
 		udp_check
@@ -378,7 +373,7 @@ struct	outproto protos[] = {
 	{
 		"tcp",
 		IPPROTO_TCP,
-		sizeof(struct tcphdr),
+		sizeof(struct tcp_hdr),
 		32768 + 666,
 		tcp_prep,
 		tcp_check
@@ -391,6 +386,7 @@ struct	outproto protos[] = {
 		gre_prep,
 		gre_check
 	},
+#endif
 	{
 		"icmp",
 		IPPROTO_ICMP,
@@ -399,6 +395,7 @@ struct	outproto protos[] = {
 		icmp_prep,
 		icmp_check
 	},
+#if 0
 	{
 		NULL,
 		0,
@@ -407,6 +404,7 @@ struct	outproto protos[] = {
 		gen_prep,
 		gen_check
 	},
+#endif
 };
 struct	outproto *proto = &protos[0];
 
@@ -421,13 +419,11 @@ main(int argc, char **argv)
 	register struct sockaddr_in *to = (struct sockaddr_in *)&whereto;
 	register struct hostinfo *hi;
 	int on = 1;
-	register struct protoent *pe;
 	register int ttl, probe, i;
 	register int seq = 0;
 	int tos = 0, settos = 0;
 	register int lsrr = 0;
 	register u_short off = 0;
-	struct ifaddrlist *al;
 	char errbuf[132];
 	int requestPort = -1;
 	int sump = 0;
@@ -438,197 +434,33 @@ main(int argc, char **argv)
 	 * Do error checking for these two calls where they appeared in
 	 * the original code.
 	 */
-	cp = "icmp";
-	pe = getprotobyname(cp);
-	if (pe) {
-		if ((s = socket(AF_INET, SOCK_RAW, pe->p_proto)) < 0)
-			sockerrno = errno;
-		else if ((sndsock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
-			sockerrno = errno;
-	}
+	if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
+		sockerrno = errno;
 
 	max_ttl = 30;
 
-	if (argv[0] == NULL)
-		prog = "traceroute";
-	else if ((cp = strrchr(argv[0], '/')) != NULL)
-		prog = cp + 1;
-	else
-		prog = argv[0];
-
-	opterr = 0;
-	while ((op = getopt(argc, argv, "dFInrSvxf:g:i:M:m:P:p:q:s:t:w:z:")) != EOF)
-		switch (op) {
-
-		case 'd':
-			options |= SO_DEBUG;
-			break;
-
-		case 'f':
-		case 'M':	/* FreeBSD compat. */
-			first_ttl = str2val(optarg, "first ttl", 1, 255);
-			break;
-
-		case 'F':
-			off = IP_DF;
-			break;
-
-		case 'g':
-			if (lsrr >= NGATEWAYS) {
-				Fprintf(stderr,
-				    "%s: No more than %d gateways\n",
-				    prog, NGATEWAYS);
-				exit(1);
-			}
-			getaddr(gwlist + lsrr, optarg);
-			++lsrr;
-			break;
-
-		case 'i':
-			device = optarg;
-			break;
-
-		case 'I':
-			proto = setproto("icmp");
-			break;
-
-		case 'm':
-			max_ttl = str2val(optarg, "max ttl", 1, 255);
-			break;
-
-		case 'N':
-			++disable_seq;
-			break;
-
-		case 'n':
-			++nflag;
-			break;
-
-		case 'P':
-			proto = setproto(optarg);
-			break;
-
-		case 'p':
-			requestPort = (u_short)str2val(optarg, "port",
-			    1, (1 << 16) - 1);
-			break;
-
-		case 'q':
-			nprobes = str2val(optarg, "nprobes", 1, -1);
-			break;
-
-		case 'r':
-			options |= SO_DONTROUTE;
-			break;
-
-		case 's':
-			/*
-			 * set the ip source address of the outbound
-			 * probe (e.g., on a multi-homed host).
-			 */
-			source = optarg;
-			break;
-
-		case 'S':
-			sump = 1;
-			break;
-
-		case 't':
-			tos = str2val(optarg, "tos", 0, 255);
-			++settos;
-			break;
-
-		case 'v':
-			++verbose;
-			break;
-
-		case 'x':
-			doipcksum = (doipcksum == 0);
-			break;
-
-		case 'w':
-			waittime = str2val(optarg, "wait time",
-			    2, 24 * 60 * 60);
-			break;
-
-		case 'z':
-			pausemsecs = str2val(optarg, "pause msecs",
-			    0, 60 * 60 * 1000);
-			break;
-
-		default:
-			usage();
-		}
-
-	/* Set requested port, if any, else default for this protocol */
-	port = (requestPort != -1) ? requestPort : proto->port;
-
-	if (first_ttl > max_ttl) {
-		Fprintf(stderr,
-		    "%s: first ttl (%d) may not be greater than max ttl (%d)\n",
-		    prog, first_ttl, max_ttl);
-		exit(1);
-	}
-
-	if (!doipcksum)
-		Fprintf(stderr, "%s: Warning: ip checksums disabled\n", prog);
-
-	if (lsrr > 0)
-		optlen = (lsrr + 1) * sizeof(gwlist[0]);
-	minpacket = sizeof(*outip) + proto->hdrlen + sizeof(struct outdata) + optlen;
-	packlen = minpacket;			/* minimum sized packet */
-
-	/* Process destination and optional packet size */
-	switch (argc - optind) {
-
-	case 2:
-		packlen = str2val(argv[optind + 1],
-		    "packet length", minpacket, maxpacket);
-		/* Fall through */
-
-	case 1:
-		hostname = argv[optind];
-		hi = gethostinfo(hostname);
-		setsin(to, hi->addrs[0]);
-		if (hi->n > 1)
-			Fprintf(stderr,
-		    "%s: Warning: %s has multiple addresses; using %s\n",
-				prog, hostname, inet_ntoa(to->sin_addr));
-		hostname = hi->name;
-		hi->name = NULL;
-		freehostinfo(hi);
-		break;
-
-	default:
-		usage();
-	}
-
-#ifdef HAVE_SETLINEBUF
-	setlinebuf (stdout);
-#else
-	setvbuf(stdout, NULL, _IOLBF, 0);
-#endif
-
 	protlen = packlen - sizeof(*outip) - optlen;
 
-	outip = (struct ip *)malloc((unsigned)packlen);
+	outip = (struct ip_hdr *)malloc((unsigned)packlen);
 	if (outip == NULL) {
 		Fprintf(stderr, "%s: malloc: %s\n", prog, strerror(errno));
 		exit(1);
 	}
 	memset((char *)outip, 0, packlen);
 
+#if 0
 	outip->ip_v = IPVERSION;
 	if (settos)
 		outip->ip_tos = tos;
-#ifdef BYTESWAP_IP_HDR
-	outip->ip_len = htons(packlen);
-	outip->ip_off = htons(off);
-#else
-	outip->ip_len = packlen;
-	outip->ip_off = off;
 #endif
-	outip->ip_p = proto->num;
+#ifdef BYTESWAP_IP_HDR
+	outip->_len = htons(packlen);
+	outip->_offset = htons(off);
+#else
+	outip->_len = packlen;
+	outip->_offset = off;
+#endif
+	outip->_proto = proto->num;
 	outp = (u_char *)(outip + 1);
 #ifdef HAVE_RAW_OPTIONS
 	if (lsrr > 0) {
@@ -640,7 +472,7 @@ main(int argc, char **argv)
 		/* final hop */
 		gwlist[lsrr] = to->sin_addr.s_addr;
 
-		outip->ip_dst.s_addr = gwlist[0];
+		outip->dest.addr = gwlist[0];
 
 		/* force 4 byte alignment */
 		optlist[0] = IPOPT_NOP;
@@ -653,15 +485,11 @@ main(int argc, char **argv)
 		memcpy(optlist + 4, gwlist + 1, i);
 	} else
 #endif
-		outip->ip_dst = to->sin_addr;
+		outip->dest.addr = to->sin_addr.s_addr;
 
-	outip->ip_hl = (outp - (u_char *)outip) >> 2;
+	IPH_VHLTOS_SET(outip, IPVERSION, (outp - (u_char *)outip) >> 2, 0);
 	ident = (getpid() & 0xffff) | 0x8000;
 
-	if (pe == NULL) {
-		Fprintf(stderr, "%s: unknown protocol %s\n", prog, cp);
-		exit(1);
-	}
 	if (s < 0) {
 		errno = sockerrno;
 		Fprintf(stderr, "%s: icmp socket: %s\n", prog, strerror(errno));
@@ -748,30 +576,6 @@ main(int argc, char **argv)
 		(void)setsockopt(sndsock, SOL_SOCKET, SO_DONTROUTE, (char *)&on,
 		    sizeof(on));
 
-	/* Get the interface address list */
-	n = ifaddrlist(&al, errbuf);
-	if (n < 0) {
-		Fprintf(stderr, "%s: ifaddrlist: %s\n", prog, errbuf);
-		exit(1);
-	}
-	if (n == 0) {
-		Fprintf(stderr,
-		    "%s: Can't find any network interfaces\n", prog);
-		exit(1);
-	}
-
-	/* Look for a specific device */
-	if (device != NULL) {
-		for (i = n; i > 0; --i, ++al)
-			if (strcmp(device, al->device) == 0)
-				break;
-		if (i <= 0) {
-			Fprintf(stderr, "%s: Can't find interface %.32s\n",
-			    prog, device);
-			exit(1);
-		}
-	}
-
 	/* Determine our source address */
 	if (source == NULL) {
 		/*
@@ -816,7 +620,7 @@ main(int argc, char **argv)
 		freehostinfo(hi);
 	}
 
-	outip->ip_src = from->sin_addr;
+	outip->src.addr = from->sin_addr.s_addr;
 
 	/* Check the source address (-s), if any, is valid */
 	if (bind(sndsock, (struct sockaddr *)from, sizeof(*from)) < 0) {
@@ -853,7 +657,7 @@ main(int argc, char **argv)
 			register int cc;
 			struct timeval t1, t2;
 			struct timezone tz;
-			register struct ip *ip;
+			register struct ip_hdr *ip;
 			struct outdata outdata;
 
 			if (sentfirst && pausemsecs > 0)
@@ -905,8 +709,8 @@ main(int argc, char **argv)
 				Printf("  %.*f ms", precis, T);
 				if (i == -2) {
 #ifndef ARCHAIC
-					ip = (struct ip *)packet;
-					if (ip->ip_ttl <= 1)
+					ip = (struct ip_hdr *)packet;
+					if (ip->_ttl <= 1)
 						Printf(" !");
 #endif
 					++got_there;
@@ -918,51 +722,51 @@ main(int argc, char **argv)
 				code = i - 1;
 				switch (code) {
 
-				case ICMP_UNREACH_PORT:
+				case ICMP_PORT_UNREACH:
 #ifndef ARCHAIC
-					ip = (struct ip *)packet;
-					if (ip->ip_ttl <= 1)
+					ip = (struct ip_hdr *)packet;
+					if (ip->_ttl <= 1)
 						Printf(" !");
 #endif
 					++got_there;
 					break;
 
-				case ICMP_UNREACH_NET:
+				case ICMP_NET_UNREACH:
 					++unreachable;
 					Printf(" !N");
 					break;
 
-				case ICMP_UNREACH_HOST:
+				case ICMP_HOST_UNREACH:
 					++unreachable;
 					Printf(" !H");
 					break;
 
-				case ICMP_UNREACH_PROTOCOL:
+				case ICMP_PROT_UNREACH:
 					++got_there;
 					Printf(" !P");
 					break;
 
-				case ICMP_UNREACH_NEEDFRAG:
+				case ICMP_FRAG_NEEDED:
 					++unreachable;
 					Printf(" !F-%d", pmtu);
 					break;
 
-				case ICMP_UNREACH_SRCFAIL:
+				case ICMP_SR_FAILED:
 					++unreachable;
 					Printf(" !S");
 					break;
 
-				case ICMP_UNREACH_FILTER_PROHIB:
+				case ICMP_PKT_FILTERED:
 					++unreachable;
 					Printf(" !X");
 					break;
 
-				case ICMP_UNREACH_HOST_PRECEDENCE:
+				case ICMP_PREC_VIOLATION:
 					++unreachable;
 					Printf(" !V");
 					break;
 
-				case ICMP_UNREACH_PRECEDENCE_CUTOFF:
+				case ICMP_PREC_CUTOFF:
 					++unreachable;
 					Printf(" !C");
 					break;
@@ -1036,8 +840,8 @@ send_probe(int seq, int ttl)
 {
 	register int cc;
 
-	outip->ip_ttl = ttl;
-	outip->ip_id = htons(ident + seq);
+	outip->_ttl = ttl;
+	outip->_id = htons(ident + seq);
 
 	/* XXX undocumented debugging hack */
 	if (verbose > 1) {
@@ -1142,10 +946,10 @@ packet_ok(register u_char *buf, int cc, register struct sockaddr_in *from,
 	register u_char type, code;
 	register int hlen;
 #ifndef ARCHAIC
-	register struct ip *ip;
+	register struct ip_hdr *ip;
 
-	ip = (struct ip *) buf;
-	hlen = ip->ip_hl << 2;
+	ip = (struct ip_hdr *) buf;
+	hlen = IPH_HL(ip);
 	if (cc < hlen + ICMP_MINLEN) {
 		if (verbose)
 			Printf("packet too short (%d bytes) from %s\n", cc,
@@ -1160,7 +964,7 @@ packet_ok(register u_char *buf, int cc, register struct sockaddr_in *from,
 	type = icp->icmp_type;
 	code = icp->icmp_code;
 	/* Path MTU Discovery (RFC1191) */
-	if (code != ICMP_UNREACH_NEEDFRAG)
+	if (code != ICMP_FRAG_NEEDED)
 		pmtu = 0;
 	else {
 #ifdef HAVE_ICMP_NEXTMTU
@@ -1173,18 +977,18 @@ packet_ok(register u_char *buf, int cc, register struct sockaddr_in *from,
 	    && proto->num == IPPROTO_ICMP
 	    && (*proto->check)((u_char *)icp, (u_char)seq))
 		return -2;
-	if ((type == ICMP_TIMXCEED && code == ICMP_TIMXCEED_INTRANS) ||
+	if ((type == ICMP_TIME_EXCEEDED && code == ICMP_TIMXCEED_INTRANS) ||
 	    type == ICMP_UNREACH) {
-		struct ip *hip;
+		struct ip_hdr *hip;
 		u_char *inner;
 
 		hip = &icp->icmp_ip;
-		hlen = hip->ip_hl << 2;
+		hlen = IPH_HL(hip);
 		inner = (u_char *)((u_char *)hip + hlen);
 		if (hlen + 12 <= cc
-		    && hip->ip_p == proto->num
+		    && hip->_proto == proto->num
 		    && (*proto->check)(inner, (u_char)seq))
-			return (type == ICMP_TIMXCEED ? -1 : code + 1);
+			return (type == ICMP_TIME_EXCEEDED ? -1 : code + 1);
 	}
 #ifndef ARCHAIC
 	if (verbose) {
@@ -1193,7 +997,7 @@ packet_ok(register u_char *buf, int cc, register struct sockaddr_in *from,
 
 		Printf("\n%d bytes from %s to ", cc, inet_ntoa(from->sin_addr));
 		Printf("%s: icmp type %d (%s) code %d\n",
-		    inet_ntoa(ip->ip_dst), type, pr_type(type), icp->icmp_code);
+		    inet_ntoa(ip->dest), type, pr_type(type), icp->icmp_code);
 		for (i = 4; i < cc ; i += sizeof(*lp))
 			Printf("%2d: x%8.8x\n", i, *lp++);
 	}
@@ -1224,10 +1028,11 @@ icmp_check(const u_char *data, int seq)
 	    && icmpheader->icmp_seq == htons(seq));
 }
 
+#if 0
 void
 udp_prep(struct outdata *outdata)
 {
-	struct udphdr *const outudp = (struct udphdr *) outp;
+	struct udp_hdr *const outudp = (struct udp_hdr *) outp;
 
 	outudp->uh_sport = htons(ident);
 	outudp->uh_dport = htons(port + outdata->seq);
@@ -1244,7 +1049,7 @@ udp_prep(struct outdata *outdata)
 int
 udp_check(const u_char *data, int seq)
 {
-	struct udphdr *const udp = (struct udphdr *) data;
+	struct udp_hdr *const udp = (struct udp_hdr *) data;
 
 	return (ntohs(udp->uh_sport) == ident
 	    && ntohs(udp->uh_dport) == port + seq);
@@ -1253,7 +1058,7 @@ udp_check(const u_char *data, int seq)
 void
 tcp_prep(struct outdata *outdata)
 {
-	struct tcphdr *const tcp = (struct tcphdr *) outp;
+	struct tcp_hdr *const tcp = (struct tcp_hdr *) outp;
 
 	tcp->th_sport = htons(ident);
 	tcp->th_dport = htons(port + outdata->seq);
@@ -1272,7 +1077,7 @@ tcp_prep(struct outdata *outdata)
 int
 tcp_check(const u_char *data, int seq)
 {
-	struct tcphdr *const tcp = (struct tcphdr *) data;
+	struct tcp_hdr *const tcp = (struct tcp_hdr *) data;
 
 	return (ntohs(tcp->th_sport) == ident
 	    && ntohs(tcp->th_dport) == port + seq);
@@ -1315,15 +1120,15 @@ gen_check(const u_char *data, int seq)
 	return(ntohs(ptr[0]) == ident
 	    && ntohs(ptr[1]) == port + seq);
 }
-
+#endif
 void
 print(register u_char *buf, register int cc, register struct sockaddr_in *from)
 {
-	register struct ip *ip;
+	register struct ip_hdr *ip;
 	register int hlen;
 
-	ip = (struct ip *) buf;
-	hlen = ip->ip_hl << 2;
+	ip = (struct ip_hdr *) buf;
+	hlen = IPH_HL(ip);
 	cc -= hlen;
 
 	if (nflag)
@@ -1333,14 +1138,14 @@ print(register u_char *buf, register int cc, register struct sockaddr_in *from)
 		    inet_ntoa(from->sin_addr));
 
 	if (verbose)
-		Printf(" %d bytes to %s", cc, inet_ntoa (ip->ip_dst));
+		Printf(" %d bytes to %s", cc, inet_ntoa (ip->dest));
 }
-
+#if 0
 /*
  * Checksum routine for UDP and TCP headers.
  */
 u_short 
-p_cksum(struct ip *ip, u_short *data, int len)
+p_cksum(struct ip_hdr *ip, u_short *data, int len)
 {
 	static struct ipovly ipo;
 	u_short sumh, sumd;
@@ -1357,7 +1162,7 @@ p_cksum(struct ip *ip, u_short *data, int len)
 
 	return ~in_cksum((u_short*)&sumt, sizeof(sumt));
 }
-
+#endif
 /*
  * Checksum routine for Internet Protocol family headers (C Version)
  */
@@ -1577,32 +1382,6 @@ str2val(register const char *str, register const char *what,
 		exit(1);
 	}
 	return (val);
-}
-
-struct outproto *
-setproto(char *pname)
-{
-	struct outproto *proto;
-	int i;
-
-	for (i = 0; protos[i].name != NULL; i++) {
-		if (strcasecmp(protos[i].name, pname) == 0) {
-			break;
-		}
-	}
-	proto = &protos[i];
-	if (proto->name == NULL) {	/* generic handler */
-		struct protoent *pe;
-		u_long pnum;
-
-		/* Determine the IP protocol number */
-		if ((pe = getprotobyname(pname)) != NULL)
-			pnum = pe->p_proto;
-		else
-			pnum = str2val(optarg, "proto number", 1, 255);
-		proto->num = pnum;
-	}
-	return proto;
 }
 
 void

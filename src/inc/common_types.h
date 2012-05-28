@@ -605,6 +605,17 @@ enum ROWSTATUS  {
 #define MAXWAIT         10
 #define PINGINTERVAL    1		/* second */
 
+/*
+ * Offsets to fields in options other than EOL and NOP.
+ */
+#define	IPOPT_OPTVAL		0		/* option ID */
+#define	IPOPT_OLEN		1		/* option length */
+#define	IPOPT_OFFSET		2		/* offset within option */
+#define	IPOPT_MINOFF		4		/* min value of above */
+
+#define	MAX_IPOPTLEN		40
+
+
 #define O_QUIET         (1 << 0)
 
 #define	A(bit)		rcvd_tbl[(bit)>>3]	/* identify byte in array */
