@@ -1,4 +1,3 @@
-include build/make.h
 VERSION = 0
 PATCHLEVEL = 1
 SUBLEVEL = 0
