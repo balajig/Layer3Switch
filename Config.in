@@ -5,9 +5,6 @@
 
 mainmenu "Open Switch Solution"
 
-config HAVE_DOT_CONFIG
-	bool
-	default y
 choice
 	prompt "Platform"
 	default PLATFORM_SIM_LINUX
