@@ -511,3 +511,8 @@ int dhcpd_process_packet (struct dhcp_packet *packet)
 			break;
 	}
 }
+
+int udhcpd_init (void)
+{
+	g_leases = malloc(server_config.max_leases * sizeof(g_leases[0]));
+}
