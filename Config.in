@@ -8,7 +8,6 @@ mainmenu "Open Switch Solution"
 config HAVE_DOT_CONFIG
 	bool
 	default y
-
 choice
 	prompt "Platform"
 	default PLATFORM_SIM_LINUX
@@ -20,6 +19,13 @@ choice
 
 config PLATFORM_SIM_LINUX
 	bool "Linux simulation"
+
+config SIM_VIRTUAL_LINK_MGR
+	bool "Virtual link mgr"
+	default y
+	depends on PLATFORM_SIM_LINUX
+	help
+	  Compiles virtual link manager.
 
 config PLATFORM_LINUX
 	bool "Linux"
