@@ -190,7 +190,7 @@ static NOINLINE void send_offer(struct dhcp_packet *oldpacket,
 		}
 
 		if (!packet.yiaddr) {
-			printf("no free IP addresses. OFFER abandoned");
+			printf("no free IP addresses. OFFER abandoned\n");
 			return;
 		}
 		/* Reserve the IP for a short time hoping to get DHCPREQUEST soon */
@@ -201,7 +201,7 @@ static NOINLINE void send_offer(struct dhcp_packet *oldpacket,
 				p_host_name ? (unsigned char)p_host_name[OPT_LEN - OPT_DATA] : 0
 				);
 		if (!lease) {
-			printf("no free IP addresses. OFFER abandoned");
+			printf("no free IP addresses. OFFER abandoned\n");
 			return;
 		}
 	}

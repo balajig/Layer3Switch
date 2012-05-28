@@ -83,5 +83,7 @@ exit
 
 #endsubmode
 
+#include "../clicmds/dhcpservercfg.cli"
+
 // Disable privileged mode
 + disable privileged-mode

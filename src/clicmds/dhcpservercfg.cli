@@ -4,7 +4,6 @@ service dhcp
 //Specifies the IP addresses that the DHCP Server should not assign to DHCP clients
 ip dhcp excluded-address <IPV4ADDR:lowaddress> { <IPV4ADDR:highaddress> }
 
-
 //Specifies the number of ping packets the DHCP Server sends to a pool address before assigning the address to a requesting client
 ip dhcp ping packets <INT:count>
 
@@ -14,7 +13,7 @@ ip dhcp ping timeout <INT:milliseconds>
 //Creates a name for the DHCP Server address pool and places you in DHCP pool configuration mode
 ip dhcp pool <STRING:name>
 
-#submode "dhcp-config"
+#submode "dhcppool"
 
 //Specifies the subnet network number and mask of the DHCP address pool
 network <IPV4ADDR:networkaddr> <IPV4ADDR:mask>
@@ -34,4 +33,4 @@ lease <INT:days> { <INT:hours> } { <INT:minutes> }
 //Specifies the duration of the lease. The default is a one-day lease.
 lease infinite 
 
-#endsubmode "dhcp-config"
+#endsubmode "dhcppool"
