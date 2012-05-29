@@ -16,8 +16,14 @@ run-script <STRING:filename>
 //ping host ip address
 ping <IPV4ADDR:hostaddr>
 
+//Traceroute host ip address
+traceroute <IPV4ADDR:hostaddr>
+
 //ping host ip address
 telnet <STRING:host>
 
 //ping host
 ping <STRING:hostname>
+
+//Traceroute host
+traceroute <STRING:hostname>

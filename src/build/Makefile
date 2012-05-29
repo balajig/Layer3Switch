@@ -58,7 +58,7 @@ SOCK:
 TELNETD:
 	make -C $(CODE_DIR)/telnetd
 TC:
-#	make -C $(CODE_DIR)/traceroute
+	make -C $(CODE_DIR)/traceroute
 UTIL:
 	make -C $(CODE_DIR)/utils
 

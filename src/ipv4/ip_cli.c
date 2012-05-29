@@ -79,9 +79,13 @@ cparser_result_t cparser_cmd_ping_hostaddr(cparser_context_t *context, uint32_t 
         sprintf (str, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
 
 	ping_me (str);
+
+	return CPARSER_OK;
 }
 
 cparser_result_t cparser_cmd_ping_hostname(cparser_context_t *context, char **hostname_ptr)
 {
 	ping_me (*hostname_ptr);
+
+	return CPARSER_OK;
 }
