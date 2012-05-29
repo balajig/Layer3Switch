@@ -1,11 +1,5 @@
-
-.PHONY: all all-before all-after clean clean-custom
-
-include ../build/make.h
-
-
-all:
-	make -C $(PLATFORM_EXE)
-
-clean:
-	make clean -C $(PLATFORM_EXE)
+#Makefile for platform
+obj-y += hal/
+obj-$(CONFIG_PLATFORM_LINUX) += linux/ 
+obj-$(CONFIG_PLATFORM_SIM_LINUX) += sim/ 
+obj-$(CONFIG_PLATFORM_ATOMTHREADS) += atomthreads/ 

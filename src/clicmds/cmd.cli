@@ -1,7 +1,7 @@
-#include "../clicmds/gen.cli"
-#include "../clicmds/showcmds.cli"
-#include "../sntp/sntpshow.cli"
-#include "../clicmds/debug.cli"
+#include "src/clicmds/gen.cli"
+#include "src/clicmds/showcmds.cli"
+#include "src/clicmds/sntpshow.cli"
+#include "src/clicmds/debug.cli"
 //configuration mode
 configure terminal
 
@@ -23,9 +23,9 @@ end
 exit
 
 
-#include "../clicmds/stp.cli"
+#include "src/clicmds/stp.cli"
 
-#include "../clicmds/rstp.cli"
+#include "src/clicmds/rstp.cli"
 
 //Configures default gateway
 ip default-gateway <IPV4ADDR:addr>
@@ -48,7 +48,7 @@ arp <IPV4ADDR:ipaddr> <MACADDR:hostmacaddr>
 // Remove a static ARP mapping.
 no arp <IPV4ADDR:ipaddr>
 
-#include "../sntp/sntpcfg.cli"
+#include "src/clicmds/sntpcfg.cli"
 
 #endsubmode
 
@@ -75,7 +75,7 @@ ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
 //Removes the IP address on Interface
 no ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
 
-#include "../clicmds/dhcpclient.cli"
+#include "src/clicmds/dhcpclient.cli"
 
 //Exit from the mode
 exit
@@ -83,7 +83,7 @@ exit
 
 #endsubmode
 
-#include "../clicmds/dhcpservercfg.cli"
+#include "src/clicmds/dhcpservercfg.cli"
 
 // Disable privileged mode
 + disable privileged-mode

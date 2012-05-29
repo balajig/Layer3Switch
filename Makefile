@@ -20,7 +20,7 @@ MAKEFLAGS += --no-print-directory
 # their own directory. If in some directory we have a dependency on
 # a file in another dir (which doesn't happen often, but it's often
 # unavoidable when linking the built-in.o targets which finally
-# turn into busybox), we will call a sub make in that other dir, and
+# turn into OpenSwitchSolution), we will call a sub make in that other dir, and
 # after that we are sure that everything which is in that other dir
 # is now up to date.
 #
@@ -95,7 +95,7 @@ ifdef O
 endif
 
 # That's our default target when none is given on the command line
-PHONY := _all
+PHONY := PARSE_TREE _all 
 _all:
 
 ifneq ($(KBUILD_OUTPUT),)
@@ -290,7 +290,7 @@ MAKEFLAGS += -rR
 
 AS		= $(CROSS_COMPILE)as
 CC		= $(CROSS_COMPILE)gcc
-LD		= $(CC) -nostdlib
+LD		= $(CROSS_COMPILE)ld
 CPP		= $(CC) -E
 AR		= $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
@@ -303,6 +303,7 @@ DEPMOD		= /sbin/depmod
 KALLSYMS	= scripts/kallsyms
 PERL		= perl
 CHECK		= sparse
+INCLUDE         = -I$(srctree)/src/inc  -I$(srctree)/src/lib  -I$(srctree)/src/cli/ -I$(srctree)/src/platform/inc/linux/
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(CF)
 MODFLAGS	= -DMODULE
@@ -315,13 +316,13 @@ AFLAGS_KERNEL	=
 
 # Use LINUXINCLUDE when you must reference the include/ directory.
 # Needed to be compatible with the O= option
-CFLAGS		:= $(CFLAGS)
-# Added only to final link stage of busybox binary
-CFLAGS_busybox	:= $(CFLAGS_busybox)
+CFLAGS		:= $(CFLAGS) $(INCLUDE)
+# Added only to final link stage of OpenSwitchSolution binary
+CFLAGS_OpenSwitchSolution	:= $(CFLAGS_OpenSwitchSolution)
 CPPFLAGS	:= $(CPPFLAGS)
 AFLAGS		:= $(AFLAGS)
 LDFLAGS		:= $(LDFLAGS)
-LDLIBS		:=
+LDLIBS		:= pthread  rt
 
 # Read KERNELRELEASE from .kernelrelease (if it exists)
 KERNELRELEASE = $(shell cat .kernelrelease 2> /dev/null)
@@ -445,7 +446,7 @@ config: scripts_basic outputmakefile gen_build_files FORCE
 
 else
 # ===========================================================================
-# Build targets only - this includes busybox, arch specific targets, clean
+# Build targets only - this includes OpenSwitchSolution, arch specific targets, clean
 # targets and others. In general all targets except *config targets.
 
 ifeq ($(KBUILD_EXTMOD),)
@@ -458,38 +459,9 @@ scripts: gen_build_files scripts_basic include/config/MARKER
 
 scripts_basic: include/autoconf.h
 
-# Objects we will link into busybox / subdirs we need to visit
+# Objects we will link into OpenSwitchSolution / subdirs we need to visit
 core-y		:= \
-		applets/ \
-
-libs-y		:= \
-		archival/ \
-		archival/libarchive/ \
-		console-tools/ \
-		coreutils/ \
-		coreutils/libcoreutils/ \
-		debianutils/ \
-		e2fsprogs/ \
-		editors/ \
-		findutils/ \
-		init/ \
-		libbb/ \
-		libpwdgrp/ \
-		loginutils/ \
-		mailutils/ \
-		miscutils/ \
-		modutils/ \
-		networking/ \
-		networking/libiproute/ \
-		networking/udhcp/ \
-		printutils/ \
-		procps/ \
-		runit/ \
-		selinux/ \
-		shell/ \
-		sysklogd/ \
-		util-linux/ \
-		util-linux/volume_id/ \
+		src/ \
 
 endif # KBUILD_EXTMOD
 
@@ -527,8 +499,8 @@ endif
 # The all: target is the default when no target is given on the
 # command line.
 # This allow a user to issue only 'make' to build a kernel including modules
-# Defaults busybox but it is usually overridden in the arch makefile
-all: busybox doc
+# Defaults OpenSwitchSolution but it is usually overridden in the arch makefile
+all: OpenSwitchSolution doc
 
 -include $(srctree)/arch/$(ARCH)/Makefile
 
@@ -541,7 +513,7 @@ CHECKFLAGS += $(NOSTDINC_FLAGS)
 # set in the environment
 # Also any assignments in arch/$(ARCH)/Makefile take precedence over
 # this default value
-export KBUILD_IMAGE ?= busybox
+export KBUILD_IMAGE ?= OpenSwitchSolution
 
 #
 # INSTALL_PATH specifies where to place the updated kernel and system map
@@ -559,9 +531,9 @@ export MODLIB
 
 
 ifeq ($(KBUILD_EXTMOD),)
-busybox-dirs	:= $(patsubst %/,%,$(filter %/, $(core-y) $(core-m) $(libs-y) $(libs-m)))
+OpenSwitchSolution-dirs	:= $(patsubst %/,%,$(filter %/, $(core-y) $(core-m) $(libs-y) $(libs-m)))
 
-busybox-alldirs	:= $(sort $(busybox-dirs) $(patsubst %/,%,$(filter %/, \
+OpenSwitchSolution-alldirs	:= $(sort $(OpenSwitchSolution-dirs) $(patsubst %/,%,$(filter %/, \
 		     $(core-n) $(core-) $(libs-n) $(libs-) \
 		)))
 
@@ -570,42 +542,42 @@ libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))
 libs-y2		:= $(patsubst %/, %/built-in.o, $(libs-y))
 libs-y		:= $(libs-y1) $(libs-y2)
 
-# Build busybox
+# Build OpenSwitchSolution
 # ---------------------------------------------------------------------------
-# busybox is build from the objects selected by $(busybox-init) and
-# $(busybox-main). Most are built-in.o files from top-level directories
+# OpenSwitchSolution is build from the objects selected by $(OpenSwitchSolution-init) and
+# $(OpenSwitchSolution-main). Most are built-in.o files from top-level directories
 # in the kernel tree, others are specified in arch/$(ARCH)Makefile.
-# Ordering when linking is important, and $(busybox-init) must be first.
+# Ordering when linking is important, and $(OpenSwitchSolution-init) must be first.
 #
-# busybox
+# OpenSwitchSolution
 #   ^
 #   |
-#   +-< $(busybox-init)
+#   +-< $(OpenSwitchSolution-init)
 #   |   +--< init/version.o + more
 #   |
-#   +--< $(busybox-main)
+#   +--< $(OpenSwitchSolution-main)
 #   |    +--< driver/built-in.o mm/built-in.o + more
 #   |
 #   +-< kallsyms.o (see description in CONFIG_KALLSYMS section)
 #
-# busybox version (uname -v) cannot be updated during normal
+# OpenSwitchSolution version (uname -v) cannot be updated during normal
 # descending-into-subdirs phase since we do not yet know if we need to
-# update busybox.
-# Therefore this step is delayed until just before final link of busybox -
+# update OpenSwitchSolution.
+# Therefore this step is delayed until just before final link of OpenSwitchSolution -
 # except in the kallsyms case where it is done just before adding the
 # symbols to the kernel.
 #
 # System.map is generated to document addresses of all kernel symbols
 
-busybox-all  := $(core-y) $(libs-y)
+OpenSwitchSolution-all  := $(core-y) $(libs-y)
 
-# Rule to link busybox - also used during CONFIG_KALLSYMS
+# Rule to link OpenSwitchSolution - also used during CONFIG_KALLSYMS
 # May be overridden by arch/$(ARCH)/Makefile
-quiet_cmd_busybox__ ?= LINK    $@
-      cmd_busybox__ ?= $(srctree)/scripts/trylink \
+quiet_cmd_OpenSwitchSolution__ ?= LINK    $@
+      cmd_OpenSwitchSolution__ ?= $(srctree)/scripts/trylink \
       "$@" \
       "$(CC)" \
-      "$(CFLAGS) $(CFLAGS_busybox)" \
+      "$(CFLAGS) $(CFLAGS_OpenSwitchSolution)" \
       "$(LDFLAGS) $(EXTRA_LDFLAGS)" \
       "$(core-y)" \
       "$(libs-y)" \
@@ -615,33 +587,33 @@ quiet_cmd_busybox__ ?= LINK    $@
 quiet_cmd_sysmap = SYSMAP
       cmd_sysmap = $(CONFIG_SHELL) $(srctree)/scripts/mksysmap
 
-# Link of busybox
+# Link of OpenSwitchSolution
 # If CONFIG_KALLSYMS is set .version is already updated
 # Generate System.map and verify that the content is consistent
-# Use + in front of the busybox_version rule to silent warning with make -j2
+# Use + in front of the OpenSwitchSolution_version rule to silent warning with make -j2
 # First command is ':' to allow us to use + in front of the rule
-define rule_busybox__
+define rule_OpenSwitchSolution__
 	:
-	$(call cmd,busybox__)
-	$(Q)echo 'cmd_$@ := $(cmd_busybox__)' > $(@D)/.$(@F).cmd
+	$(call cmd,OpenSwitchSolution__)
+	$(Q)echo 'cmd_$@ := $(cmd_OpenSwitchSolution__)' > $(@D)/.$(@F).cmd
 endef
 
 
 ifdef CONFIG_KALLSYMS
-# Generate section listing all symbols and add it into busybox $(kallsyms.o)
+# Generate section listing all symbols and add it into OpenSwitchSolution $(kallsyms.o)
 # It's a three stage process:
-# o .tmp_busybox1 has all symbols and sections, but __kallsyms is
+# o .tmp_OpenSwitchSolution1 has all symbols and sections, but __kallsyms is
 #   empty
 #   Running kallsyms on that gives us .tmp_kallsyms1.o with
-#   the right size - busybox version (uname -v) is updated during this step
-# o .tmp_busybox2 now has a __kallsyms section of the right size,
+#   the right size - OpenSwitchSolution version (uname -v) is updated during this step
+# o .tmp_OpenSwitchSolution2 now has a __kallsyms section of the right size,
 #   but due to the added section, some addresses have shifted.
 #   From here, we generate a correct .tmp_kallsyms2.o
-# o The correct .tmp_kallsyms2.o is linked into the final busybox.
-# o Verify that the System.map from busybox matches the map from
-#   .tmp_busybox2, just in case we did not generate kallsyms correctly.
+# o The correct .tmp_kallsyms2.o is linked into the final OpenSwitchSolution.
+# o Verify that the System.map from OpenSwitchSolution matches the map from
+#   .tmp_OpenSwitchSolution2, just in case we did not generate kallsyms correctly.
 # o If CONFIG_KALLSYMS_EXTRA_PASS is set, do an extra pass using
-#   .tmp_busybox3 and .tmp_kallsyms3.o.  This is only meant as a
+#   .tmp_OpenSwitchSolution3 and .tmp_kallsyms3.o.  This is only meant as a
 #   temporary bypass to allow the kernel to be built while the
 #   maintainers work out what went wrong with kallsyms.
 
@@ -656,22 +628,22 @@ kallsyms.o := .tmp_kallsyms$(last_kallsyms).o
 define verify_kallsyms
 	$(Q)$(if $($(quiet)cmd_sysmap),                       \
 	  echo '  $($(quiet)cmd_sysmap) .tmp_System.map' &&)  \
-	  $(cmd_sysmap) .tmp_busybox$(last_kallsyms) .tmp_System.map
+	  $(cmd_sysmap) .tmp_OpenSwitchSolution$(last_kallsyms) .tmp_System.map
 	$(Q)cmp -s System.map .tmp_System.map ||              \
 		(echo Inconsistent kallsyms data;             \
 		 echo Try setting CONFIG_KALLSYMS_EXTRA_PASS; \
 		 rm .tmp_kallsyms* ; /bin/false )
 endef
 
-# Update busybox version before link
+# Update OpenSwitchSolution version before link
 # Use + in front of this rule to silent warning about make -j1
 # First command is ':' to allow us to use + in front of this rule
-cmd_ksym_ld = $(cmd_busybox__)
+cmd_ksym_ld = $(cmd_OpenSwitchSolution__)
 define rule_ksym_ld
 	:
-	+$(call cmd,busybox_version)
-	$(call cmd,busybox__)
-	$(Q)echo 'cmd_$@ := $(cmd_busybox__)' > $(@D)/.$(@F).cmd
+	+$(call cmd,OpenSwitchSolution_version)
+	$(call cmd,OpenSwitchSolution__)
+	$(Q)echo 'cmd_$@ := $(cmd_OpenSwitchSolution__)' > $(@D)/.$(@F).cmd
 endef
 
 # Generate .S file with all kernel symbols
@@ -682,18 +654,18 @@ quiet_cmd_kallsyms = KSYM    $@
 .tmp_kallsyms1.o .tmp_kallsyms2.o .tmp_kallsyms3.o: %.o: %.S scripts FORCE
 	$(call if_changed_dep,as_o_S)
 
-.tmp_kallsyms%.S: .tmp_busybox% $(KALLSYMS)
+.tmp_kallsyms%.S: .tmp_OpenSwitchSolution% $(KALLSYMS)
 	$(call cmd,kallsyms)
 
-# .tmp_busybox1 must be complete except kallsyms, so update busybox version
-.tmp_busybox1: $(busybox-lds) $(busybox-all) FORCE
+# .tmp_OpenSwitchSolution1 must be complete except kallsyms, so update OpenSwitchSolution version
+.tmp_OpenSwitchSolution1: $(OpenSwitchSolution-lds) $(OpenSwitchSolution-all) FORCE
 	$(call if_changed_rule,ksym_ld)
 
-.tmp_busybox2: $(busybox-lds) $(busybox-all) .tmp_kallsyms1.o FORCE
-	$(call if_changed,busybox__)
+.tmp_OpenSwitchSolution2: $(OpenSwitchSolution-lds) $(OpenSwitchSolution-all) .tmp_kallsyms1.o FORCE
+	$(call if_changed,OpenSwitchSolution__)
 
-.tmp_busybox3: $(busybox-lds) $(busybox-all) .tmp_kallsyms2.o FORCE
-	$(call if_changed,busybox__)
+.tmp_OpenSwitchSolution3: $(OpenSwitchSolution-lds) $(OpenSwitchSolution-all) .tmp_kallsyms2.o FORCE
+	$(call if_changed,OpenSwitchSolution__)
 
 # Needs to visit scripts/ before $(KALLSYMS) can be used.
 $(KALLSYMS): scripts ;
@@ -701,7 +673,7 @@ $(KALLSYMS): scripts ;
 # Generate some data for debugging strange kallsyms problems
 debug_kallsyms: .tmp_map$(last_kallsyms)
 
-.tmp_map%: .tmp_busybox% FORCE
+.tmp_map%: .tmp_OpenSwitchSolution% FORCE
 	($(OBJDUMP) -h $< | $(AWK) '/^ +[0-9]/{print $$4 " 0 " $$2}'; $(NM) $<) | sort > $@
 
 .tmp_map3: .tmp_map2
@@ -710,33 +682,33 @@ debug_kallsyms: .tmp_map$(last_kallsyms)
 
 endif # ifdef CONFIG_KALLSYMS
 
-# busybox image - including updated kernel symbols
-busybox_unstripped: $(busybox-all) FORCE
-	$(call if_changed_rule,busybox__)
+# OpenSwitchSolution image - including updated kernel symbols
+OpenSwitchSolution_unstripped: $(OpenSwitchSolution-all) FORCE
+	$(call if_changed_rule,OpenSwitchSolution__)
 	$(Q)rm -f .old_version
 
-busybox: busybox_unstripped
+OpenSwitchSolution: OpenSwitchSolution_unstripped
 ifeq ($(SKIP_STRIP),y)
 	$(Q)cp $< $@
 else
 	$(Q)$(STRIP) -s --remove-section=.note --remove-section=.comment \
-		busybox_unstripped -o $@
+		OpenSwitchSolution_unstripped -o $@
 # strip is confused by PIE executable and does not set exec bits
 	$(Q)chmod a+x $@
 endif
 
 # The actual objects are generated when descending,
 # make sure no implicit rule kicks in
-$(sort $(busybox-all)): $(busybox-dirs) ;
+$(sort $(OpenSwitchSolution-all)): $(OpenSwitchSolution-dirs) ;
 
-# Handle descending into subdirectories listed in $(busybox-dirs)
+# Handle descending into subdirectories listed in $(OpenSwitchSolution-dirs)
 # Preset locale variables to speed up the build process. Limit locale
 # tweaks to this spot to avoid wrong language settings when running
 # make menuconfig etc.
 # Error messages still appears in the original language
 
-PHONY += $(busybox-dirs)
-$(busybox-dirs): prepare scripts
+PHONY += $(OpenSwitchSolution-dirs)
+$(OpenSwitchSolution-dirs): prepare scripts PARSE_TREE
 	$(Q)$(MAKE) $(build)=$@
 
 # Build the kernel release string
@@ -799,7 +771,7 @@ PHONY += prepare-all
 # 2) Create the include2 directory, used for the second asm symlink
 prepare3: .kernelrelease
 ifneq ($(KBUILD_SRC),)
-	@echo '  Using $(srctree) as source for busybox'
+	@echo '  Using $(srctree) as source for OpenSwitchSolution'
 	$(Q)if [ -f $(srctree)/.config ]; then \
 		echo "  $(srctree) is not clean, please run 'make mrproper'";\
 		echo "  in the '$(srctree)' directory.";\
@@ -818,7 +790,7 @@ ifneq ($(KBUILD_MODULES),)
 	$(Q)rm -f $(MODVERDIR)/*
 endif
 
-archprepare: prepare1 scripts_basic applets_dir
+archprepare: prepare1 scripts_basic
 
 prepare0: archprepare FORCE
 	$(Q)$(MAKE) $(build)=.
@@ -826,10 +798,10 @@ prepare0: archprepare FORCE
 # All the preparing..
 prepare prepare-all: prepare0
 
-#	Leave this as default for preprocessing busybox.lds.S, which is now
+#	Leave this as default for preprocessing OpenSwitchSolution.lds.S, which is now
 #	done in arch/$(ARCH)/kernel/Makefile
 
-export CPPFLAGS_busybox.lds += -P -C -U$(ARCH)
+export CPPFLAGS_OpenSwitchSolution.lds += -P -C -U$(ARCH)
 
 # 	FIXME: The asm symlink changes when $(ARCH) changes. That's
 #	hard to detect, but I suppose "make mrproper" is a good idea
@@ -888,7 +860,7 @@ all: modules
 #	Build modules
 
 PHONY += modules
-modules: $(busybox-dirs) $(if $(KBUILD_BUILTIN),busybox)
+modules: $(OpenSwitchSolution-dirs) $(if $(KBUILD_BUILTIN),OpenSwitchSolution)
 	@echo '  Building modules, stage 2.';
 	$(Q)$(MAKE) -rR -f $(srctree)/scripts/Makefile.modpost
 
@@ -920,7 +892,7 @@ _modinst_:
 
 # If System.map exists, run depmod.  This deliberately does not have a
 # dependency on System.map since that would run the dependency tree on
-# busybox.  This depmod is only for convenience to give the initial
+# OpenSwitchSolution.  This depmod is only for convenience to give the initial
 # boot a modules.dep even before / is mounted read-write.  However the
 # boot script depmod is the master version.
 ifeq "$(strip $(INSTALL_MOD_PATH))" ""
@@ -939,7 +911,7 @@ else # CONFIG_MODULES
 
 modules modules_install: FORCE
 	@echo
-	@echo "The present busybox configuration has modules disabled."
+	@echo "The present OpenSwitchSolution configuration has modules disabled."
 	@echo "Type 'make config' and enable loadable module support."
 	@echo "Then build a kernel with module support enabled."
 	@echo
@@ -956,9 +928,9 @@ endif # CONFIG_MODULES
 
 # Directories & files removed with 'make clean'
 CLEAN_DIRS  += $(MODVERDIR) _install 0_lib
-CLEAN_FILES +=	busybox busybox_unstripped* busybox.links \
+CLEAN_FILES +=	OpenSwitchSolution OpenSwitchSolution_unstripped* OpenSwitchSolution.links \
                 System.map .kernelrelease \
-                .tmp_kallsyms* .tmp_version .tmp_busybox* .tmp_System.map
+                .tmp_kallsyms* .tmp_version .tmp_OpenSwitchSolution* .tmp_System.map
 
 # Directories & files removed with 'make mrproper'
 MRPROPER_DIRS  += include/config include2
@@ -973,13 +945,13 @@ MRPROPER_FILES += .config .config.old include/asm .version .old_version \
 		  include/usage.h \
 		  applets/usage \
 		  .kernelrelease Module.symvers tags TAGS cscope* \
-		  busybox_old
+		  OpenSwitchSolution_old
 
 # clean - Delete most, but leave enough to build external modules
 #
 clean: rm-dirs  := $(CLEAN_DIRS)
 clean: rm-files := $(CLEAN_FILES)
-clean-dirs      := $(addprefix _clean_,$(srctree) $(busybox-alldirs))
+clean-dirs      := $(addprefix _clean_,$(srctree) $(OpenSwitchSolution-alldirs))
 
 PHONY += $(clean-dirs) clean archclean
 $(clean-dirs):
@@ -994,8 +966,8 @@ clean: archclean $(clean-dirs)
 		-type f -print | xargs rm -f
 
 PHONY += doc-clean
-doc-clean: rm-files := docs/busybox.pod \
-		  docs/BusyBox.html docs/busybox.1 docs/BusyBox.txt
+doc-clean: rm-files := docs/OpenSwitchSolution.pod \
+		  docs/BusyBox.html docs/OpenSwitchSolution.1 docs/BusyBox.txt
 doc-clean:
 	$(call cmd,rmfiles)
 
@@ -1243,7 +1215,7 @@ endif #ifeq ($(mixed-targets),1)
 
 PHONY += checkstack
 checkstack:
-	$(OBJDUMP) -d busybox $$(find . -name '*.ko') | \
+	$(OBJDUMP) -d OpenSwitchSolution $$(find . -name '*.ko') | \
 	$(PERL) $(src)/scripts/checkstack.pl $(ARCH)
 
 kernelrelease:
@@ -1251,6 +1223,9 @@ kernelrelease:
 	$(error kernelrelease not valid - run 'make *config' to update it))
 kernelversion:
 	@echo $(KERNELVERSION)
+PARSE_TREE:
+	echo "Generate CLI Commands"
+	$(srctree)/scripts/mk_parser.py -o $(srctree)/src/cli/ $(srctree)/src/clicmds/cmd.cli
 
 # Single targets
 # ---------------------------------------------------------------------------

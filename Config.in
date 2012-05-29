@@ -32,6 +32,49 @@ config PLATFORM_ATOMTHREADS
 
 endchoice
 
+menu 'Layer 2 Config'
+
+config BRIDGE_FDB
+	bool "Enable FDB"
+	default y
+	help
+	  This Enables Bridge 
+
+config STP
+	bool "Enables Spanning Tree"
+	default y
+	depends on BRIDGE_FDB
+	help
+	   Say Y here if you want STP to be enabled
+
+config RSTP
+	bool "Enables Rapid Spanning Tree"
+	default y
+	help
+	   Say Y here if you want RSTP to be enabled
+endmenu
+
+menu 'System Config'
+choice
+	prompt "Timers"
+	default GEN_TIMERS
+	help
+	  There are 3 Timers currently we support:
+	  - Generic timers : We most efficient but resource consuming.
+	  - Light weight timers: Light weight timers consumes less memory
+			         works on par Generic timers
+	  - OS Timers : Not Supoorted
+
+config GEN_TIMERS
+	bool "Generic Timers"
+
+config LIGHT_WEIGHT_TIMERS
+	bool "Light weight Timers"
+endchoice
+
+endmenu
+
+
 menu 'Debugging Options'
 
 config DEBUG
