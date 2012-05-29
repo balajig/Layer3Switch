@@ -1,34 +1,4 @@
-#   $Id: Makefile,v 1.4 2010/10/25 20:48:19 Sasi Exp $ 
-.PHONY: all all-before all-after clean clean-custom
-
-include ../build/make.h
-
-INTERF_CODE_DIR = $(CODE_DIR)/ifmgmt
-INTERF_INC_DIR =  $(INTERF_CODE_DIR)/inc -I$(COMMON_INC)
-INTERF_SRCC_DIR = $(INTERF_CODE_DIR)
-INTERF_OBJ_DIR = $(INTERF_CODE_DIR)/obj
-
-
-INTERF_OBJS += $(INTERF_OBJ_DIR)/if_cli.o
-INTERF_OBJS += $(INTERF_OBJ_DIR)/if.o
-INTERF_OBJS += $(INTERF_OBJ_DIR)/if_api.o
-
-all: all-before  obj $(INTERF_OBJS) tm_port.o all-after
-
-obj:
-	mkdir -p ${INTERF_OBJ_DIR}
-
-clean: clean-custom
-	$(RM) $(INTERF_OBJ_DIR)/*.o $(FINAL_OBJ)/tm_port.o
-
-$(INTERF_OBJ_DIR)/if_cli.o: $(INTERF_SRCC_DIR)/if_cli.c
-	$(CC) -c $(COMPILATION_SWITCH) $(INTERF_SRCC_DIR)/if_cli.c -o $(INTERF_OBJ_DIR)/if_cli.o $(CFLAGS) -I$(INTERF_INC_DIR)
-
-$(INTERF_OBJ_DIR)/if.o: $(INTERF_SRCC_DIR)/if.c
-	$(CC) -c $(COMPILATION_SWITCH) $(INTERF_SRCC_DIR)/if.c -o $(INTERF_OBJ_DIR)/if.o $(CFLAGS) -I$(INTERF_INC_DIR)
-
-$(INTERF_OBJ_DIR)/if_api.o: $(INTERF_SRCC_DIR)/if_api.c
-	$(CC) -c $(COMPILATION_SWITCH) $(INTERF_SRCC_DIR)/if_api.c -o $(INTERF_OBJ_DIR)/if_api.o $(CFLAGS) -I$(INTERF_INC_DIR)
-
-tm_port.o: $(INTERF_OBJS)
-	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/tm_port.o $(INTERF_OBJS)
+#Makefile for If mgr
+obj-y += if_cli.o
+obj-y += if.o
+obj-y += if_api.o

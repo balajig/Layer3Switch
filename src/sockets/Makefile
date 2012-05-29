@@ -1,24 +1,3 @@
-#   $Id: Makefile,v 1.4 2010/10/25 20:48:19 Sasi Exp $ 
-.PHONY: all all-before all-after clean clean-custom
+#Makefile for Sockets
 
-include ../build/make.h
-
-SOCKS_CODE_DIR = $(CODE_DIR)/sockets
-SOCKS_INC_DIR =  $(SOCKS_CODE_DIR)/ -I$(COMMON_INC)
-SOCKS_SRCC_DIR = $(SOCKS_CODE_DIR)
-
-CFLAGS += -I$(SOCKS_INC_DIR)
-
-SOCKS_SRCS = $(wildcard *.c)
-
-SOCK_OBJ = $(SOCKS_SRCS:.c=.o)
-
-all: $(SOCK_OBJ) socket.o
-
-$(SOCKS_OBJ)/%.o : %.c Makefile
-	$(CC) -c $(CFLAGS) $< -o $@
-socket.o: $(SOCKS_OBJ)
-	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/socket.o $(SOCKS_SRCC_DIR)/*.o
-
-clean:
-	rm -f *.o $(FINAL_OBJ)/socket.o
+obj-y += api_lib.o api_msg.o netbuf.o netdb.o sockets.o stubs.o

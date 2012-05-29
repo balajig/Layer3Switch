@@ -54,6 +54,58 @@ config RSTP
 	   Say Y here if you want RSTP to be enabled
 endmenu
 
+menu 'Layer 3 Config'
+
+config ZEBRA_RTM
+	bool "Zebra RTM"
+	default y
+	help
+	  This Enables Zebra RTM
+endmenu
+
+menu 'TCP/IP Layer'
+choice
+	prompt "TCP/IP "
+	default OPENSWITCH_TCP_IP
+	help
+	  There are 2 types
+	  - OPEN Switch TCPIP : It is a clone/copy of LWIP
+	  - OS TCP/IP : Not Supoorted
+
+config OPENSWITCH_TCP_IP
+	bool "Open Switch TCP/IP (LWIP)"
+endchoice
+
+endmenu
+
+menu 'Application Layer'
+
+config TELNET
+	bool "Telnet client/server"
+	default y
+	help
+	  This Enables telnet client and server in your Switch
+
+config TRACE_ROUTE
+	bool "Traceroute"
+	default y
+	help
+	   Say Y here if you want traceroute to be enabled
+
+config DHCP_SERVER
+	bool "DHCP Server"
+	default y
+	help
+	   Say Y here if you want DHCP server to be enabled
+
+config SNTP_CLIENT
+	bool "SNTP Client"
+	default y
+	help
+	   Say Y here if you want SNTP Client to be enabled
+endmenu
+
+
 menu 'System Config'
 choice
 	prompt "Timers"

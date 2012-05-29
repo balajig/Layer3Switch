@@ -575,7 +575,7 @@ OpenSwitchSolution-all  := $(core-y) $(libs-y)
 # May be overridden by arch/$(ARCH)/Makefile
 quiet_cmd_OpenSwitchSolution__ ?= LINK    $@
       cmd_OpenSwitchSolution__ ?= $(srctree)/scripts/trylink \
-      "$@" \
+      "Switch_unstripped" \
       "$(CC)" \
       "$(CFLAGS) $(CFLAGS_OpenSwitchSolution)" \
       "$(LDFLAGS) $(EXTRA_LDFLAGS)" \
@@ -692,9 +692,9 @@ ifeq ($(SKIP_STRIP),y)
 	$(Q)cp $< $@
 else
 	$(Q)$(STRIP) -s --remove-section=.note --remove-section=.comment \
-		OpenSwitchSolution_unstripped -o $@
+		Switch_unstripped -o Switch
 # strip is confused by PIE executable and does not set exec bits
-	$(Q)chmod a+x $@
+	$(Q)chmod a+x Switch
 endif
 
 # The actual objects are generated when descending,
