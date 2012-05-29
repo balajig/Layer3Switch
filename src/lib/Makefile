@@ -1,55 +1,30 @@
-#   $Id: Makefile,v 1.4 2010/10/25 20:48:19 Sasi Exp $ 
-.PHONY: all all-before all-after clean clean-custom
+#Makefile for Lib
 
-include ../build/make.h
+obj-$(CONFIG_GEN_TIMERS) += tmr_init.o
+obj-$(CONFIG_GEN_TIMERS) += update.o
+obj-$(CONFIG_GEN_TIMERS) += thr_sp.o.o
+obj-$(CONFIG_GEN_TIMERS) += btm_hlf.o
 
-LIBS_CODE_DIR = $(CODE_DIR)/lib
-LIBS_INC_DIR =  $(LIBS_CODE_DIR)/ -I$(COMMON_INC)
-LIBS_SRCC_DIR = $(LIBS_CODE_DIR)
-
-#Update this alone to point LW means lightwight timers none means
-#normaltimers
-TIMER_TAG=
-
-TIMERS_SRCS += $(LIBS_SRCC_DIR)/tmr_init.c
-TIMERS_SRCS += $(LIBS_SRCC_DIR)/update.c
-TIMERS_SRCS += $(LIBS_SRCC_DIR)/thr_spec.c
-TIMERS_SRCS += $(LIBS_SRCC_DIR)/btm_hlf.c
-
-LWTIMERS_SRCS += $(LIBS_SRCC_DIR)/lwtimers.c
-
-LIBS_SRCS += $(${TIMER_TAG}TIMERS_SRCS)
-
-LIBS_SRCS += $(LIBS_SRCC_DIR)/libinit.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/util.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/msg_queue.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/hashlib.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/rbtree.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/mem_main.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/tsk_main.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/memp.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/mem.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/pbuf.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/def.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/table.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/linklist.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/prefix.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/vector.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/hash.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/pqueue.c
-LIBS_SRCS += $(LIBS_SRCC_DIR)/libtelnet.c
+obj-$(CONFIG_LIGHT_WEIGHT_TIMERS) += lwtimers.o
+obj-y += libinit.o
+obj-y += util.o
+obj-y += msg_queue.o
+obj-y += hashlib.o
+obj-y += rbtree.o
+obj-y += mem_main.o
+obj-y += tsk_main.o
+obj-y += memp.o
+obj-y += mem.o
+obj-y += pbuf.o
+obj-y += def.o
+obj-y += table.o
+obj-y += linklist.o
+obj-y += prefix.o
+obj-y += v.otor.o
+obj-y += hash.o
+obj-y += pqueue.o
+obj-y += libtelnet.o
 
 
 CFLAGS += -I$(LIBS_INC_DIR) -DTIMER_BTM_HALF
 
-LIB_OBJ = $(LIBS_SRCS:.c=.o)
-
-all: $(LIB_OBJ) lib.o
-
-$(LIBS_OBJ) : %.o : %.c Makefile
-	$(CC) -c $(CFLAGS) $< -o $@
-lib.o: $(LIBS_OBJ)
-	$(LD) $(LD_FLAGS) -o $(FINAL_OBJ)/lib.o $(LIBS_SRCC_DIR)/*.o
-
-clean:
-	rm -f *.o $(FINAL_OBJ)/lib.o
