@@ -21,3 +21,4 @@ obj-$(CONFIG_ZEBRA_RTM) += rtm/
 obj-$(CONFIG_TRACE_ROUTE) += traceroute/
 obj-$(CONFIG_DHCP_SERVER) += dhcpserver/
 obj-$(CONFIG_SNTP_CLIENT) += sntp/
+obj-$(CONFIG_TFTP) += tftp/

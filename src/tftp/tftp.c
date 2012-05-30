@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#include "common/tftpsubs.h"
+#include "tftpsubs.h"
 
 /*
  * TFTP User Program -- Protocol Machines

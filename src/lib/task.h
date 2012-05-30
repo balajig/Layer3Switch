@@ -50,7 +50,7 @@ typedef struct __task_tm__ {
     int             schedalgo;
     struct pstat    cpu_stats;
     void            *(*start_routine)(void*);
-    void            (*exit_routine)();
+    void            (*exit_routine)(void);
     void            *tskarg;
 }tmtask_t;
 
@@ -58,7 +58,7 @@ retval_t init_tsk (tmtask_t *);
 retval_t start_tsk(tmtask_t *, tmtaskid_t *);
 retval_t deinit_tsk (tmtask_t *);
 void fill_tsk_info (const char *tskname, int tsk_prio, int sched_alg, int stk_size,
-               void *(*start_routine) (void *), void (*exit_routine) (),
+               void *(*start_routine) (void *), void (*exit_routine) (void),
                void *arg, tmtask_t * ptskinfo);
 retval_t validate_tsk_params (const char *tskname, int sched_alg, int stk_size,
                      void *(*start_routine) (void *));
@@ -67,5 +67,5 @@ retval_t deinit_tsk_attr (tmtask_t * ptskinfo);
 retval_t start_task (tmtask_t * ptskinfo, tmtaskid_t * ptskid);
 retval_t init_tsk_attr (tmtask_t * ptskinfo);
 tmtask_t * get_tsk_info (char *tskname, tmtaskid_t tskid);
-pid_t get_tsk_pid ();
+pid_t get_tsk_pid (void);
 #endif

@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#include "common/tftpsubs.h"
+#include "tftpsubs.h"
 
 /* Many bug fixes are from Jim Guyton <guyton@rand-unix> */
 

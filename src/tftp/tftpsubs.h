@@ -37,8 +37,7 @@
  */
 #ifndef TFTPSUBS_H
 #define TFTPSUBS_H
-
-#include "config.h"
+#include "common_types.h"
 
 union sock_addr {
     struct sockaddr     sa;

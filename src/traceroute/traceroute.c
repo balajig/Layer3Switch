@@ -866,7 +866,7 @@ deltaT(struct timeval *t1p, struct timeval *t2p)
 char *
 pr_type(register u_char t)
 {
-	static char *ttab[] = {
+	static const char *ttab[] = {
 	"Echo Reply",	"ICMP 1",	"ICMP 2",	"Dest Unreachable",
 	"Source Quench", "Redirect",	"ICMP 6",	"ICMP 7",
 	"Echo",		"ICMP 9",	"ICMP 10",	"Time Exceeded",

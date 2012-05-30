@@ -17,10 +17,10 @@
 #define PRIV_LEVEL6      (0x1 << 6)
 #define PRIV_LEVEL7      (0x1 << 7)
 
-int cli_get_vlan_id ();
-int cli_get_port ();
+int cli_get_vlan_id (void);
+int cli_get_port (void);
 int set_prompt (const char *prmpt_new);
 void cli_set_port (int port);
 int set_curr_mode (int mode);
 int get_prompt (char *pmt);
-int exit_mode ();
+int exit_mode (void);

@@ -16,9 +16,9 @@ typedef struct event_block
 
 /*TASK*/
 retval_t task_create (const char tskname[], int tsk_prio, int sched_alg, int stk_size,
-	              void *(*start_routine) (void *), void (*exit_routine) (),
+	              void *(*start_routine) (void *), void (*exit_routine) (void),
 		      void *arg, tmtaskid_t * rettskid);
-tmtaskid_t tsk_selfid ();
+tmtaskid_t tsk_selfid (void);
 void tsk_delay (int secs, int nsecs);
 void tsk_sleep (int secs);
 void tsk_mdelay (int msecs);
