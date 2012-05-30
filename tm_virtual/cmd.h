@@ -38,22 +38,3 @@ struct cli {
 	int session;
 	int priv_level;
 };
-
-typedef struct cmds {
-	struct rb_node rlist; 
-	int start_char; /*key*/
-	struct list_head  head;
-}cmd_t;
-
-
-typedef struct cmd_node {
-	char cmd[MAX_CMD_NAME];
-	char helpstring[MAX_HELP_STRING];
-	unsigned int priv_mode; /*8 bits for priv, 24 bits for mode*/
-	void *arg;
-	int (*handler) (char *, ...);
-	struct list_head  np;
-}cmdnode_t;
-
-
-cmd_t * cmd_tree_walk (struct rb_root  *cmd_root, unsigned int key);

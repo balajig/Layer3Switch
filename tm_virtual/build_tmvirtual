@@ -7,16 +7,12 @@ export PLATFORM_OS=linux
 
 if [ "$1" = "" ]; then
 	echo "Building TM Virtual Lib"
-	export CODE_DIR=$PWD/../src
-	make -C ../src/lib/
 	export CODE_DIR=$PWD
 	make -C .
 else
 	echo "Cleaning SIM Lib"
 	export CODE_DIR=$PWD
 	make $1 -C .
-	export CODE_DIR=$PWD/../src
-	make $1 -C ../src/lib/ 
 fi
 if [ $? = 0 ]; then
 	echo "Sucessfully Done"

@@ -9,7 +9,6 @@ vmgr_OBJ_DIR = $(vmgr_CODE_DIR)/obj
 
 vmgr_OBJS += $(vmgr_OBJ_DIR)/main.o
 vmgr_OBJS += $(vmgr_OBJ_DIR)/cli_main.o
-vmgr_OBJS += $(vmgr_OBJ_DIR)/cmd_parser.o
 vmgr_OBJS += $(vmgr_OBJ_DIR)/arch_os.o
 
 all: all-before  obj $(vmgr_OBJS) tmvirtual all-after

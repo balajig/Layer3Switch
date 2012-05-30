@@ -118,16 +118,16 @@ int destroy_virtual_link (char *args[], int count)
 	return -1;
 }
 
-int create_virtual_link (char *args[], int count)
+int create_virtual_link (int arg0, int arg1, int arg2, int arg3)
 {
 	vlink_t *p =NULL;
 	uint8_t inst[2];
 	uint8_t port[2];
 
-	inst[0] = atoi (args[0]);
-	port[0] = atoi (args[1]);
-	inst[1] = atoi (args[2]);
-	port[1] = atoi (args[3]);
+	inst[0] = arg0;
+	port[0] = arg1;
+	inst[1] = arg2;
+	port[1] = arg3;
 
 	if (!(p = (vlink_t *) malloc (sizeof(vlink_t)))) {
 		printf ("Out of Memory\n");
@@ -314,33 +314,17 @@ int main (int argc, char **argv)
 		return -1;
 	}
 
-	lib_init ();
-
 	create_communication_channel ();
 
 	INIT_LIST_HEAD (&vlink);
 
-	task_create ("VLNK", 3, 3, 32000, vlink_processing_task, NULL, NULL, &tid);
-
-	create_cmdline_interface ("tm_virtual");
-
-	set_curr_priv_level (1);
+	pthread_create (&tid, NULL, vlink_processing_task, NULL);
 
 	write_string ("######## TM Virtual Started #######\n");
 
-	install_cmd_handler ("vlink inst <no> port <no> inst <no> port <no>", 
-			"Creates virtual link between two instance", 
-			create_virtual_link, NULL, 1);
+	create_virtual_link (1,1,2,1);
 
-	install_cmd_handler ("no vlink inst <no> port <no> inst <no> port <no>", 
-			"Creates virtual link between two instance", 
-			destroy_virtual_link, NULL, 1);
-
-#if 0
-        install_cmd_handler ("task", "dumps task info", dump_task_info, NULL, 1);
-#endif
-
-        install_cmd_handler ("show vlink", "Displays all virtual links", show_vlinks, NULL, 1);
+	create_cmdline_interface ("tmvirtual#");
 
 	while (1) {
 		sleep (-1);
