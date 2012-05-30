@@ -80,6 +80,16 @@ struct hostent {
 #define h_addr h_addr_list[0] /* for backward compatibility */
 };
 
+/* Description of data base entry for a single service.  */
+struct servent
+{
+  char *s_name;                 /* Official service name.  */
+  char **s_aliases;             /* Alias list.  */
+  int s_port;                   /* Port number.  */
+  char *s_proto;                /* Protocol to use.  */
+};
+
+
 struct addrinfo {
     int               ai_flags;      /* Input flags. */
     int               ai_family;     /* Address family of socket. */

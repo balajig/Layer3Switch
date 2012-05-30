@@ -1,3 +1,4 @@
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 #define accept(a,b,c)         lwip_accept(a,b,c)
 #define bind(a,b,c)           lwip_bind(a,b,c)
 #define shutdown(a,b)         lwip_shutdown(a,b)
@@ -19,3 +20,4 @@
 #define read(a,b,c)           lwip_read(a,b,c)
 #define write(a,b,c)          lwip_write(a,b,c)
 #define close(s)              lwip_close(s)
+#endif

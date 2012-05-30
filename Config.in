@@ -66,7 +66,6 @@ endmenu
 menu 'TCP/IP Layer'
 choice
 	prompt "TCP/IP "
-	default OPENSWITCH_TCP_IP
 	help
 	  There are 2 types
 	  - OPEN Switch TCPIP : It is a clone/copy of LWIP
@@ -74,6 +73,8 @@ choice
 
 config OPENSWITCH_TCP_IP
 	bool "Open Switch TCP/IP (LWIP)"
+config OS_TCP_IP
+	bool "Operating System  TCP/IP stack"
 endchoice
 
 endmenu

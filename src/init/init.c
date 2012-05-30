@@ -84,7 +84,9 @@ void layer3switch_init (void)
 #if LWIP_TIMERS
 	sys_timeouts_init ();
 #endif /* LWIP_TIMERS */
+#ifdef CONFIG_TELNET
 	telnet_init ();
+#endif
 
         spawn_pkt_processing_task ();
 

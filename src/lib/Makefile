@@ -24,7 +24,7 @@ obj-y += vector.o
 obj-y += hash.o
 obj-y += pqueue.o
 obj-y += libtelnet.o
-
+obj-y += socklib.o
 
 CFLAGS += -I$(LIBS_INC_DIR) -DTIMER_BTM_HALF
 
