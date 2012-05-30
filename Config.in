@@ -132,7 +132,7 @@ menu 'Debugging Options'
 
 config DEBUG
 	bool "Build with extra Debugging symbols"
-	default n
+	default y
 	help
 	  Say Y here if you wish to examine Open Switch Solution internals while
 	  running. This increases the size of the binary considerably, and
@@ -143,7 +143,7 @@ config DEBUG
 
 config DEBUG_PESSIMIZE
 	bool "Disable compiler optimizations"
-	default n
+	default y
 	depends on DEBUG
 	help
 	  The compiler's optimization of source code can eliminate and reorder
