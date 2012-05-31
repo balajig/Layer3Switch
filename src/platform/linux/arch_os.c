@@ -73,7 +73,7 @@ int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs)
 			continue;
 		}
 		if (errno == ETIMEDOUT) {
-			return -1;
+			return ETIMEDOUT;
 		}
 	}
 
