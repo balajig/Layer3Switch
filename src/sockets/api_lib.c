@@ -331,7 +331,7 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
 #if LWIP_SO_RCVTIMEO
     if (dequeue_packet
         (conn->acceptmbox, (void **) &newconn, sizeof (struct netconn),
-         conn->recv_timeout, 0) == SYS_ARCH_TIMEOUT)
+         conn->recv_timeout, 0) == ERR_TIMEOUT)
     {
         NETCONN_SET_SAFE_ERR (conn, ERR_TIMEOUT);
         return ERR_TIMEOUT;
