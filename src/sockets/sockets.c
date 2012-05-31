@@ -1356,21 +1356,14 @@ lwip_select (int maxfdp1, fd_set * readset, fd_set * writeset,
             if (timeout == 0)
             {
                 /* Wait forever */
-                msectimeout = 0;
+		waitres = sync_lock (&select_cb.sem);
             }
             else
             {
-                msectimeout =
-                    ((timeout->tv_sec * 1000) +
-                     ((timeout->tv_usec + 500) / 1000));
-                if (msectimeout == 0)
-                {
-                    /* Wait 1ms at least (0 means wait forever) */
-                    msectimeout = 1;
-                }
+            	waitres = sync_lock_timed_wait (&select_cb.sem, timeout->tv_sec,
+						timeout->tv_usec * 1000);
             }
 
-            waitres = sys_arch_sem_wait (&select_cb.sem, msectimeout);
         }
         /* Increase select_waiting for each socket we are interested in */
         for (i = 0; i < maxfdp1; i++)
@@ -1408,8 +1401,8 @@ lwip_select (int maxfdp1, fd_set * readset, fd_set * writeset,
         select_cb_ctr++;
         SYS_ARCH_UNPROTECT (lev);
 
-        sys_sem_free (&select_cb.sem);
-        if (waitres == SYS_ARCH_TIMEOUT)
+        destroy_sync_lock (&select_cb.sem);
+        if (waitres == ETIMEDOUT)
         {
             /* Timeout */
             LWIP_DEBUGF (SOCKETS_DEBUG, ("lwip_select: timeout expired\n"));
@@ -1904,7 +1897,7 @@ lwip_getsockopt (int s, int level, int optname, void *optval,
     data.optlen = optlen;
     data.err = err;
     lwip_getsockopt_internal (&data);
-    sys_arch_sem_wait (&sock->conn->op_completed, 0);
+    sync_lock (&sock->conn->op_completed);
     /* maybe lwip_getsockopt_internal has changed err */
     err = data.err;
 
@@ -2374,7 +2367,7 @@ lwip_setsockopt (int s, int level, int optname, const void *optval,
     data.optlen = &optlen;
     data.err = err;
     lwip_setsockopt_internal (&data);
-    sys_arch_sem_wait (&sock->conn->op_completed, 0);
+    sync_lock (&sock->conn->op_completed);
     /* maybe lwip_setsockopt_internal has changed err */
     err = data.err;
 
