@@ -16,33 +16,24 @@
 
 #define MAX_SOCK_LAYER 12
 
-struct sock_layer {
-	sync_lock_t  lock;
-	int          sock_id;
-	int          familiy;
-	int 	     flags;
-	uint32_t     addr;
-	int          index;
-}SOCK_T;
-
-static SOCK_T *sock_layer[MAX_SOCK_LAYER];
-static sync_lock_t  lock;
-
 struct sock_client {
+	int       type;
 	int       familiy;
-	int       sock
 	uint32_t  addr;
 	int       flags;
-	union proto {    
+	union __sock {    
 		struct sock_tcp {
 			int port;
 			int listen;
 		}tcp;
 		struct sock_udp {
-			int  port;
+			int       lport;
+			int       rport
+			uint32_t  raddr;
 		}udp;
-	}p;
+	}_sock;
 	int       protocol;
+	int       (*sock_data_cb) (void *data, void *arg);
 };
 
 enum {
@@ -52,25 +43,112 @@ enum {
 	SOCK_CLIENT_BLOCKING = 0x8,
 };
 
-int sock_client_init (struct sock_client *client)
+struct sock_layer {
+	sync_lock_t         lock;
+	int                 sock_id;
+	struct sock_client  client;	
+}SOCK_T;
+
+static SOCK_T *sock_layer[MAX_SOCK_LAYER];
+static sync_lock_t  lock;
+static tmtaskid_t sockmgrid;
+
+static fd_set
+
+static void sockmgr (void *arg)
+{
+	fd_set rfds;
+	struct timeval tv;
+	int retval;
+
+	while (1) {
+
+
+	}
+}
+
+int sock_mgr_init (void)
+{
+	if (task_create ("SockMgr", 90, 3, 20 * 1024, sockmgr, NULL, NULL, 
+			 &sockmgrid) == TSK_FAILURE) {
+		printf ("Task creation failed : SockMgr\n", );
+		return -1;
+	}
+}
+
+void sock_client_init (struct sock_client *client)
 {
 	if (!client)
 		return 0;
-	client->familiy    = -1;
-	client->flags      =  0;
-	client->addr       =  0;
+	memset (client, 0, sizeof (*client));
 }
 
-int sock_client_register (struct sock_client *new)
+int sock_client_register (struct sock_client *client)
 {
-	sync_lock (&lock);
+	SOCK_T  *new;
 
+	if (!client)
+		return -1;
+
+	if ((client->familiy < AF_INET) || (client->familiy > AF_MAX)) {
+		return -1;
+	}
+
+	sync_lock (&lock);
 
 	sync_unlock (&lock);
 }
 
+static int tcp_sock_register ()
+{
+
+
+}
+
+static int udp_sock_register (struct sock_client *client)
+{
+        int sock = -1;
+	struct sockaddr_in addr;
+
+        sock = socket(client->familiy, SOCK_DGRAM, IPPROTO_UDP);
+
+        if (!sock) {
+                perror ("Socket : ");
+                return -1;
+        }
+
+	if (client->flags & SOCK_CLIENT_BIND) {
+		memset (&addr, 0, sizeof (addr));
+		addr.sin_family = client->familiy;
+		addr.sin_port = htons (client->_sock.udp.lport);
+		addr.sin_addr.s_addr = client->addr;
+
+		if(bind(sock, (struct sockaddr *) &addr, sizeof(struct sockaddr))) {
+			close (sock);
+                	perror ("Bind : ");
+			return -1;
+		}
+	}
+
+	if (client->flags & SOCK_CLIENT_CONNECT) {
+		memset (&addr, 0, sizeof (addr));
+
+		addr.sin_family = client->familiy;
+		addr.sin_port = htons (client->_sock.udp.rport);
+		addr.sin_addr.s_addr = client->_sock.udp.raddr;
+
+		if (connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr))) {
+			close (sock);
+                	perror ("connect : ");
+			return -1;
+		}
+	}
+
+	return sock;
+}
+
 /*Caller must hold the main sock layer lock*/
-SOCK_T * alloc_new_sock_layer  (void)
+static SOCK_T * alloc_new_sock_layer  (void)
 {
 	int i = MAX_SOCK_LAYER;
 	
@@ -88,7 +166,7 @@ SOCK_T * alloc_new_sock_layer  (void)
 	return NULL;
 }
 
-void release_sock_layer (SOCK_T *p)
+static void release_sock_layer (SOCK_T *p)
 {
 	if (p) {
 		sock_layer[p->index] = NULL;
