@@ -40,8 +40,6 @@ extern "C" {
 
 #if NO_SYS
 
-#define sys_arch_sem_wait(s,t) ERR_OK
-#define sys_sem_free(s) ERR_OK
 #define sys_mutex_new(mu) ERR_OK
 #define sys_mutex_lock(mu) ERR_OK
 #define sys_mutex_unlock(mu) ERR_OK
@@ -57,7 +55,6 @@ extern "C" {
 #define SYS_MBOX_EMPTY SYS_ARCH_TIMEOUT 
 
 
-#define sys_msleep(t)
 
 #else /* NO_SYS */
 
