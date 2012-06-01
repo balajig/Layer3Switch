@@ -41,17 +41,24 @@ config BRIDGE_FDB
 	  This Enables Bridge 
 
 config STP
-	bool "Enables Spanning Tree"
+	bool "Enable Spanning Tree"
 	default y
 	depends on BRIDGE_FDB
 	help
 	   Say Y here if you want STP to be enabled
 
 config RSTP
-	bool "Enables Rapid Spanning Tree"
+	bool "Enable Rapid Spanning Tree"
 	default y
 	help
 	   Say Y here if you want RSTP to be enabled
+
+config STP
+	bool "Enable Linux Spanning Tree"
+	default y
+	help
+	   Say Y here if you want Linux STP to be enabled
+
 endmenu
 
 menu 'Layer 3 Config'
@@ -60,7 +67,7 @@ config ZEBRA_RTM
 	bool "Zebra RTM"
 	default y
 	help
-	  This Enables Zebra RTM
+	  Enables Zebra RTM
 endmenu
 
 menu 'TCP/IP Layer'
