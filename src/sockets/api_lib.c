@@ -407,7 +407,7 @@ netconn_recv_data (struct netconn *conn, void **new_buf)
     }
 
 #if LWIP_SO_RCVTIMEO
-    if (dequeue_packet (conn->recvmbox, &buf, sizeof (&buf), 1, 0) < 0)
+    if (dequeue_packet (conn->recvmbox, &buf, sizeof (&buf), 0, 0) < 0)
     {
         NETCONN_SET_SAFE_ERR (conn, ERR_TIMEOUT);
         return ERR_TIMEOUT;
