@@ -290,6 +290,7 @@ int fetch_and_update_if_info (if_t *ife)
 
 int read_interfaces (void)
 {
+	if_loopif_init ();
 	if (if_readlist () < 0)
 		return -1;
 	return 0;

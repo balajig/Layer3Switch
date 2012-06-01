@@ -75,6 +75,40 @@
 
 void ethernetif_init (struct interface *netif);
 
+
+#if LWIP_HAVE_LOOPIF
+static struct interface loop_if;
+
+struct interface * get_loopback_if (void)
+{
+	return &loop_if;
+}
+err_t if_loopif_init(void)
+{
+  struct interface  *netif = &loop_if;
+
+  ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
+  IP4_ADDR(&loop_gw, 127,0,0,1);
+  IP4_ADDR(&loop_ipaddr, 127,0,0,1);
+  IP4_ADDR(&loop_netmask, 255,0,0,0);
+
+  /* initialize the snmp variables and counters inside the struct netif
+ *    * ifSpeed: no assumption can be made!
+ *       */
+  //NETIF_INIT_SNMP(netif, snmp_ifType_softwareLoopback, 0);
+
+  netif->ifDescr[0] = 'l';
+  netif->ifDescr[1] = 'o';
+  netif->ifDescr[2] = '\0';
+  netif->output = if_loop_output;
+
+  if_set_addr (netif, &loop_ipaddr, &loop_netmask, &loop_gw);
+  return ERR_OK;
+}
+
+#endif
+
+
 void interface_init (struct interface *netif, void *state, if_input_fn input)
 {
     static u8_t         netifnum = 0;
@@ -469,6 +503,7 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
     struct interface       *stats_if = netif;
 #endif /* LWIP_HAVE_LOOPIF */
 #endif /* LWIP_SNMP */
+
     SYS_ARCH_DECL_PROTECT (lev);
     LWIP_UNUSED_ARG (ipaddr);
 
@@ -481,6 +516,7 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
         snmp_inc_ifoutdiscards (stats_if);
         return ERR_MEM;
     }
+#if 0
 #if LWIP_LOOPBACK_MAX_PBUFS
     clen = pbuf_clen (r);
     /* check for overflow or too many pbuf on queue */
@@ -495,6 +531,7 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
     }
     netif->loop_cnt_current += clen;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
+#endif
 
     /* Copy the whole pbuf queue p into the single pbuf r */
     if ((err = pbuf_copy (r, p)) != ERR_OK)
@@ -506,6 +543,13 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
         return err;
     }
 
+    /* loopback packets are always IP packets! */
+    if (ip_input (r, netif) != ERR_OK)
+    {
+	    pbuf_free (r);
+    }
+
+#if 0
     /* Put the packet on a linked list which gets emptied through calling
        if_poll(). */
 
@@ -526,16 +570,17 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
         netif->loop_last = last;
     }
     SYS_ARCH_UNPROTECT (lev);
-
+#endif
     LINK_STATS_INC (link.xmit);
     snmp_add_ifoutoctets (stats_if, p->tot_len);
     snmp_inc_ifoutucastpkts (stats_if);
 
+#if 0
 #if LWIP_NETIF_LOOPBACK_MULTITHREADING
     /* For multithreading environment, schedule a call to if_poll */
     tcpip_callback ((tcpip_callback_fn) if_poll, netif);
 #endif /* LWIP_NETIF_LOOPBACK_MULTITHREADING */
-
+#endif
     return ERR_OK;
 }
 
@@ -622,6 +667,7 @@ if_poll (struct interface *netif)
 /**
  * Calls if_poll() for every netif on the if_list.
  */
+#if 0
 void
 if_poll_all (void)
 {
@@ -634,5 +680,6 @@ if_poll_all (void)
         netif = netif->next;
     }
 }
+#endif
 #endif /* !LWIP_NETIF_LOOPBACK_MULTITHREADING */
 #endif /* ENABLE_LOOPBACK */

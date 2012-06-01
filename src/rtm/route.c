@@ -16,6 +16,7 @@ if_t *route_lookup (uint32_t ip)
 {
 	struct rib * rib_new;
 	struct in_addr addr;
+	if_t   *outif = NULL;
 	
 	addr.s_addr = ip;
 
@@ -24,7 +25,12 @@ if_t *route_lookup (uint32_t ip)
 	if (!rib_new)
 		return NULL;
 
-	return if_lookup_by_index (rib_new->nexthop->ifindex);
+	outif = if_lookup_by_index (rib_new->nexthop->ifindex);
+
+	if (outif->ip_addr.addr == ip) {
+		outif = get_loopback_if ();
+	}
+	return outif;
 }
 
 int  cli_show_ip_route (void)

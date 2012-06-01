@@ -12,7 +12,7 @@ if_t port_cdb[MAX_PORTS];
 int port_init (void)
 {
 	int idx = 0;
-
+	if_loopif_init ();
 	while (idx  < get_max_ports ()) {
 		interface_init (&port_cdb[idx], NULL, NULL);
 		sprintf ((char *)port_cdb[idx].ifDescr, "%s%d","port",idx);
