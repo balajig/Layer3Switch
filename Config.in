@@ -53,7 +53,7 @@ config RSTP
 	help
 	   Say Y here if you want RSTP to be enabled
 
-config STP
+config LINUX_STP
 	bool "Enable Linux Spanning Tree"
 	default y
 	depends on PLATFORM_LINUX
