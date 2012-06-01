@@ -53,15 +53,16 @@ int dhcpd_start (void)
 
 	read_config (NULL);
 
-	return 0;
-}
-
-int dhcpd_init (void)
-{
 	if (task_create ("dhcpd", 30, 3, 20 * 1024, dhcpd_task, NULL, NULL, 
 			 &dhcptaskid) == TSK_FAILURE) {
 		printf ("Task creation failed : %s\n", "dhcpd");
 		return -1;
 	}
+
+	return 0;
+}
+
+int dhcpd_init (void)
+{
 	return 0;
 }
