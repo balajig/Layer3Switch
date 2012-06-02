@@ -63,9 +63,12 @@ int sync_lock (sync_lock_t *slock)
 int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs)
 {
 	struct timespec abs_timeout;
+	int    err = 0;
 
-	abs_timeout.tv_sec = secs;
-	abs_timeout.tv_nsec = nanosecs;
+	clock_gettime(CLOCK_REALTIME, &abs_timeout);
+
+	abs_timeout.tv_sec += secs;
+	abs_timeout.tv_nsec += nanosecs;
 
 	while (sem_timedwait (slock, &abs_timeout) < 0)  {
 		/*signal interrupts*/
