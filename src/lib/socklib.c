@@ -12,15 +12,22 @@
 #include "sockets.h"
 #include "socks.h"
 
-#ifdef UNDER_DEV
+#ifndef UNDER_DEV
 
 #define MAX_SOCK_LAYER 12
 
+#define SOCK_UDP 1
+#define SOCK_TCP 2
+
+
 struct sock_client {
+	int       (*sock_data_cb) (void *data, void *arg);
+	void      *arg;
 	int       type;
 	int       familiy;
 	uint32_t  addr;
 	int       flags;
+	int       datalen;
 	union __sock {    
 		struct sock_tcp {
 			int port;
@@ -28,12 +35,11 @@ struct sock_client {
 		}tcp;
 		struct sock_udp {
 			int       lport;
-			int       rport
+			int       rport;
 			uint32_t  raddr;
 		}udp;
 	}_sock;
 	int       protocol;
-	int       (*sock_data_cb) (void *data, void *arg);
 };
 
 enum {
@@ -43,9 +49,10 @@ enum {
 	SOCK_CLIENT_BLOCKING = 0x8,
 };
 
-struct sock_layer {
+typedef struct sock_layer {
 	sync_lock_t         lock;
 	int                 sock_id;
+	int 		    index;
 	struct sock_client  client;	
 }SOCK_T;
 
@@ -53,25 +60,73 @@ static SOCK_T *sock_layer[MAX_SOCK_LAYER];
 static sync_lock_t  lock;
 static tmtaskid_t sockmgrid;
 
-static fd_set
+static fd_set sock_rfds;
+static fd_set sock_wfds;
+static fd_set sock_efds;
+static int maxsockfd;
+
+static int udp_sock_register (struct sock_client *client);
+static SOCK_T * alloc_new_sock_layer  (void);
+
+
+
+static sock_process_rfds (fd_set *sock_rfds)
+{
+	int i = 0;
+
+	while (i < MAX_SOCK_LAYER) {
+		if (sock_layer[i]) {
+			if (FD_ISSET (sock_layer[i]->sock_id, sock_rfds)) {
+				void *buf = malloc (sock_layer[i]->client.datalen);
+				read (sock_layer[i]->sock_id, buf, sock_layer[i]->client.datalen); 
+				sock_layer[i]->client.sock_data_cb (buf, sock_layer[i]->client.arg); 
+				free (buf);
+			}
+		}
+	}
+}
 
 static void sockmgr (void *arg)
 {
 	fd_set rfds;
+	fd_set wfds;
+	fd_set efds;
 	struct timeval tv;
 	int retval;
 
 	while (1) {
+		FD_ZERO (&rfds);
+		FD_ZERO (&wfds);
+		FD_ZERO (&efds);
 
+		memcpy (&rfds , &sock_rfds, sizeof(rfds));
+		memcpy (&wfds , &sock_wfds, sizeof(wfds));
+		memcpy (&efds , &sock_efds, sizeof(efds));
 
+		retval = select (maxsockfd + 1,  &rfds, &wfds, &efds, NULL);
+
+		if (retval < 0)
+			continue;
+
+		sock_process_rfds (&rfds);
+
+#if 0
+		sock_process_wfds (&wfds);
+
+		sock_process_efds (&efds);
+#endif
 	}
 }
 
 int sock_mgr_init (void)
 {
+	FD_ZERO(&sock_rfds);
+	FD_ZERO(&sock_wfds);
+	FD_ZERO(&sock_efds);
+
 	if (task_create ("SockMgr", 90, 3, 20 * 1024, sockmgr, NULL, NULL, 
 			 &sockmgrid) == TSK_FAILURE) {
-		printf ("Task creation failed : SockMgr\n", );
+		printf ("Task creation failed : SockMgr\n");
 		return -1;
 	}
 }
@@ -86,6 +141,8 @@ void sock_client_init (struct sock_client *client)
 int sock_client_register (struct sock_client *client)
 {
 	SOCK_T  *new;
+	int sock = -1;
+	int rval = -1;
 
 	if (!client)
 		return -1;
@@ -96,7 +153,30 @@ int sock_client_register (struct sock_client *client)
 
 	sync_lock (&lock);
 
+	if (client->type == SOCK_UDP) {
+
+		sock = udp_sock_register (client);
+		
+		if (sock < 0)
+			goto unlock;
+		new = alloc_new_sock_layer ();
+
+		if (!new) {
+			/*TODO: deregister*/
+			goto unlock;
+		}
+		new->sock_id = sock;
+
+		create_sync_lock (&new->lock);
+
+		memcpy (&new->client, client, sizeof (*client));
+		
+	} else if (client->type == SOCK_TCP) {
+
+	}
+unlock:
 	sync_unlock (&lock);
+	return rval;
 }
 
 static int tcp_sock_register ()
