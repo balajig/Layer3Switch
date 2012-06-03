@@ -18,6 +18,7 @@ void handle_expired_timer (APP_TIMER_T *ptmr)
 {
 	if (ptmr->timer->flags & TIMER_DELETE) {
 		ptmr->timer->flags &= ~TIMER_DELETE;
+		free_timer (ptmr->timer);
 		return;
 	}
 	timer_unlock ();
