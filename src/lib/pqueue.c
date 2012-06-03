@@ -112,7 +112,7 @@ int queue_packet (unsigned long qblk , uint8_t *buf, int len)
 	return 0;
 }
 
-int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs, int nsecs)
+int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs, int nsecs, int flags)
 {
 	queue_cb_t * p = (queue_cb_t *)qcb;
 	socket_queue_t  *qbuf = NULL;
@@ -125,6 +125,8 @@ int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs,
 
 		int event = 0;
 		if (list_empty (&p->queue)) {
+			if (flags)
+				return -1;
 			if (!secs && !nsecs)
 				err = EvtRx (&p->evt, &event, PKT_RX_ON_SOCK);
 			else
