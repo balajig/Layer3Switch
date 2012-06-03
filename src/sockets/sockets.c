@@ -1268,6 +1268,15 @@ lwip_select (int maxfdp1, fd_set * readset, fd_set * writeset,
     int                 i;
     SYS_ARCH_DECL_PROTECT (lev);
 
+    err = create_sync_lock(&select_cb.sem);
+    if (err != ERR_OK)
+    {
+	    /* failed to create semaphore */
+	    set_errno (ENOMEM);
+	    return -1;
+    }
+
+
     LWIP_DEBUGF (SOCKETS_DEBUG,
                  ("lwip_select(%d, %p, %p, %p, tvsec=%" S32_F " tvusec=%" S32_F
                   ")\n", maxfdp1, (void *) readset, (void *) writeset,
@@ -1304,14 +1313,6 @@ lwip_select (int maxfdp1, fd_set * readset, fd_set * writeset,
         select_cb.writeset = writeset;
         select_cb.exceptset = exceptset;
         select_cb.sem_signalled = 0;
-        err = create_sync_lock(&select_cb.sem);
-        if (err != ERR_OK)
-        {
-            /* failed to create semaphore */
-            set_errno (ENOMEM);
-            return -1;
-        }
-
         /* Protect the select_cb_list */
         SYS_ARCH_PROTECT (lev);
 
@@ -1401,13 +1402,13 @@ lwip_select (int maxfdp1, fd_set * readset, fd_set * writeset,
         select_cb_ctr++;
         SYS_ARCH_UNPROTECT (lev);
 
-        destroy_sync_lock (&select_cb.sem);
         if (waitres == ETIMEDOUT)
         {
             /* Timeout */
             LWIP_DEBUGF (SOCKETS_DEBUG, ("lwip_select: timeout expired\n"));
             /* This is OK as the local fdsets are empty and nready is zero,
                or we would have returned earlier. */
+	   nready = -ETIMEDOUT;
             goto return_copy_fdsets;
         }
 
@@ -1432,6 +1433,7 @@ lwip_select (int maxfdp1, fd_set * readset, fd_set * writeset,
     {
         *exceptset = lexceptset;
     }
+    destroy_sync_lock (&select_cb.sem);
 
     return nready;
 }
