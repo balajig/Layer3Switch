@@ -683,7 +683,7 @@ netconn_drain(struct netconn *conn)
 
   /* Delete and drain the recvmbox. */
   if (pqueue_valid(conn->recvmbox)) {
-    while (dequeue_packet (conn->recvmbox, &mem, sizeof (&mem), 0, 0) != -1) {
+    while (dequeue_packet (conn->recvmbox, &mem, sizeof (&mem), 0, 0, 1) != -1) {
 #if LWIP_TCP
       if (conn->type == NETCONN_TCP) {
         if(mem != NULL) {
@@ -707,7 +707,7 @@ netconn_drain(struct netconn *conn)
   /* Delete and drain the acceptmbox. */
 #if LWIP_TCP
   if (pqueue_valid(conn->acceptmbox)) {
-    while (dequeue_packet (conn->acceptmbox, &mem, sizeof (&mem), 0, 0) != -1) {
+    while (dequeue_packet (conn->acceptmbox, &mem, sizeof (&mem), 0, 0, 1) != -1) {
       struct netconn *newconn = (struct netconn *)mem;
       /* Only tcp pcbs have an acceptmbox, so no need to check conn->type */
       /* pcb might be set to NULL already by err_tcp() */

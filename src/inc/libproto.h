@@ -105,7 +105,7 @@ unsigned long  pqueue_create (void);
 int  pqueue_destroy (unsigned long pcb);
 int  pqueue_valid (unsigned long pcb);
 int queue_packet (unsigned long qblk , uint8_t *buf, int len);
-int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs, int nsecs);
+int dequeue_packet (unsigned long qcb, uint8_t **data, size_t datalen, int secs, int nsecs, int flags);
 
 /*LIB */
 uint32_t ip_2_uint32 (uint8_t *ipaddress, int byte_order);

@@ -36,7 +36,7 @@ void * dhcp_task (void *arg)
 									
 	while (1) {
 
-		if (dequeue_packet (dhcp_pqid, (void *)&msg, sizeof (msg), 0, 0) < 0)
+		if (dequeue_packet (dhcp_pqid, (void *)&msg, sizeof (msg), 0, 0, 0) < 0)
 			continue;
 
 		if (dhcpd_msg_call_back [msg->msg_type])
