@@ -19,6 +19,7 @@
 
 cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	int i = 0;
 	cli_printf ("The default DNS domain name is: openswitch\n");
         cli_printf ("%-20s    %-16s\n", "DNS name server", "status");
@@ -34,7 +35,8 @@ cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context)
 		}
 		i++;
 	}
-	return 0;
+#endif
+	return CPARSER_OK;
 
 }
 
@@ -46,14 +48,18 @@ cparser_result_t cparser_cmd_config_ip_dns_domain_name_domainname(cparser_contex
 
 cparser_result_t cparser_cmd_config_ip_dns_server_address_dnsserver_primary(cparser_context_t *context, uint32_t *dnsserver_ptr)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	if (!set_dns_server (ntohl(*dnsserver_ptr), 1))
 		return CPARSER_NOT_OK;
+#endif
 	return CPARSER_OK;
 }
 
 cparser_result_t cparser_cmd_config_ip_dns_server_address_dnsserver(cparser_context_t *context, uint32_t *dnsserver_ptr)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	if (!set_dns_server (ntohl(*dnsserver_ptr), 0))
 		return CPARSER_NOT_OK;
+#endif
 	return CPARSER_OK;
 }

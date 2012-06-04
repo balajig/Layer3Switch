@@ -25,6 +25,7 @@ obj-y += hash.o
 obj-y += pqueue.o
 obj-y += libtelnet.o
 obj-y += socklib.o
+obj-y += ip_addr.o
 
 CFLAGS += -I$(LIBS_INC_DIR) -DTIMER_BTM_HALF
 

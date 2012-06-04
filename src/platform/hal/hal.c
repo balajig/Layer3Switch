@@ -85,7 +85,9 @@ void process_pkt (void  *pkt, int len, uint16_t port)
 		return;
 	}
 
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     	p = allocate_and_cpy_buf_2_pbuf (pkt, len);
 	if (p)
 		ethernet_input (p, IF_INFO (port));
+#endif
 }

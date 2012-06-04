@@ -1,2 +1,2 @@
 # Makefile for ARP
-obj-$(CONFIG_OPENSWITCH_TCP_IP) := arp_cli.o  etharp.o 
+obj-$(CONFIG_OPENSWITCH_TCP_IP) := etharp.o 

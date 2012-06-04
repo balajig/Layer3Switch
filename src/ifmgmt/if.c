@@ -108,6 +108,39 @@ err_t if_loopif_init(void)
 
 #endif
 
+err_t
+low_level_output (struct interface *netif, struct pbuf *p)
+{
+    struct pbuf        *q;
+    int port = netif->ifIndex;
+    uint8_t  *packet = malloc (netif->ifMtu);
+    int len = 0;
+
+    if (!packet)
+	return ERR_MEM;
+
+#if ETH_PAD_SIZE
+    pbuf_header (p, -ETH_PAD_SIZE);    /* drop the padding word */
+#endif
+
+    for (q = p; q != NULL; q = q->next)
+    {
+	memcpy (packet + len, q->payload, q->len);
+	len += q->len;
+    }
+    send_packet (packet, port, len);
+
+
+#if ETH_PAD_SIZE
+    pbuf_header (p, ETH_PAD_SIZE);    /* reclaim the padding word */
+#endif
+
+   free (packet);
+
+    return ERR_OK;
+}
+
+
 
 void interface_init (struct interface *netif, void *state, if_input_fn input)
 {
@@ -147,7 +180,11 @@ void interface_init (struct interface *netif, void *state, if_input_fn input)
     netif->loop_cnt_current = 0;
 #endif /* ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS */
 
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     ethernetif_init (netif);
+#else
+    netif->linkoutput = low_level_output;
+#endif
 
     if_zebra_new_hook (netif);
 
@@ -160,9 +197,11 @@ void interface_init (struct interface *netif, void *state, if_input_fn input)
 #endif
 
     /* add this netif to the list */
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     snmp_inc_iflist ();
+#endif
 
-#if LWIP_IGMP
+#if 0
     /* start IGMP processing */
     if (netif->flags & NETIF_FLAG_IGMP)
     {
@@ -211,6 +250,7 @@ if_set_ipaddr (struct interface *netif, ip_addr_t * ipaddr)
     struct tcp_pcb     *pcb;
     struct tcp_pcb_listen *lpcb;
 
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     /* address is actually being changed? */
     if ((ip_addr_cmp (ipaddr, &(netif->ip_addr))) == 0)
     {
@@ -254,13 +294,16 @@ if_set_ipaddr (struct interface *netif, ip_addr_t * ipaddr)
             }
         }
     }
-#endif
     snmp_delete_ipaddridx_tree (netif);
     snmp_delete_iprteidx_tree (0, netif);
+#endif
+#endif
     /* set new IP address to netif */
     ip_addr_set (&(netif->ip_addr), ipaddr);
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     snmp_insert_ipaddridx_tree (netif);
     snmp_insert_iprteidx_tree (0, netif);
+#endif
 
     LWIP_DEBUGF (NETIF_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
                  ("netif: IP address of interface %c%c set to %" U16_F ".%"
@@ -303,10 +346,14 @@ if_set_gw (struct interface *netif, ip_addr_t * gw)
 void
 if_set_netmask (struct interface *netif, ip_addr_t * netmask)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     snmp_delete_iprteidx_tree (0, netif);
+#endif
     /* set new netmask to netif */
     ip_addr_set (&(netif->netmask), netmask);
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     snmp_insert_iprteidx_tree (0, netif);
+#endif
     LWIP_DEBUGF (NETIF_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE,
                  ("netif: netmask of interface %c%c set to %" U16_F ".%" U16_F
                   ".%" U16_F ".%" U16_F "\n", netif->ifDescr[0], netif->ifDescr[1],
@@ -340,6 +387,7 @@ if_set_up (struct interface *netif)
 
         if (netif->flags & NETIF_FLAG_LINK_UP)
         {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 #if LWIP_ARP
             /* For Ethernet network interfaces, we would like to send a "gratuitous ARP" */
             if (netif->flags & (NETIF_FLAG_ETHARP))
@@ -347,8 +395,9 @@ if_set_up (struct interface *netif)
                 etharp_gratuitous (netif);
             }
 #endif /* LWIP_ARP */
+#endif
 
-#if LWIP_IGMP
+#if 0
             /* resend IGMP memberships */
             if (netif->flags & NETIF_FLAG_IGMP)
             {
@@ -513,7 +562,9 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
     {
         LINK_STATS_INC (link.memerr);
         LINK_STATS_INC (link.drop);
+#ifdef CONFIG_OPENSWITCH_TCP_IP
         snmp_inc_ifoutdiscards (stats_if);
+#endif
         return ERR_MEM;
     }
 #if 0
@@ -539,15 +590,21 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
         pbuf_free (r);
         LINK_STATS_INC (link.memerr);
         LINK_STATS_INC (link.drop);
+#ifdef CONFIG_OPENSWITCH_TCP_IP
         snmp_inc_ifoutdiscards (stats_if);
+#endif
         return err;
     }
 
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     /* loopback packets are always IP packets! */
     if (ip_input (r, netif) != ERR_OK)
     {
 	    pbuf_free (r);
     }
+#else
+
+#endif
 
 #if 0
     /* Put the packet on a linked list which gets emptied through calling
@@ -572,8 +629,10 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
     SYS_ARCH_UNPROTECT (lev);
 #endif
     LINK_STATS_INC (link.xmit);
+#ifdef CONFIG_OPENSWITCH_TCP_IP
     snmp_add_ifoutoctets (stats_if, p->tot_len);
     snmp_inc_ifoutucastpkts (stats_if);
+#endif
 
 #if 0
 #if LWIP_NETIF_LOOPBACK_MULTITHREADING
@@ -590,6 +649,7 @@ if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
  * if_loop_output() are put on a list that is passed to netif->input() by
  * if_poll().
  */
+#if 0
 void
 if_poll (struct interface *netif)
 {
@@ -662,7 +722,7 @@ if_poll (struct interface *netif)
     }
     while (netif->loop_first != NULL);
 }
-
+#endif
 #if !LWIP_NETIF_LOOPBACK_MULTITHREADING
 /**
  * Calls if_poll() for every netif on the if_list.
@@ -683,3 +743,11 @@ if_poll_all (void)
 #endif
 #endif /* !LWIP_NETIF_LOOPBACK_MULTITHREADING */
 #endif /* ENABLE_LOOPBACK */
+int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask)
+{
+	ip_addr_t ipaddr, netmask;
+	ipaddr.addr = ipaddress;
+	netmask.addr = ipmask;
+	if_set_addr (IF_INFO(ifindex), &ipaddr, &netmask, &ipaddr);
+	return 0;
+}

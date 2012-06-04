@@ -455,6 +455,13 @@ char read_input ()
         return c;
 }
 
+#ifndef CONFIG_OPENSWITCH_TCP_IP
+int lwip_read (int fd, char *buf, int size)
+{
+	return read (fd, buf, size);
+}
+#endif
+
 void do_mode_change (int mode)
 {
 	int i = sizeof (mode_p)/ sizeof(struct modes);

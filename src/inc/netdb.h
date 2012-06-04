@@ -107,6 +107,7 @@ struct addrinfo {
 extern int h_errno;
 #endif /* LWIP_DNS_API_DECLARE_H_ERRNO*/
 
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 struct hostent *lwip_gethostbyname(const char *name);
 int lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
                 size_t buflen, struct hostent **result, int *h_errnop);
@@ -122,7 +123,7 @@ int lwip_getaddrinfo(const char *nodename,
 #define freeaddrinfo(addrinfo) lwip_freeaddrinfo(addrinfo)
 #define getaddrinfo(nodname, servname, hints, res) \
        lwip_getaddrinfo(nodname, servname, hints, res)
-
+#endif
 #ifdef __cplusplus
 }
 #endif

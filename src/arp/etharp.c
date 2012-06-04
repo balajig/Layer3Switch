@@ -1523,37 +1523,7 @@ ethernet_input (struct pbuf *p, struct interface *netif)
     return ERR_OK;
 }
 
-static              err_t
-low_level_output (struct interface *netif, struct pbuf *p)
-{
-    struct pbuf        *q;
-    int port = netif->ifIndex;
-    uint8_t  *packet = malloc (netif->ifMtu);
-    int len = 0;
-
-    if (!packet)
-	return ERR_MEM;
-
-#if ETH_PAD_SIZE
-    pbuf_header (p, -ETH_PAD_SIZE);    /* drop the padding word */
-#endif
-
-    for (q = p; q != NULL; q = q->next)
-    {
-	memcpy (packet + len, q->payload, q->len);
-	len += q->len;
-    }
-    send_packet (packet, port, len);
-
-
-#if ETH_PAD_SIZE
-    pbuf_header (p, ETH_PAD_SIZE);    /* reclaim the padding word */
-#endif
-
-   free (packet);
-
-    return ERR_OK;
-}
+extern err_t low_level_output (struct interface *netif, struct pbuf *p);
 
 void ethernetif_init (struct interface *netif)
 {

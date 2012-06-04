@@ -7,18 +7,22 @@
 
 cparser_result_t cparser_cmd_show_arp(cparser_context_t *context)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	if (!show_arp_entries ())
 		return CPARSER_OK;
+#endif
 	return CPARSER_NOT_OK;
 }
 cparser_result_t cparser_cmd_config_no_arp_ipaddr (cparser_context_t *context, uint32_t *ipaddr_ptr)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	ip_addr_t ipaddr;
 
 	ipaddr.addr = *ipaddr_ptr;
 	
 	if (!etharp_remove_static_entry (&ipaddr))
 		return CPARSER_OK;
+#endif
 	return CPARSER_NOT_OK;
 }
 
@@ -26,6 +30,7 @@ cparser_result_t cparser_cmd_config_arp_ipaddr_hostmacaddr(cparser_context_t *co
     uint32_t *ipaddr_ptr,
     cparser_macaddr_t *hostmacaddr_ptr)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	ip_addr_t ipaddr;
 	struct eth_addr ethaddr;
 
@@ -35,5 +40,6 @@ cparser_result_t cparser_cmd_config_arp_ipaddr_hostmacaddr(cparser_context_t *co
 
 	if (!etharp_add_static_entry (&ipaddr, &ethaddr))
 		return CPARSER_OK;
+#endif
 	return CPARSER_NOT_OK;
 }

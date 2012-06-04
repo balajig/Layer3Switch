@@ -5,7 +5,12 @@
 #include "cparser_tree.h"
 #include "dhcp.h"
 
+
+#ifndef CONFIG_OPENSWITCH_TCP_IP
+u8_t g_dhcp_debug;
+#else
 extern u8_t g_dhcp_debug;
+#endif
 
 cparser_result_t cparser_cmd_debug_dhcp_client (cparser_context_t *context)
 {
@@ -19,35 +24,43 @@ cparser_result_t cparser_cmd_no_debug_dhcp_client (cparser_context_t *context)
 }
 cparser_result_t cparser_cmd_if_ip_address_dhcp(cparser_context_t *context)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
 	if (!dhcp_start (IF_INFO (port)))
 		return CPARSER_OK;
+#endif
 	return CPARSER_NOT_OK;
 }
 cparser_result_t cparser_cmd_if_no_ip_address_dhcp(cparser_context_t *context)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
 	if (!dhcp_release (IF_INFO (port))) {
 		dhcp_stop (IF_INFO (port));
 		return CPARSER_OK;
 	}
+#endif
 	return CPARSER_NOT_OK;
 }
 
 cparser_result_t cparser_cmd_if_ip_dhcp_release(cparser_context_t *context)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
 	if (!dhcp_release (IF_INFO (port))) {
 		return CPARSER_OK;
 	}
+#endif
 	return CPARSER_NOT_OK;
 }
 cparser_result_t cparser_cmd_if_ip_dhcp_renew(cparser_context_t *context)
 {
+#ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
 	if (!dhcp_renew (IF_INFO (port))) {
 		return CPARSER_OK;
 	}
+#endif
 	return CPARSER_NOT_OK;
 }
 

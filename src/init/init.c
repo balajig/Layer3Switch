@@ -13,6 +13,16 @@ void layer3switch_init (void);
 int etharp_init (void);
 int rtm_init (void);
 
+#ifndef CONFIG_OPENSWITCH_TCP_IP
+#define etharp_init()
+#define tcp_init()
+#define snmp_init()
+#define dhcp_init()
+#define autoip_init()
+#define igmp_init()
+#define dns_init()
+#endif
+
 void layer3switch_init (void)
 {
         lib_init ();

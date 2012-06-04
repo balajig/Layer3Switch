@@ -16,6 +16,7 @@ obj-y += lib/
 obj-y += ifmgmt/
 obj-y += vlan/
 obj-y += ping/
+obj-y += clicallbacks/
 
 obj-$(CONFIG_TELNET) += telnetd/
 obj-$(CONFIG_ZEBRA_RTM) += rtm/
