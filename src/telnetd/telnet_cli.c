@@ -14,8 +14,11 @@
 #include "cparser.h"
 #include "cparser_tree.h"
 
+extern int telnet_to (char *host); 
+
 cparser_result_t cparser_cmd_telnet_host(cparser_context_t *context, char **host_ptr)
 {
-	telnet_to (*host_ptr, NULL);
+	context = context;
+	telnet_to (*host_ptr);
 	return CPARSER_OK;
 }

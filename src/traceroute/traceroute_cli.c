@@ -15,11 +15,15 @@
 #include "cparser.h"
 #include "cparser_tree.h"
 
+extern int do_traceroute (char *trcdest);
+
 cparser_result_t cparser_cmd_traceroute_hostaddr(cparser_context_t *context,
 		uint32_t *hostaddr_ptr)
 {
         uint8_t  addr[4];
-        uint8_t  str[10];
+        char     str[10];
+
+	context = context;
 
         uint32_2_ipstring (ntohl(*hostaddr_ptr), addr);
 
@@ -32,6 +36,8 @@ cparser_result_t cparser_cmd_traceroute_hostaddr(cparser_context_t *context,
 cparser_result_t cparser_cmd_traceroute_hostname(cparser_context_t *context,
 		char **hostname_ptr)
 {
+	context = context;
+
 	do_traceroute (*hostname_ptr);
 
 	return CPARSER_OK;

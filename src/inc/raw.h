@@ -69,8 +69,7 @@ struct raw_pcb {
   /* Common members of all PCB types */
   IP_PCB;
   u8_t protocol;
-  u8_t pad[3];
-};
+}__attribute__ ((packed));
 
 /* The following functions is the application layer interface to the
    RAW code. */

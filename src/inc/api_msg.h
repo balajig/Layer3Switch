@@ -72,44 +72,44 @@ struct api_msg_msg {
     /** used for do_newconn */
     struct {
       u8_t proto;
-    } n;
+    }__attribute__ ((packed)) n;
     /** used for do_bind and do_connect */
     struct {
       ip_addr_t *ipaddr;
       u16_t port;
-    } bc;
+    }__attribute__ ((packed)) bc;
     /** used for do_getaddr */
     struct {
       ip_addr_t *ipaddr;
       u16_t *port;
       u8_t local;
-    } ad;
+    }__attribute__ ((packed)) ad;
     /** used for do_write */
     struct {
       const void *dataptr;
       size_t len;
       u8_t apiflags;
-    } w;
+    }__attribute__ ((packed)) w;
     /** used for do_recv */
     struct {
       u32_t len;
-    } r;
+    }__attribute__ ((packed)) r;
     /** used for do_close (/shutdown) */
     struct {
       u8_t shut;
-    } sd;
+    }__attribute__ ((packed)) sd;
 #if LWIP_IGMP
     /** used for do_join_leave_group */
     struct {
       ip_addr_t *multiaddr;
       ip_addr_t *if_addr;
       enum netconn_igmp join_or_leave;
-    } jl;
+    }__attribute__ ((packed)) jl;
 #endif /* LWIP_IGMP */
 #if TCP_LISTEN_BACKLOG
     struct {
       u8_t backlog;
-    } lb;
+    }__attribute__ ((packed)) lb;
 #endif /* TCP_LISTEN_BACKLOG */
   } msg;
 }__attribute__ ((packed));
@@ -122,7 +122,7 @@ struct api_msg {
   void (* function)(struct api_msg_msg *msg);
   /** arguments for this function */
   struct api_msg_msg msg;
-};
+}__attribute__ ((packed));
 
 #if LWIP_DNS
 /** As do_gethostbyname requires more arguments but doesn't require a netconn,

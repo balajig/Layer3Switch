@@ -408,8 +408,7 @@ struct	outproto protos[] = {
 };
 struct	outproto *proto = &protos[0];
 
-int
-do_traceroute (char *trcdest)
+int do_traceroute (char *trcdest)
 {
 	register int op, code, n;
 	register char *cp;

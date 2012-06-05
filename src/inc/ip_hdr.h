@@ -89,7 +89,7 @@ extern "C" {
 struct ip_pcb {
 /* Common members of all PCB types */
   IP_PCB;
-};
+}__attribute__ ((packed));
 
 /*
  * Option flags per-socket. These are the same like SO_XXX.

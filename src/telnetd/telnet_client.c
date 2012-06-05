@@ -16,7 +16,10 @@
 #include "netdb.h"
 #include <termios.h>
 
-static struct termios orig_tios;
+
+void * telnet2_task (void *arg);
+int telnet_to (char *host); 
+
 static telnet_t *telnet;
 static int do_echo;
 
@@ -28,9 +31,12 @@ static const telnet_telopt_t telopts[] = {
 	{ -1, 0, 0 }
 };
 
+#if 0
+static struct termios orig_tios;
 static void _cleanup(void) {
 	tcsetattr(STDOUT_FILENO, TCSADRAIN, &orig_tios);
 }
+#endif
 
 static void _input(char *buffer, int size) {
 	static char crlf[] = { '\r', '\n' };
@@ -69,7 +75,7 @@ static void _send(int sock, const char *buffer, size_t size) {
 	}
 }
 
-static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
+static void _event_handler(telnet_t *tnet, telnet_event_t *ev,
 		void *user_data) {
 	int sock = *(int*)user_data;
 
@@ -104,7 +110,7 @@ static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 		case TELNET_EV_TTYPE:
 			/* respond with our terminal type, if requested */
 			if (ev->ttype.cmd == TELNET_TTYPE_SEND) {
-				telnet_ttype_is(telnet, getenv("TERM"));
+				telnet_ttype_is(tnet, getenv("TERM"));
 			}
 			break;
 			/* respond to particular subnegotiations */
@@ -120,7 +126,7 @@ static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 	}
 }
 
-void telnet2_task (void *arg)
+void * telnet2_task (void *arg)
 {
 	int sock = (int)arg;
 	int rs;
@@ -140,14 +146,15 @@ void telnet2_task (void *arg)
 	}
 }
 
-int telnet_to (char *host, char *port) 
+int telnet_to (char *host) 
 {
 	int rs;
 	int sock;
-	struct sockaddr_in addr;
 	struct addrinfo *ai;
 	struct addrinfo hints;
+#if 0
 	struct termios tios;
+#endif
 	tmtaskid_t hthread = -1;
 	char buffer[512];
 

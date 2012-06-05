@@ -12,12 +12,14 @@ void send_interface_enable_or_disable (int port , int state);
 
 cparser_result_t cparser_cmd_if_enable(cparser_context_t *context)
 {
+	context = context;
 	if (!cli_set_port_enable ())
                 return CPARSER_OK;
         return CPARSER_NOT_OK;
 }
 cparser_result_t cparser_cmd_if_disable(cparser_context_t *context)
 {
+	context = context;
 	if (!cli_set_port_disable ())
                 return CPARSER_OK;
         return CPARSER_NOT_OK;
@@ -60,6 +62,7 @@ cparser_result_t cparser_cmd_interface_ethernet_portnum(cparser_context_t *conte
 
 cparser_result_t cparser_cmd_show_interface(cparser_context_t *context)
 {
+	context = context;
 	if (!cli_show_interfaces (-1))
                 return CPARSER_OK;
         return CPARSER_NOT_OK;

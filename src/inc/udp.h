@@ -108,8 +108,7 @@ struct udp_pcb {
   /** ports are in host byte order */
   u16_t local_port, remote_port;
   u8_t flags;
-  u8_t pad[3];
-};
+}__attribute__ ((packed));
 /* udp_pcbs export for exernal reference (e.g. SNMP agent) */
 extern struct udp_pcb *udp_pcbs;
 
