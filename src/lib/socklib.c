@@ -12,8 +12,6 @@
 #include "sockets.h"
 #include "socks.h"
 
-#ifndef UNDER_DEV
-
 #define MAX_SOCK_LAYER 12
 
 #define SOCK_UDP 1
@@ -103,7 +101,11 @@ static void sockmgr (void *arg)
 		memcpy (&wfds , &sock_wfds, sizeof(wfds));
 		memcpy (&efds , &sock_efds, sizeof(efds));
 
-		retval = select (maxsockfd + 1,  &rfds, &wfds, &efds, NULL);
+		/* Wait up to five seconds. */
+		tv.tv_sec = 1;
+		tv.tv_usec = 0;
+
+		retval = select (maxsockfd + 1,  &rfds, &wfds, &efds, &tv);
 
 		if (retval < 0)
 			continue;
@@ -224,6 +226,8 @@ static int udp_sock_register (struct sock_client *client)
 		}
 	}
 
+	FD_SET (sock, &sock_rfds);
+
 	return sock;
 }
 
@@ -254,7 +258,6 @@ static void release_sock_layer (SOCK_T *p)
 	}
 }
 
-#endif
 
 int udp_v4_create (struct sockaddr_in *addr)
 {
