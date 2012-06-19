@@ -47,8 +47,6 @@ void layer3switch_init (void)
 
         //vrrp_init ();
 
-        init_task_cpu_usage_moniter_timer ();
-
 	/* Sanity check user-configurable values */
 	lwip_sanity_check ();
 
@@ -99,6 +97,8 @@ void layer3switch_init (void)
 #endif
 
         spawn_pkt_processing_task ();
+
+        init_task_cpu_usage_moniter_timer ();
 
         start_cli_task ();
 }

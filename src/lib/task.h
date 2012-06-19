@@ -30,14 +30,6 @@ enum
     TSK_SCHED_RR
 }tsk_sched_alg;
 
-struct pstat
-{
-	long unsigned int utime;
-	long unsigned int stime;
-	long unsigned int tcpu;
-};
-
-
 typedef struct __task_tm__ {
     struct list_head     tsk_node;
     char            task_name[MAX_TASK_NAME];
@@ -48,7 +40,6 @@ typedef struct __task_tm__ {
     int 	    stksze;
     int             prio;
     int             schedalgo;
-    struct pstat    cpu_stats;
     void            *(*start_routine)(void*);
     void            (*exit_routine)(void);
     void            *tskarg;

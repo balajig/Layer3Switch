@@ -24,6 +24,44 @@
 tmtaskid_t tsk_selfid ();
 tmtask_t           * get_tsk_info_frm_id (tmtaskid_t tskid);
 void * tsk_wrap (void *ptskarg);
+int init_task_cpu_usage_moniter_timer (void);
+void track_cpu_usage (void *);
+int  show_cpu_usage (void);
+
+static TIMER_ID cpu_timer;
+
+struct pstat_temp
+{
+	long unsigned int utime;
+	long unsigned int stime;
+	long unsigned int tcpu;
+	long int cstime;
+	long int cutime;
+};
+
+static LIST_HEAD(tsk_hd);
+
+struct pstat
+{
+	long unsigned int utime;
+	long unsigned int stime;
+	long unsigned int tcpu;
+};
+
+typedef struct task_info_ {
+    struct list_head     tsk_node;
+    char            task_name[MAX_TASK_NAME];
+    pid_t             tsk_pid;
+    void *(*entry)(void *);
+    void            *arg;
+#ifdef TASK_DEBUG
+    int 	    stksze;
+    int             prio;
+    int             schedalgo;
+#endif
+    struct pstat    cpu_stats;
+}task_t;
+
 
 int create_sync_lock (sync_lock_t *slock)
 {
@@ -63,9 +101,12 @@ int sync_lock (sync_lock_t *slock)
 int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs)
 {
 	struct timespec abs_timeout;
+	int    err = 0;
 
-	abs_timeout.tv_sec = secs;
-	abs_timeout.tv_nsec = nanosecs;
+	clock_gettime(CLOCK_REALTIME, &abs_timeout);
+
+	abs_timeout.tv_sec += secs;
+	abs_timeout.tv_nsec += nanosecs;
 
 	while (sem_timedwait (slock, &abs_timeout) < 0)  {
 		/*signal interrupts*/
@@ -73,7 +114,7 @@ int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs)
 			continue;
 		}
 		if (errno == ETIMEDOUT) {
-			return -1;
+			return ETIMEDOUT;
 		}
 	}
 
@@ -89,14 +130,41 @@ int sync_unlock (sync_lock_t *slock)
 	return 0;
 }
 
+static void *task_start (void *arg)
+{
+	task_t *p = arg;
+	
+	p->tsk_pid = get_tsk_pid ();
+
+	p->entry (p->arg);
+
+	list_del (&p->tsk_node);
+
+	free (p);
+
+	return NULL;
+}
 
 retval_t start_task (tmtask_t * ptskinfo, tmtaskid_t * ptskid)
 {
-    if (pthread_create (ptskid, &ptskinfo->tsk_attr, ptskinfo->start_routine,
-                        (void *) ptskinfo->tskarg))
+    task_t *p = NULL;
+    p = calloc (1, sizeof (task_t));
+    if (!p) 
+	return TSK_FAILURE;
+
+    INIT_LIST_HEAD (&p->tsk_node);
+    p->tsk_pid = *ptskid;
+    p->entry   = ptskinfo->start_routine;
+    p->arg     =  ptskinfo->tskarg;
+    strcpy (p->task_name, ptskinfo->task_name);
+
+    if (pthread_create (ptskid, &ptskinfo->tsk_attr, task_start,
+                        (void *)p))
     {
+	free (p);
         return TSK_FAILURE;
     }
+    list_add_tail (&p->tsk_node, &tsk_hd);
     return TSK_SUCCESS;
 }
 
@@ -299,4 +367,134 @@ void EvtSignal (EVT_T *evt)
 		return;
 	pthread_cond_signal (&evt->evt_cnd);
 	pthread_mutex_unlock (&evt->evt_mtx);
+}
+
+int init_task_cpu_usage_moniter_timer (void)
+{
+	setup_timer (&cpu_timer, track_cpu_usage, NULL);
+
+	mod_timer (cpu_timer, 5 * tm_get_ticks_per_second ());
+
+	return 0;
+}
+
+static int get_usage(pid_t pid, struct pstat_temp* result)
+{
+	char pid_s[20];
+	char stat_filepath[30] = "/proc/self/task/";
+	int i =0;
+	FILE *fpstat = NULL;
+	FILE *fstat = NULL;
+	long unsigned int cpu_time[10];
+
+	memset(cpu_time, 0, sizeof(cpu_time));
+
+	snprintf(pid_s, sizeof(pid_s), "%d", pid);
+	strncat(stat_filepath, pid_s, sizeof(stat_filepath) - strlen(stat_filepath) -1);
+	strncat(stat_filepath, "/stat", sizeof(stat_filepath) - strlen(stat_filepath) -1);
+
+	fpstat = fopen(stat_filepath, "r");
+
+	if(!fpstat){
+		return -1;
+	}
+
+	fstat = fopen("/proc/stat", "r");
+	if(!fstat){
+		fclose(fstat);
+		return -1;
+	}
+	bzero(result, sizeof(struct pstat));
+
+	if(fscanf(fpstat, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %ld %ld", 
+		  &result->utime, &result->stime, &result->cutime, &result->cstime) == EOF){
+		fclose(fpstat);
+		fclose(fstat);
+		return -1;
+	}
+	fclose(fpstat);
+
+	//read+calc cpu total time from /proc/stat, on linux 2.6.35-23 x86_64 the cpu row has 10values could differ on different architectures :/
+	if(fscanf(fstat, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", 
+		         &cpu_time[0], &cpu_time[1], &cpu_time[2], &cpu_time[3], &cpu_time[4], &cpu_time[5], &cpu_time[6], 
+			&cpu_time[7], &cpu_time[8], &cpu_time[9]) == EOF){
+		fclose(fstat);
+		return -1;
+	}
+	fclose(fstat);
+
+	for(i=0; i < 10;i++){
+		result->tcpu += cpu_time[i];
+	}
+
+	return 0;
+}
+
+/*
+ * calculates the actual CPU usage(curr - lst) in percent
+ * curr, lst: both last measured get_usage() results
+ * ucpu_usage, scpu_usage: result parameters: user and sys cpu usage in %
+ */
+static void calc_cpu_usage (struct pstat* curr, struct pstat* lst, float* ucpu_usage, float* scpu_usage, float *tcpu)
+{
+	*ucpu_usage = ((100 * (curr->utime - lst->utime )) / (float)((curr->tcpu - lst->tcpu)));
+	*scpu_usage = ((100 * (curr->stime - lst->stime))  / (float)((curr->tcpu - lst->tcpu)));
+
+	*tcpu = ((100 * ((curr->utime + curr->stime) -(lst->utime + lst->stime))) / (float)((curr->tcpu - lst->tcpu)));
+}
+
+int show_cpu_usage (void)
+{
+	register struct list_head *node = NULL;
+	register task_t  *tskinfo = NULL;
+
+	cli_printf
+		("\n Task Name         CPU User        System \n");
+	cli_printf
+		("\r ---------         --------        -------\n");
+
+
+	list_for_each (node, (&tsk_hd))
+	{
+		float user_usage = 0.0, system_usage = 0.0, tcpu = 0.0;
+		struct pstat_temp current;
+		struct pstat curr;;
+
+		memset (&current, 0, sizeof(current));
+
+		tskinfo = (task_t *) node;
+
+		get_usage (tskinfo->tsk_pid, &current);
+
+		curr.utime = current.utime + current.cutime;
+		curr.stime = current.stime + current.cstime;
+		curr.tcpu = current.tcpu;
+
+		calc_cpu_usage (&curr, &tskinfo->cpu_stats, &user_usage, &system_usage , &tcpu) ;
+
+		cli_printf (" %-16s    %-8.1f       %-8.1f\n", tskinfo->task_name, user_usage * 2, system_usage);
+	}
+	return 0;
+}
+
+void track_cpu_usage (void *unused)
+{
+	register struct list_head *node = NULL;
+	register task_t  *tskinfo = NULL;
+
+	list_for_each (node, (&tsk_hd))
+	{
+		struct pstat_temp current;
+
+		memset (&current, 0, sizeof(current));
+
+		tskinfo = (task_t *) node;
+
+		get_usage (tskinfo->tsk_pid, &current);
+
+		tskinfo->cpu_stats.utime = current.utime + current.cutime;
+		tskinfo->cpu_stats.stime = current.stime + current.cstime;
+		tskinfo->cpu_stats.tcpu = current.tcpu;
+	}
+	mod_timer (cpu_timer, 1 * tm_get_ticks_per_second ());
 }

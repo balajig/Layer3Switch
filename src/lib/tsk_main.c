@@ -12,7 +12,6 @@
 
 #include "common_types.h"
 
-LIST_HEAD(tsk_hd);
 
 tmtaskid_t          curtskid;
 
