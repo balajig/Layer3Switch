@@ -98,12 +98,22 @@ struct modes mode_p[] = { {GLOBAL_CONFIG_MODE, change_config_mode},
 			  {USER_EXEC_MODE,  end_mode}
 			};
 
+static FILE *fp = NULL;
+
+void write_config_to_start_up (char *line)
+{
+	if (!fp || !line)
+		return;
+	fwrite (line, 1, strlen (line), fp);
+}
 
 int cli_init (const char *prmt) 
 {
 	int i = 1;
         user_db_init ();
-
+	
+	fp = fopen ("startup.cfg", "w");
+	
 	while (i < MAX_CLI_SESSION) {
 		this_cli[i].session = -1;
 		i++;

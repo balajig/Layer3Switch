@@ -101,11 +101,7 @@ static void sockmgr (void *arg)
 		memcpy (&wfds , &sock_wfds, sizeof(wfds));
 		memcpy (&efds , &sock_efds, sizeof(efds));
 
-		/* Wait up to five seconds. */
-		tv.tv_sec = 1;
-		tv.tv_usec = 0;
-
-		retval = select (maxsockfd + 1,  &rfds, &wfds, &efds, &tv);
+		retval = select (maxsockfd + 1,  &rfds, &wfds, &efds, NULL);
 
 		if (retval < 0)
 			continue;
