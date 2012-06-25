@@ -52,10 +52,8 @@ static inline void timer_expiry_action (TIMER_T * ptmr);
 
 /************* Private Variable Declaration *********************/
 static   int          indx = 0;
-static   EVT_T        timer_event;
 static   sync_lock_t  core_timer;
 static   LIST_HEAD    (timers_list);
-static   LIST_HEAD    (expd_tmrs);
 /****************************************************************/
 
 volatile unsigned long ticks = 0;
@@ -116,14 +114,14 @@ static void timer_add_sort (TIMER_T *new)
 
 static void timer_add (TIMER_T *p)
 {
-debug_timers ();
+			debug_timers ();
 	if (!next_expiry || next_expiry > p->exp) {
 		next_expiry = p->exp;
 		list_add (&p->next, &timers_list);
 	} else {
 		timer_add_sort (p);
 	}
-debug_timers ();
+			debug_timers ();
 }
 
 void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int flags)
@@ -327,34 +325,11 @@ void * tick_clock (void *unused)
 	return NULL;
 }
 
-#ifdef TIMER_BTM_HALF
-void * tick_service (void *unused) 
-{
-	int evt = 0;
-
-	while (1) {
-		EvtRx (&timer_event, &evt, TMR_SERVE_TIMERS);
-
-		if (evt & TMR_SERVE_TIMERS)
-			btm_hlf ();
-	}
-	return NULL;
-}
-#endif
 
 int init_timer_mgr (void)
 {
 	tmtaskid_t btmhlftask_id = 0;
 	tmtaskid_t task_id = 0;
-
-#ifdef TIMER_BTM_HALF
-	EventInit (&timer_event);
-
-	if (task_create ("TMRBHF", 99, TSK_SCHED_RR, 32000,
-	  		  tick_service, NULL, NULL, &btmhlftask_id) == TSK_FAILURE) {
-		return FAILURE;
-	}
-#endif
 
 	if (task_create ("TMRTHF", 99, TSK_SCHED_RR, 32000,
 			  tick_clock, NULL, NULL, &task_id) == TSK_FAILURE) {
@@ -364,22 +339,13 @@ int init_timer_mgr (void)
 
 	timer_lock_create ();
 
-#ifdef TIMER_BTM_HALF
-	bh_timer_lock_create ();
-#endif
-
 	return SUCCESS;
 }
 
 
 void service_timers (void)
 {
-        if (tm_process_tick_and_update_timers ()) {
-#ifdef TIMER_BTM_HALF
-		EvtSnd (&timer_event, TMR_SERVE_TIMERS);
-#endif
-		return;
-	}
+     tm_process_tick_and_update_timers ();
 }
 
 int timer_restart  (TIMER_T *p)
@@ -412,17 +378,6 @@ void handle_expired_timer (TIMER_T *ptmr)
 	}
 }
 
-#ifdef TIMER_BTM_HALF
-static inline void timer_expiry_action (TIMER_T * ptmr)
-{
-	timer->is_running = 0;
-	timer_unlock ();
-	bh_timer_lock ();
-	list_add_tail (&ptmr->elist, &expd_tmrs);
-	bh_timer_unlock ();
-	timer_lock ();
-}
-#else
 void timer_expiry_action (TIMER_T * ptmr)
 {
 	ptmr->is_running = 0;
@@ -430,40 +385,28 @@ void timer_expiry_action (TIMER_T * ptmr)
 	handle_expired_timer (ptmr);
 	timer_lock ();
 }
-#endif
 
 
 int tm_process_tick_and_update_timers (void)
 {
-	int timers_exp = 0;
 	int i = 0;
 	TIMER_T *p, *n;
 
 	list_for_each_entry_safe(p, n, &timers_list, next) {
 		if (p->exp <= ticks) {
 			list_del (&p->next);
-			INIT_LIST_HEAD (&p->elist);
-			list_add_tail (&p->elist, &expd_tmrs);
-			timers_exp++;
 			next_expiry = 0;
+			timer_expiry_action (p);
 			continue;
 		} 
 	}
 
-	if (!timers_exp) {
-		p = NULL;
+	if (!next_expiry && !list_empty(&timers_list)) {
 		p = list_first_entry (&timers_list, TIMER_T , next);
-		if (p)
-			next_expiry = p->exp;
+		next_expiry = p->exp;
 	}
 
-	list_for_each_entry_safe(p, n, &expd_tmrs, elist) {
-		list_del (&p->elist);
-		INIT_LIST_HEAD (&p->elist);
-		timer_expiry_action (p);
-	}
-
-	return timers_exp;
+	return 0;
 }
 int timer_pending (void *timer)
 {
