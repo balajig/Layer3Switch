@@ -683,11 +683,11 @@ debug_kallsyms: .tmp_map$(last_kallsyms)
 endif # ifdef CONFIG_KALLSYMS
 
 # OpenSwitchSolution image - including updated kernel symbols
-OpenSwitchSolution_unstripped: $(OpenSwitchSolution-all) FORCE
+Switch_unstripped: $(OpenSwitchSolution-all) FORCE
 	$(call if_changed_rule,OpenSwitchSolution__)
 	$(Q)rm -f .old_version
 
-OpenSwitchSolution: OpenSwitchSolution_unstripped
+OpenSwitchSolution: Switch_unstripped
 ifeq ($(SKIP_STRIP),y)
 	$(Q)cp $< $@
 else
@@ -928,7 +928,7 @@ endif # CONFIG_MODULES
 
 # Directories & files removed with 'make clean'
 CLEAN_DIRS  += $(MODVERDIR) _install 0_lib
-CLEAN_FILES +=	OpenSwitchSolution OpenSwitchSolution_unstripped* OpenSwitchSolution.links \
+CLEAN_FILES +=	Switch Switch_unstripped* Switch.links \
                 System.map .kernelrelease \
                 .tmp_kallsyms* .tmp_version .tmp_OpenSwitchSolution* .tmp_System.map
 
