@@ -100,13 +100,6 @@ static void timer_add_sort (TIMER_T *new)
 			p->next.prev->next = &new->next;
 			break;
 		}
-		if (p->exp == new->exp) {
-			add = 1;
-			new->next.next = p->next.next;
-			new->next.prev = &p->next;
-			p->next.next = &new->next;
-			break;
-		}
 	}
 	if (!add)
 		list_add_tail (&new->next, &timers_list); 
@@ -114,14 +107,14 @@ static void timer_add_sort (TIMER_T *new)
 
 static void timer_add (TIMER_T *p)
 {
-			debug_timers ();
 	if (!next_expiry || next_expiry > p->exp) {
 		next_expiry = p->exp;
 		list_add (&p->next, &timers_list);
 	} else {
+	debug_timers ();
 		timer_add_sort (p);
+	debug_timers ();
 	}
-			debug_timers ();
 }
 
 void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int flags)
@@ -245,7 +238,8 @@ void free_timer (TIMER_T *p)
 
 static inline int timers_pending_for_service (void)
 {
-	if (next_expiry == ticks)  {
+	int diff = next_expiry - ticks;
+	if (diff <= 0)  {
 		return 1;
 	}
         return 0;
@@ -393,7 +387,8 @@ int tm_process_tick_and_update_timers (void)
 	TIMER_T *p, *n;
 
 	list_for_each_entry_safe(p, n, &timers_list, next) {
-		if (p->exp <= ticks) {
+		int diff = p->exp - ticks;
+		if (diff <= 0) {
 			list_del (&p->next);
 			next_expiry = 0;
 			timer_expiry_action (p);
