@@ -30,7 +30,6 @@
 typedef struct tm_timer
 {
 	struct  list_head next;
-	struct  list_head elist;
 	void           *data;
  	void           (*time_out_handler)(void *);
 	unsigned int    exp;
@@ -78,43 +77,52 @@ static void timer_lock_create (void)
 static void debug_timers (void)
 {
 	TIMER_T *p = NULL;
+	return;
 
 	printf ("\n\n");
 	list_for_each_entry (p, &timers_list, next) {
 		printf ("Timer value : %d\n", p->exp);
 	}
 	printf ("\n\n");
-	fflush (stdout);
 }
 
 static void timer_add_sort (TIMER_T *new)
 {
-	TIMER_T *p = NULL;
-	int add = 0;
+	TIMER_T *cur = NULL;
 
-	list_for_each_entry (p, &timers_list, next) {
-		if (p->exp > new->exp) {
-			add = 1;
-			new->next.next = &p->next;
-			new->next.prev = p->next.prev;
-			p->next.prev->next = &new->next;
-			break;
+	if (!list_empty(&timers_list)) {
+		list_for_each_entry (cur, &timers_list, next) {
+			printf ("Curr value : %d New Value :%d\n", cur->exp, new->exp);
+			if (new->exp <= cur->exp) {
+				if (cur->next.prev == &timers_list) {
+					list_add (&new->next, &timers_list);
+				} else
+					__list_add (&new->next, &cur->next.prev, &cur->next);  
+				break;
+			}
+			else if (new->exp > cur->exp) {
+				TIMER_T *nxt = (TIMER_T *)cur->next.next;
+				if (list_is_last(&cur->next, &timers_list)) {
+					list_add_tail (&new->next, &nxt->next);  
+					break;
+				}
+				else if ((new->exp <= nxt->exp)) {
+					__list_add (&new->next, &cur->next, &nxt->next);  
+					break;
+				} 
+			}
 		}
-	}
-	if (!add)
-		list_add_tail (&new->next, &timers_list); 
+	}else 
+		list_add (&new->next, &timers_list);
 }
 
 static void timer_add (TIMER_T *p)
 {
-	if (!next_expiry || next_expiry > p->exp) {
+	debug_timers ();
+	if (!next_expiry)
 		next_expiry = p->exp;
-		list_add (&p->next, &timers_list);
-	} else {
+	timer_add_sort (p);
 	debug_timers ();
-		timer_add_sort (p);
-	debug_timers ();
-	}
 }
 
 void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int flags)
