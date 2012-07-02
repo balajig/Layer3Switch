@@ -81,6 +81,8 @@ int mac_address_update (MACADDRESS mac_addr, int32_t port_no, uint16_t vlan_id)
 {
 	fdb_t *p = NULL;
 
+	(void)vlan_id;
+
 	if (!stp_is_mac_learning_allowed (port_no)) {
 		return 0;
 	}
@@ -113,7 +115,7 @@ static fdb_t * fdb_lookup (MACADDRESS mac, int32_t port_no)
 	if (!fdb)
 		return NULL;
 
-	return fdb;
+	return (fdb->port == port_no) ? fdb : NULL;
 }
 
 static int fdb_add_entry (MACADDRESS mac, int32_t portno, int is_static)
@@ -141,6 +143,8 @@ static void fdb_free_entry (void *fdb)
 
 static int fdb_delete_entry (MACADDRESS mac, int32_t portno)
 {
+	/*FIXME: handle portno too, while deleting*/
+	portno = portno;
 	return hash_tbl_delete (mac.addr, fdb_hash_table, fdb_free_entry);
 }
 
@@ -164,6 +168,8 @@ void delete_age_out_entires (void *data)
 
 void aging_timer_expired (void *unused)
 {
+	unused = unused;
+
 	hash_walk (fdb_hash_table, delete_age_out_entires); 
 	mod_timer (ageing_timer, tbridge.dot1dTpAgingTime);
 }
@@ -172,13 +178,13 @@ void display_fdb_entry (void *data)
 {
 	unsigned char *mac = NULL;
 	fdb_t *p = (fdb_t *)data;
-	unsigned long time = ((p->expiry - get_ticks()) < 0) ?0: (p->expiry - get_ticks());
+	unsigned long rtime = ((p->expiry - get_ticks()) < 0) ?0: (p->expiry - get_ticks());
 
 	mac = p->mac_addr.addr;
 
         cli_printf ("  %-4d    %02x:%02x:%02x:%02x:%02x:%02x    %-10s    %-lu.%-2lu\n", p->port,
 		mac[0],mac[1],mac[2],mac[3],mac[4],mac[5], p->is_static?"static": "dynamic",
-		time / tm_get_ticks_per_second (), time % tm_get_ticks_per_second());
+		rtime / tm_get_ticks_per_second (), rtime % tm_get_ticks_per_second());
 
 }
 
