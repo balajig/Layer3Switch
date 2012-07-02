@@ -14,7 +14,7 @@
 #include "cparser.h"
 #include "cparser_tree.h"
 
-cparser_result_t cparser_cmd_show_ntp_associations(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_ntp_associations(cparser_context_t *context )
 {
 
 }

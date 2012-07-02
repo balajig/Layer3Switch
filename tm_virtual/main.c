@@ -198,7 +198,7 @@ int process_pkt (char *buf, int len)
 	pkt_hdr = (inst_t *)buf;
 
 #ifdef DBG
-	printf ("Pakcet Rx'd of len %d from inst %d on port %d\n\n", len, pkt_hdr->inst, pkt_hdr->port);
+	printf ("Pakcet Rx'd of len %d frm inst%d-port %d and sent", len, pkt_hdr->inst, pkt_hdr->port);
 #endif
 
 	list_for_each_safe (p, n, &vlink) {
@@ -212,13 +212,14 @@ int process_pkt (char *buf, int len)
 			inst = 0;
 			goto tx_pkt;
 		} else {
-#ifdef DBG
+#ifdef DBG1
 			printf ("Pkt  is dropped\n");
 #endif
 			continue;
 		}
 tx_pkt:
 		if (tx = 1) { /*XXX:It is = only not == */
+			printf (" inst %d - port %d\n", vnode->inst[inst].inst, (vnode->inst[inst].port));
 			dest = tm_inst_port (vnode->inst[inst].inst);
 
 			memcpy (&pkt_hdr->inst, &vnode->inst[inst], sizeof(inst_t));
@@ -323,6 +324,8 @@ int main (int argc, char **argv)
 	write_string ("######## TM Virtual Started #######\n");
 
 	create_virtual_link (1,1,2,1);
+	create_virtual_link (2,2,3,2);
+	create_virtual_link (1,2,3,1);
 
 	create_cmdline_interface ("tmvirtual#");
 
