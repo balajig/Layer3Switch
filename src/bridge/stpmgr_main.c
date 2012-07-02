@@ -55,6 +55,8 @@ void *stpmgr_task (void *arg)
 {
 	struct stp_msg *msg = NULL;
 
+	arg = arg;
+
 	while (1) {
 		if (msg_rcv (stp_Q_id, (char **)&msg, sizeof(struct stp_msg)) < 0) {
 			continue;
@@ -134,6 +136,8 @@ int process_bpdu (void *bpdu, uint16_t port, int vlanid, int len)
 	int stp_mode = vlan_get_this_bridge_stp_mode (vlanid);
 
 	if (stp_mode == MODE_STP) {
+		/*FIXME: validate len*/
+		len = len;
 	 	stp_process_bpdu (bpdu, port);
 
 	} else if (stp_mode == MODE_RSTP) {
