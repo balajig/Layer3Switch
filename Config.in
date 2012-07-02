@@ -118,7 +118,7 @@ endmenu
 menu 'System Config'
 choice
 	prompt "Timers"
-	default GEN_TIMERS
+	default LIGHT_WEIGHT_TIMERS
 	help
 	  There are 3 Timers currently we support:
 	  - Generic timers : We most efficient but resource consuming.
