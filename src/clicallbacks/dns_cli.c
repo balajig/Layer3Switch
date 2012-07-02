@@ -17,7 +17,7 @@
 #include "dns.h"
 
 
-cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context UNUSED_PARAM)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	int i = 0;
@@ -40,13 +40,13 @@ cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context)
 
 }
 
-cparser_result_t cparser_cmd_config_ip_dns_domain_name_domainname(cparser_context_t *context, char **domainname_ptr)
+cparser_result_t cparser_cmd_config_ip_dns_domain_name_domainname(cparser_context_t *context UNUSED_PARAM, char **domainname_ptr UNUSED_PARAM)
 {
 	cli_printf ("Not Implemented\n");
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_config_ip_dns_server_address_dnsserver_primary(cparser_context_t *context, uint32_t *dnsserver_ptr)
+cparser_result_t cparser_cmd_config_ip_dns_server_address_dnsserver_primary(cparser_context_t *context UNUSED_PARAM, uint32_t *dnsserver_ptr)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	if (!set_dns_server (ntohl(*dnsserver_ptr), 1))
@@ -55,7 +55,7 @@ cparser_result_t cparser_cmd_config_ip_dns_server_address_dnsserver_primary(cpar
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_config_ip_dns_server_address_dnsserver(cparser_context_t *context, uint32_t *dnsserver_ptr)
+cparser_result_t cparser_cmd_config_ip_dns_server_address_dnsserver(cparser_context_t *context UNUSED_PARAM, uint32_t *dnsserver_ptr)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	if (!set_dns_server (ntohl(*dnsserver_ptr), 0))

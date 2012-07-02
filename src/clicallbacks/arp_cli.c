@@ -5,7 +5,7 @@
 #include "ip_addr.h"
 #include "netif/etharp.h"
 
-cparser_result_t cparser_cmd_show_arp(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_arp(cparser_context_t *context UNUSED_PARAM)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	if (!show_arp_entries ())
@@ -13,7 +13,7 @@ cparser_result_t cparser_cmd_show_arp(cparser_context_t *context)
 #endif
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_no_arp_ipaddr (cparser_context_t *context, uint32_t *ipaddr_ptr)
+cparser_result_t cparser_cmd_config_no_arp_ipaddr (cparser_context_t *context UNUSED_PARAM, uint32_t *ipaddr_ptr)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	ip_addr_t ipaddr;
@@ -26,7 +26,7 @@ cparser_result_t cparser_cmd_config_no_arp_ipaddr (cparser_context_t *context, u
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_config_arp_ipaddr_hostmacaddr(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_arp_ipaddr_hostmacaddr(cparser_context_t *context UNUSED_PARAM,
     uint32_t *ipaddr_ptr,
     cparser_macaddr_t *hostmacaddr_ptr)
 {

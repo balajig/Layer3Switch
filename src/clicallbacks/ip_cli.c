@@ -17,7 +17,7 @@
 #include "rtm.h"
 
 
-cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
+cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context UNUSED_PARAM,
     uint32_t *addr_ptr,
     uint32_t *mask_ptr)
 {
@@ -34,7 +34,7 @@ cparser_result_t cparser_cmd_if_ip_address_addr_mask(cparser_context_t *context,
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_if_no_ip_address_addr_mask(cparser_context_t *context,
+cparser_result_t cparser_cmd_if_no_ip_address_addr_mask(cparser_context_t *context UNUSED_PARAM,
     uint32_t *addr_ptr,
     uint32_t *mask_ptr)
 {
@@ -49,7 +49,7 @@ cparser_result_t cparser_cmd_if_no_ip_address_addr_mask(cparser_context_t *conte
 }
 
 
-cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context UNUSED_PARAM)
 {
 	int i = 1;
 	while (i <= get_max_ports ()) {
@@ -69,7 +69,7 @@ cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context)
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_ping_hostaddr(cparser_context_t *context, uint32_t *hostaddr_ptr)
+cparser_result_t cparser_cmd_ping_hostaddr(cparser_context_t *context UNUSED_PARAM, uint32_t *hostaddr_ptr)
 {
         uint8_t  addr[4];
         uint8_t  str[10];
@@ -83,7 +83,7 @@ cparser_result_t cparser_cmd_ping_hostaddr(cparser_context_t *context, uint32_t 
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_ping_hostname(cparser_context_t *context, char **hostname_ptr)
+cparser_result_t cparser_cmd_ping_hostname(cparser_context_t *context UNUSED_PARAM, char **hostname_ptr)
 {
 	ping_me (*hostname_ptr);
 

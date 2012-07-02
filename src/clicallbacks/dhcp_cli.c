@@ -12,17 +12,17 @@ u8_t g_dhcp_debug;
 extern u8_t g_dhcp_debug;
 #endif
 
-cparser_result_t cparser_cmd_debug_dhcp_client (cparser_context_t *context)
+cparser_result_t cparser_cmd_debug_dhcp_client (cparser_context_t *context UNUSED_PARAM)
 {
 	g_dhcp_debug = 0x80;
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_no_debug_dhcp_client (cparser_context_t *context)
+cparser_result_t cparser_cmd_no_debug_dhcp_client (cparser_context_t *context UNUSED_PARAM)
 {
 	g_dhcp_debug = 0x00;
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_if_ip_address_dhcp(cparser_context_t *context)
+cparser_result_t cparser_cmd_if_ip_address_dhcp(cparser_context_t *context UNUSED_PARAM)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
@@ -31,7 +31,7 @@ cparser_result_t cparser_cmd_if_ip_address_dhcp(cparser_context_t *context)
 #endif
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_if_no_ip_address_dhcp(cparser_context_t *context)
+cparser_result_t cparser_cmd_if_no_ip_address_dhcp(cparser_context_t *context UNUSED_PARAM)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
@@ -43,7 +43,7 @@ cparser_result_t cparser_cmd_if_no_ip_address_dhcp(cparser_context_t *context)
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_if_ip_dhcp_release(cparser_context_t *context)
+cparser_result_t cparser_cmd_if_ip_dhcp_release(cparser_context_t *context UNUSED_PARAM)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
@@ -53,7 +53,7 @@ cparser_result_t cparser_cmd_if_ip_dhcp_release(cparser_context_t *context)
 #endif
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_if_ip_dhcp_renew(cparser_context_t *context)
+cparser_result_t cparser_cmd_if_ip_dhcp_renew(cparser_context_t *context UNUSED_PARAM)
 {
 #ifdef CONFIG_OPENSWITCH_TCP_IP
 	int port = cli_get_port ();
@@ -64,7 +64,7 @@ cparser_result_t cparser_cmd_if_ip_dhcp_renew(cparser_context_t *context)
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_show_dhcp_client_lease(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_dhcp_client_lease(cparser_context_t *context UNUSED_PARAM)
 {
 	int i = 0;
 
@@ -109,16 +109,16 @@ cparser_result_t cparser_cmd_show_dhcp_client_lease(cparser_context_t *context)
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_if_ip_dhcp_client_hostname(cparser_context_t *context, char **hostname_ptr)
+cparser_result_t cparser_cmd_if_ip_dhcp_client_hostname(cparser_context_t *context UNUSED_PARAM, char **hostname_ptr)
 {
 	int port = cli_get_port ();
 	if_set_hostname (IF_INFO (port), *hostname_ptr);
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_if_ip_dhcp_client_lease_days_hours_mins(cparser_context_t *context,
-    int32_t *days_ptr,
-    int32_t *hours_ptr,
-    int32_t *mins_ptr)
+cparser_result_t cparser_cmd_if_ip_dhcp_client_lease_days_hours_mins(cparser_context_t *context UNUSED_PARAM,
+    int32_t *days_ptr UNUSED_PARAM,
+    int32_t *hours_ptr UNUSED_PARAM,
+    int32_t *mins_ptr UNUSED_PARAM)
 {
 	cli_printf ("Not Implemented\n");
 	return CPARSER_OK;

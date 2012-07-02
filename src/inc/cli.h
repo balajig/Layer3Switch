@@ -24,3 +24,5 @@ void cli_set_port (int port);
 int set_curr_mode (int mode);
 int get_prompt (char *pmt);
 int exit_mode (void);
+
+#define UNUSED_PARAM  __attribute__((unused))

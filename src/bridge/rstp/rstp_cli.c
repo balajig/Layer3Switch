@@ -15,19 +15,19 @@ int vlan_spanning_tree_disable_on_vlan (int vlan_id, int mode);
 
 extern struct list_head bstp_list;
 
-cparser_result_t cparser_cmd_show_rstp(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_rstp(cparser_context_t * context UNUSED_PARAM)
 {
 	if (!show_spanning_tree_8021w ())
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_spanning_tree_rstp (cparser_context_t *context)
+cparser_result_t cparser_cmd_config_spanning_tree_rstp (cparser_context_t *context UNUSED_PARAM)
 {
 	if (!spanning_8021w_tree_enable ())
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_spanning_tree_rstp_priority_priority(cparser_context_t *context, int32_t *priority_ptr)
+cparser_result_t cparser_cmd_config_spanning_tree_rstp_priority_priority(cparser_context_t *context UNUSED_PARAM, int32_t *priority_ptr)
 {
 	if (!rstp_set_bridge_priority (*priority_ptr, cli_get_vlan_id ()))
 		return CPARSER_OK;
@@ -35,7 +35,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_priority_priority(cparser
 }
 
 cparser_result_t cparser_cmd_config_spanning_tree_rstp_hello_time_htimesecs_forward_delay_fdlysecs_max_age_maxagesecs (
-    cparser_context_t *context,
+    cparser_context_t *context UNUSED_PARAM,
     int32_t *htimesecs_ptr,
     int32_t *fdlysecs_ptr,
     int32_t *maxagesecs_ptr)
@@ -77,7 +77,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_hello_time_htimesecs_forw
 }
 
 cparser_result_t cparser_cmd_config_spanning_tree_rstp_forward_delay_fdlysecs_max_age_maxagesecs_hello_time_htimesecs(
-    cparser_context_t *context,
+    cparser_context_t *context UNUSED_PARAM,
     int32_t *fdlysecs_ptr,
     int32_t *maxagesecs_ptr,
     int32_t *htimesecs_ptr)
@@ -120,7 +120,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_forward_delay_fdlysecs_ma
 	return CPARSER_NOT_OK;
 }
 cparser_result_t cparser_cmd_config_spanning_tree_rstp_max_age_maxagesecs_forward_delay_fdlysecs_hello_time_htimesecs(
-    cparser_context_t *context,
+    cparser_context_t *context UNUSED_PARAM,
     int32_t *maxagesecs_ptr,
     int32_t *fdlysecs_ptr,
     int32_t *htimesecs_ptr)
@@ -161,7 +161,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_max_age_maxagesecs_forwar
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_path_cost_cost(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_path_cost_cost(cparser_context_t *context UNUSED_PARAM,
     int32_t *portnum_ptr,
     int32_t *cost_ptr)
 {
@@ -170,7 +170,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_path_cos
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_priority_priority(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_priority_priority(cparser_context_t *context UNUSED_PARAM,
     int32_t *portnum_ptr,
     int32_t *priority_ptr)
 {
@@ -179,14 +179,14 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_priority
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_config_no_spanning_tree_rstp(cparser_context_t *context)
+cparser_result_t cparser_cmd_config_no_spanning_tree_rstp(cparser_context_t *context UNUSED_PARAM)
 {
 	if (!spanning_8021w_tree_disable ())
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_admin_edge_port(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_admin_edge_port(cparser_context_t *context UNUSED_PARAM,
     int32_t *portnum_ptr)
 {
 	struct bstp_state *pinst =  rstp_get_this_bridge_entry (cli_get_vlan_id ());
@@ -210,7 +210,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_admin_ed
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_admin_pt2pt(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_spanning_tree_rstp_ethernet_portnum_admin_pt2pt(cparser_context_t *context UNUSED_PARAM,
     int32_t *portnum_ptr)
 {
 	struct bstp_state *pinst =  rstp_get_this_bridge_entry (cli_get_vlan_id ());

@@ -16,34 +16,35 @@ struct stp_instance * get_this_bridge_entry (uint16_t vlan_id);
 
 extern struct list_head stp_instance_head;
 
-cparser_result_t cparser_cmd_show_spanning_tree(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_spanning_tree(cparser_context_t *context UNUSED_PARAM)
 {
 	if (!show_spanning_tree ())
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_spanning_tree(cparser_context_t *context)
+cparser_result_t cparser_cmd_config_spanning_tree(cparser_context_t *context UNUSED_PARAM)
 {
 	if (!spanning_tree_enable ())
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_spanning_tree_priority_priority(cparser_context_t *context, int32_t *priority_ptr)
+cparser_result_t cparser_cmd_config_spanning_tree_priority_priority(cparser_context_t *context UNUSED_PARAM, int32_t *priority_ptr)
 {
 	if (!stp_set_bridge_priority (*priority_ptr, cli_get_vlan_id ()))
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
 
-cparser_result_t cparser_cmd_config_no_spanning_tree_priority_priority(cparser_context_t *context, int32_t *priority_ptr)
+cparser_result_t cparser_cmd_config_no_spanning_tree_priority_priority(cparser_context_t *context UNUSED_PARAM, int32_t *priority_ptr)
 {
-	if (!stp_set_bridge_priority (STP_DEF_PRIORITY, cli_get_vlan_id ()))
+	*priority_ptr = STP_DEF_PRIORITY;
+	if (!stp_set_bridge_priority (*priority_ptr, cli_get_vlan_id ()))
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
 
 cparser_result_t cparser_cmd_config_spanning_tree_hello_time_htimesecs_forward_delay_fdlysecs_max_age_maxagesecs (
-    cparser_context_t *context,
+    cparser_context_t *context UNUSED_PARAM,
     int32_t *htimesecs_ptr,
     int32_t *fdlysecs_ptr,
     int32_t *maxagesecs_ptr)
@@ -85,7 +86,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_hello_time_htimesecs_forward_d
 }
 
 cparser_result_t cparser_cmd_config_spanning_tree_forward_delay_fdlysecs_max_age_maxagesecs_hello_time_htimesecs(
-    cparser_context_t *context,
+    cparser_context_t *context UNUSED_PARAM,
     int32_t *fdlysecs_ptr,
     int32_t *maxagesecs_ptr,
     int32_t *htimesecs_ptr)
@@ -128,7 +129,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_forward_delay_fdlysecs_max_age
 	return CPARSER_NOT_OK;
 }
 cparser_result_t cparser_cmd_config_spanning_tree_max_age_maxagesecs_forward_delay_fdlysecs_hello_time_htimesecs(
-    cparser_context_t *context,
+    cparser_context_t *context UNUSED_PARAM,
     int32_t *maxagesecs_ptr,
     int32_t *fdlysecs_ptr,
     int32_t *htimesecs_ptr)
@@ -168,7 +169,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_max_age_maxagesecs_forward_del
 		return CPARSER_NOT_OK;
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_spanning_tree_ethernet_portnum_path_cost_cost(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_spanning_tree_ethernet_portnum_path_cost_cost(cparser_context_t *context UNUSED_PARAM,
     int32_t *portnum_ptr,
     int32_t *cost_ptr)
 {
@@ -176,7 +177,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_ethernet_portnum_path_cost_cos
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_spanning_tree_ethernet_portnum_priority_priority(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_spanning_tree_ethernet_portnum_priority_priority(cparser_context_t *context UNUSED_PARAM,
     int32_t *portnum_ptr,
     int32_t *priority_ptr)
 {
@@ -184,7 +185,7 @@ cparser_result_t cparser_cmd_config_spanning_tree_ethernet_portnum_priority_prio
 		return CPARSER_OK;
 	return CPARSER_NOT_OK;
 }
-cparser_result_t cparser_cmd_config_no_spanning_tree(cparser_context_t *context)
+cparser_result_t cparser_cmd_config_no_spanning_tree(cparser_context_t *context UNUSED_PARAM)
 {
 	if (!spanning_tree_disable ())
 		return CPARSER_OK;

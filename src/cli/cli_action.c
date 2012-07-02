@@ -22,33 +22,33 @@ int   debug_memory_pool       (int pool_id, int set);
 static cparser_result_t cparser_cmd_enter_privileged_mode (cparser_t *parser, char *buf, int buf_size);
 
 
-cparser_result_t cparser_cmd_lock(cparser_context_t *context)
+cparser_result_t cparser_cmd_lock(cparser_context_t *context UNUSED_PARAM)
 {
 	if (process_lock ())
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_logout(cparser_context_t *context)
+cparser_result_t cparser_cmd_logout(cparser_context_t *context UNUSED_PARAM)
 {
 	if (process_logout ())
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_show_users(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_users(cparser_context_t *context UNUSED_PARAM)
 {
 	if (show_users ())
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_show_mem_pool(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_mem_pool(cparser_context_t *context UNUSED_PARAM)
 {
         if (show_mem_pool ())
                 return CPARSER_NOT_OK;
         return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_show_task_cpu(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_task_cpu(cparser_context_t *context UNUSED_PARAM)
 {
 	if (show_cpu_usage ())
 		return CPARSER_NOT_OK;
@@ -80,21 +80,21 @@ cparser_result_t cparser_cmd_configure_terminal(cparser_context_t *context)
 	return cparser_submode_enter(context->parser, NULL, prompt);
 }
 cparser_result_t cparser_cmd_config_user_add_username_password_level
-                 (cparser_context_t *context, char **username_ptr, char **password_ptr, int32_t *level_ptr)
+                 (cparser_context_t *context UNUSED_PARAM, char **username_ptr, char **password_ptr, int32_t *level_ptr)
 
 {
 	if (create_user (*username_ptr, *password_ptr, *level_ptr))
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_config_user_del_username(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_user_del_username(cparser_context_t *context UNUSED_PARAM,
     char **username_ptr)
 {
 	if (user_del (*username_ptr))
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_end(cparser_context_t *context)
+cparser_result_t cparser_cmd_end(cparser_context_t *context UNUSED_PARAM)
 {
 	return CPARSER_OK;
 }
@@ -113,7 +113,7 @@ cparser_result_t cparser_cmd_disable_privileged_mode(cparser_context_t *context)
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_config_end(cparser_context_t *context)
+cparser_result_t cparser_cmd_config_end(cparser_context_t *context UNUSED_PARAM)
 {
         set_prompt ("");
         set_curr_mode (USER_EXEC_MODE);
@@ -130,7 +130,7 @@ cparser_result_t cparser_cmd_config_exit(cparser_context_t *context)
 }
 
 
-cparser_result_t cparser_cmd_show_mac_address_table(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_mac_address_table(cparser_context_t *context UNUSED_PARAM)
 {
 	if (!show_mac_table ())
 		return CPARSER_OK;
@@ -173,14 +173,14 @@ cparser_result_t cparser_cmd_run_script_filename(cparser_context_t *context, cha
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_clear_screen (cparser_context_t *context)
+cparser_result_t cparser_cmd_clear_screen (cparser_context_t *context UNUSED_PARAM)
 {
 	cli_printf("\033[2J");
 	cli_printf("\033[0;0f");
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_debug_mem_pool_poolid(cparser_context_t *context, int32_t *poolid_ptr)
+cparser_result_t cparser_cmd_debug_mem_pool_poolid(cparser_context_t *context UNUSED_PARAM, int32_t *poolid_ptr)
 {
 	int rval = -1;
 
@@ -194,7 +194,7 @@ cparser_result_t cparser_cmd_debug_mem_pool_poolid(cparser_context_t *context, i
 	return CPARSER_OK;
 }
 
-cparser_result_t cparser_cmd_no_debug_mem_pool_poolid(cparser_context_t *context, int32_t *poolid_ptr)
+cparser_result_t cparser_cmd_no_debug_mem_pool_poolid(cparser_context_t *context UNUSED_PARAM, int32_t *poolid_ptr)
 {
 	int rval = -1;
 
