@@ -135,6 +135,11 @@ static u8_t         etharp_cached_entry;
 static err_t        update_arp_entry (struct interface *netif, ip_addr_t * ipaddr,
                                       struct eth_addr *ethaddr, u8_t flags);
 
+void ethernetif_init (struct interface *netif);
+void arp_setup_timers (void);
+int etharp_init (void);
+int show_arp_entries (void);
+
 /* Some checks, instead of etharp_init(): */
 #if (LWIP_ARP && (ARP_TABLE_SIZE > 0x7f))
 #error "ARP_TABLE_SIZE must fit in an s8_t, you have to reduce it in your lwipopts.h"
@@ -1535,6 +1540,7 @@ TIMER_ID arptimer;
 
 static void arp_timer (void *arg)
 {
+	arg = arg;
 	etharp_tmr ();
 	mod_timer (arptimer, ARP_TMR_INTERVAL * tm_get_ticks_per_second ());
 }
@@ -1549,6 +1555,7 @@ void arp_setup_timers (void)
 int etharp_init (void)
 {
 	arp_setup_timers ();
+	return 0;
 }
 
 int show_arp_entries (void)
@@ -1561,7 +1568,7 @@ int show_arp_entries (void)
 		u8_t                state = arp_table[i].state;
 		if (state != ETHARP_STATE_EMPTY) {
 			uint8_t addr[4];
-		 	uint32_2_ipstring (arp_table[i].ipaddr.addr, &addr);
+		 	uint32_2_ipstring (arp_table[i].ipaddr.addr, &addr[0]);
 			cli_printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
 			cli_printf(" at %02x:%02x:%02x:%02x:%02x:%02x on %s\n",
 				arp_table[i].ethaddr.addr[0],arp_table[i].ethaddr.addr[1],
