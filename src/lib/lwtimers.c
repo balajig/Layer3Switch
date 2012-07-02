@@ -51,12 +51,12 @@ static inline void timer_expiry_action (TIMER_T * ptmr);
 
 /************* Private Variable Declaration *********************/
 static   int          indx = 0;
+static   int          timers_count = 0;
 static   sync_lock_t  core_timer;
 static   LIST_HEAD    (timers_list);
 /****************************************************************/
 
 volatile unsigned long ticks = 0;
-volatile unsigned long next_expiry = 0;
 
 static void timer_lock (void)
 {
@@ -76,12 +76,17 @@ static void timer_lock_create (void)
 
 static void debug_timers (void)
 {
+	int i  = 0;
 	TIMER_T *p = NULL;
-	return;
+	return ;
 
 	printf ("\n\n");
 	list_for_each_entry (p, &timers_list, next) {
-		printf ("Timer value : %d\n", p->exp);
+		printf ("Timer value : %d\n", p->exp, i++);
+		if (i > timers_count) {
+			int *k = NULL;
+			*k = 0;
+		}
 	}
 	printf ("\n\n");
 }
@@ -90,14 +95,15 @@ static void timer_add_sort (TIMER_T *new)
 {
 	TIMER_T *cur = NULL;
 
+	timers_count ++;
 	if (!list_empty(&timers_list)) {
 		list_for_each_entry (cur, &timers_list, next) {
-			printf ("Curr value : %d New Value :%d\n", cur->exp, new->exp);
 			if (new->exp <= cur->exp) {
 				if (cur->next.prev == &timers_list) {
 					list_add (&new->next, &timers_list);
-				} else
-					__list_add (&new->next, &cur->next.prev, &cur->next);  
+				} else {
+					__list_add (&new->next, &cur->next.prev, &cur->next);
+				}
 				break;
 			}
 			else if (new->exp > cur->exp) {
@@ -112,15 +118,13 @@ static void timer_add_sort (TIMER_T *new)
 				} 
 			}
 		}
-	}else 
+	} else  
 		list_add (&new->next, &timers_list);
 }
 
 static void timer_add (TIMER_T *p)
 {
 	debug_timers ();
-	if (!next_expiry)
-		next_expiry = p->exp;
 	timer_add_sort (p);
 	debug_timers ();
 }
@@ -151,6 +155,8 @@ void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int
 	timer_lock ();
 
 	timer_add (new);
+
+	new->is_running = 1;
 
 	timer_unlock ();
 
@@ -185,12 +191,17 @@ int mod_timer (void *timer, unsigned int tick)
 	if (!p)
 		return -1;
 
+	if (p->is_running)
+		return -1;
+
 	p->exp = ticks + tick;
 	p->time =  tick;
 
 	timer_lock ();
 
 	timer_add (p);
+
+	p->is_running = 1;
 
 	timer_unlock ();
 
@@ -213,7 +224,6 @@ int stop_timer (void *timer)
 		p->is_running = 0;
 		list_del (&p->next);
 	}
-
 	timer_unlock ();
 	return 0;
 }
@@ -244,24 +254,14 @@ void free_timer (TIMER_T *p)
 	tm_free (p, sizeof(*p));
 }
 
-static inline int timers_pending_for_service (void)
-{
-	int diff = next_expiry - ticks;
-	if (diff <= 0)  {
-		return 1;
-	}
-        return 0;
-}
-
 void update_times ()
 {
 	timer_lock ();
 
 	ticks++;
 
-	if (timers_pending_for_service ()) {
-		service_timers ();
-	}
+	service_timers ();
+
 	timer_unlock ();
 }
 
@@ -397,16 +397,15 @@ int tm_process_tick_and_update_timers (void)
 	list_for_each_entry_safe(p, n, &timers_list, next) {
 		int diff = p->exp - ticks;
 		if (diff <= 0) {
+#ifdef TIMER_DBG
+			printf ("Delete timer : %d %d %d\n", ticks, p->exp, diff);
+#endif
+			timers_count--;
 			list_del (&p->next);
-			next_expiry = 0;
+			INIT_LIST_HEAD (&p->next);
 			timer_expiry_action (p);
 			continue;
 		} 
-	}
-
-	if (!next_expiry && !list_empty(&timers_list)) {
-		p = list_first_entry (&timers_list, TIMER_T , next);
-		next_expiry = p->exp;
 	}
 
 	return 0;
@@ -414,7 +413,7 @@ int tm_process_tick_and_update_timers (void)
 int timer_pending (void *timer)
 {
 	TIMER_T  *p = (TIMER_T *)timer;
-
+	
         if (!p)
                 return 0;
 
