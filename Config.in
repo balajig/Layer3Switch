@@ -123,7 +123,6 @@ choice
 	  There are 3 Timers currently we support:
 	  - Generic timers : We most efficient but resource consuming.
 	  - Light weight timers: Light weight timers consumes less memory
-			         works on par Generic timers
 	  - OS Timers : Not Supoorted
 
 config GEN_TIMERS
@@ -133,6 +132,11 @@ config LIGHT_WEIGHT_TIMERS
 	bool "Light weight Timers"
 endchoice
 
+config MAX_PHY_PORTS
+	int "Maximux Physical Ports"
+	default 6
+	help
+	   Enter Maximum Physical Ports
 endmenu
 
 
