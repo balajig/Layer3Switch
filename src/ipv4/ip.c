@@ -14,20 +14,8 @@
 int ip_init (void);
 int init_ip_interface_table (void);
 
-struct ip_addr_entry ip_port[MAX_PORTS];
-
 int init_ip_interface_table (void)
 {
-	int i = 0;
-
-	memset (ip_port, 0, sizeof (ip_port));
-	
-	while (i < get_max_ports ()) 
-	{
-		ip_port[i].IfIndex = i + 1;
-		i++;
-	}
-
 	return 0;
 }
 
