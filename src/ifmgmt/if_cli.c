@@ -70,8 +70,10 @@ int cli_show_interfaces_all (void)
 	cli_printf (" Port      Name       MTU    Type    Admin    Oper   LastChange\n");
 	cli_printf (" ----     -----      -----  ------   ------  -----   ----------\n");
 	while (idx < MAX_PORTS) {
-		if (port_cdb[idx].ifIndex < 0)
-			break;
+		if (!port_cdb[idx].ifIndex) {
+			idx++;
+			continue;
+		}
 		cli_printf (" %-3d       %-8s   %-5d   %-6s  %-4s    %-4s        %-4d\n",
 		idx+1, port_cdb[idx].ifDescr,
 		port_cdb[idx].ifMtu, type[port_cdb[idx].ifType], state[port_cdb[idx].ifAdminStatus],

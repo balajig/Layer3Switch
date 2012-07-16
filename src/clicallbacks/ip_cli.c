@@ -56,6 +56,10 @@ cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context UNUSED
 		const char *State[2] = {"UP", "DOWN"};
 		uint8_t addr[4];
 		uint8_t Mask[4];
+		if (!port_cdb[i - 1].ifIndex) {
+			i++;
+			continue;
+		}
 		cli_printf ("\n%s is administratively %s, line protocol is %s\n", IF_DESCR(i), State[IF_ADMIN_STATUS(i) - 1],
 				State[IF_OPER_STATUS(i) - 1]);
 		cli_printf  ("Internet address is ");

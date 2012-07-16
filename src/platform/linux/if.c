@@ -247,7 +247,7 @@ int fetch_and_update_if_info (if_t *ife)
 
 	if (ioctl(fd, SIOCGIFINDEX, (char *)&ifr) == 0) {
 		update_linux_if_map (idx, ifr.ifr_ifindex);
-		ife->ifIndex = idx;
+		ife->ifIndex = idx + 1;
 	}
 
 	if (ioctl(fd, SIOCGIFMTU, (char *)&ifr) == 0)
