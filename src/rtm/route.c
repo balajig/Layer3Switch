@@ -31,7 +31,7 @@ if_t *route_lookup (uint32_t ip)
 
 	outif = if_lookup_by_index (rib_new->nexthop->ifindex);
 
-	if (outif->ip_addr.addr == ip) {
+	if ((outif->ip_addr.addr == ip) || ((ip & 0x000007f) == 0x7f)) {
 		outif = get_loopback_if ();
 	}
 	return outif;
