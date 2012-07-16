@@ -13,11 +13,11 @@ int port_init (void)
 {
 	int idx = 0;
 	if_loopif_init ();
-	while (idx  < get_max_ports ()) {
+	while (idx  < get_max_phy_ports ()) {
 		interface_init (&port_cdb[idx], NULL, NULL);
 		sprintf ((char *)port_cdb[idx].ifDescr, "%s%d","port",idx);
 		port_cdb[idx].ifIndex = idx + 1;
-		port_cdb[idx].ifType = 0;
+		port_cdb[idx].ifType = 1;
 		port_cdb[idx].ifMtu = 1500;
 		port_cdb[idx].ifSpeed = 10;
 		port_cdb[idx].ifAdminStatus = IF_DOWN;
@@ -58,27 +58,14 @@ int get_port_mac_address (uint32_t port, uint8_t *mac)
 	return 0;
 }
 
-int cli_show_interfaces (int port)
+int get_max_phy_ports (void)
 {
-	int idx = -1;
-
-	const char *state[]  = {"UNKNWN", "UP", "DOWN"};
-
-	cli_printf (" Port    Name     MTU    Type    Admin    Oper   LastChange\n");
-	cli_printf (" ----   -----    -----  ------   ------  -----   ----------\n");
-	while (++idx < get_max_ports ()) {
-		cli_printf (" %-3d    %-6s   %-5d   %-6s  %-4s    %-4s        %-4d\n",
-		port_cdb[idx].ifIndex + 1, port_cdb[idx].ifDescr,
-		port_cdb[idx].ifMtu, "ETH", state[port_cdb[idx].ifAdminStatus],
-		state[port_cdb[idx].ifOperStatus], port_cdb[idx].ifLastChange);
-	}
-
-	return 0;
+        return CONFIG_MAX_PHY_PORTS;
 }
 
 int get_max_ports (void)
 {
-        return MAX_PORTS;
+        return CONFIG_MAX_PHY_PORTS;
 }
 
 int make_if_down (if_t *p)

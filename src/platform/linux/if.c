@@ -37,6 +37,8 @@ int make_if_up (if_t *p);
 void * if_link_monitor (void *arg);
 void send_interface_enable_or_disable (int port , int state);
 
+if_t port_cdb[MAX_PORTS];
+
 static int idx = 0;
 
 int get_max_ports (void)
@@ -47,7 +49,7 @@ int get_max_ports (void)
 static int new_port_init (int idx)
 {
 	interface_init (&port_cdb[idx], NULL, NULL);
-	port_cdb[idx].ifType = 0;
+	port_cdb[idx].ifType = 1;
 	port_cdb[idx].ifMtu = 1500;
 	port_cdb[idx].ifSpeed = 10;
 	port_cdb[idx].ifAdminStatus = IF_DOWN;

@@ -36,7 +36,7 @@ static int32_t  sockid_pkt = 0;
 struct linux_if_mapping {
 	tmtaskid_t task_id;
 	int linux_ifIndex;
-}linux_if_map[MAX_PORTS];
+}linux_if_map[CONFIG_MAX_PHY_PORTS];
 
 
 void show_uptime (char *[]);
