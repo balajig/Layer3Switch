@@ -14,7 +14,7 @@ void get_bridge_mac_address (char *);
 
 extern char switch_mac[];
 bridge_group_t   this_bridge;
-port_entry_t     this_bridge_ports[MAX_PORTS];
+port_entry_t     this_bridge_ports[CONFIG_MAX_PHY_PORTS];
 
 int bridge_init (void)
 {
