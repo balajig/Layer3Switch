@@ -52,7 +52,7 @@ cparser_result_t cparser_cmd_if_no_ip_address_addr_mask(cparser_context_t *conte
 cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context UNUSED_PARAM)
 {
 	int i = 1;
-	while (i <= get_max_ports ()) {
+	while (i <= MAX_PORTS) {
 		const char *State[2] = {"UP", "DOWN"};
 		uint8_t addr[4];
 		uint8_t Mask[4];

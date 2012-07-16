@@ -83,6 +83,30 @@ exit
 
 #endsubmode
 
+//Interface mode
+interface loopback <INT:portnum>
+
+#submode "iflo"
+
+//Enables the port
+enable
+
+//Disable the port
+disable
+
+//Configures IP address on Interface
+ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
+
+//Removes the IP address on Interface
+no ip address <IPV4ADDR:addr> <IPV4ADDR:mask>
+
+#include "src/clicmds/dhcpclient.cli"
+
+//Exit from the mode
+exit
+
+#endsubmode
+
 #include "src/clicmds/dhcpservercfg.cli"
 
 // Disable privileged mode

@@ -60,13 +60,36 @@ cparser_result_t cparser_cmd_interface_ethernet_portnum(cparser_context_t *conte
 
 }
 
+int cli_show_interfaces_all (void)
+{
+	int idx = 0;
+
+	const char *state[]  = {"UNKNWN", "UP", "DOWN"};
+	const char *type []  = {"UNKNWN", "ETH", "LO"};
+
+	cli_printf (" Port      Name       MTU    Type    Admin    Oper   LastChange\n");
+	cli_printf (" ----     -----      -----  ------   ------  -----   ----------\n");
+	while (idx < MAX_PORTS) {
+		if (port_cdb[idx].ifIndex < 0)
+			break;
+		cli_printf (" %-3d       %-8s   %-5d   %-6s  %-4s    %-4s        %-4d\n",
+		idx+1, port_cdb[idx].ifDescr,
+		port_cdb[idx].ifMtu, type[port_cdb[idx].ifType], state[port_cdb[idx].ifAdminStatus],
+		state[port_cdb[idx].ifOperStatus], port_cdb[idx].ifLastChange);
+		idx++;
+	}
+
+	return 0;
+}
+
 cparser_result_t cparser_cmd_show_interface(cparser_context_t *context)
 {
 	context = context;
-	if (!cli_show_interfaces (-1))
+	if (!cli_show_interfaces_all ())
                 return CPARSER_OK;
         return CPARSER_NOT_OK;
 }
+
 
 int  cli_set_port_enable (void)
 {
@@ -88,4 +111,67 @@ int cli_set_port_disable (void)
 	}
 	send_interface_enable_or_disable (port, IF_DOWN);
 	return 0;
+}
+
+cparser_result_t cparser_cmd_interface_loopback_portnum(cparser_context_t *context,
+    int32_t *portnum_ptr)
+{
+	char prompt[CPARSER_MAX_PROMPT];
+	/* Enter the submode */
+        cli_set_port (*portnum_ptr);
+        sprintf (prompt, "%s%d%s","(config-if-lo", *portnum_ptr, ")");
+        set_prompt (prompt);
+	get_prompt (prompt);
+        set_curr_mode (INTERFACE_MODE);
+	return cparser_submode_enter(context->parser, NULL, prompt);
+}
+cparser_result_t cparser_cmd_iflo_enable(cparser_context_t *context)
+{
+
+}
+cparser_result_t cparser_cmd_iflo_disable(cparser_context_t *context)
+{
+
+}
+cparser_result_t cparser_cmd_iflo_ip_address_addr_mask(cparser_context_t *context,
+    uint32_t *addr_ptr,
+    uint32_t *mask_ptr)
+{
+
+}
+cparser_result_t cparser_cmd_iflo_ip_address_dhcp(cparser_context_t *context)
+{
+}
+cparser_result_t cparser_cmd_iflo_ip_dhcp_client_hostname(cparser_context_t *context,
+    char **hostname_ptr)
+{
+}
+cparser_result_t cparser_cmd_iflo_ip_dhcp_client_lease_days_hours_mins(cparser_context_t *context,
+    int32_t *days_ptr,
+    int32_t *hours_ptr,
+    int32_t *mins_ptr)
+{
+}
+cparser_result_t cparser_cmd_iflo_ip_dhcp_release(cparser_context_t *context)
+{
+}
+cparser_result_t cparser_cmd_iflo_ip_dhcp_renew(cparser_context_t *context)
+{
+}
+cparser_result_t cparser_cmd_iflo_no_ip_address_addr_mask(cparser_context_t *context,
+    uint32_t *addr_ptr,
+    uint32_t *mask_ptr)
+{
+}
+cparser_result_t cparser_cmd_iflo_no_ip_address_dhcp(cparser_context_t *context)
+{
+}
+
+cparser_result_t cparser_cmd_iflo_exit(cparser_context_t *context)
+{
+	if (!exit_mode ())
+	{
+		return cparser_submode_exit (context->parser);
+	}
+	return CPARSER_NOT_OK;
 }

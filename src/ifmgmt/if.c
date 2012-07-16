@@ -74,6 +74,7 @@
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
 void ethernetif_init (struct interface *netif);
+static int if_lo_init (void);
 
 
 #if LWIP_HAVE_LOOPIF
@@ -103,6 +104,8 @@ err_t if_loopif_init(void)
   netif->output = if_loop_output;
 
   if_set_addr (netif, &loop_ipaddr, &loop_netmask, &loop_gw);
+
+  if_lo_init ();
   return ERR_OK;
 }
 
@@ -750,4 +753,45 @@ int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask)
 	netmask.addr = ipmask;
 	if_set_addr (IF_INFO(ifindex), &ipaddr, &netmask, &ipaddr);
 	return 0;
+}
+
+static int if_lo_init (void)
+{
+	int mini_index = CONFIG_MAX_PHY_PORTS;
+
+	while (mini_index < (CONFIG_MAX_PHY_PORTS + MAX_LOOPBACK_PORTS)) {
+		struct interface  *netif = &port_cdb[mini_index];
+		ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
+		sprintf ((char *)netif->ifDescr, "%s%d","lo", mini_index - CONFIG_MAX_PHY_PORTS + 1);
+		netif->ifIndex = mini_index + 1;
+		netif->ifType = 2;
+		netif->ifMtu = 16436;
+		netif->ifSpeed = 10;
+		netif->ifAdminStatus = IF_UP;
+		netif->ifOperStatus = IF_UP;
+		netif->ifLastChange = 0;
+		netif->ifInOctets = 0;
+		netif->ifInUcastPkts = 0;
+		netif->ifInDiscards = 0;
+		netif->ifInErrors = 0;
+		netif->ifInUnknownProtos = 0;
+		netif->ifOutOctets = 0;
+		netif->ifOutUcastPkts = 0;
+		netif->ifOutDiscards = 0;
+		netif->ifOutErrors = 0;
+		netif->pstp_info = NULL;
+		netif->flags = NETIF_FLAG_BROADCAST |  NETIF_FLAG_LINK_UP;
+
+		IP4_ADDR(&loop_gw, 127,0,0,1);
+		IP4_ADDR(&loop_ipaddr, 127,0,0,mini_index - CONFIG_MAX_PHY_PORTS + 2);
+		IP4_ADDR(&loop_netmask, 255,0,0,0);
+
+		netif->output = if_loop_output;
+
+		if_set_addr (netif, &loop_ipaddr, &loop_netmask, &loop_gw);
+
+		mini_index++;
+
+		//if_connect_init (&port_cdb[idx]);
+	}
 }

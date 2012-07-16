@@ -329,7 +329,9 @@ struct sockaddr {
 #define ETHER_MAX_LEN   (ETH_FRAME_LEN + ETHER_CRC_LEN) /* max packet length */
 
 
-#define MAX_PORTS  12 
+#define MIN_LOOPBACK_PORTS  1
+#define MAX_LOOPBACK_PORTS  8 
+#define MAX_PORTS          (CONFIG_MAX_PHY_PORTS + MAX_LOOPBACK_PORTS)
 
 #define LLC_PDU_TYPE_I  0       /* first bit */
 #define LLC_PDU_TYPE_S  1       /* first two bits */
