@@ -118,7 +118,7 @@ void update_linux_if_map (int port, int ifindex)
 }
 void send_packet (void *buf, uint16_t port, int len)
 {
-#if 0
+#if 1
 	struct sockaddr_ll socket_address;
 
 	memset (&socket_address, 0, sizeof(socket_address));
