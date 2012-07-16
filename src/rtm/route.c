@@ -22,8 +22,12 @@ if_t *route_lookup (uint32_t ip)
 
 	rib_new = rib_match_ipv4 (addr);
 
-	if (!rib_new)
+	if (!rib_new) {
+		/*Temp Fix*/
+		if ((ip & 0x000007f) == 0x7f)
+			return get_loopback_if ();
 		return NULL;
+	}
 
 	outif = if_lookup_by_index (rib_new->nexthop->ifindex);
 
