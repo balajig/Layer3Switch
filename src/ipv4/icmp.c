@@ -385,7 +385,6 @@ static int ntransmitted  = 0;
 void pinger (ip_addr_t destip)
 {
     struct pbuf        *q;
-    struct ip_hdr      *iphdr;
     /* we can use the echo header here */
     struct icmp_echo_hdr *icmphdr;
 
@@ -426,5 +425,6 @@ int ping_IP (uint32_t ipaddr)
 	destip.addr = ipaddr;
 	
 	pinger (destip);
+	return 0;
 }
 #endif /* LWIP_ICMP */

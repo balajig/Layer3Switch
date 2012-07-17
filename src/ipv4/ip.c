@@ -22,7 +22,7 @@ int init_ip_interface_table (void)
 
 int ip_init (void)
 {
-	init_ip_interface_table ();
+	return init_ip_interface_table ();
 }
 #if 0
 /*

@@ -168,7 +168,7 @@ igmp_init (void)
  * Dump global IGMP groups list
  */
 void
-igmp_dump_group_list ()
+igmp_dump_group_list (void)
 {
     struct igmp_group  *group = igmp_group_list;
 

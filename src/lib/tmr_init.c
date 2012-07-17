@@ -347,7 +347,7 @@ service_req:
         return 1;
 }
 
-void update_times ()
+void update_times (void)
 {
 	timer_lock ();
 
