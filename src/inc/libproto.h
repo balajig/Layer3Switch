@@ -77,6 +77,8 @@ int msg_send (int qid, void *msg, int size);
 int create_sync_lock (sync_lock_t *slock);
 int sync_lock (sync_lock_t *slock);
 int sync_unlock (sync_lock_t *slock);
+int destroy_sync_lock (sync_lock_t *slock);
+
 
 uint32_t ip_2_uint32 (uint8_t *ipaddress, int byte_order);
 void uint32_2_ipstring (uint32_t ipAddress, uint8_t *addr);

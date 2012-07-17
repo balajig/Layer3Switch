@@ -1,6 +1,6 @@
-LOCK_TCPIP_CORE ()
+void LOCK_TCPIP_CORE (void)
 {
 }
-UNLOCK_TCPIP_CORE ()
+void UNLOCK_TCPIP_CORE (void)
 {
 }

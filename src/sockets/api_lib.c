@@ -323,7 +323,7 @@ netconn_accept (struct netconn * conn, struct netconn ** new_conn)
     }
 #if LWIP_SO_RCVTIMEO
     if (dequeue_packet
-        (conn->acceptmbox, (void **) &newconn, sizeof (struct netconn),
+        (conn->acceptmbox, (uint8_t **) &newconn, sizeof (struct netconn),
          conn->recv_timeout, 0, 0) == ERR_TIMEOUT)
     {
         NETCONN_SET_SAFE_ERR (conn, ERR_TIMEOUT);
@@ -400,7 +400,7 @@ netconn_recv_data (struct netconn *conn, void **new_buf)
 
 #if LWIP_SO_RCVTIMEO
     if (dequeue_packet
-        (conn->recvmbox, (void **) &buf, sizeof (&buf),
+        (conn->recvmbox, (uint8_t **) &buf, sizeof (&buf),
          1, 0, 0) == ERR_TIMEOUT)
     {
         NETCONN_SET_SAFE_ERR (conn, ERR_TIMEOUT);
@@ -753,7 +753,6 @@ netconn_join_leave_group (struct netconn * conn,
 {
 
 /*FIXME: SASI*/
-#if 0
     struct api_msg      msg;
     err_t               err;
 
@@ -764,13 +763,13 @@ netconn_join_leave_group (struct netconn * conn,
     msg.function = do_join_leave_group;
     msg.msg.conn = conn;
     msg.msg.msg.jl.multiaddr = multiaddr;
-    msg.msg.msg.jl.netif_addr = netif_addr;
+    msg.msg.msg.jl.if_addr = netif_addr;
     msg.msg.msg.jl.join_or_leave = join_or_leave;
+#if 0
     err = TCPIP_APIMSG (&msg);
-
+#endif
     NETCONN_SET_SAFE_ERR (conn, err);
     return err;
-#endif
 }
 #endif /* LWIP_IGMP */
 
