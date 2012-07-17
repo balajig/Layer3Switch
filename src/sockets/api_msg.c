@@ -68,6 +68,8 @@ static void do_close_internal(struct netconn *conn);
 #endif
 
 #if LWIP_RAW
+static u8_t recv_raw(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr);
+
 /**
  * Receive callback function for RAW netconns.
  * Doesn't 'eat' the packet, only references it and sends it to

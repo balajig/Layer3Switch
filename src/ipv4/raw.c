@@ -105,9 +105,8 @@ raw_input (struct pbuf *p, struct interface *inp)
                 if (pcb->recv != NULL)
                 {
                     /* the receive callback function did not eat the packet? */
-                    if (pcb->
-                        recv (pcb->recv_arg, pcb, p,
-                              ip_current_src_addr ()) != 0)
+                    if (pcb->recv (pcb->recv_arg, pcb, p,
+                                   ip_current_src_addr ()) != 0)
                     {
                         /* receive function ate the packet */
                         p = NULL;
