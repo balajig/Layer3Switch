@@ -178,7 +178,8 @@ void display_fdb_entry (void *data)
 {
 	unsigned char *mac = NULL;
 	fdb_t *p = (fdb_t *)data;
-	unsigned long rtime = ((p->expiry - get_ticks()) < 0) ?0: (p->expiry - get_ticks());
+	unsigned long rtime = ((p->expiry - get_secs()) < 0) ?0: (p->expiry - get_secs()) * 
+			      tm_get_ticks_per_second ();
 
 	mac = p->mac_addr.addr;
 
