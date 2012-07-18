@@ -13,8 +13,6 @@ if_t port_cdb[MAX_PORTS];
 
 int port_init (void)
 {
-	int idx = 0;
-
 	read_interfaces ();
 
 	return 0;
