@@ -53,9 +53,6 @@ void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), in
 int timer_pending (void *p);
 unsigned int timer_get_remaining_time (void *p);
 unsigned int get_secs (void);
-unsigned int get_ticks (void);
-unsigned int get_mins (void);
-unsigned int get_hrs (void);
 
 /*HASH*/
 struct hash_table * create_hash_table (const char *, int ,int (*cmp)(const uint8_t *, const uint8_t *),
@@ -121,5 +118,10 @@ char*  hex2bin(char *dst, const char *str, int count);
 void dump_stack (void);
 const char * inet_ntop(int af, const void *src, char *dst, size_t size);
 size_t strlcpy(char *dst, const char *src, size_t siz);
+
+int mcore_init (void);
+int get_cpu (void);
+long get_max_cpus (void);
+int cpu_bind (int cpu);
 
 #endif

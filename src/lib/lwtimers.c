@@ -46,34 +46,38 @@ void             show_uptime    (void);
 void    *        tick_service   (void *unused) ;
 void    *        tick_clock     (void *unused);
 int              init_timer_mgr (void);
-static inline void timer_expiry_action (TIMER_T * ptmr);
+static inline void timer_expiry_action (TIMER_T * ptmr, int );
+static unsigned int get_ticks (void);
 /****************************************************************/
 
 /************* Private Variable Declaration *********************/
-static   int          indx = 0;
-static   int          timers_count = 0;
-static   sync_lock_t  core_timer;
-static   LIST_HEAD    (timers_list);
+struct timer_mgr {
+	struct list_head timers_list;
+	volatile unsigned long ticks;
+	sync_lock_t  core_timer;
+}*tmr_mgr;
+static int          timers_count;
+static int          indx;
 /****************************************************************/
 
-volatile unsigned long ticks = 0;
 
-static void timer_lock (void)
+static void timer_lock (int cpu)
 {
-	sync_lock (&core_timer);
+	sync_lock (&(tmr_mgr + cpu)->core_timer);
 }
 
-static void timer_unlock (void)
+static void timer_unlock (int cpu)
 {
-	sync_unlock (&core_timer);
+	sync_unlock (&(tmr_mgr + cpu)->core_timer);
 }
 
-static void timer_lock_create (void)
+static void timer_lock_create (int cpu)
 {
-	create_sync_lock (&core_timer);
-	timer_unlock ();
+	create_sync_lock (&(tmr_mgr + cpu)->core_timer);
+	timer_unlock (cpu);
 }
 
+#if 0
 static void debug_timers (void)
 {
 	int i  = 0;
@@ -90,25 +94,27 @@ static void debug_timers (void)
 	}
 	printf ("\n\n");
 }
+#endif
 
-static void timer_add_sort (TIMER_T *new)
+static void timer_add_sort (TIMER_T *new, int cpu)
 {
 	TIMER_T *cur = NULL;
+	struct list_head *head = &(tmr_mgr + cpu)->timers_list;
 
 	timers_count ++;
-	if (!list_empty(&timers_list)) {
-		list_for_each_entry (cur, &timers_list, next) {
+	if (!list_empty(head)) {
+		list_for_each_entry (cur, head, next) {
 			if (new->exp <= cur->exp) {
-				if (cur->next.prev == &timers_list) {
-					list_add (&new->next, &timers_list);
+				if (cur->next.prev == head) {
+					list_add (&new->next, head);
 				} else {
-					__list_add (&new->next, &cur->next.prev, &cur->next);
+					__list_add (&new->next, cur->next.prev, &cur->next);
 				}
 				break;
 			}
 			else if (new->exp > cur->exp) {
 				TIMER_T *nxt = (TIMER_T *)cur->next.next;
-				if (list_is_last(&cur->next, &timers_list)) {
+				if (list_is_last(&cur->next, head)) {
 					list_add_tail (&new->next, &nxt->next);  
 					break;
 				}
@@ -119,20 +125,19 @@ static void timer_add_sort (TIMER_T *new)
 			}
 		}
 	} else  
-		list_add (&new->next, &timers_list);
+		list_add (&new->next, head);
 }
 
-static void timer_add (TIMER_T *p)
+static void timer_add (TIMER_T *p, int cpu)
 {
-	debug_timers ();
-	timer_add_sort (p);
-	debug_timers ();
+	timer_add_sort (p, cpu);
 }
 
 void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int flags)
 {
 	TIMER_T  *new = NULL;
 	int idx = 0;
+	int cpu = get_cpu ();
 
 
 	if ( !(idx = alloc_timer_id ())  || 
@@ -144,7 +149,7 @@ void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int
 	new->idx = idx;
 	new->data = data;
 	new->time_out_handler = handler;
-	new->exp = ticks + tick;
+	new->exp = (tmr_mgr + cpu)->ticks + tick;
 	new->time = tick;
 
 	if (flags)
@@ -152,13 +157,13 @@ void * start_timer (unsigned int tick, void *data, void (*handler) (void *), int
 	else
 		new->flags = TIMER_ONCE;
 
-	timer_lock ();
+	timer_lock (cpu);
 
-	timer_add (new);
+	timer_add (new, cpu);
 
 	new->is_running = 1;
 
-	timer_unlock ();
+	timer_unlock (cpu);
 
 	return (void *)new;
 }
@@ -187,27 +192,29 @@ int setup_timer (void **p, void (*handler) (void *), void *data)
 int mod_timer (void *timer, unsigned int tick)
 {
 	TIMER_T  *p = (TIMER_T *)timer;
+	int cpu = 0;
 
 	if (!p)
 		return -1;
 
 	if (p->is_running)
 		return -1;
+	
+	cpu = get_cpu ();
 
-	p->exp = ticks + tick;
+	p->exp = (tmr_mgr + cpu)->ticks  + tick;
 	p->time =  tick;
 
-	timer_lock ();
+	timer_lock (cpu);
 
-	timer_add (p);
+	timer_add (p, cpu);
 
 	p->is_running = 1;
 
-	timer_unlock ();
+	timer_unlock (cpu);
 
 	return 0;
 }
-
 
 static int alloc_timer_id (void)
 {
@@ -217,30 +224,21 @@ static int alloc_timer_id (void)
 int stop_timer (void *timer)
 {
 	TIMER_T  *p = (TIMER_T *)timer;
+	int cpu = get_cpu ();
 
-	timer_lock ();
+	timer_lock (cpu);
 
 	if (p && p->is_running) {
 		p->is_running = 0;
 		list_del (&p->next);
 	}
-	timer_unlock ();
+	timer_unlock (cpu);
 	return 0;
 }
 
 int del_timer (void *timer)
 {
-	TIMER_T  *p = (TIMER_T *)timer;
-
-	timer_lock ();
-
-	if (p->is_running) {
-		p->is_running = 0;
-		list_del (&p->next);
-	}
-
-	timer_unlock ();
-
+	stop_timer (timer);
 	return 0;
 }
 
@@ -254,31 +252,32 @@ void free_timer (TIMER_T *p)
 	tm_free (p, sizeof(*p));
 }
 
-void update_times ()
+void update_times (int cpu)
 {
-	timer_lock ();
+	timer_lock (cpu);
 
-	ticks++;
+	(tmr_mgr + cpu)->ticks++;
 
-	service_timers ();
+     	tm_process_tick_and_update_timers (cpu);
 
-	timer_unlock ();
+	timer_unlock (cpu);
 }
 
 unsigned int get_secs (void)
 {
-	return ticks / 100;
-}
-unsigned int get_ticks (void)
-{
-	return ticks;
+	return get_ticks () / 100;
 }
 
-unsigned int get_mins (void)
+static unsigned int get_ticks (void)
+{
+	return (tmr_mgr + get_cpu ())->ticks ;
+}
+
+static unsigned int get_mins (void)
 {
 	return get_secs() / 60;
 }
-unsigned int get_hrs (void)
+static unsigned int get_hrs (void)
 {
 	return get_mins () / (24);
 }
@@ -308,6 +307,13 @@ void * tick_clock (void *unused)
 {
 	register clock_t    start, end;
 	register int        tick = 0;
+	int                 cpu = (int) unused;
+	
+	cpu_bind (cpu);
+
+	timer_lock_create (cpu);
+
+	INIT_LIST_HEAD (&(tmr_mgr + cpu)->timers_list);
 
 	for (;;) {
 
@@ -321,7 +327,7 @@ void * tick_clock (void *unused)
 			tick = 1;
 
 		while (tick--) {
-			update_times (); 
+			update_times (cpu); 
 		}
 	}
 	return NULL;
@@ -330,37 +336,38 @@ void * tick_clock (void *unused)
 
 int init_timer_mgr (void)
 {
-	tmtaskid_t btmhlftask_id = 0;
 	tmtaskid_t task_id = 0;
+	long      max_cpus = get_max_cpus ();
+	int       i = 0;
 
-	if (task_create ("TMRTHF", 99, TSK_SCHED_RR, 32000,
-			  tick_clock, NULL, NULL, &task_id) == TSK_FAILURE) {
+	tmr_mgr = tm_malloc (sizeof (struct timer_mgr) * max_cpus);
 
-		return FAILURE;
+	while (i < max_cpus) {
+		if (task_create ("TMR", 99, TSK_SCHED_RR, 32000,
+				tick_clock, NULL, (void *)i, &task_id) == TSK_FAILURE) {
+			return FAILURE;
+		}
+		i++;
 	}
-
-	timer_lock_create ();
 
 	return SUCCESS;
 }
 
 
-void service_timers (void)
-{
-     tm_process_tick_and_update_timers ();
-}
 
 int timer_restart  (TIMER_T *p)
 {
-	timer_lock ();
+	int cpu = get_cpu ();
 
-	p->exp = p->time + ticks;
+	timer_lock (cpu);
+
+	p->exp = p->time + (tmr_mgr + cpu)->ticks ;
 	
-	timer_add (p);
+	timer_add (p, cpu);
 
 	p->is_running = 1;
 
-	timer_unlock ();
+	timer_unlock (cpu);
 
 	return 0;
 }
@@ -380,30 +387,31 @@ void handle_expired_timer (TIMER_T *ptmr)
 	}
 }
 
-void timer_expiry_action (TIMER_T * ptmr)
+static void timer_expiry_action (TIMER_T * ptmr, int cpu)
 {
 	ptmr->is_running = 0;
-	timer_unlock ();
+	timer_unlock (cpu);
 	handle_expired_timer (ptmr);
-	timer_lock ();
+	timer_lock (cpu);
 }
 
 
-int tm_process_tick_and_update_timers (void)
+int tm_process_tick_and_update_timers (int cpu)
 {
 	int i = 0;
 	TIMER_T *p, *n;
+	struct list_head *head = &(tmr_mgr + cpu)->timers_list;
 
-	list_for_each_entry_safe(p, n, &timers_list, next) {
-		int diff = p->exp - ticks;
+	list_for_each_entry_safe(p, n, head, next) {
+		int diff = p->exp - (tmr_mgr + cpu)->ticks;
 		if (diff <= 0) {
 #ifdef TIMER_DBG
-			printf ("Delete timer : %d %d %d\n", ticks, p->exp, diff);
+			printf ("Delete timer : %d %d %d\n", (tmr_mgr + cpu)->ticks, p->exp, diff);
 #endif
 			timers_count--;
 			list_del (&p->next);
 			INIT_LIST_HEAD (&p->next);
-			timer_expiry_action (p);
+			timer_expiry_action (p, cpu);
 			continue;
 		} 
 	}
@@ -435,6 +443,5 @@ unsigned int timer_get_remaining_time (void *timer)
                 printf ("\nTIMERS : Oopss negative remainiting time %s\n",__FUNCTION__);
                 t = 0;
         }
-
         return t;
 }
