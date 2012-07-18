@@ -7,7 +7,7 @@ mainmenu "Open Switch Solution"
 
 choice
 	prompt "Platform"
-	default PLATFORM_SIM_LINUX
+	default PLATFORM_LINUX
 	help
 	  There are 3 Platforms currently we support:
 	  - Linux simulation: Simulates Open Switch On Linux.
@@ -74,6 +74,7 @@ endmenu
 menu 'TCP/IP Layer'
 choice
 	prompt "TCP/IP "
+	default OS_TCP_IP
 	help
 	  There are 2 types
 	  - OPEN Switch TCPIP : It is a clone/copy of LWIP
