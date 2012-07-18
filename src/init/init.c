@@ -25,6 +25,8 @@ int rtm_init (void);
 
 void layer3switch_init (void)
 {
+	mcore_init ();
+
         lib_init ();
 
 	mem_init ();
