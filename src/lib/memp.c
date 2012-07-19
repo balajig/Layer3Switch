@@ -38,39 +38,40 @@
  *
  */
 
-#include "opt.h"
+#include "lwip/opt.h"
 
-#include "memp.h"
-#include "pbuf.h"
-#include "udp.h"
-#include "raw.h"
-#include "tcp_impl.h"
-#include "igmp.h"
-#include "api.h"
-#include "api_msg.h"
-#include "tcpip.h"
-#include "sys.h"
-#include "timers.h"
-#include "stats.h"
+#include "lwip/memp.h"
+#include "lwip/pbuf.h"
+#include "lwip/udp.h"
+#include "lwip/raw.h"
+#include "lwip/tcp_impl.h"
+#include "lwip/igmp.h"
+#include "lwip/api.h"
+#include "lwip/api_msg.h"
+#include "lwip/tcpip.h"
+#include "lwip/sys.h"
+#include "lwip/timers.h"
+#include "lwip/stats.h"
 #include "netif/etharp.h"
-#include "ip_frag.h"
-#include "snmp_structs.h"
-#include "snmp_msg.h"
-#include "dns.h"
+#include "lwip/ip_frag.h"
+#include "lwip/snmp_structs.h"
+#include "lwip/snmp_msg.h"
+#include "lwip/dns.h"
 #include "netif/ppp_oe.h"
+#include "lwip/nd6.h"
+#include "lwip/ip6_frag.h"
+#include "lwip/mld6.h"
 
 #include <string.h>
 
-struct stats_       lwip_stats;
-#if !MEMP_MEM_MALLOC            /* don't build if not configured for use in lwipopts.h */
+#if !MEMP_MEM_MALLOC /* don't build if not configured for use in lwipopts.h */
 
-struct memp
-{
-    struct memp        *next;
+struct memp {
+  struct memp *next;
 #if MEMP_OVERFLOW_CHECK
-    const char         *file;
-    int                 line;
-#endif                            /* MEMP_OVERFLOW_CHECK */
+  const char *file;
+  int line;
+#endif /* MEMP_OVERFLOW_CHECK */
 };
 
 #if MEMP_OVERFLOW_CHECK
@@ -84,20 +85,20 @@ struct memp
  * lwipopts.h to change the amount reserved for checking. */
 #ifndef MEMP_SANITY_REGION_BEFORE
 #define MEMP_SANITY_REGION_BEFORE  16
-#endif /* MEMP_SANITY_REGION_BEFORE */
+#endif /* MEMP_SANITY_REGION_BEFORE*/
 #if MEMP_SANITY_REGION_BEFORE > 0
 #define MEMP_SANITY_REGION_BEFORE_ALIGNED    LWIP_MEM_ALIGN_SIZE(MEMP_SANITY_REGION_BEFORE)
 #else
 #define MEMP_SANITY_REGION_BEFORE_ALIGNED    0
-#endif /* MEMP_SANITY_REGION_BEFORE */
+#endif /* MEMP_SANITY_REGION_BEFORE*/
 #ifndef MEMP_SANITY_REGION_AFTER
 #define MEMP_SANITY_REGION_AFTER   16
-#endif /* MEMP_SANITY_REGION_AFTER */
+#endif /* MEMP_SANITY_REGION_AFTER*/
 #if MEMP_SANITY_REGION_AFTER > 0
 #define MEMP_SANITY_REGION_AFTER_ALIGNED     LWIP_MEM_ALIGN_SIZE(MEMP_SANITY_REGION_AFTER)
 #else
 #define MEMP_SANITY_REGION_AFTER_ALIGNED     0
-#endif /* MEMP_SANITY_REGION_AFTER */
+#endif /* MEMP_SANITY_REGION_AFTER*/
 
 /* MEMP_SIZE: save space for struct memp and for sanity check */
 #define MEMP_SIZE          (LWIP_MEM_ALIGN_SIZE(sizeof(struct memp)) + MEMP_SANITY_REGION_BEFORE_ALIGNED)
@@ -128,24 +129,24 @@ static struct memp *memp_tab[MEMP_MAX];
 #if !MEM_USE_POOLS && !MEMP_MEM_MALLOC
 static
 #endif
-const u16_t         memp_sizes[MEMP_MAX] = {
+const u16_t memp_sizes[MEMP_MAX] = {
 #define LWIP_MEMPOOL(name,num,size,desc)  LWIP_MEM_ALIGN_SIZE(size),
-#include "memp_std.h"
+#include "lwip/memp_std.h"
 };
 
-#if !MEMP_MEM_MALLOC            /* don't build if not configured for use in lwipopts.h */
+#if !MEMP_MEM_MALLOC /* don't build if not configured for use in lwipopts.h */
 
 /** This array holds the number of elements in each pool. */
-static const u16_t  memp_num[MEMP_MAX] = {
+static const u16_t memp_num[MEMP_MAX] = {
 #define LWIP_MEMPOOL(name,num,size,desc)  (num),
-#include "memp_std.h"
+#include "lwip/memp_std.h"
 };
 
 /** This array holds a textual description of each pool. */
 #ifdef LWIP_DEBUG
-static const char  *memp_desc[MEMP_MAX] = {
+static const char *memp_desc[MEMP_MAX] = {
 #define LWIP_MEMPOOL(name,num,size,desc)  (desc),
-#include "memp_std.h"
+#include "lwip/memp_std.h"
 };
 #endif /* LWIP_DEBUG */
 
@@ -157,22 +158,22 @@ static const char  *memp_desc[MEMP_MAX] = {
  *   extern u8_t __attribute__((section(".onchip_mem"))) memp_memory_UDP_PCB_base[];
  */
 #define LWIP_MEMPOOL(name,num,size,desc) u8_t memp_memory_ ## name ## _base \
-  [((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size)))];
-#include "memp_std.h"
+  [((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size)))];   
+#include "lwip/memp_std.h"
 
 /** This array holds the base of each memory pool. */
-static u8_t        *const memp_bases[] = {
-#define LWIP_MEMPOOL(name,num,size,desc) memp_memory_ ## name ## _base,
-#include "memp_std.h"
+static u8_t *const memp_bases[] = { 
+#define LWIP_MEMPOOL(name,num,size,desc) memp_memory_ ## name ## _base,   
+#include "lwip/memp_std.h"
 };
 
 #else /* MEMP_SEPARATE_POOLS */
 
 /** This is the actual memory used by the pools (all pools in one big block). */
-static u8_t         memp_memory[MEM_ALIGNMENT - 1
+static u8_t memp_memory[MEM_ALIGNMENT - 1 
 #define LWIP_MEMPOOL(name,num,size,desc) + ( (num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size) ) )
-#include "memp_std.h"
-    ];
+#include "lwip/memp_std.h"
+];
 
 #endif /* MEMP_SEPARATE_POOLS */
 
@@ -181,34 +182,30 @@ static u8_t         memp_memory[MEM_ALIGNMENT - 1
  * Check that memp-lists don't form a circle
  */
 static int
-memp_sanity (void)
+memp_sanity(void)
 {
-    s16_t               i, c;
-    struct memp        *m, *n;
+  s16_t i, c;
+  struct memp *m, *n;
 
-    for (i = 0; i < MEMP_MAX; i++)
-    {
-        for (m = memp_tab[i]; m != NULL; m = m->next)
-        {
-            c = 1;
-            for (n = memp_tab[i]; n != NULL; n = n->next)
-            {
-                if (n == m && --c < 0)
-                {
-                    return 0;
-                }
-            }
+  for (i = 0; i < MEMP_MAX; i++) {
+    for (m = memp_tab[i]; m != NULL; m = m->next) {
+      c = 1;
+      for (n = memp_tab[i]; n != NULL; n = n->next) {
+        if (n == m && --c < 0) {
+          return 0;
         }
+      }
     }
-    return 1;
+  }
+  return 1;
 }
-#endif /* MEMP_SANITY_CHECK */
+#endif /* MEMP_SANITY_CHECK*/
 #if MEMP_OVERFLOW_CHECK
 #if defined(LWIP_DEBUG) && MEMP_STATS
-static const char  *memp_overflow_names[] = {
+static const char * memp_overflow_names[] = {
 #define LWIP_MEMPOOL(name,num,size,desc) "/"desc,
-#include "memp_std.h"
-};
+#include "lwip/memp_std.h"
+  };
 #endif
 
 /**
@@ -219,31 +216,28 @@ static const char  *memp_overflow_names[] = {
  * @param memp_type the pool p comes from
  */
 static void
-memp_overflow_check_element_overflow (struct memp *p, u16_t memp_type)
+memp_overflow_check_element_overflow(struct memp *p, u16_t memp_type)
 {
-    u16_t               k;
-    u8_t               *m;
+  u16_t k;
+  u8_t *m;
 #if MEMP_SANITY_REGION_AFTER_ALIGNED > 0
-    m = (u8_t *) p + MEMP_SIZE + memp_sizes[memp_type];
-    for (k = 0; k < MEMP_SANITY_REGION_AFTER_ALIGNED; k++)
-    {
-        if (m[k] != 0xcd)
-        {
-            char                errstr[128] = "detected memp overflow in pool ";
-            char                digit[] = "0";
-            if (memp_type >= 10)
-            {
-                digit[0] = '0' + (memp_type / 10);
-                strcat (errstr, digit);
-            }
-            digit[0] = '0' + (memp_type % 10);
-            strcat (errstr, digit);
+  m = (u8_t*)p + MEMP_SIZE + memp_sizes[memp_type];
+  for (k = 0; k < MEMP_SANITY_REGION_AFTER_ALIGNED; k++) {
+    if (m[k] != 0xcd) {
+      char errstr[128] = "detected memp overflow in pool ";
+      char digit[] = "0";
+      if(memp_type >= 10) {
+        digit[0] = '0' + (memp_type/10);
+        strcat(errstr, digit);
+      }
+      digit[0] = '0' + (memp_type%10);
+      strcat(errstr, digit);
 #if defined(LWIP_DEBUG) && MEMP_STATS
-            strcat (errstr, memp_overflow_names[memp_type]);
+      strcat(errstr, memp_overflow_names[memp_type]);
 #endif
-            LWIP_ASSERT (errstr, 0);
-        }
+      LWIP_ASSERT(errstr, 0);
     }
+  }
 #endif
 }
 
@@ -255,32 +249,28 @@ memp_overflow_check_element_overflow (struct memp *p, u16_t memp_type)
  * @param memp_type the pool p comes from
  */
 static void
-memp_overflow_check_element_underflow (struct memp *p, u16_t memp_type)
+memp_overflow_check_element_underflow(struct memp *p, u16_t memp_type)
 {
-    u16_t               k;
-    u8_t               *m;
+  u16_t k;
+  u8_t *m;
 #if MEMP_SANITY_REGION_BEFORE_ALIGNED > 0
-    m = (u8_t *) p + MEMP_SIZE - MEMP_SANITY_REGION_BEFORE_ALIGNED;
-    for (k = 0; k < MEMP_SANITY_REGION_BEFORE_ALIGNED; k++)
-    {
-        if (m[k] != 0xcd)
-        {
-            char                errstr[128] =
-                "detected memp underflow in pool ";
-            char                digit[] = "0";
-            if (memp_type >= 10)
-            {
-                digit[0] = '0' + (memp_type / 10);
-                strcat (errstr, digit);
-            }
-            digit[0] = '0' + (memp_type % 10);
-            strcat (errstr, digit);
+  m = (u8_t*)p + MEMP_SIZE - MEMP_SANITY_REGION_BEFORE_ALIGNED;
+  for (k = 0; k < MEMP_SANITY_REGION_BEFORE_ALIGNED; k++) {
+    if (m[k] != 0xcd) {
+      char errstr[128] = "detected memp underflow in pool ";
+      char digit[] = "0";
+      if(memp_type >= 10) {
+        digit[0] = '0' + (memp_type/10);
+        strcat(errstr, digit);
+      }
+      digit[0] = '0' + (memp_type%10);
+      strcat(errstr, digit);
 #if defined(LWIP_DEBUG) && MEMP_STATS
-            strcat (errstr, memp_overflow_names[memp_type]);
+      strcat(errstr, memp_overflow_names[memp_type]);
 #endif
-            LWIP_ASSERT (errstr, 0);
-        }
+      LWIP_ASSERT(errstr, 0);
     }
+  }
 #endif
 }
 
@@ -290,63 +280,66 @@ memp_overflow_check_element_underflow (struct memp *p, u16_t memp_type)
  * @see memp_overflow_check_element for a description of the check
  */
 static void
-memp_overflow_check_all (void)
+memp_overflow_check_all(void)
 {
-    u16_t               i, j;
-    struct memp        *p;
+  u16_t i, j;
+  struct memp *p;
 
-    p = (struct memp *) LWIP_MEM_ALIGN (memp_memory);
-    for (i = 0; i < MEMP_MAX; ++i)
-    {
-        p = p;
-        for (j = 0; j < memp_num[i]; ++j)
-        {
-            memp_overflow_check_element_overflow (p, i);
-            p = (struct memp *) ((u8_t *) p + MEMP_SIZE + memp_sizes[i] +
-                                 MEMP_SANITY_REGION_AFTER_ALIGNED);
-        }
+#if !MEMP_SEPARATE_POOLS
+  p = (struct memp *)LWIP_MEM_ALIGN(memp_memory);
+#endif /* !MEMP_SEPARATE_POOLS */
+  for (i = 0; i < MEMP_MAX; ++i) {
+#if MEMP_SEPARATE_POOLS
+    p = (struct memp *)(memp_bases[i]);
+#endif /* MEMP_SEPARATE_POOLS */
+    for (j = 0; j < memp_num[i]; ++j) {
+      memp_overflow_check_element_overflow(p, i);
+      p = (struct memp*)((u8_t*)p + MEMP_SIZE + memp_sizes[i] + MEMP_SANITY_REGION_AFTER_ALIGNED);
     }
-    p = (struct memp *) LWIP_MEM_ALIGN (memp_memory);
-    for (i = 0; i < MEMP_MAX; ++i)
-    {
-        p = p;
-        for (j = 0; j < memp_num[i]; ++j)
-        {
-            memp_overflow_check_element_underflow (p, i);
-            p = (struct memp *) ((u8_t *) p + MEMP_SIZE + memp_sizes[i] +
-                                 MEMP_SANITY_REGION_AFTER_ALIGNED);
-        }
+  }
+#if !MEMP_SEPARATE_POOLS
+  p = (struct memp *)LWIP_MEM_ALIGN(memp_memory);
+#endif /* !MEMP_SEPARATE_POOLS */
+  for (i = 0; i < MEMP_MAX; ++i) {
+#if MEMP_SEPARATE_POOLS
+    p = (struct memp *)(memp_bases[i]);
+#endif /* MEMP_SEPARATE_POOLS */
+    for (j = 0; j < memp_num[i]; ++j) {
+      memp_overflow_check_element_underflow(p, i);
+      p = (struct memp*)((u8_t*)p + MEMP_SIZE + memp_sizes[i] + MEMP_SANITY_REGION_AFTER_ALIGNED);
     }
+  }
 }
 
 /**
  * Initialize the restricted areas of all memp elements in every pool.
  */
 static void
-memp_overflow_init (void)
+memp_overflow_init(void)
 {
-    u16_t               i, j;
-    struct memp        *p;
-    u8_t               *m;
+  u16_t i, j;
+  struct memp *p;
+  u8_t *m;
 
-    p = (struct memp *) LWIP_MEM_ALIGN (memp_memory);
-    for (i = 0; i < MEMP_MAX; ++i)
-    {
-        p = p;
-        for (j = 0; j < memp_num[i]; ++j)
-        {
+#if !MEMP_SEPARATE_POOLS
+  p = (struct memp *)LWIP_MEM_ALIGN(memp_memory);
+#endif /* !MEMP_SEPARATE_POOLS */
+  for (i = 0; i < MEMP_MAX; ++i) {
+#if MEMP_SEPARATE_POOLS
+    p = (struct memp *)(memp_bases[i]);
+#endif /* MEMP_SEPARATE_POOLS */
+    for (j = 0; j < memp_num[i]; ++j) {
 #if MEMP_SANITY_REGION_BEFORE_ALIGNED > 0
-            m = (u8_t *) p + MEMP_SIZE - MEMP_SANITY_REGION_BEFORE_ALIGNED;
-            memset (m, 0xcd, MEMP_SANITY_REGION_BEFORE_ALIGNED);
+      m = (u8_t*)p + MEMP_SIZE - MEMP_SANITY_REGION_BEFORE_ALIGNED;
+      memset(m, 0xcd, MEMP_SANITY_REGION_BEFORE_ALIGNED);
 #endif
 #if MEMP_SANITY_REGION_AFTER_ALIGNED > 0
-            m = (u8_t *) p + MEMP_SIZE + memp_sizes[i];
-            memset (m, 0xcd, MEMP_SANITY_REGION_AFTER_ALIGNED);
+      m = (u8_t*)p + MEMP_SIZE + memp_sizes[i];
+      memset(m, 0xcd, MEMP_SANITY_REGION_AFTER_ALIGNED);
 #endif
-            p = (struct memp *) ((u8_t *) p + MEMP_SIZE + memp_sizes[i] +
-                                 MEMP_SANITY_REGION_AFTER_ALIGNED);
-        }
+      p = (struct memp*)((u8_t*)p + MEMP_SIZE + memp_sizes[i] + MEMP_SANITY_REGION_AFTER_ALIGNED);
     }
+  }
 }
 #endif /* MEMP_OVERFLOW_CHECK */
 
@@ -356,47 +349,42 @@ memp_overflow_init (void)
  * Carves out memp_memory into linked lists for each pool-type.
  */
 void
-memp_init (void)
+memp_init(void)
 {
-    struct memp        *memp;
-    u16_t               i, j;
+  struct memp *memp;
+  u16_t i, j;
 
-    for (i = 0; i < MEMP_MAX; ++i)
-    {
-        MEMP_STATS_AVAIL (used, i, 0);
-        MEMP_STATS_AVAIL (max, i, 0);
-        MEMP_STATS_AVAIL (err, i, 0);
-        MEMP_STATS_AVAIL (avail, i, memp_num[i]);
-    }
+  for (i = 0; i < MEMP_MAX; ++i) {
+    MEMP_STATS_AVAIL(used, i, 0);
+    MEMP_STATS_AVAIL(max, i, 0);
+    MEMP_STATS_AVAIL(err, i, 0);
+    MEMP_STATS_AVAIL(avail, i, memp_num[i]);
+  }
 
 #if !MEMP_SEPARATE_POOLS
-    memp = (struct memp *) LWIP_MEM_ALIGN (memp_memory);
+  memp = (struct memp *)LWIP_MEM_ALIGN(memp_memory);
 #endif /* !MEMP_SEPARATE_POOLS */
-    /* for every pool: */
-    for (i = 0; i < MEMP_MAX; ++i)
-    {
-        memp_tab[i] = NULL;
+  /* for every pool: */
+  for (i = 0; i < MEMP_MAX; ++i) {
+    memp_tab[i] = NULL;
 #if MEMP_SEPARATE_POOLS
-        memp = (struct memp *) memp_bases[i];
+    memp = (struct memp*)memp_bases[i];
 #endif /* MEMP_SEPARATE_POOLS */
-        /* create a linked list of memp elements */
-        for (j = 0; j < memp_num[i]; ++j)
-        {
-            memp->next = memp_tab[i];
-            memp_tab[i] = memp;
-            memp =
-                (struct memp *) (void *) ((u8_t *) memp + MEMP_SIZE +
-                                          memp_sizes[i]
+    /* create a linked list of memp elements */
+    for (j = 0; j < memp_num[i]; ++j) {
+      memp->next = memp_tab[i];
+      memp_tab[i] = memp;
+      memp = (struct memp *)(void *)((u8_t *)memp + MEMP_SIZE + memp_sizes[i]
 #if MEMP_OVERFLOW_CHECK
-                                          + MEMP_SANITY_REGION_AFTER_ALIGNED
+        + MEMP_SANITY_REGION_AFTER_ALIGNED
 #endif
-                );
-        }
+      );
     }
+  }
 #if MEMP_OVERFLOW_CHECK
-    memp_overflow_init ();
-    /* check everything a first time to see if it worked */
-    memp_overflow_check_all ();
+  memp_overflow_init();
+  /* check everything a first time to see if it worked */
+  memp_overflow_check_all();
 #endif /* MEMP_OVERFLOW_CHECK */
 }
 
@@ -411,50 +399,44 @@ memp_init (void)
  *
  * @return a pointer to the allocated memory or a NULL pointer on error
  */
-void               *
+void *
 #if !MEMP_OVERFLOW_CHECK
-memp_malloc (memp_t type)
+memp_malloc(memp_t type)
 #else
-memp_malloc_fn (memp_t type, const char *file, const int line)
+memp_malloc_fn(memp_t type, const char* file, const int line)
 #endif
 {
-    struct memp        *memp;
-    SYS_ARCH_DECL_PROTECT (old_level);
+  struct memp *memp;
+  SYS_ARCH_DECL_PROTECT(old_level);
+ 
+  LWIP_ERROR("memp_malloc: type < MEMP_MAX", (type < MEMP_MAX), return NULL;);
 
-    LWIP_ERROR ("memp_malloc: type < MEMP_MAX", (type < MEMP_MAX), return NULL;
-        );
-
-    SYS_ARCH_PROTECT (old_level);
+  SYS_ARCH_PROTECT(old_level);
 #if MEMP_OVERFLOW_CHECK >= 2
-    memp_overflow_check_all ();
+  memp_overflow_check_all();
 #endif /* MEMP_OVERFLOW_CHECK >= 2 */
 
-    memp = memp_tab[type];
-
-    if (memp != NULL)
-    {
-        memp_tab[type] = memp->next;
+  memp = memp_tab[type];
+  
+  if (memp != NULL) {
+    memp_tab[type] = memp->next;
 #if MEMP_OVERFLOW_CHECK
-        memp->next = NULL;
-        memp->file = file;
-        memp->line = line;
+    memp->next = NULL;
+    memp->file = file;
+    memp->line = line;
 #endif /* MEMP_OVERFLOW_CHECK */
-        MEMP_STATS_INC_USED (used, type);
-        LWIP_ASSERT ("memp_malloc: memp properly aligned",
-                     ((mem_ptr_t) memp % MEM_ALIGNMENT) == 0);
-        memp = (struct memp *) (void *) ((u8_t *) memp + MEMP_SIZE);
-    }
-    else
-    {
-        LWIP_DEBUGF (MEMP_DEBUG | LWIP_DBG_LEVEL_SERIOUS,
-                     ("memp_malloc: out of memory in pool %s\n",
-                      memp_desc[type]));
-        MEMP_STATS_INC (err, type);
-    }
+    MEMP_STATS_INC_USED(used, type);
+    LWIP_ASSERT("memp_malloc: memp properly aligned",
+                ((mem_ptr_t)memp % MEM_ALIGNMENT) == 0);
+    memp = (struct memp*)(void *)((u8_t*)memp + MEMP_SIZE);
+  } else {
+    LWIP_DEBUGF(MEMP_DEBUG | LWIP_DBG_LEVEL_SERIOUS, ("memp_malloc: out of memory in pool %s\n", memp_desc[type]));
+    MEMP_STATS_INC(err, type);
+  }
 
-    SYS_ARCH_UNPROTECT (old_level);
+  SYS_ARCH_UNPROTECT(old_level);
 
-    return memp;
+  return memp;
 }
 
 /**
@@ -464,40 +446,39 @@ memp_malloc_fn (memp_t type, const char *file, const int line)
  * @param mem the memp element to free
  */
 void
-memp_free (memp_t type, void *mem)
+memp_free(memp_t type, void *mem)
 {
-    struct memp        *memp;
-    SYS_ARCH_DECL_PROTECT (old_level);
+  struct memp *memp;
+  SYS_ARCH_DECL_PROTECT(old_level);
 
-    if (mem == NULL)
-    {
-        return;
-    }
-    LWIP_ASSERT ("memp_free: mem properly aligned",
-                 ((mem_ptr_t) mem % MEM_ALIGNMENT) == 0);
+  if (mem == NULL) {
+    return;
+  }
+  LWIP_ASSERT("memp_free: mem properly aligned",
+                ((mem_ptr_t)mem % MEM_ALIGNMENT) == 0);
 
-    memp = (struct memp *) (void *) ((u8_t *) mem - MEMP_SIZE);
+  memp = (struct memp *)(void *)((u8_t*)mem - MEMP_SIZE);
 
-    SYS_ARCH_PROTECT (old_level);
+  SYS_ARCH_PROTECT(old_level);
 #if MEMP_OVERFLOW_CHECK
 #if MEMP_OVERFLOW_CHECK >= 2
-    memp_overflow_check_all ();
+  memp_overflow_check_all();
 #else
-    memp_overflow_check_element_overflow (memp, type);
-    memp_overflow_check_element_underflow (memp, type);
+  memp_overflow_check_element_overflow(memp, type);
+  memp_overflow_check_element_underflow(memp, type);
 #endif /* MEMP_OVERFLOW_CHECK >= 2 */
 #endif /* MEMP_OVERFLOW_CHECK */
 
-    MEMP_STATS_DEC (used, type);
-
-    memp->next = memp_tab[type];
-    memp_tab[type] = memp;
+  MEMP_STATS_DEC(used, type); 
+  
+  memp->next = memp_tab[type]; 
+  memp_tab[type] = memp;
 
 #if MEMP_SANITY_CHECK
-    LWIP_ASSERT ("memp sanity", memp_sanity ());
+  LWIP_ASSERT("memp sanity", memp_sanity());
 #endif /* MEMP_SANITY_CHECK */
 
-    SYS_ARCH_UNPROTECT (old_level);
+  SYS_ARCH_UNPROTECT(old_level);
 }
 
 #endif /* MEMP_MEM_MALLOC */

@@ -36,13 +36,12 @@
  *
  */
 
-#include "opt.h"
-#include "common_types.h"
+#include "lwip/opt.h"
 
 #if LWIP_NETCONN /* don't build if not configured for use in lwipopts.h */
 
-#include "netbuf.h"
-#include "memp.h"
+#include "lwip/netbuf.h"
+#include "lwip/memp.h"
 
 #include <string.h>
 
@@ -62,7 +61,7 @@ netbuf *netbuf_new(void)
   if (buf != NULL) {
     buf->p = NULL;
     buf->ptr = NULL;
-    ip_addr_set_any(&buf->addr);
+    ipX_addr_set_any(LWIP_IPV6, &buf->addr);
     buf->port = 0;
 #if LWIP_NETBUF_RECVINFO || LWIP_CHECKSUM_ON_COPY
 #if LWIP_CHECKSUM_ON_COPY
@@ -70,7 +69,7 @@ netbuf *netbuf_new(void)
 #endif /* LWIP_CHECKSUM_ON_COPY */
     buf->toport_chksum = 0;
 #if LWIP_NETBUF_RECVINFO
-    ip_addr_set_any(&buf->toaddr);
+    ipX_addr_set_any(LWIP_IPV6, &buf->toaddr);
 #endif /* LWIP_NETBUF_RECVINFO */
 #endif /* LWIP_NETBUF_RECVINFO || LWIP_CHECKSUM_ON_COPY */
     return buf;

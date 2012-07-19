@@ -70,7 +70,7 @@
 #ifndef PPP_OE_H
 #define PPP_OE_H
 
-#include "opt.h"
+#include "lwip/opt.h"
 
 #if PPPOE_SUPPORT > 0
 
@@ -85,7 +85,7 @@ struct pppoehdr {
   PACK_STRUCT_FIELD(u8_t code);
   PACK_STRUCT_FIELD(u16_t session);
   PACK_STRUCT_FIELD(u16_t plen);
-} ;
+} PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
@@ -98,7 +98,7 @@ PACK_STRUCT_BEGIN
 struct pppoetag {
   PACK_STRUCT_FIELD(u16_t tag);
   PACK_STRUCT_FIELD(u16_t len);
-} ;
+} PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
@@ -146,7 +146,7 @@ PACK_STRUCT_END
 
 struct pppoe_softc {
   struct pppoe_softc *next;
-  struct interface *sc_ethif;      /* ethernet interface we are using */
+  struct netif *sc_ethif;      /* ethernet interface we are using */
   int sc_pd;                   /* ppp unit number */
   void (*sc_linkStatusCB)(int pd, int up);
 
@@ -171,14 +171,14 @@ struct pppoe_softc {
 
 #define pppoe_init() /* compatibility define, no initialization needed */
 
-err_t pppoe_create(struct interface *ethif, int pd, void (*linkStatusCB)(int pd, int up), struct pppoe_softc **scptr);
-err_t pppoe_destroy(struct interface *ifp);
+err_t pppoe_create(struct netif *ethif, int pd, void (*linkStatusCB)(int pd, int up), struct pppoe_softc **scptr);
+err_t pppoe_destroy(struct netif *ifp);
 
 int pppoe_connect(struct pppoe_softc *sc);
 void pppoe_disconnect(struct pppoe_softc *sc);
 
-void pppoe_disc_input(struct interface *netif, struct pbuf *p);
-void pppoe_data_input(struct interface *netif, struct pbuf *p);
+void pppoe_disc_input(struct netif *netif, struct pbuf *p);
+void pppoe_data_input(struct netif *netif, struct pbuf *p);
 
 err_t pppoe_xmit(struct pppoe_softc *sc, struct pbuf *pb);
 
