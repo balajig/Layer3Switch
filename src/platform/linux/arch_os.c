@@ -156,7 +156,8 @@ retval_t start_task (tmtask_t * ptskinfo, tmtaskid_t * ptskid)
     p->tsk_pid = *ptskid;
     p->entry   = ptskinfo->start_routine;
     p->arg     =  ptskinfo->tskarg;
-    strcpy (p->task_name, ptskinfo->task_name);
+    strncpy (p->task_name, ptskinfo->task_name, strlen (ptskinfo->task_name));
+    p->task_name[strlen (ptskinfo->task_name)] = '\0';
 
     if (pthread_create (ptskid, &ptskinfo->tsk_attr, task_start,
                         (void *)p))

@@ -155,7 +155,7 @@ void * telnetd (void *arg)
 	int i;
 	struct sockaddr_in addr;
 	socklen_t addrlen;
-	int  hthread = -1;
+	tmtaskid_t  hthread = -1;
 
 	listen_port = 23;
 
@@ -196,7 +196,7 @@ void * telnetd (void *arg)
 			return 1;
 		}
 
-		if (task_create ("telent", 30, 3, 48 * 1024, telnet_task, NULL, (void *)rs, 
+		if (task_create ("telnet", 30, 3, 48 * 1024, telnet_task, NULL, (void *)rs, 
 					&hthread) == 0) {
 			printf ("Task creation failed : %s\n", "telnet");
 		}
@@ -207,8 +207,8 @@ void * telnetd (void *arg)
 
 int telnet_init (void)
 {
-	int  hthread = -1;
-	if (task_create ("telnetd", 30, 3, 20 * 1024, telnetd, NULL, NULL, 
+	tmtaskid_t  hthread = -1;
+	if (task_create ("telnetd", 30, 3, 16 * 1024, telnetd, NULL, NULL, 
 				&hthread) == 0) {
 		printf ("Task creation failed : %s\n", "telnetd");
 		return -1;

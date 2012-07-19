@@ -53,7 +53,7 @@ void fill_tsk_info (const char *tskname, int tsk_prio, int sched_alg, int stk_si
                void *(*start_routine) (void *), void (*exit_routine) (),
                void *arg, tmtask_t * ptskinfo)
 {
-    memcpy (ptskinfo->task_name, tskname, MAX_TASK_NAME);
+    strcpy (ptskinfo->task_name, tskname);
     ptskinfo->prio = tsk_prio;
     ptskinfo->schedalgo = sched_alg;
     ptskinfo->stksze = stk_size;

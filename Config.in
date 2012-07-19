@@ -74,7 +74,7 @@ endmenu
 menu 'TCP/IP Layer'
 choice
 	prompt "TCP/IP "
-	default OS_TCP_IP
+	default OPENSWITCH_TCP_IP
 	help
 	  There are 2 types
 	  - OPEN Switch TCPIP : It is a clone/copy of LWIP
