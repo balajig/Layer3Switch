@@ -68,15 +68,9 @@ static void   *          alloc_mem         (size_t size);
 static void              free_mem          (void *mem, size_t size);
 int                      debug_memory_pool (int pool_id, int set);
 
-static struct list_head hd_mcb;
+static LIST_HEAD(hd_mcb);
 static unsigned long    pool_index;
 static int debug_all = 0;
-
-int mem_init (void)
-{
-	INIT_LIST_HEAD (&hd_mcb);
-	return 0;
-}
 
 int mem_pool_create (const char *name, size_t size, int n_blks, int flags)
 {

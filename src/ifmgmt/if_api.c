@@ -2,11 +2,11 @@
  *  This file based on quagga if.c 99% remains same as original
  */
 #include "common_types.h"
+#include "lwip/sockets.h"
 #include "ifmgmt.h"
 #include "prefix.h"
 #include "linklist.h"
 #include "rtm.h"
-#include "sockets.h"
 
 enum GET_IF {   
 	GET_IF_BY_NAME = 1, 

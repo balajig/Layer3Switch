@@ -22,7 +22,7 @@
 
 #ifndef _ZEBRA_SOCKUNION_H
 #define _ZEBRA_SOCKUNION_H
-#include "sockets.h"
+#include "lwip/sockets.h"
 #include "socks.h"
 
 #if 0

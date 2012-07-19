@@ -37,6 +37,7 @@
  */
 #ifndef __LWIP_OPT_H__
 #define __LWIP_OPT_H__
+#include "common_types.h"
 
 /*
  * Include user defined options first. Anything not defined in these files
@@ -758,7 +759,7 @@
  * a 'struct mib_array_node mib_private' which contains your MIB.
  */
 #ifndef SNMP_PRIVATE_MIB
-#define SNMP_PRIVATE_MIB                1
+#define SNMP_PRIVATE_MIB                0
 #endif
 
 /**

@@ -385,4 +385,5 @@ void netif_create_ip6_linklocal_address(struct interface * netif, u8_t from_mac_
 }
 #endif
 
+#include "ifmgmt.h"
 #endif /* __LWIP_NETIF_H__ */

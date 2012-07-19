@@ -94,6 +94,7 @@ pop_node(struct nse* node)
 void
 snmp_ifindextonetif(s32_t ifindex, struct interface **netif)
 {
+#if 0
   struct interface *nif = netif_list;
   s32_t i, ifidx;
 
@@ -105,6 +106,7 @@ snmp_ifindextonetif(s32_t ifindex, struct interface **netif)
     i++;
   }
   *netif = nif;
+#endif
 }
 
 /**
@@ -115,6 +117,7 @@ snmp_ifindextonetif(s32_t ifindex, struct interface **netif)
 void
 snmp_netiftoifindex(struct interface *netif, s32_t *ifidx)
 {
+#if 0
   struct interface *nif = netif_list;
   u16_t i;
 
@@ -125,6 +128,7 @@ snmp_netiftoifindex(struct interface *netif, s32_t *ifidx)
     i++;
   }
   *ifidx = i+1;
+#endif
 }
 
 /**

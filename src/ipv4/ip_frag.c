@@ -678,7 +678,7 @@ ip_frag(struct pbuf *p, struct interface *netif, ip_addr_t *dest)
   struct ip_hdr *iphdr;
   u16_t nfb;
   u16_t left, cop;
-  u16_t mtu = netif->mtu;
+  u16_t mtu = netif->ifMtu;
   u16_t ofo, omf;
   u16_t last;
   u16_t poff = IP_HLEN;

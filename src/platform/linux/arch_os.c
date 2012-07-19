@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>   /* For SYS_xxx definitions */
 #include "common_types.h"
-#include "err.h"
+#include "lwip/err.h"
 
 tmtaskid_t tsk_selfid ();
 tmtask_t           * get_tsk_info_frm_id (tmtaskid_t tskid);

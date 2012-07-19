@@ -9,7 +9,7 @@
  */
 
 #include "common_types.h"
-#include "sockets.h"
+#include "lwip/sockets.h"
 #include "socks.h"
 
 #define MAX_SOCK_LAYER 12
@@ -145,7 +145,7 @@ int sock_client_register (struct sock_client *client)
 	if (!client)
 		return -1;
 
-	if ((client->familiy < AF_INET) || (client->familiy > AF_MAX)) {
+	if ((client->familiy < AF_INET) || (client->familiy > 40)) {
 		return -1;
 	}
 

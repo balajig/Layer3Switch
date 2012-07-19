@@ -32,11 +32,10 @@
 // 
 
 #include "common_types.h"
-#include "ip_hdr.h"
-#include "netdb.h"
-#include "icmp.h"
-#include "signal.h"
-#include "sockets.h"
+#include "lwip/ip.h"
+#include "lwip/netdb.h"
+#include "lwip/icmp.h"
+#include "lwip/sockets.h"
 #include "socks.h"
 
 #define NTP_EPOCH            (86400U * (365U * 70U + 17U))

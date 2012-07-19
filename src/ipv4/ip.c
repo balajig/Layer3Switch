@@ -9,7 +9,6 @@
  */
 
 #include "common_types.h"
-#include "ip.h"
 
 int ip_init (void);
 int init_ip_interface_table (void);

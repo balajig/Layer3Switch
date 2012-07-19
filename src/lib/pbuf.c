@@ -69,7 +69,7 @@
 #include "lwip/memp.h"
 #include "lwip/pbuf.h"
 #include "lwip/sys.h"
-#include "arch/perf.h"
+//#include "arch/perf.h"
 #if LWIP_TCP && TCP_QUEUE_OOSEQ
 #include "lwip/tcp_impl.h"
 #endif
@@ -630,7 +630,7 @@ pbuf_free(struct pbuf *p)
   }
   LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_free(%p)\n", (void *)p));
 
-  PERF_START;
+  //PERF_START;
 
   LWIP_ASSERT("pbuf_free: sane type",
     p->type == PBUF_RAM || p->type == PBUF_ROM ||

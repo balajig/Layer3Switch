@@ -10,6 +10,9 @@
 #include "common.h"
 #include "dhcpd.h"
 
+#define PF_PACKET       17      /* Packet family.  */
+#define AF_PACKET PF_PACKET
+
 void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)
 {
 	memset(packet, 0, sizeof(*packet));

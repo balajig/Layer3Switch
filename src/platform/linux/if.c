@@ -11,7 +11,7 @@
 
 #include "common_types.h"
 #include "ifmgmt.h"
-#include "sockets.h"
+#include "lwip/sockets.h"
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <mqueue.h>
@@ -25,6 +25,8 @@
 
 #define _PATH_PROCNET_DEV "/proc/net/dev"
 
+#define PF_PACKET       17      /* Packet family.  */
+#define AF_PACKET PF_PACKET
 
 extern char switch_mac[];
 int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask);

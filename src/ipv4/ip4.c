@@ -54,7 +54,7 @@
 #include "lwip/dhcp.h"
 #include "lwip/autoip.h"
 #include "lwip/stats.h"
-#include "arch/perf.h"
+//#include "arch/perf.h"
 
 #include <string.h>
 
@@ -120,6 +120,7 @@ ip_route(ip_addr_t *dest)
   }
 #endif
 
+#if 0
   /* iterate through netifs */
   for (netif = netif_list; netif != NULL; netif = netif->next) {
     /* network mask matches? */
@@ -139,6 +140,23 @@ ip_route(ip_addr_t *dest)
   }
   /* no matching netif found, use default netif */
   return netif_default;
+#else
+	struct interface *p = route_lookup (dest->addr);
+
+	if (!p)
+	{
+		LWIP_DEBUGF (IP_DEBUG | LWIP_DBG_LEVEL_SERIOUS,
+				("ip_route: No route to %" U16_F ".%" U16_F ".%" U16_F ".%"
+				 U16_F "\n", ip4_addr1_16 (dest), ip4_addr2_16 (dest),
+				 ip4_addr3_16 (dest), ip4_addr4_16 (dest)));
+		IP_STATS_INC (ip.rterr);
+		snmp_inc_ipoutnoroutes ();
+		return NULL;
+	}
+	return p;
+
+
+#endif
 }
 
 #if IP_FORWARD
@@ -191,7 +209,7 @@ ip_forward(struct pbuf *p, struct ip_hdr *iphdr, struct interface *inp)
 {
   struct interface *netif;
 
-  PERF_START;
+  //PERF_START;
 
   if (!ip_canforward(p)) {
     goto return_noroute;
@@ -254,7 +272,7 @@ ip_forward(struct pbuf *p, struct ip_hdr *iphdr, struct interface *inp)
 
   PERF_STOP("ip_forward");
   /* don't fragment if interface has mtu set to 0 [loopif] */
-  if (netif->mtu && (p->tot_len > netif->mtu)) {
+  if (netif->ifMtu && (p->tot_len > netif->ifMtu)) {
     if ((IPH_OFFSET(iphdr) & PP_NTOHS(IP_DF)) == 0) {
 #if IP_FRAG
       ip_frag(p, netif, ip_current_dest_addr());
@@ -386,7 +404,8 @@ ip_input(struct pbuf *p, struct interface *inp)
     /* start trying with inp. if that's not acceptable, start walking the
        list of configured netifs.
        'first' is used as a boolean to mark whether we started walking the list */
-    int first = 1;
+    int 	            tports = get_max_ports ();
+    int                 port = 1;
     netif = inp;
     do {
       LWIP_DEBUGF(IP_DEBUG, ("ip_input: iphdr->dest 0x%"X32_F" netif->ip_addr 0x%"X32_F" (0x%"X32_F", 0x%"X32_F", 0x%"X32_F")\n",
@@ -417,17 +436,14 @@ ip_input(struct pbuf *p, struct interface *inp)
           break;
         }
 #endif /* LWIP_AUTOIP */
+	netif = IF_INFO(port);
+	if (netif == inp)
+	{
+		netif = IF_INFO (port + 1);
+	}
+	port++;
       }
-      if (first) {
-        first = 0;
-        netif = netif_list;
-      } else {
-        netif = netif->next;
-      }
-      if (netif == inp) {
-        netif = netif->next;
-      }
-    } while(netif != NULL);
+    } while (port <= tports);
   }
 
 #if IP_ACCEPT_LINK_LAYER_ADDRESSING
@@ -782,7 +798,7 @@ err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
 #endif /* ENABLE_LOOPBACK */
 #if IP_FRAG
   /* don't fragment if interface has mtu set to 0 [loopif] */
-  if (netif->mtu && (p->tot_len > netif->mtu)) {
+  if (netif->ifMtu && (p->tot_len > netif->ifMtu)) {
     return ip_frag(p, netif, dest);
   }
 #endif /* IP_FRAG */

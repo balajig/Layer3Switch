@@ -1,4 +1,5 @@
-#include "init.h"
+#include "lwip/opt.h"
+#include "lwip/init.h"
 
 int lib_init (void);
 int cli_init (const char *prmt);

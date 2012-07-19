@@ -9,6 +9,7 @@
  */
 
 #include "common_types.h"
+#include "lwip/sockets.h"
 
 /* Max bit/byte length of IPv4 address. */
 #define IPV4_MAX_BYTELEN    4

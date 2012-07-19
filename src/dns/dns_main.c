@@ -21,30 +21,18 @@ struct dns_server_tbl {
 
 
 struct dns_server_tbl  dns_servers[DNS_MAX_SERVERS];
-TIMER_ID    dns_timer;
 
 /**
  * The DNS resolver client timer - handle retries and timeouts and should
  * be called every DNS_TMR_INTERVAL milliseconds (every second by default).
  */
-static void dns_timer_handler (void *arg)
-{
-	dns_check_entries ();
-	mod_timer (dns_timer, milli_secs_to_ticks (DNS_TMR_INTERVAL));
-}
-
-int dns_init (void)
+void dns_db_init (void)
 {
 	memset (dns_servers, 0, sizeof(dns_servers));
 
 	/*Create UDP sock for DNS*/
 	dns_socket_init ();
 
-	setup_timer (&dns_timer, dns_timer_handler, NULL);
-
-	mod_timer (dns_timer, milli_secs_to_ticks (DNS_TMR_INTERVAL));
-
-	return 0;
 }
 
 

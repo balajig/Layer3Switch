@@ -64,11 +64,10 @@
  */
 
 #include "common_types.h"
-#include "ip_hdr.h"
-#include "netdb.h"
-#include "icmp.h"
-#include "signal.h"
-#include "sockets.h"
+#include "lwip/ip.h"
+#include "lwip/netdb.h"
+#include "lwip/icmp.h"
+#include "lwip/sockets.h"
 #include "socks.h"
 
 int ping_me (char *host);

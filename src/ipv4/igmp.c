@@ -514,15 +514,16 @@ igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
 {
   err_t              err = ERR_VAL; /* no matching interface */
   struct igmp_group *group;
-  struct interface      *netif;
+  struct interface      *netif = NULL;
+   int max_ports = get_max_phy_ports () , i = 0;
 
   /* make sure it is multicast address */
   LWIP_ERROR("igmp_joingroup: attempt to join non-multicast address", ip_addr_ismulticast(groupaddr), return ERR_VAL;);
   LWIP_ERROR("igmp_joingroup: attempt to join allsystems address", (!ip_addr_cmp(groupaddr, &allsystems)), return ERR_VAL;);
 
   /* loop through netif's */
-  netif = netif_list;
-  while (netif != NULL) {
+  while (i < max_ports) {
+     netif = &port_cdb[i];
     /* Should we join this interface ? */
     if ((netif->flags & NETIF_FLAG_IGMP) && ((ip_addr_isany(ifaddr) || ip_addr_cmp(&(netif->ip_addr), ifaddr)))) {
       /* find group or create a new one if not found */
@@ -566,7 +567,7 @@ igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
       }
     }
     /* proceed to next network interface */
-    netif = netif->next;
+    i++;
   }
 
   return err;
@@ -584,15 +585,16 @@ igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
 {
   err_t              err = ERR_VAL; /* no matching interface */
   struct igmp_group *group;
-  struct interface      *netif;
+  struct interface      *netif = NULL;
+  int max_ports = get_max_phy_ports () , i = 0;
 
   /* make sure it is multicast address */
   LWIP_ERROR("igmp_leavegroup: attempt to leave non-multicast address", ip_addr_ismulticast(groupaddr), return ERR_VAL;);
   LWIP_ERROR("igmp_leavegroup: attempt to leave allsystems address", (!ip_addr_cmp(groupaddr, &allsystems)), return ERR_VAL;);
 
   /* loop through netif's */
-  netif = netif_list;
-  while (netif != NULL) {
+  while (i < max_ports) {
+     netif = &port_cdb[i];
     /* Should we leave this interface ? */
     if ((netif->flags & NETIF_FLAG_IGMP) && ((ip_addr_isany(ifaddr) || ip_addr_cmp(&(netif->ip_addr), ifaddr)))) {
       /* find group */
@@ -639,7 +641,7 @@ igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
       }
     }
     /* proceed to next network interface */
-    netif = netif->next;
+    i++;
   }
 
   return err;

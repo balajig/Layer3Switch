@@ -2398,7 +2398,7 @@ ifentry_get_object_def(u8_t ident_len, s32_t *ident, struct obj_def *od)
           od->instance = MIB_OBJECT_TAB;
           od->access = MIB_OBJECT_READ_ONLY;
           od->asn_type = (SNMP_ASN1_UNIV | SNMP_ASN1_PRIMIT | SNMP_ASN1_OC_STR);
-          od->v_len = netif->hwaddr_len;
+          od->v_len = netif->ifPhysAddress_len;
         }
         break;
       case 7: /* ifAdminStatus */
@@ -2475,7 +2475,7 @@ ifentry_get_value(struct obj_def *od, u16_t len, void *value)
       }
       break;
     case 2: /* ifDescr */
-      ocstrncpy((u8_t*)value, (u8_t*)netif->name, len);
+      ocstrncpy((u8_t*)value, (u8_t*)netif->ifDescr, len);
       break;
     case 3: /* ifType */
       {
@@ -2486,7 +2486,7 @@ ifentry_get_value(struct obj_def *od, u16_t len, void *value)
     case 4: /* ifMtu */
       {
         s32_t *sint_ptr = (s32_t*)value;
-        *sint_ptr = netif->mtu;
+        *sint_ptr = netif->ifMtu;
       }
       break;
     case 5: /* ifSpeed */
@@ -2496,7 +2496,7 @@ ifentry_get_value(struct obj_def *od, u16_t len, void *value)
       }
       break;
     case 6: /* ifPhysAddress */
-      ocstrncpy((u8_t*)value, netif->hwaddr, len);
+      ocstrncpy((u8_t*)value, netif->ifPhysAddress, len);
       break;
     case 7: /* ifAdminStatus */
       {
@@ -2696,7 +2696,7 @@ atentry_get_object_def(u8_t ident_len, s32_t *ident, struct obj_def *od)
         od->instance = MIB_OBJECT_TAB;
         od->access = MIB_OBJECT_READ_WRITE;
         od->asn_type = (SNMP_ASN1_UNIV | SNMP_ASN1_PRIMIT | SNMP_ASN1_OC_STR);
-        od->v_len = 6; /** @todo try to use netif::hwaddr_len */
+        od->v_len = 6; /** @todo try to use netif::ifPhysAddress_len */
         break;
       case 3: /* atNetAddress */
         od->instance = MIB_OBJECT_TAB;
@@ -3072,15 +3072,19 @@ ip_addrentry_get_value(struct obj_def *od, u16_t len, void *value)
   u8_t id;
   u16_t ifidx;
   ip_addr_t ip;
-  struct interface *netif = netif_list;
+  struct interface *netif = NULL;
 
   LWIP_UNUSED_ARG(len);
   snmp_oidtoip(&od->id_inst_ptr[1], &ip);
   ifidx = 0;
-  while ((netif != NULL) && !ip_addr_cmp(&ip, &netif->ip_addr))
-  {
-    netif = netif->next;
-    ifidx++;
+
+  while (ifidx < get_max_ports ()) {
+	  netif =  &port_cdb[ifidx];
+	  if (!ip_addr_cmp (&ip, &(netif->ip_addr))) {
+		  netif = NULL;
+		  ifidx++;
+	  }else
+		  break;
   }
 
   if (netif != NULL)
@@ -3213,11 +3217,23 @@ ip_rteentry_get_value(struct obj_def *od, u16_t len, void *value)
   struct interface *netif;
   ip_addr_t dest;
   s32_t *ident;
-  u8_t id;
+  u8_t id, idx = 0;
 
   ident = od->id_inst_ptr;
   snmp_oidtoip(&ident[1], &dest);
 
+
+  while (idx < get_max_ports ()) {
+	  /* not using ip_route(), need exact match! */
+	  netif =  &port_cdb[idx];
+	  if (!ip_addr_netcmp (&dest, &(netif->ip_addr), &(netif->netmask))) {
+		  netif = NULL;
+		  idx++;
+	  }else
+		  break;
+  }
+
+#if 0
   if (ip_addr_isany(&dest))
   {
     /* ip_route() uses default netif for default route */
@@ -3233,6 +3249,7 @@ ip_rteentry_get_value(struct obj_def *od, u16_t len, void *value)
       netif = netif->next;
     }
   }
+#endif
   if (netif != NULL)
   {
     LWIP_ASSERT("invalid id", (ident[0] >= 0) && (ident[0] <= 0xff));
@@ -3387,7 +3404,7 @@ ip_ntomentry_get_object_def(u8_t ident_len, s32_t *ident, struct obj_def *od)
         od->instance = MIB_OBJECT_TAB;
         od->access = MIB_OBJECT_READ_WRITE;
         od->asn_type = (SNMP_ASN1_UNIV | SNMP_ASN1_PRIMIT | SNMP_ASN1_OC_STR);
-        od->v_len = 6; /** @todo try to use netif::hwaddr_len */
+        od->v_len = 6; /** @todo try to use netif::ifPhysAddress_len */
         break;
       case 3: /* ipNetToMediaNetAddress */
         od->instance = MIB_OBJECT_TAB;

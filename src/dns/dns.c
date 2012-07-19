@@ -72,6 +72,7 @@
  * Includes
  *----------------------------------------------------------------------------*/
 
+#include "common_types.h"
 #include "lwip/opt.h"
 
 #if LWIP_DNS /* don't build if not configured for use in lwipopts.h */
@@ -210,6 +211,7 @@ static void dns_init_local();
 /* forward declarations */
 static void dns_recv(void *s, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port);
 static void dns_check_entries(void);
+static void dns_timer_handler (void *arg);
 
 /*-----------------------------------------------------------------------------
  * Globales
@@ -223,6 +225,7 @@ static ip_addr_t              dns_servers[DNS_MAX_SERVERS];
 /** Contiguous buffer for processing responses */
 static u8_t                   dns_payload_buffer[LWIP_MEM_ALIGN_BUFFER(DNS_MSG_SIZE)];
 static u8_t*                  dns_payload;
+static TIMER_ID    dns_timer;
 
 /**
  * Initialize the resolver: set up the UDP pcb and configure the default server
@@ -258,6 +261,10 @@ dns_init()
       dns_setserver(0, &dnsserver);
     }
   }
+  setup_timer (&dns_timer, dns_timer_handler, NULL);
+
+  mod_timer (dns_timer, milli_secs_to_ticks (DNS_TMR_INTERVAL));
+
 #if DNS_LOCAL_HOSTLIST
   dns_init_local();
 #endif
@@ -966,5 +973,12 @@ dns_gethostbyname(const char *hostname, ip_addr_t *addr, dns_found_callback foun
   /* queue query with specified callback */
   return dns_enqueue(hostname, found, callback_arg);
 }
+
+static void dns_timer_handler (void *arg)
+{
+	dns_check_entries ();
+	mod_timer (dns_timer, milli_secs_to_ticks (DNS_TMR_INTERVAL));
+}
+
 
 #endif /* LWIP_DNS */

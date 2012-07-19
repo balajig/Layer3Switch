@@ -12,7 +12,7 @@
 #include <string.h>
 #include "common_types.h"
 #include "ifmgmt.h"
-#include "pbuf.h"
+#include "lwip/pbuf.h"
 
 #define IS_MAC_UCAST_MAC(addr)  (!(addr[0] & 0xFF))
 

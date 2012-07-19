@@ -12,11 +12,15 @@
 #include "common_types.h"
 #include "ifmgmt.h"
 #include "cli.h"
-#include "sockets.h"
+#include "lwip/sockets.h"
 #include <mqueue.h>
 #include <stdint.h>
 #include <getopt.h>
 #include <net/ethernet.h> /* the L2 protocols */
+
+
+#define PF_PACKET       17      /* Packet family.  */
+#define AF_PACKET PF_PACKET
 
 
 int parse_cmdline (int argc, char *argv[]);
