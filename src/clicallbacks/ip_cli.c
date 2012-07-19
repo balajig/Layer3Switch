@@ -11,7 +11,7 @@
 #include "common_types.h"
 #include "cli.h"
 #include "ifmgmt.h"
-#include "ip.h"
+#include "lwip/ip.h"
 #include "cparser.h"
 #include "cparser_tree.h"
 #include "rtm.h"

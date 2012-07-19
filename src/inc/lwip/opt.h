@@ -44,6 +44,8 @@
  */
 //#include "lwipopts.h"
 #include "lwip/debug.h"
+#define PACK_STRUCT_STRUCT __attribute__((packed))
+
 
 /*
    -----------------------------------------------
@@ -65,7 +67,7 @@
  * use lwIP facilities.
  */
 #ifndef NO_SYS
-#define NO_SYS                          0
+#define NO_SYS                          1
 #endif
 
 /**
@@ -223,7 +225,7 @@
  * this should be set high.
  */
 #ifndef MEMP_NUM_PBUF
-#define MEMP_NUM_PBUF                   16
+#define MEMP_NUM_PBUF                   64
 #endif
 
 /**
@@ -231,7 +233,7 @@
  * (requires the LWIP_RAW option)
  */
 #ifndef MEMP_NUM_RAW_PCB
-#define MEMP_NUM_RAW_PCB                4
+#define MEMP_NUM_RAW_PCB                8
 #endif
 
 /**
@@ -240,7 +242,7 @@
  * (requires the LWIP_UDP option)
  */
 #ifndef MEMP_NUM_UDP_PCB
-#define MEMP_NUM_UDP_PCB                4
+#define MEMP_NUM_UDP_PCB                8
 #endif
 
 /**
@@ -248,7 +250,7 @@
  * (requires the LWIP_TCP option)
  */
 #ifndef MEMP_NUM_TCP_PCB
-#define MEMP_NUM_TCP_PCB                5
+#define MEMP_NUM_TCP_PCB                8
 #endif
 
 /**
@@ -467,7 +469,7 @@
  * that returns 1 to accept a packet or 0 to drop a packet.
  */
 #ifndef ETHARP_SUPPORT_VLAN
-#define ETHARP_SUPPORT_VLAN             0
+#define ETHARP_SUPPORT_VLAN             1
 #endif
 
 /** LWIP_ETHERNET==1: enable ethernet support for PPPoE even though ARP
@@ -505,7 +507,7 @@
  * interface, define this to 0.
  */
 #ifndef IP_FORWARD
-#define IP_FORWARD                      0
+#define IP_FORWARD                      1
 #endif
 
 /**
@@ -586,7 +588,7 @@
  * on recv operations, you also have to set IP_SOF_BROADCAST_RECV=1.
  */
 #ifndef IP_SOF_BROADCAST
-#define IP_SOF_BROADCAST                0
+#define IP_SOF_BROADCAST                1
 #endif
 
 /**
@@ -594,7 +596,7 @@
  * filter on recv operations.
  */
 #ifndef IP_SOF_BROADCAST_RECV
-#define IP_SOF_BROADCAST_RECV           0
+#define IP_SOF_BROADCAST_RECV           1
 #endif
 
 /**
@@ -605,7 +607,7 @@
  * link-layer-broadcast/multicast packets as such using the corresponding pbuf flags!
  */
 #ifndef IP_FORWARD_ALLOW_TX_ON_RX_NETIF
-#define IP_FORWARD_ALLOW_TX_ON_RX_NETIF 0
+#define IP_FORWARD_ALLOW_TX_ON_RX_NETIF 1
 #endif
 
 /**
@@ -641,14 +643,14 @@
  * LWIP_BROADCAST_PING==1: respond to broadcast pings (default is unicast only)
  */
 #ifndef LWIP_BROADCAST_PING
-#define LWIP_BROADCAST_PING             0
+#define LWIP_BROADCAST_PING             1
 #endif
 
 /**
  * LWIP_MULTICAST_PING==1: respond to multicast pings (default is unicast only)
  */
 #ifndef LWIP_MULTICAST_PING
-#define LWIP_MULTICAST_PING             0
+#define LWIP_MULTICAST_PING             1
 #endif
 
 /*
@@ -679,7 +681,7 @@
  * LWIP_DHCP==1: Enable DHCP module.
  */
 #ifndef LWIP_DHCP
-#define LWIP_DHCP                       0
+#define LWIP_DHCP                       1
 #endif
 
 /**
@@ -698,7 +700,7 @@
  * LWIP_AUTOIP==1: Enable AUTOIP module.
  */
 #ifndef LWIP_AUTOIP
-#define LWIP_AUTOIP                     0
+#define LWIP_AUTOIP                     1
 #endif
 
 /**
@@ -706,7 +708,7 @@
  * the same interface at the same time.
  */
 #ifndef LWIP_DHCP_AUTOIP_COOP
-#define LWIP_DHCP_AUTOIP_COOP           0
+#define LWIP_DHCP_AUTOIP_COOP           1
 #endif
 
 /**
@@ -730,7 +732,7 @@
  * transport.
  */
 #ifndef LWIP_SNMP
-#define LWIP_SNMP                       0
+#define LWIP_SNMP                       1
 #endif
 
 /**
@@ -756,7 +758,7 @@
  * a 'struct mib_array_node mib_private' which contains your MIB.
  */
 #ifndef SNMP_PRIVATE_MIB
-#define SNMP_PRIVATE_MIB                0
+#define SNMP_PRIVATE_MIB                1
 #endif
 
 /**
@@ -802,7 +804,7 @@
  * LWIP_IGMP==1: Turn on IGMP module. 
  */
 #ifndef LWIP_IGMP
-#define LWIP_IGMP                       0
+#define LWIP_IGMP                       1
 #endif
 
 /*
@@ -815,7 +817,7 @@
  * transport.
  */
 #ifndef LWIP_DNS
-#define LWIP_DNS                        0
+#define LWIP_DNS                        1
 #endif
 
 /** DNS maximum number of entries to maintain locally. */
@@ -854,13 +856,13 @@
  *  that returns the IP address or INADDR_NONE if not found.
  */
 #ifndef DNS_LOCAL_HOSTLIST
-#define DNS_LOCAL_HOSTLIST              0
+#define DNS_LOCAL_HOSTLIST              1
 #endif /* DNS_LOCAL_HOSTLIST */
 
 /** If this is turned on, the local host-list can be dynamically changed
  *  at runtime. */
 #ifndef DNS_LOCAL_HOSTLIST_IS_DYNAMIC
-#define DNS_LOCAL_HOSTLIST_IS_DYNAMIC   0
+#define DNS_LOCAL_HOSTLIST_IS_DYNAMIC   1
 #endif /* DNS_LOCAL_HOSTLIST_IS_DYNAMIC */
 
 /*
@@ -1114,7 +1116,7 @@
  * field.
  */
 #ifndef LWIP_NETIF_HOSTNAME
-#define LWIP_NETIF_HOSTNAME             0
+#define LWIP_NETIF_HOSTNAME             1
 #endif
 
 /**
@@ -1214,7 +1216,7 @@
  * LWIP_HAVE_LOOPIF==1: Support loop interface (127.0.0.1) and loopif.c
  */
 #ifndef LWIP_HAVE_LOOPIF
-#define LWIP_HAVE_LOOPIF                0
+#define LWIP_HAVE_LOOPIF                1
 #endif
 
 /*

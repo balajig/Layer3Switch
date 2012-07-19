@@ -12,40 +12,40 @@ struct interface {
 	struct stp_port_entry *pstp_info;
 	/** This function is called by the network device driver
 	 *  to pass a packet up the TCP/IP stack. */
-	if_input_fn input;
+	netif_input_fn input;
 	/** This function is called by the IP module when it wants
 	 *  to send a packet on the interface. This function typically
 	 *  first resolves the hardware address, then sends the packet. */
-	if_output_fn output;
+	netif_output_fn output;
 	/** This function is called by the ARP module when it wants
 	 *  to send a packet on the interface. This function outputs
 	 *  the pbuf as-is on the link medium. */
-	if_linkoutput_fn linkoutput;
+	netif_linkoutput_fn linkoutput;
 #if LWIP_IPV6
-  /** This function is called by the IPv6 module when it wants
-   *  to send a packet on the interface. This function typically
-   *  first resolves the hardware address, then sends the packet. */
-  netif_output_ip6_fn output_ip6;
+	/** This function is called by the IPv6 module when it wants
+	 *  to send a packet on the interface. This function typically
+	 *  first resolves the hardware address, then sends the packet. */
+	netif_output_ip6_fn output_ip6;
 #endif /* LWIP_IPV6 */
 
 #if LWIP_NETIF_STATUS_CALLBACK
 	/** This function is called when the netif state is set to up or down
 	*/
-	if_status_callback_fn status_callback;
+	netif_status_callback_fn status_callback;
 #endif /* LWIP_NETIF_STATUS_CALLBACK */
 #if LWIP_NETIF_LINK_CALLBACK
 	/** This function is called when the netif link is set to up or down
 	*/
-	if_status_callback_fn link_callback;
+	netif_status_callback_fn link_callback;
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 	/** This field can be set by the device driver and could point
 	 *  to state information for the device. */
 #if LWIP_IPV6
-  /** Array of IPv6 addresses for this netif. */
-  ip6_addr_t ip6_addr[LWIP_IPV6_NUM_ADDRESSES];
-  /** The state of each IPv6 address (Tentative, Preferred, etc).
-   * @see ip6_addr.h */
-  u8_t ip6_addr_state[LWIP_IPV6_NUM_ADDRESSES];
+	/** Array of IPv6 addresses for this netif. */
+	ip6_addr_t ip6_addr[LWIP_IPV6_NUM_ADDRESSES];
+	/** The state of each IPv6 address (Tentative, Preferred, etc).
+	 * @see ip6_addr.h */
+	u8_t ip6_addr_state[LWIP_IPV6_NUM_ADDRESSES];
 #endif /* LWIP_IPV6 */
 
 	void *state;
@@ -57,33 +57,29 @@ struct interface {
 	/** the AutoIP client state information for this netif */
 	struct autoip *autoip;
 #endif
-#if LWIP_IPV6_AUTOCONFIG
-  /** is this netif enabled for IPv6 autoconfiguration */
-  u8_t ip6_autoconfig_enabled;
-#endif /* LWIP_IPV6_AUTOCONFIG */
-#if LWIP_IPV6_SEND_ROUTER_SOLICIT
-  /** Number of Router Solicitation messages that remain to be sent. */
-  u8_t rs_count;
-#endif /* LWIP_IPV6_SEND_ROUTER_SOLICIT */
 #if LWIP_IPV6_DHCP6
-  /** the DHCPv6 client state information for this netif */
-  struct dhcp6 *dhcp6;
+	/** the DHCPv6 client state information for this netif */
+	struct dhcp6 *dhcp6;
 #endif /* LWIP_IPV6_DHCP6 */
 #if LWIP_NETIF_HOSTNAME
 	char  hostname[MAX_PORT_NAME];
 #endif /* LWIP_NETIF_HOSTNAME */
+	/* Connected address list. */
+	struct list *connected;
+
+	void *info;
 #if LWIP_IGMP
 	/** This function could be called to add or delete a entry in the multicast
 	  filter table of the ethernet MAC.*/
-	if_igmp_mac_filter_fn igmp_mac_filter;
+	netif_igmp_mac_filter_fn igmp_mac_filter;
 #endif /* LWIP_IGMP */
 #if LWIP_NETIF_HWADDRHINT
 	u8_t *addr_hint;
 #endif /* LWIP_NETIF_HWADDRHINT */
 #if LWIP_IPV6 && LWIP_IPV6_MLD
-  /** This function could be called to add or delete an entry in the IPv6 multicast
-      filter table of the ethernet MAC. */
-  netif_mld_mac_filter_fn mld_mac_filter;
+	/** This function could be called to add or delete an entry in the IPv6 multicast
+	  filter table of the ethernet MAC. */
+	netif_mld_mac_filter_fn mld_mac_filter;
 #endif /* LWIP_IPV6 && LWIP_IPV6_MLD */
 #if ENABLE_LOOPBACK
 	/* List of packets to be queued for ourselves. */
@@ -93,41 +89,37 @@ struct interface {
 	u16_t loop_cnt_current;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
 #endif /* ENABLE_LOOPBACK */
-	  /* Connected address list. */
-  	struct list *connected;
+	unsigned long in_bytes;
+	unsigned long in_packets;
+	unsigned long in_mcast_pkts;
+	unsigned long in_errors;
+	unsigned long in_discards;
+	unsigned long in_unknown_protos;
 
-	void *info;
-        unsigned long in_bytes;
-        unsigned long in_packets;
-        unsigned long in_mcast_pkts;
-        unsigned long in_errors;
-        unsigned long in_discards;
-        unsigned long in_unknown_protos;
-
-        unsigned long out_bytes;
-        unsigned long out_packets;
-        unsigned long out_mcast_pkts; 
-        unsigned long out_errors;
-        unsigned long out_discards;
-        unsigned long out_collisions;
-        char      ifDescr[MAX_PORT_NAME];          
-        int32_t   ifIndex;
-        int32_t   ifType;
-        int32_t   ifMtu;   
-        int32_t   ifSpeed;
-        int32_t   ifAdminStatus;
-        int32_t   ifOperStatus;
-        uint32_t  ifLastChange; 
-        uint32_t  ifInOctets; 
-        uint32_t  ifInUcastPkts;
-        uint32_t  ifInDiscards;    
-        uint32_t  ifInErrors;     
-        uint32_t  ifInUnknownProtos;
-        uint32_t  ifOutOctets;
-        uint32_t  ifOutUcastPkts;
-        uint32_t  ifOutDiscards;   
-        uint32_t  ifOutErrors;    
- 	uint32_t   metric;
+	unsigned long out_bytes;
+	unsigned long out_packets;
+	unsigned long out_mcast_pkts; 
+	unsigned long out_errors;
+	unsigned long out_discards;
+	unsigned long out_collisions;
+	char      ifDescr[MAX_PORT_NAME];          
+	int32_t   ifIndex;
+	int32_t   ifType;
+	int32_t   ifMtu;   
+	int32_t   ifSpeed;
+	int32_t   ifAdminStatus;
+	int32_t   ifOperStatus;
+	uint32_t  ifLastChange; 
+	uint32_t  ifInOctets; 
+	uint32_t  ifInUcastPkts;
+	uint32_t  ifInDiscards;    
+	uint32_t  ifInErrors;     
+	uint32_t  ifInUnknownProtos;
+	uint32_t  ifOutOctets;
+	uint32_t  ifOutUcastPkts;
+	uint32_t  ifOutDiscards;   
+	uint32_t  ifOutErrors;    
+	uint32_t   metric;
 	/** (estimate) link speed */
 	u32_t link_speed;
 	/** timestamp at last change made (up/down) */
@@ -158,6 +150,14 @@ struct interface {
 	/** link type (from "snmp_ifType" enum from snmp.h) */
 	u8_t link_type;
 #endif /* LWIP_SNMP */
+#if LWIP_IPV6_AUTOCONFIG
+	/** is this netif enabled for IPv6 autoconfiguration */
+	u8_t ip6_autoconfig_enabled;
+#endif /* LWIP_IPV6_AUTOCONFIG */
+#if LWIP_IPV6_SEND_ROUTER_SOLICIT
+	/** Number of Router Solicitation messages that remain to be sent. */
+	u8_t rs_count;
+#endif /* LWIP_IPV6_SEND_ROUTER_SOLICIT */
 }__attribute__ ((__packed__));
 
 typedef struct interface if_t;

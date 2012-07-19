@@ -150,7 +150,6 @@ typedef err_t (*netif_igmp_mac_filter_fn)(struct interface *netif,
 typedef err_t (*netif_mld_mac_filter_fn)(struct interface *netif,
        ip6_addr_t *group, u8_t action);
 #endif /* LWIP_IPV6 && LWIP_IPV6_MLD */
-#endif
 #if 0
 /** Generic data structure used for all lwIP network interfaces.
  *  The following fields should be filled in by the initialization
@@ -323,31 +322,31 @@ void netif_remove(struct interface * netif);
    structure. */
 struct interface *netif_find(char *name);
 
-void netif_set_default(struct interface *netif);
+void if_set_default(struct interface *netif);
 
-void netif_set_ipaddr(struct interface *netif, ip_addr_t *ipaddr);
-void netif_set_netmask(struct interface *netif, ip_addr_t *netmask);
-void netif_set_gw(struct interface *netif, ip_addr_t *gw);
+void if_set_ipaddr(struct interface *netif, ip_addr_t *ipaddr);
+void if_set_netmask(struct interface *netif, ip_addr_t *netmask);
+void if_set_gw(struct interface *netif, ip_addr_t *gw);
 
-void netif_set_up(struct interface *netif);
-void netif_set_down(struct interface *netif);
+void if_set_up(struct interface *netif);
+void if_set_down(struct interface *netif);
 /** Ask if an interface is up */
 #define netif_is_up(netif) (((netif)->flags & NETIF_FLAG_UP) ? (u8_t)1 : (u8_t)0)
 
 #if LWIP_NETIF_STATUS_CALLBACK
-void netif_set_status_callback(struct interface *netif, netif_status_callback_fn status_callback);
+void if_set_status_callback(struct interface *netif, netif_status_callback_fn status_callback);
 #endif /* LWIP_NETIF_STATUS_CALLBACK */
 #if LWIP_NETIF_REMOVE_CALLBACK
-void netif_set_remove_callback(struct interface *netif, netif_status_callback_fn remove_callback);
+void if_set_remove_callback(struct interface *netif, netif_status_callback_fn remove_callback);
 #endif /* LWIP_NETIF_REMOVE_CALLBACK */
 
-void netif_set_link_up(struct interface *netif);
-void netif_set_link_down(struct interface *netif);
+void if_set_link_up(struct interface *netif);
+void if_set_link_down(struct interface *netif);
 /** Ask if a link is up */ 
 #define netif_is_link_up(netif) (((netif)->flags & NETIF_FLAG_LINK_UP) ? (u8_t)1 : (u8_t)0)
 
 #if LWIP_NETIF_LINK_CALLBACK
-void netif_set_link_callback(struct interface *netif, netif_status_callback_fn link_callback);
+void if_set_link_callback(struct interface *netif, netif_status_callback_fn link_callback);
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
 #if LWIP_NETIF_HOSTNAME
@@ -361,10 +360,10 @@ void netif_set_link_callback(struct interface *netif, netif_status_callback_fn l
 #endif /* LWIP_IGMP */
 
 #if ENABLE_LOOPBACK
-err_t netif_loop_output(struct interface *netif, struct pbuf *p, ip_addr_t *dest_ip);
-void netif_poll(struct interface *netif);
+err_t if_loop_output(struct interface *netif, struct pbuf *p, ip_addr_t *dest_ip);
+void if_poll(struct interface *netif);
 #if !LWIP_NETIF_LOOPBACK_MULTITHREADING
-void netif_poll_all(void);
+void if_poll_all(void);
 #endif /* !LWIP_NETIF_LOOPBACK_MULTITHREADING */
 #endif /* ENABLE_LOOPBACK */
 

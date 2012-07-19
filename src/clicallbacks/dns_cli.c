@@ -13,8 +13,8 @@
 #include "ifmgmt.h"
 #include "cparser.h"
 #include "cparser_tree.h"
-#include "opt.h"
-#include "dns.h"
+#include "lwip/opt.h"
+#include "lwip/dns.h"
 
 
 cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context UNUSED_PARAM)

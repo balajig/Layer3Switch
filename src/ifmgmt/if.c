@@ -36,6 +36,7 @@
  *
  */
 
+#include "common_types.h"
 #include "lwip/opt.h"
 
 #include "lwip/def.h"
@@ -66,6 +67,7 @@
 #if LWIP_IPV6_MLD
 #include "lwip/mld6.h"
 #endif /* LWIP_IPV6_MLD */
+#include "ifmgmt.h"
 
 #if LWIP_NETIF_STATUS_CALLBACK
 #define NETIF_STATUS_CALLBACK(n) do{ if (n->status_callback) { (n->status_callback)(n); }}while(0)
@@ -151,15 +153,13 @@ low_level_output (struct interface *netif, struct pbuf *p)
 
 
 
-void interface_init (struct interface *netif, void *state, if_input_fn input)
+void interface_init (struct interface *netif, void *state, netif_input_fn input)
 {
     static u8_t         netifnum = 0;
 
 #if LWIP_IPV6
   u32_t i;
 #endif
-
-  LWIP_ASSERT("No init function given", init != NULL);
 
   /* reset new interface configuration state */
   ip_addr_set_zero(&netif->ip_addr);

@@ -2,7 +2,7 @@
 #include "cli.h"
 #include "cparser.h"
 #include "cparser_tree.h"
-#include "ip_addr.h"
+#include "lwip/ip_addr.h"
 #include "netif/etharp.h"
 
 cparser_result_t cparser_cmd_show_arp(cparser_context_t *context UNUSED_PARAM)

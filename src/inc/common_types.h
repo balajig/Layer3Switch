@@ -234,18 +234,24 @@ typedef unsigned long  mem_ptr_t;
 
 typedef uint32_t in_addr_t;
 
-struct in_addr {
-  in_addr_t s_addr;
-};
-
-typedef struct ip_addr ip_addr_t;
-
 struct in6_addr {
 	uint8_t  s6_addr[16];  /* IPv6 address */
 };
 
 
 # define SIN6_LEN
+
+struct sockaddr_ll
+  {
+    unsigned short int sll_family;
+    unsigned short int sll_protocol;
+    int sll_ifindex;
+    unsigned short int sll_hatype;
+    unsigned char sll_pkttype;
+    unsigned char sll_halen;
+    unsigned char sll_addr[8];
+  };
+
 
 
 struct sockaddr_in6 
@@ -256,23 +262,6 @@ struct sockaddr_in6
 	uint32_t sin6_flowinfo; /* IPv6 flow information */ 
 	struct in6_addr sin6_addr; /* IPv6 address */ 
 }; 
-
-
-/* members are in network byte order */
-struct sockaddr_in {
-  u8_t sin_len;
-  u8_t sin_family;
-  u16_t sin_port;
-  struct in_addr sin_addr;
-  char sin_zero[8];
-};
-
-struct sockaddr {
-  u8_t sa_len;
-  u8_t sa_family;
-  char sa_data[14];
-};
-
 
 
 #define MAX_PORT_NAME 16 

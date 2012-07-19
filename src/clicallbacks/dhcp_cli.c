@@ -3,7 +3,7 @@
 #include "ifmgmt.h"
 #include "cparser.h"
 #include "cparser_tree.h"
-#include "dhcp.h"
+#include "lwip/dhcp.h"
 
 
 #ifndef CONFIG_OPENSWITCH_TCP_IP

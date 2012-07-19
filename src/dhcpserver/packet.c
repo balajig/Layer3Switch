@@ -8,7 +8,6 @@
  */
 #include "common_types.h"
 #include "common.h"
-#include "sockets.h"
 #include "dhcpd.h"
 
 void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)

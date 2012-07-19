@@ -14,7 +14,6 @@
 #include "ifmgmt.h"
 #include "cparser.h"
 #include "cparser_tree.h"
-#include "dhcp.h"
 
 cparser_result_t cparser_cmd_service_dhcp(cparser_context_t *context UNUSED_PARAM)
 {
