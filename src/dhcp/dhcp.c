@@ -66,21 +66,23 @@
  *
  */
 
-#include "opt.h"
+#include "common_types.h"
+#include "lwip/opt.h"
 
 #if LWIP_DHCP                    /* don't build if not configured for use in lwipopts.h */
 
-#include "stats.h"
-#include "mem.h"
-#include "udp.h"
-#include "ip_addr.h"
-#include "netif.h"
-#include "def.h"
-#include "sys.h"
-#include "dhcp.h"
-#include "autoip.h"
-#include "dns.h"
+#include "lwip/stats.h"
+#include "lwip/mem.h"
+#include "lwip/udp.h"
+#include "lwip/ip_addr.h"
+#include "lwip/netif.h"
+#include "lwip/def.h"
+#include "lwip/sys.h"
+#include "lwip/dhcp.h"
+#include "lwip/autoip.h"
+#include "lwip/dns.h"
 #include "netif/etharp.h"
+#include "ifmgmt.h"
 
 #include <string.h>
 

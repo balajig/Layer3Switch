@@ -44,6 +44,7 @@
  */
  
 #include "lwip/opt.h"
+#include "common_types.h"
 
 #if LWIP_ARP || LWIP_ETHERNET
 
@@ -60,6 +61,7 @@
 #if PPPOE_SUPPORT
 #include "netif/ppp_oe.h"
 #endif /* PPPOE_SUPPORT */
+#include "ifmgmt.h"
 
 #include <string.h>
 
@@ -417,8 +419,8 @@ etharp_send_ip(struct interface *netif, struct pbuf *p, struct eth_addr *src, st
 {
   struct eth_hdr *ethhdr = (struct eth_hdr *)p->payload;
 
-  LWIP_ASSERT("netif->hwaddr_len must be the same as ETHARP_HWADDR_LEN for etharp!",
-              (netif->hwaddr_len == ETHARP_HWADDR_LEN));
+  LWIP_ASSERT("netif->ifPhysAddress_len must be the same as ETHARP_HWADDR_LEN for etharp!",
+              (netif->ifPhysAddress_len == ETHARP_HWADDR_LEN));
   ETHADDR32_COPY(&ethhdr->dest, dst);
   ETHADDR16_COPY(&ethhdr->src, src);
   ethhdr->type = PP_HTONS(ETHTYPE_IP);
@@ -449,7 +451,7 @@ static err_t
 etharp_update_arp_entry(struct interface *netif, ip_addr_t *ipaddr, struct eth_addr *ethaddr, u8_t flags)
 {
   s8_t i;
-  LWIP_ASSERT("netif->hwaddr_len == ETHARP_HWADDR_LEN", netif->hwaddr_len == ETHARP_HWADDR_LEN);
+  LWIP_ASSERT("netif->ifPhysAddress_len == ETHARP_HWADDR_LEN", netif->ifPhysAddress_len == ETHARP_HWADDR_LEN);
   LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_update_arp_entry: %"U16_F".%"U16_F".%"U16_F".%"U16_F" - %02"X16_F":%02"X16_F":%02"X16_F":%02"X16_F":%02"X16_F":%02"X16_F"\n",
     ip4_addr1_16(ipaddr), ip4_addr2_16(ipaddr), ip4_addr3_16(ipaddr), ip4_addr4_16(ipaddr),
     ethaddr->addr[0], ethaddr->addr[1], ethaddr->addr[2],
@@ -507,7 +509,7 @@ etharp_update_arp_entry(struct interface *netif, ip_addr_t *ipaddr, struct eth_a
     arp_table[i].q = NULL;
 #endif /* ARP_QUEUEING */
     /* send the queued IP packet */
-    etharp_send_ip(netif, p, (struct eth_addr*)(netif->hwaddr), ethaddr);
+    etharp_send_ip(netif, p, (struct eth_addr*)(netif->ifPhysAddress), ethaddr);
     /* free the queued IP packet */
     pbuf_free(p);
   }
@@ -783,8 +785,8 @@ etharp_arp_input(struct interface *netif, struct eth_addr *ethaddr, struct pbuf 
       IPADDR2_COPY(&hdr->dipaddr, &hdr->sipaddr);
       IPADDR2_COPY(&hdr->sipaddr, &netif->ip_addr);
 
-      LWIP_ASSERT("netif->hwaddr_len must be the same as ETHARP_HWADDR_LEN for etharp!",
-                  (netif->hwaddr_len == ETHARP_HWADDR_LEN));
+      LWIP_ASSERT("netif->ifPhysAddress_len must be the same as ETHARP_HWADDR_LEN for etharp!",
+                  (netif->ifPhysAddress_len == ETHARP_HWADDR_LEN));
 #if LWIP_AUTOIP
       /* If we are using Link-Local, all ARP packets that contain a Link-Local
        * 'sender IP address' MUST be sent using link-layer broadcast instead of
@@ -854,7 +856,7 @@ etharp_output_to_arp_index(struct interface *netif, struct pbuf *q, u8_t arp_idx
     }
   }
   
-  return etharp_send_ip(netif, q, (struct eth_addr*)(netif->hwaddr),
+  return etharp_send_ip(netif, q, (struct eth_addr*)(netif->ifPhysAddress),
     &arp_table[arp_idx].ethaddr);
 }
 
@@ -977,7 +979,7 @@ etharp_output(struct interface *netif, struct pbuf *q, ip_addr_t *ipaddr)
   /* continuation for multicast/broadcast destinations */
   /* obtain source Ethernet address of the given interface */
   /* send packet directly on the link */
-  return etharp_send_ip(netif, q, (struct eth_addr*)(netif->hwaddr), dest);
+  return etharp_send_ip(netif, q, (struct eth_addr*)(netif->ifPhysAddress), dest);
 }
 
 /**
@@ -1016,7 +1018,7 @@ etharp_output(struct interface *netif, struct pbuf *q, ip_addr_t *ipaddr)
 err_t
 etharp_query(struct interface *netif, ip_addr_t *ipaddr, struct pbuf *q)
 {
-  struct eth_addr * srcaddr = (struct eth_addr *)netif->hwaddr;
+  struct eth_addr * srcaddr = (struct eth_addr *)netif->ifPhysAddress;
   err_t result = ERR_MEM;
   s8_t i; /* ARP entry index */
 
@@ -1206,8 +1208,8 @@ etharp_raw(struct interface *netif, const struct eth_addr *ethsrc_addr,
   LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_raw: sending raw ARP packet.\n"));
   hdr->opcode = htons(opcode);
 
-  LWIP_ASSERT("netif->hwaddr_len must be the same as ETHARP_HWADDR_LEN for etharp!",
-              (netif->hwaddr_len == ETHARP_HWADDR_LEN));
+  LWIP_ASSERT("netif->ifPhysAddress_len must be the same as ETHARP_HWADDR_LEN for etharp!",
+              (netif->ifPhysAddress_len == ETHARP_HWADDR_LEN));
 #if LWIP_AUTOIP
   /* If we are using Link-Local, all ARP packets that contain a Link-Local
    * 'sender IP address' MUST be sent using link-layer broadcast instead of
@@ -1260,8 +1262,8 @@ err_t
 etharp_request(struct interface *netif, ip_addr_t *ipaddr)
 {
   LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_request: sending ARP request.\n"));
-  return etharp_raw(netif, (struct eth_addr *)netif->hwaddr, &ethbroadcast,
-                    (struct eth_addr *)netif->hwaddr, &netif->ip_addr, &ethzero,
+  return etharp_raw(netif, (struct eth_addr *)netif->ifPhysAddress, &ethbroadcast,
+                    (struct eth_addr *)netif->ifPhysAddress, &netif->ip_addr, &ethzero,
                     ipaddr, ARP_REQUEST);
 }
 #endif /* LWIP_ARP */
@@ -1370,7 +1372,7 @@ ethernet_input(struct pbuf *p, struct interface *netif)
         goto free_and_return;
       }
       /* pass p to ARP module */
-      etharp_arp_input(netif, (struct eth_addr*)(netif->hwaddr), p);
+      etharp_arp_input(netif, (struct eth_addr*)(netif->ifPhysAddress), p);
       break;
 #endif /* LWIP_ARP */
 #if PPPOE_SUPPORT

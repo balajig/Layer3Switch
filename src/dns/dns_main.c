@@ -9,10 +9,15 @@
  */
 
 
-#include "opt.h"
+#include "lwip/opt.h"
 #include "common_types.h"
-#include "ip_addr.h"
-#include "dns.h"
+#include "lwip/ip_addr.h"
+#include "lwip/dns.h"
+
+struct dns_server_tbl {
+        ip_addr_t addr;
+        uint32_t status;
+};
 
 
 struct dns_server_tbl  dns_servers[DNS_MAX_SERVERS];

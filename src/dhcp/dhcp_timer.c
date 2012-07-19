@@ -10,7 +10,7 @@
 
 #include "common_types.h"
 #include "ifmgmt.h"
-#include "dhcp.h"
+#include "lwip/dhcp.h"
 
 void         dhcp_timeout (struct interface *netif);
 static void dhcp_timer_coarse (void *arg)

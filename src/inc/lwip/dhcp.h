@@ -46,7 +46,8 @@ struct dhcp
   struct pbuf *p_out; /* pbuf of outcoming msg */
   struct dhcp_msg *msg_out; /* outgoing msg */
   u16_t options_out_len; /* outgoing msg options length */
-  u16_t request_timeout; /* #ticks with period DHCP_FINE_TIMER_SECS for request timeout */
+  TIMER_ID request_timeout; /* #ticks with period DHCP_FINE_TIMER_SECS for request timeout */
+  TIMER_ID coarse_timer;
   u16_t t1_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for renewal time */
   u16_t t2_timeout;  /* #ticks with period DHCP_COARSE_TIMER_SECS for rebind time */
   ip_addr_t server_ip_addr; /* dhcp server address that offered this lease */
@@ -128,9 +129,9 @@ void dhcp_arp_reply(struct interface *netif, ip_addr_t *addr);
 #endif
 
 /** to be called every minute */
-void dhcp_coarse_tmr(void);
+//void dhcp_coarse_tmr(void);
 /** to be called every half second */
-void dhcp_fine_tmr(void);
+//void dhcp_fine_tmr(void);
  
 /** DHCP message item offsets and length */
 #define DHCP_OP_OFS       0

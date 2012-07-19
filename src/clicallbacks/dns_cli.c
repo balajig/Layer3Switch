@@ -16,6 +16,12 @@
 #include "lwip/opt.h"
 #include "lwip/dns.h"
 
+struct dns_server_tbl {
+        ip_addr_t addr;
+        uint32_t status;
+};
+
+extern struct dns_server_tbl  dns_servers[];
 
 cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context UNUSED_PARAM)
 {
