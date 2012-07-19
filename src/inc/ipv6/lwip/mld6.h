@@ -59,7 +59,7 @@ struct mld_group {
   /** next link */
   struct mld_group *next;
   /** interface on which the group is active */
-  struct netif      *netif;
+  struct interface      *netif;
   /** multicast address */
   ip6_addr_t         group_address;
   /** signifies we were the last person to report */
@@ -100,11 +100,11 @@ PACK_STRUCT_END
 
 
 #define mld6_init() /* TODO should we init tables? */
-err_t  mld6_stop(struct netif *netif);
-void   mld6_report_groups(struct netif *netif);
+err_t  mld6_stop(struct interface *netif);
+void   mld6_report_groups(struct interface *netif);
 void   mld6_tmr(void);
-struct mld_group *mld6_lookfor_group(struct netif *ifp, ip6_addr_t *addr);
-void   mld6_input(struct pbuf *p, struct netif *inp);
+struct mld_group *mld6_lookfor_group(struct interface *ifp, ip6_addr_t *addr);
+void   mld6_input(struct pbuf *p, struct interface *inp);
 err_t  mld6_joingroup(ip6_addr_t *srcaddr, ip6_addr_t *groupaddr);
 err_t  mld6_leavegroup(ip6_addr_t *srcaddr, ip6_addr_t *groupaddr);
 

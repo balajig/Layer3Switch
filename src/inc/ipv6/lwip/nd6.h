@@ -61,7 +61,7 @@ extern "C" {
 /* Struct for tables. */
 struct nd6_neighbor_cache_entry {
   ip6_addr_t next_hop_address;
-  struct netif * netif;
+  struct interface * netif;
   u8_t lladdr[NETIF_MAX_HWADDR_LEN];
   /*u32_t pmtu;*/
 #if LWIP_ND6_QUEUEING
@@ -90,7 +90,7 @@ struct nd6_destination_cache_entry {
 
 struct nd6_prefix_list_entry {
   ip6_addr_t prefix;
-  struct netif * netif;
+  struct interface * netif;
   u32_t invalidation_timer;
 #if LWIP_IPV6_AUTOCONFIG
   u8_t flags;
@@ -351,10 +351,10 @@ extern u32_t retrans_timer;
 
 #define nd6_init() /* TODO should we init tables? */
 void nd6_tmr(void);
-void nd6_input(struct pbuf *p, struct netif *inp);
-s8_t nd6_get_next_hop_entry(ip6_addr_t * ip6addr, struct netif * netif);
-s8_t nd6_select_router(ip6_addr_t * ip6addr, struct netif * netif);
-u16_t nd6_get_destination_mtu(ip6_addr_t * ip6addr, struct netif * netif);
+void nd6_input(struct pbuf *p, struct interface *inp);
+s8_t nd6_get_next_hop_entry(ip6_addr_t * ip6addr, struct interface * netif);
+s8_t nd6_select_router(ip6_addr_t * ip6addr, struct interface * netif);
+u16_t nd6_get_destination_mtu(ip6_addr_t * ip6addr, struct interface * netif);
 err_t nd6_queue_packet(s8_t neighbor_index, struct pbuf * p);
 #if LWIP_ND6_TCP_REACHABILITY_HINTS
 void nd6_reachability_hint(ip6_addr_t * ip6addr);

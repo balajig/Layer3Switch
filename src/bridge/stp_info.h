@@ -1,8 +1,8 @@
 #include "common_types.h"
 #include "list.h"
 #include "bridge.h"
-#include "opt.h"
-#include "pbuf.h"
+#include "lwip/opt.h"
+#include "lwip/pbuf.h"
 
 #define BPDU_PROTOCOL_ID        0x00
 #define BPDU_VERSION_ID         0x00

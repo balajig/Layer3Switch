@@ -118,7 +118,7 @@ struct ip_pcb {
 struct ip_globals
 {
   /** The interface that provided the packet for the current callback invocation. */
-  struct netif *current_netif;
+  struct interface *current_netif;
   /** Header of the input packet currently being processed. */
   const struct ip_hdr *current_ip4_header;
 #if LWIP_IPV6

@@ -63,7 +63,7 @@ void             tcp_fasttmr (void);
 
 
 /* Only used by IP to pass a TCP segment to TCP: */
-void             tcp_input   (struct pbuf *p, struct netif *inp);
+void             tcp_input   (struct pbuf *p, struct interface *inp);
 /* Used within the TCP code only: */
 struct tcp_pcb * tcp_alloc   (u8_t prio);
 void             tcp_abandon (struct tcp_pcb *pcb, int reset);

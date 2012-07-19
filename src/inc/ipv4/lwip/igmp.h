@@ -73,7 +73,7 @@ struct igmp_group {
   /** next link */
   struct igmp_group *next;
   /** interface on which the group is active */
-  struct netif      *netif;
+  struct interface      *netif;
   /** multicast address */
   ip_addr_t          group_address;
   /** signifies we were the last person to report */
@@ -88,11 +88,11 @@ struct igmp_group {
 
 /*  Prototypes */
 void   igmp_init(void);
-err_t  igmp_start(struct netif *netif);
-err_t  igmp_stop(struct netif *netif);
-void   igmp_report_groups(struct netif *netif);
-struct igmp_group *igmp_lookfor_group(struct netif *ifp, ip_addr_t *addr);
-void   igmp_input(struct pbuf *p, struct netif *inp, ip_addr_t *dest);
+err_t  igmp_start(struct interface *netif);
+err_t  igmp_stop(struct interface *netif);
+void   igmp_report_groups(struct interface *netif);
+struct igmp_group *igmp_lookfor_group(struct interface *ifp, ip_addr_t *addr);
+void   igmp_input(struct pbuf *p, struct interface *inp, ip_addr_t *dest);
 err_t  igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
 err_t  igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
 void   igmp_tmr(void);

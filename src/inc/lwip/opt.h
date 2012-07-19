@@ -42,7 +42,7 @@
  * Include user defined options first. Anything not defined in these files
  * will be set to standard values. Override anything you dont like!
  */
-#include "lwipopts.h"
+//#include "lwipopts.h"
 #include "lwip/debug.h"
 
 /*
@@ -1150,7 +1150,7 @@
 
 /**
  * LWIP_NETIF_HWADDRHINT==1: Cache link-layer-address hints (e.g. table
- * indices) in struct netif. TCP and UDP can make use of this to prevent
+ * indices) in struct interface. TCP and UDP can make use of this to prevent
  * scanning the ARP table for every sent packet. While this is faster for big
  * ARP tables or many concurrent connections, it might be counterproductive
  * if you have a tiny ARP table or if there never are concurrent connections.
@@ -2130,7 +2130,7 @@
  * LWIP_HOOK_IP4_INPUT(pbuf, input_netif):
  * - called from ip_input() (IPv4)
  * - pbuf: received struct pbuf passed to ip_input()
- * - input_netif: struct netif on which the packet has been received
+ * - input_netif: struct interface on which the packet has been received
  * Return values:
  * - 0: Hook has not consumed the packet, packet is processed as normal
  * - != 0: Hook has consumed the packet.

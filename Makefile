@@ -303,7 +303,7 @@ DEPMOD		= /sbin/depmod
 KALLSYMS	= scripts/kallsyms
 PERL		= perl
 CHECK		= sparse
-INCLUDE         = -I$(srctree)/src/inc  -I$(srctree)/src/lib  -I$(srctree)/src/cli/ -I$(srctree)/src/platform/inc/linux/
+INCLUDE         = -I$(srctree)/src/inc  -I$(srctree)/src/lib  -I$(srctree)/src/cli/ -I$(srctree)/src/platform/inc/linux/ -I$(srctree)/src/inc/ipv4 -I$(srctree)/src/inc/ipv6
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(CF)
 MODFLAGS	= -DMODULE

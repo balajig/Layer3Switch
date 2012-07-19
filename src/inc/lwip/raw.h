@@ -119,7 +119,7 @@ struct raw_pcb * raw_new_ip6   (u8_t proto);
 #endif /* LWIP_IPV6 */
 
 /* The following functions are the lower layer interface to RAW. */
-u8_t             raw_input      (struct pbuf *p, struct netif *inp);
+u8_t             raw_input      (struct pbuf *p, struct interface *inp);
 #define raw_init() /* Compatibility define, not init needed. */
 
 #ifdef __cplusplus

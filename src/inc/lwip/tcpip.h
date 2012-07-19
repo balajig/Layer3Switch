@@ -101,12 +101,12 @@ void tcpip_init(tcpip_init_done_fn tcpip_init_done, void *arg);
 err_t tcpip_apimsg(struct api_msg *apimsg);
 #endif /* LWIP_NETCONN */
 
-err_t tcpip_input(struct pbuf *p, struct netif *inp);
+err_t tcpip_input(struct pbuf *p, struct interface *inp);
 
 #if LWIP_NETIF_API
-err_t tcpip_netifapi(struct netifapi_msg *netifapimsg);
+err_t tcpip_netifapi(struct interfaceapi_msg *netifapimsg);
 #if LWIP_TCPIP_CORE_LOCKING
-err_t tcpip_netifapi_lock(struct netifapi_msg *netifapimsg);
+err_t tcpip_netifapi_lock(struct interfaceapi_msg *netifapimsg);
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 #endif /* LWIP_NETIF_API */
 
@@ -150,11 +150,11 @@ struct tcpip_msg {
     struct api_msg *apimsg;
 #endif /* LWIP_NETCONN */
 #if LWIP_NETIF_API
-    struct netifapi_msg *netifapimsg;
+    struct interfaceapi_msg *netifapimsg;
 #endif /* LWIP_NETIF_API */
     struct {
       struct pbuf *p;
-      struct netif *netif;
+      struct interface *netif;
     } inp;
     struct {
       tcpip_callback_fn function;

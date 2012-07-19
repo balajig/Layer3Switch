@@ -2,7 +2,7 @@
 #define _IFMGMT_H
 #include "linklist.h"
 struct interface;
-#include "netif.h"
+#include "lwip/netif.h"
 #define ZEBRA_INTERFACE_ACTIVE     (1 << 0)
 #define ZEBRA_INTERFACE_SUB        (1 << 1)
 #define ZEBRA_INTERFACE_LINKDETECTION (1 << 2)
@@ -21,6 +21,13 @@ struct interface {
 	 *  to send a packet on the interface. This function outputs
 	 *  the pbuf as-is on the link medium. */
 	if_linkoutput_fn linkoutput;
+#if LWIP_IPV6
+  /** This function is called by the IPv6 module when it wants
+   *  to send a packet on the interface. This function typically
+   *  first resolves the hardware address, then sends the packet. */
+  netif_output_ip6_fn output_ip6;
+#endif /* LWIP_IPV6 */
+
 #if LWIP_NETIF_STATUS_CALLBACK
 	/** This function is called when the netif state is set to up or down
 	*/
@@ -33,6 +40,14 @@ struct interface {
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 	/** This field can be set by the device driver and could point
 	 *  to state information for the device. */
+#if LWIP_IPV6
+  /** Array of IPv6 addresses for this netif. */
+  ip6_addr_t ip6_addr[LWIP_IPV6_NUM_ADDRESSES];
+  /** The state of each IPv6 address (Tentative, Preferred, etc).
+   * @see ip6_addr.h */
+  u8_t ip6_addr_state[LWIP_IPV6_NUM_ADDRESSES];
+#endif /* LWIP_IPV6 */
+
 	void *state;
 #if LWIP_DHCP
 	/** the DHCP client state information for this netif */
@@ -42,6 +57,18 @@ struct interface {
 	/** the AutoIP client state information for this netif */
 	struct autoip *autoip;
 #endif
+#if LWIP_IPV6_AUTOCONFIG
+  /** is this netif enabled for IPv6 autoconfiguration */
+  u8_t ip6_autoconfig_enabled;
+#endif /* LWIP_IPV6_AUTOCONFIG */
+#if LWIP_IPV6_SEND_ROUTER_SOLICIT
+  /** Number of Router Solicitation messages that remain to be sent. */
+  u8_t rs_count;
+#endif /* LWIP_IPV6_SEND_ROUTER_SOLICIT */
+#if LWIP_IPV6_DHCP6
+  /** the DHCPv6 client state information for this netif */
+  struct dhcp6 *dhcp6;
+#endif /* LWIP_IPV6_DHCP6 */
 #if LWIP_NETIF_HOSTNAME
 	char  hostname[MAX_PORT_NAME];
 #endif /* LWIP_NETIF_HOSTNAME */
@@ -53,6 +80,11 @@ struct interface {
 #if LWIP_NETIF_HWADDRHINT
 	u8_t *addr_hint;
 #endif /* LWIP_NETIF_HWADDRHINT */
+#if LWIP_IPV6 && LWIP_IPV6_MLD
+  /** This function could be called to add or delete an entry in the IPv6 multicast
+      filter table of the ethernet MAC. */
+  netif_mld_mac_filter_fn mld_mac_filter;
+#endif /* LWIP_IPV6 && LWIP_IPV6_MLD */
 #if ENABLE_LOOPBACK
 	/* List of packets to be queued for ourselves. */
 	struct pbuf *loop_first;

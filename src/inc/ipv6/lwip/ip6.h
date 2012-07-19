@@ -163,13 +163,13 @@ PACK_STRUCT_END
 
 
 #define ip6_init() /* TODO should we init current addresses and header pointer? */
-struct netif *ip6_route(struct ip6_addr *src, struct ip6_addr *dest);
-ip6_addr_t   *ip6_select_source_address(struct netif *netif, ip6_addr_t * dest);
-err_t         ip6_input(struct pbuf *p, struct netif *inp);
+struct interface *ip6_route(struct ip6_addr *src, struct ip6_addr *dest);
+ip6_addr_t   *ip6_select_source_address(struct interface *netif, ip6_addr_t * dest);
+err_t         ip6_input(struct pbuf *p, struct interface *inp);
 err_t         ip6_output(struct pbuf *p, struct ip6_addr *src, struct ip6_addr *dest,
                          u8_t hl, u8_t tc, u8_t nexth);
 err_t         ip6_output_if(struct pbuf *p, struct ip6_addr *src, struct ip6_addr *dest,
-                            u8_t hl, u8_t tc, u8_t nexth, struct netif *netif);
+                            u8_t hl, u8_t tc, u8_t nexth, struct interface *netif);
 #if LWIP_NETIF_HWADDRHINT
 err_t         ip6_output_hinted(struct pbuf *p, ip6_addr_t *src, ip6_addr_t *dest,
                                 u8_t hl, u8_t tc, u8_t nexth, u8_t *addr_hint);

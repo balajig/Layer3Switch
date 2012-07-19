@@ -90,7 +90,7 @@ struct pbuf_custom_ref {
 };
 #endif /* __LWIP_PBUF_CUSTOM_REF__ */
 
-err_t ip6_frag(struct pbuf *p, struct netif *netif, ip6_addr_t *dest);
+err_t ip6_frag(struct pbuf *p, struct interface *netif, ip6_addr_t *dest);
 
 #endif /* LWIP_IPV6 && LWIP_IPV6_FRAG */
 
