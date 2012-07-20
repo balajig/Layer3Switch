@@ -3,6 +3,7 @@
 #include "linklist.h"
 struct interface;
 #include "lwip/netif.h"
+#include "lwip/inet.h"
 #define ZEBRA_INTERFACE_ACTIVE     (1 << 0)
 #define ZEBRA_INTERFACE_SUB        (1 << 1)
 #define ZEBRA_INTERFACE_LINKDETECTION (1 << 2)

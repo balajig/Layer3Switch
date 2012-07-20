@@ -456,5 +456,5 @@ int read_port_mac_address (int port, uint8_t *p);
 int get_max_ports (void);
 int cli_printf  (const char *fmt, ...);
 #include "libproto.h"
-#define PERF_STOP
+#define PERF_STOP(x)
 #endif

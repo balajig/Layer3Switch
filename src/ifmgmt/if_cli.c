@@ -127,52 +127,52 @@ cparser_result_t cparser_cmd_interface_loopback_portnum(cparser_context_t *conte
         set_curr_mode (INTERFACE_MODE);
 	return cparser_submode_enter(context->parser, NULL, prompt);
 }
-cparser_result_t cparser_cmd_iflo_enable(cparser_context_t *context)
+cparser_result_t cparser_cmd_iflo_enable(cparser_context_t *context UNUSED_PARAM)
 {
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_disable(cparser_context_t *context)
+cparser_result_t cparser_cmd_iflo_disable(cparser_context_t *context UNUSED_PARAM)
 {
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_ip_address_addr_mask(cparser_context_t *context,
+cparser_result_t cparser_cmd_iflo_ip_address_addr_mask(cparser_context_t *context UNUSED_PARAM,
     uint32_t *addr_ptr,
     uint32_t *mask_ptr)
 {
 
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_ip_address_dhcp(cparser_context_t *context)
+cparser_result_t cparser_cmd_iflo_ip_address_dhcp(cparser_context_t *context UNUSED_PARAM)
 {
   	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_ip_dhcp_client_hostname(cparser_context_t *context,
+cparser_result_t cparser_cmd_iflo_ip_dhcp_client_hostname(cparser_context_t *context UNUSED_PARAM,
     char **hostname_ptr)
 {
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_ip_dhcp_client_lease_days_hours_mins(cparser_context_t *context,
+cparser_result_t cparser_cmd_iflo_ip_dhcp_client_lease_days_hours_mins(cparser_context_t *context UNUSED_PARAM,
     int32_t *days_ptr,
     int32_t *hours_ptr,
     int32_t *mins_ptr)
 {
   	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_ip_dhcp_release(cparser_context_t *context)
+cparser_result_t cparser_cmd_iflo_ip_dhcp_release(cparser_context_t *context UNUSED_PARAM)
 {
   	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_ip_dhcp_renew(cparser_context_t *context)
+cparser_result_t cparser_cmd_iflo_ip_dhcp_renew(cparser_context_t *context UNUSED_PARAM)
 {
   	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_no_ip_address_addr_mask(cparser_context_t *context,
+cparser_result_t cparser_cmd_iflo_no_ip_address_addr_mask(cparser_context_t *context UNUSED_PARAM,
     uint32_t *addr_ptr,
     uint32_t *mask_ptr)
 {
   	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_iflo_no_ip_address_dhcp(cparser_context_t *context)
+cparser_result_t cparser_cmd_iflo_no_ip_address_dhcp(cparser_context_t *context UNUSED_PARAM)
 {
   	return CPARSER_OK;
 }

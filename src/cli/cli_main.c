@@ -70,22 +70,22 @@ int change_to_interface_mode(char **args);
 int change_config_mode(char **args);
 int end_mode(char **args);
 int exit_mode(void);
+extern int show_users (void);
+int process_logout();
+int process_lock (void);
+extern int show_cpu_usage (void);
+extern int show_mem_pool (void);
+void write_config_to_start_up (char *line);
+int user_db_init (void);
+struct cli * cli_get_new_session (void);
+int cli_get_cli_session_id (void);
+int cli_telnet_session_init (char *prmt, int fd, void *data);
 
 
 struct cli this_cli[MAX_CLI_SESSION];
 int clitskid = 0;
 static int gfd = 1;
 int login_sucessfull = 0;
-
-int change_to_interface_mode (char **args);
-int change_config_mode (char **args);
-int change_vlan_mode (char **args);
-int end_mode (char **args);
-extern int show_users (void);
-int process_logout();
-int process_lock (void);
-extern int show_cpu_usage (void);
-extern int show_mem_pool (void);
 
 struct modes {
 	int mode;

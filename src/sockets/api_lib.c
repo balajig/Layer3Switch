@@ -54,6 +54,8 @@
 #include "lwip/api_msg.h"
 
 #include <string.h>
+#undef TCPIP_APIMSG
+#define TCPIP_APIMSG(pmsg, func, err) func (&((pmsg)->msg)); err = ERR_OK
 
 /**
  * Create a new netconn (of a specific type) that has a callback function.

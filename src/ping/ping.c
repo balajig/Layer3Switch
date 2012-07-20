@@ -160,6 +160,7 @@ static int ping_exit = 0;
 static void sendping(int);
 static void pingstats(int);
 static void unpack(char *, int, struct sockaddr_in *);
+static void set_pingexit (void);
 
 static void *pingtimer;
 
@@ -191,6 +192,7 @@ static int in_cksum(unsigned short *buf, int sz)
 static void pingstats(int ign)
 {
 	//signal(SIGINT, SIG_IGN);
+	ign = 1;
 	
 	cli_printf("\n--- %s ping statistics ---\n", hostname);
 	cli_printf("%ld packets transmitted, ", ntransmitted);
@@ -207,7 +209,7 @@ static void pingstats(int ign)
 			   (tsum / (nreceived + nrepeats)) % 10, tmax / 10, tmax % 10);
 }
 
-int set_pingexit (void)
+static void set_pingexit (void)
 {
 	ping_exit = 1;
 }
@@ -218,6 +220,7 @@ static void sendping(int ign)
 	int i;
 	char packet[datalen + 8];
 
+	ign = 1;
 	pkt = (struct icmp *) packet;
 
 	pkt->icmp_type = ICMP_ECHO;
