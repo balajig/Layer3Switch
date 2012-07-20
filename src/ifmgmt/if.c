@@ -109,7 +109,7 @@ err_t if_loopif_init(void)
   netif->ifDescr[0] = 'l';
   netif->ifDescr[1] = 'o';
   netif->ifDescr[2] = '\0';
-  netif->output = if_loop_output;
+  netif->output = netif_loop_output;
 
   if_set_addr (netif, &loop_ipaddr, &loop_netmask, &loop_gw);
 
@@ -451,7 +451,7 @@ if_set_up (struct interface *netif)
  * @see dhcp_start()
  */
 void
-if_set_down (struct interface *netif)
+netif_set_down (struct interface *netif)
 {
     if (netif->flags & NETIF_FLAG_UP)
     {
@@ -578,7 +578,7 @@ if_set_link_callback (struct interface *netif,
  *         ERR_MEM if the pbuf used to copy the packet couldn't be allocated
  */
 err_t
-if_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
+netif_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
 {
     struct pbuf        *r;
     err_t               err;
@@ -826,7 +826,7 @@ static int if_lo_init (void)
 		IP4_ADDR(&loop_ipaddr, 127,0,0,mini_index - CONFIG_MAX_PHY_PORTS + 2);
 		IP4_ADDR(&loop_netmask, 255,0,0,0);
 
-		netif->output = if_loop_output;
+		netif->output = netif_loop_output;
 
 		if_set_addr (netif, &loop_ipaddr, &loop_netmask, &loop_gw);
 

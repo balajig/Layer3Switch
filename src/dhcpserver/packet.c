@@ -219,7 +219,8 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	packet.udp.chksum = udhcp_checksum(&packet, IP_UDP_DHCP_SIZE - padding);
 	/* but for sending, it is set to IP packet len */
 	packet.ip._len = htons(IP_UDP_DHCP_SIZE - padding);
-	IPH_VHLTOS_SET(&packet.ip, IPVERSION, sizeof(packet.ip) >> 2, 0);
+	IPH_VHL_SET(&packet.ip, IPVERSION, sizeof(packet.ip) >> 2);
+	IPH_TOS_SET(&packet.ip, 0);
 	packet.ip._ttl = IPDEFTTL;
 	packet.ip._chksum = udhcp_checksum(&packet.ip, sizeof(packet.ip));
 

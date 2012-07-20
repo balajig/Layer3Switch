@@ -515,7 +515,7 @@ igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
   err_t              err = ERR_VAL; /* no matching interface */
   struct igmp_group *group;
   struct interface      *netif = NULL;
-   int max_ports = get_max_phy_ports () , i = 0;
+   int max_ports = get_max_ports () , i = 0;
 
   /* make sure it is multicast address */
   LWIP_ERROR("igmp_joingroup: attempt to join non-multicast address", ip_addr_ismulticast(groupaddr), return ERR_VAL;);
@@ -586,7 +586,7 @@ igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
   err_t              err = ERR_VAL; /* no matching interface */
   struct igmp_group *group;
   struct interface      *netif = NULL;
-  int max_ports = get_max_phy_ports () , i = 0;
+  int max_ports = get_max_ports () , i = 0;
 
   /* make sure it is multicast address */
   LWIP_ERROR("igmp_leavegroup: attempt to leave non-multicast address", ip_addr_ismulticast(groupaddr), return ERR_VAL;);

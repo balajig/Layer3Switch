@@ -329,7 +329,7 @@ void if_set_netmask(struct interface *netif, ip_addr_t *netmask);
 void if_set_gw(struct interface *netif, ip_addr_t *gw);
 
 void if_set_up(struct interface *netif);
-void if_set_down(struct interface *netif);
+void netif_set_down(struct interface *netif);
 /** Ask if an interface is up */
 #define netif_is_up(netif) (((netif)->flags & NETIF_FLAG_UP) ? (u8_t)1 : (u8_t)0)
 
@@ -350,8 +350,8 @@ void if_set_link_callback(struct interface *netif, netif_status_callback_fn link
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
 #if LWIP_NETIF_HOSTNAME
-#define netif_set_hostname(netif, name) do { if((netif) != NULL) { (netif)->hostname = name; }}while(0)
-#define netif_get_hostname(netif) (((netif) != NULL) ? ((netif)->hostname) : NULL)
+#define netif_set_hostname(netif, name) do { if((netif) != NULL) { memcpy ((netif)->hostname, name, MAX_PORT_NAME); }}while(0)
+#define netif_get_hostname(netif) (((netif) != NULL) ? (&(netif)->hostname) : NULL)
 #endif /* LWIP_NETIF_HOSTNAME */
 
 #if LWIP_IGMP

@@ -1458,4 +1458,12 @@ int show_arp_entries (void)
 
 }
 
+extern err_t low_level_output (struct interface *netif, struct pbuf *p);
+
+void ethernetif_init (struct interface *netif)
+{
+    netif->output = etharp_output;
+    netif->linkoutput = low_level_output;
+}
+
 #endif /* LWIP_ARP || LWIP_ETHERNET */

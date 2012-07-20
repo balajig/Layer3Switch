@@ -200,4 +200,5 @@ int if_is_broadcast(struct interface *ifp);
 int if_is_pointopoint(struct interface *ifp);
 int if_is_multicast(struct interface *ifp);
 struct interface * get_loopback_if (void);
+err_t netif_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr);
 #endif

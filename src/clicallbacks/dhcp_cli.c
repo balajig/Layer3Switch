@@ -112,7 +112,7 @@ cparser_result_t cparser_cmd_show_dhcp_client_lease(cparser_context_t *context U
 cparser_result_t cparser_cmd_if_ip_dhcp_client_hostname(cparser_context_t *context UNUSED_PARAM, char **hostname_ptr)
 {
 	int port = cli_get_port ();
-	if_set_hostname (IF_INFO (port), *hostname_ptr);
+	netif_set_hostname (IF_INFO (port), *hostname_ptr);
 	return CPARSER_OK;
 }
 cparser_result_t cparser_cmd_if_ip_dhcp_client_lease_days_hours_mins(cparser_context_t *context UNUSED_PARAM,

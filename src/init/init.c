@@ -34,7 +34,7 @@ void layer3switch_init (void)
 
 	memp_init ();
 
-	pbuf_init ();
+//	pbuf_init ();
 
         cli_init ("OpenSwitch");
 
@@ -50,14 +50,8 @@ void layer3switch_init (void)
 
         //vrrp_init ();
 
-	/* Sanity check user-configurable values */
-	lwip_sanity_check ();
-
 	/* Modules initialization */
 	//stats_init ();
-#if !NO_SYS
-	sys_init ();
-#endif /* !NO_SYS */
 	//if_init ();
 #if LWIP_SOCKET
 	//lwip_socket_init ();
@@ -67,7 +61,7 @@ void layer3switch_init (void)
 	etharp_init ();
 #endif /* LWIP_ARP */
 #if LWIP_RAW
-	raw_init ();
+	//raw_init ();
 #endif /* LWIP_RAW */
 #if LWIP_UDP
 	udp_init ();
@@ -82,7 +76,7 @@ void layer3switch_init (void)
 
 	dhcp_init ();
 #if LWIP_AUTOIP
-	autoip_init ();
+	//autoip_init ();
 #endif /* LWIP_AUTOIP */
 #if LWIP_IGMP
 	igmp_init ();

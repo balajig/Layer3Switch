@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 typedef sync_lock_t sys_sem_t;
-typedef u8_t sys_mbox_t;
+typedef unsigned long sys_mbox_t;
 #if NO_SYS
 
 /* For a totally minimal and standalone system, we provide null

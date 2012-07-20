@@ -194,7 +194,7 @@ dhcp_handle_nak (struct interface *netif)
                  ("dhcp_handle_nak(netif=%p) %c%c%" U16_F "\n", (void *) netif,
                   netif->ifDescr[0], netif->ifDescr[1], (u16_t) netif->num));
     /* Set the interface down since the address must no longer be used, as per RFC2131 */
-    if_set_down (netif);
+    netif_set_down (netif);
     /* remove IP address from interface */
     if_set_ipaddr (netif, IP_ADDR_ANY);
     if_set_gw (netif, IP_ADDR_ANY);
@@ -877,7 +877,7 @@ dhcp_network_changed (struct interface *netif)
         case DHCP_RENEWING:
         case DHCP_BOUND:
         case DHCP_REBOOTING:
-            if_set_down (netif);
+            netif_set_down (netif);
             dhcp->tries = 0;
             dhcp_reboot (netif);
             break;
@@ -1449,7 +1449,7 @@ dhcp_release (struct interface * netif)
                  ("dhcp_release(): set request timeout %" U16_F " msecs\n",
                   msecs));
     /* bring the interface down */
-    if_set_down (netif);
+    netif_set_down (netif);
     /* remove IP address from interface */
     if_set_ipaddr (netif, IP_ADDR_ANY);
     if_set_gw (netif, IP_ADDR_ANY);

@@ -468,7 +468,8 @@ int do_traceroute (char *trcdest)
 	getaddr (&to->sin_addr.s_addr , trcdest);
 	outip->dest.addr = to->sin_addr.s_addr;
 
-	IPH_VHLTOS_SET(outip, IPVERSION, (outp - (u_char *)outip) >> 2, 0);
+	IPH_VHL_SET(outip, IPVERSION, (outp - (u_char *)outip) >> 2);
+	IPH_TOS_SET(outip, 0);
 	ident = (getpid() & 0xffff) | 0x8000;
 
 	if (s < 0) {

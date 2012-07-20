@@ -29,6 +29,7 @@ void track_cpu_usage (void *);
 int  show_cpu_usage (void);
 
 static TIMER_ID cpu_timer;
+typedef unsigned long sys_mbox_t;
 
 struct pstat_temp
 {
@@ -550,12 +551,72 @@ sys_mutex_unlock(mu)
 sys_mutex_free(mu)
 sys_mutex_valid(mu) 0
 sys_mutex_set_invalid(mu)
-sys_mbox_new(m, s) ERR_OK
-sys_mbox_fetch(m,d)
-sys_mbox_tryfetch(m,d)
-sys_mbox_post(m,d)
-sys_mbox_trypost(m,d)
-sys_mbox_free(m)
-sys_mbox_valid(m)
-sys_mbox_set_invalid(m)
+#endif
+
+/** Create a new mbox of specified size
+ * @param mbox pointer to the mbox to create
+ * @param size (miminum) number of messages in this mbox
+ * @return ERR_OK if successful, another err_t otherwise */
+err_t sys_mbox_new(sys_mbox_t *mbox, int size)
+{
+
+}
+/** Post a message to an mbox - may not fail
+ * -> blocks if full, only used from tasks not from ISR
+ * @param mbox mbox to posts the message
+ * @param msg message to post (ATTENTION: can be NULL) */
+void sys_mbox_post(sys_mbox_t *mbox, void *msg)
+{
+
+}
+/** Try to post a message to an mbox - may fail if full or ISR
+ * @param mbox mbox to posts the message
+ * @param msg message to post (ATTENTION: can be NULL) */
+err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
+{
+
+}
+/** Wait for a new message to arrive in the mbox
+ * @param mbox mbox to get a message from
+ * @param msg pointer where the message is stored
+ * @param timeout maximum time (in milliseconds) to wait for a message
+ * @return time (in milliseconds) waited for a message, may be 0 if not waited
+           or SYS_ARCH_TIMEOUT on timeout
+ *         The returned time has to be accurate to prevent timer jitter! */
+u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
+{
+}
+/* Allow port to override with a macro, e.g. special timout for sys_arch_mbox_fetch() */
+#ifndef sys_arch_mbox_tryfetch
+/** Wait for a new message to arrive in the mbox
+ * @param mbox mbox to get a message from
+ * @param msg pointer where the message is stored
+ * @param timeout maximum time (in milliseconds) to wait for a message
+ * @return 0 (milliseconds) if a message has been received
+ *         or SYS_MBOX_EMPTY if the mailbox is empty */
+u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
+{
+
+}
+#endif
+/** For now, we map straight to sys_arch implementation. */
+#define sys_mbox_tryfetch(mbox, msg) sys_arch_mbox_tryfetch(mbox, msg)
+/** Delete an mbox
+ * @param mbox mbox to delete */
+void sys_mbox_free(sys_mbox_t *mbox)
+{
+
+}
+#define sys_mbox_fetch(mbox, msg) sys_arch_mbox_fetch(mbox, msg, 0)
+#ifndef sys_mbox_valid
+/** Check if an mbox is valid/allocated: return 1 for valid, 0 for invalid */
+int sys_mbox_valid(sys_mbox_t *mbox)
+{
+}
+#endif
+#ifndef sys_mbox_set_invalid
+/** Set an mbox invalid so that sys_mbox_valid returns 0 */
+void sys_mbox_set_invalid(sys_mbox_t *mbox)
+{
+}
 #endif

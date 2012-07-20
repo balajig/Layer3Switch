@@ -263,6 +263,10 @@ void update_times (int cpu)
 	timer_unlock (cpu);
 }
 
+unsigned int sys_now ()
+{
+	return get_ticks ();
+}
 unsigned int get_secs (void)
 {
 	return get_ticks () / 100;
