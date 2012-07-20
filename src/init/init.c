@@ -38,9 +38,10 @@ void layer3switch_init (void)
 
         cli_init ("OpenSwitch");
 
-#ifdef ZEBRA_RTM_SUPPORT
+#ifdef CONFIG_ZEBRA_RTM
 	rtm_init ();
 #endif  /* RTM_SUPPORT */
+	tcpip_init (NULL, NULL);
 
         port_init ();
 

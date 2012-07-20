@@ -1253,7 +1253,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef TCPIP_THREAD_STACKSIZE
-#define TCPIP_THREAD_STACKSIZE          0
+#define TCPIP_THREAD_STACKSIZE          32*1024
 #endif
 
 /**
@@ -1262,7 +1262,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef TCPIP_THREAD_PRIO
-#define TCPIP_THREAD_PRIO               1
+#define TCPIP_THREAD_PRIO               97
 #endif
 
 /**

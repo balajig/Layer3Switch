@@ -435,7 +435,8 @@ tcpip_trycallback(struct tcpip_callback_msg* msg)
 void
 tcpip_init(tcpip_init_done_fn initfunc, void *arg)
 {
-  lwip_init();
+  tmtaskid_t tcpthread;
+  //lwip_init();
 
   tcpip_init_done = initfunc;
   tcpip_init_done_arg = arg;
@@ -448,7 +449,7 @@ tcpip_init(tcpip_init_done_fn initfunc, void *arg)
   }
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
-  sys_thread_new(TCPIP_THREAD_NAME, tcpip_thread, NULL, TCPIP_THREAD_STACKSIZE, TCPIP_THREAD_PRIO);
+  task_create (TCPIP_THREAD_NAME, TCPIP_THREAD_PRIO, 3, TCPIP_THREAD_STACKSIZE,tcpip_thread, NULL, NULL, &tcpthread);
 }
 
 /**

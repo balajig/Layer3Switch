@@ -436,13 +436,13 @@ ip_input(struct pbuf *p, struct interface *inp)
           break;
         }
 #endif /* LWIP_AUTOIP */
-	netif = IF_INFO(port);
-	if (netif == inp)
-	{
-		netif = IF_INFO (port + 1);
-	}
-	port++;
       }
+      netif = IF_INFO(port);
+      if (netif == inp)
+      {
+	      netif = IF_INFO (port + 1);
+      }
+      port++;
     } while (port <= tports);
   }
 

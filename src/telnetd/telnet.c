@@ -161,7 +161,7 @@ void * telnetd (void *arg)
 
 	/* create listening socket */
 	if ((listen_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		fprintf(stderr, "socket() failed: %s\n", strerror(errno));
+		fprintf(stderr, "socket() failed\n");
 		return 1;
 	}
 
@@ -175,13 +175,13 @@ void * telnetd (void *arg)
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_port = htons(listen_port);
 	if (bind(listen_sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-		fprintf(stderr, "bind() failed: %s\n", strerror(errno));
+		fprintf(stderr, "bind() failed\n");
 		return 1;
 	}
 
 	/* listen for clients */
 	if (listen(listen_sock, 5) == -1) {
-		fprintf(stderr, "listen() failed: %s\n", strerror(errno));
+		fprintf(stderr, "listen() failed\n");
 		return 1;
 	}
 
@@ -192,7 +192,7 @@ void * telnetd (void *arg)
 
 		if ((rs = accept(listen_sock, (struct sockaddr *)&addr,
 						&addrlen)) == -1) {
-			fprintf(stderr, "accept() failed: %s\n", strerror(errno));
+			fprintf(stderr, "accept() failed\n");
 			return 1;
 		}
 

@@ -103,7 +103,7 @@ int msg_create_Q (const char *name, int maxmsg, int size)
 }
 
 
-int msg_rcv (mqd_t qid, char **msg, int size)
+int msg_rcv (int qid, char **msg, int size)
 {
 	struct msg * p = NULL;
 	
@@ -124,7 +124,7 @@ int msg_rcv (mqd_t qid, char **msg, int size)
 	return -1;
 }
 
-int msg_send (mqd_t qid, void *msg, int size)
+int msg_send (int qid, void *msg, int size)
 {
 	struct msg * p = NULL;
 
@@ -140,4 +140,20 @@ int msg_send (mqd_t qid, void *msg, int size)
 
 	EvtUnLock (&Queue[qid].q_evt);
 	return -1;
+}
+
+int msg_Q_delete (int qid)
+{
+	mem_pool_delete (Queue[qid].mpool_id);
+	EventDeInit (&Queue[qid].q_evt);
+	memset (Queue[qid].name, 0, MAX_Q_NAME);
+	Queue[qid].max_msg = 0;
+	Queue[qid].size = 0;
+	Queue[qid].mpool_id = -1;
+	INIT_LIST_HEAD (&Queue[qid].msg_list);
+	Queue[qid].flags = MQ_FREE;
+}
+int mq_vaild (int qid)
+{
+	return Queue[qid].flags == MQ_ACTIVE;
 }

@@ -9,6 +9,7 @@
 #include <mqueue.h>
 #include <stdint.h>
 #include <getopt.h>
+#define LWIP_COMPAT_SOCKETS 0
 #include "common_types.h"
 #include "ifmgmt.h"
 #include "cli.h"

@@ -557,9 +557,14 @@ sys_mutex_set_invalid(mu)
  * @param mbox pointer to the mbox to create
  * @param size (miminum) number of messages in this mbox
  * @return ERR_OK if successful, another err_t otherwise */
-err_t sys_mbox_new(sys_mbox_t *mbox, int size)
+err_t sys_mbox_new(sys_mbox_t *mbox, int max_msg)
 {
-
+	if (!max_msg)
+		max_msg = 100; /*FIXME*/
+	if (!(*mbox = msg_create_Q ("sys_box", max_msg, sizeof (unsigned long))))
+		return -ENOMEM;
+	return 0;
+	
 }
 /** Post a message to an mbox - may not fail
  * -> blocks if full, only used from tasks not from ISR
@@ -567,14 +572,14 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
  * @param msg message to post (ATTENTION: can be NULL) */
 void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
-
+	return msg_send (*mbox, msg, sizeof (unsigned long));
 }
 /** Try to post a message to an mbox - may fail if full or ISR
  * @param mbox mbox to posts the message
  * @param msg message to post (ATTENTION: can be NULL) */
 err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
 {
-
+	return msg_send (*mbox, msg, sizeof (unsigned long));
 }
 /** Wait for a new message to arrive in the mbox
  * @param mbox mbox to get a message from
@@ -585,6 +590,7 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
  *         The returned time has to be accurate to prevent timer jitter! */
 u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
 {
+	return msg_rcv (*mbox, msg, sizeof (unsigned long));
 }
 /* Allow port to override with a macro, e.g. special timout for sys_arch_mbox_fetch() */
 #ifndef sys_arch_mbox_tryfetch
@@ -596,7 +602,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
  *         or SYS_MBOX_EMPTY if the mailbox is empty */
 u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
 {
-
+	return msg_rcv (*mbox, msg, sizeof (unsigned long));
 }
 #endif
 /** For now, we map straight to sys_arch implementation. */
@@ -605,13 +611,14 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
  * @param mbox mbox to delete */
 void sys_mbox_free(sys_mbox_t *mbox)
 {
-
+	msg_Q_delete (*mbox);
 }
 #define sys_mbox_fetch(mbox, msg) sys_arch_mbox_fetch(mbox, msg, 0)
 #ifndef sys_mbox_valid
 /** Check if an mbox is valid/allocated: return 1 for valid, 0 for invalid */
 int sys_mbox_valid(sys_mbox_t *mbox)
 {
+	return mq_vaild (*mbox);
 }
 #endif
 #ifndef sys_mbox_set_invalid

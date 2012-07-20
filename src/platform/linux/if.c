@@ -11,6 +11,7 @@
 
 #include "common_types.h"
 #include "ifmgmt.h"
+#define LWIP_COMPAT_SOCKETS 0
 #include "lwip/sockets.h"
 #include <sys/ioctl.h>
 #include <sys/stat.h>
