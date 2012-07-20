@@ -4,6 +4,7 @@ obj-$(CONFIG_OPENSWITCH_TCP_IP) += tcp/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += udp/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += dhcp/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += ipv4/
+obj-$(CONFIG_OPENSWITCH_TCP_IP) += ipv6/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += dns/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += sockets/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += snmp/
