@@ -499,3 +499,63 @@ void track_cpu_usage (void *unused)
 	}
 	mod_timer (cpu_timer, 1 * tm_get_ticks_per_second ());
 }
+
+int sys_sem_new(sync_lock_t *slock, int count)
+{
+	if (!slock)
+		return -1;
+	if (sem_init(slock, 0, count) < 0) {
+		perror ("SEM_INIT: ");
+		return -1;
+	}
+	return 0;
+}
+int sys_sem_signal (sync_lock_t *slock)
+{
+	return sync_unlock (slock);
+}
+
+int sys_sem_wait (sync_lock_t *slock)
+{
+	return sync_lock (slock);
+}
+int sys_arch_sem_wait(sync_lock_t *s, unsigned int msecs)
+{
+	unsigned int nsecs = msecs * 1000 * 1000;
+	unsigned int secs = nsecs / (1000 * 1000 * 1000);
+	nsecs %= (1000 * 1000 * 1000);
+
+	return sync_lock_timed_wait (s, secs, nsecs);
+}
+
+int sys_sem_free(sync_lock_t *s) 
+{
+	return destroy_sync_lock (s);
+}
+
+int sys_sem_valid(sync_lock_t *sem) 
+{
+	int val = 0;
+
+	return sem_getvalue(sem, &val);	
+}
+int sys_sem_set_invalid(sync_lock_t *sem)
+{
+
+}
+#if 0
+sys_mutex_new(mu) ERR_OK
+sys_mutex_lock(mu)
+sys_mutex_unlock(mu)
+sys_mutex_free(mu)
+sys_mutex_valid(mu) 0
+sys_mutex_set_invalid(mu)
+sys_mbox_new(m, s) ERR_OK
+sys_mbox_fetch(m,d)
+sys_mbox_tryfetch(m,d)
+sys_mbox_post(m,d)
+sys_mbox_trypost(m,d)
+sys_mbox_free(m)
+sys_mbox_valid(m)
+sys_mbox_set_invalid(m)
+#endif

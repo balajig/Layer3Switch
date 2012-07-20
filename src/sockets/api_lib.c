@@ -51,6 +51,7 @@
 #include "lwip/raw.h"
 #include "lwip/udp.h"
 #include "lwip/tcp.h"
+#include "lwip/api_msg.h"
 
 #include <string.h>
 

@@ -39,6 +39,7 @@
 #define __LWIP_OPT_H__
 #include "common_types.h"
 
+#define LWIP_COMPAT_MUTEX 1
 /*
  * Include user defined options first. Anything not defined in these files
  * will be set to standard values. Override anything you dont like!
@@ -46,6 +47,8 @@
 //#include "lwipopts.h"
 #include "lwip/debug.h"
 #define PACK_STRUCT_STRUCT __attribute__((packed))
+
+#define LWIP_PLATFORM_ASSERT(x) assert (x)
 
 
 /*
@@ -68,7 +71,7 @@
  * use lwIP facilities.
  */
 #ifndef NO_SYS
-#define NO_SYS                          1
+#define NO_SYS                          0
 #endif
 
 /**
@@ -1522,7 +1525,7 @@
  * LWIP_STATS==1: Enable statistics collection in lwip_stats.
  */
 #ifndef LWIP_STATS
-#define LWIP_STATS                      1
+#define LWIP_STATS                      0
 #endif
 
 #if LWIP_STATS

@@ -203,14 +203,13 @@ static const char rcsid[] =
  */
 
 #include "common_types.h"
-#include "ip_hdr.h"
-#include "tcp_impl.h"
-#include "udp.h"
-#include "netdb.h"
+#include "lwip/ip.h"
+#include "lwip/tcp_impl.h"
+#include "lwip/udp.h"
+#include "lwip/netdb.h"
+#include "lwip/icmp.h"
+#include "lwip/sockets.h"
 #include "ip_icmp.h"
-#include "icmp.h"
-#include "signal.h"
-#include "sockets.h"
 #include "socks.h"
 
 /* rfc1716 */

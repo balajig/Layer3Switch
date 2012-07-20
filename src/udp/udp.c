@@ -63,7 +63,7 @@
 #include "lwip/icmp6.h"
 #include "lwip/stats.h"
 #include "lwip/snmp.h"
-#include "arch/perf.h"
+//#include "arch/perf.h"
 #include "lwip/dhcp.h"
 
 #include <string.h>
@@ -162,7 +162,7 @@ udp_input(struct pbuf *p, struct interface *inp)
   u8_t broadcast;
   u8_t for_us;
 
-  PERF_START;
+  //PERF_START;
 
   UDP_STATS_INC(udp.recv);
 

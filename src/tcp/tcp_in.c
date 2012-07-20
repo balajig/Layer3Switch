@@ -54,7 +54,7 @@
 #include "lwip/inet_chksum.h"
 #include "lwip/stats.h"
 #include "lwip/snmp.h"
-#include "arch/perf.h"
+//#include "arch/perf.h"
 #include "lwip/ip6.h"
 #include "lwip/ip6_addr.h"
 #include "lwip/inet_chksum.h"
@@ -108,7 +108,7 @@ tcp_input(struct pbuf *p, struct interface *inp)
   u16_t chksum;
 #endif /* CHECKSUM_CHECK_TCP */
 
-  PERF_START;
+  //PERF_START;
 
   TCP_STATS_INC(tcp.recv);
   snmp_inc_tcpinsegs();

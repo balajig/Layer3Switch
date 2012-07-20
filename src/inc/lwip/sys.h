@@ -38,13 +38,13 @@
 extern "C" {
 #endif
 
+typedef sync_lock_t sys_sem_t;
+typedef u8_t sys_mbox_t;
 #if NO_SYS
 
 /* For a totally minimal and standalone system, we provide null
    definitions of the sys_ functions. */
-typedef u8_t sys_sem_t;
 typedef u8_t sys_mutex_t;
-typedef u8_t sys_mbox_t;
 
 #define sys_sem_new(s, c) ERR_OK
 #define sys_sem_signal(s)
@@ -221,7 +221,7 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox);
  * @param arg parameter passed to 'thread'
  * @param stacksize stack size in bytes for the new thread (may be ignored by ports)
  * @param prio priority of the new thread (may be ignored by ports) */
-sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio);
+tmtaskid_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio);
 
 #endif /* NO_SYS */
 

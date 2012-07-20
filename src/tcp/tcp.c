@@ -1658,7 +1658,7 @@ tcp_eff_send_mss_impl(u16_t sendmss, ipX_addr_t *dest
     if (outif == NULL) {
       return sendmss;
     }
-    mtu = outif->mtu;
+    mtu = outif->ifMtu;
   }
 
   if (mtu != 0) {

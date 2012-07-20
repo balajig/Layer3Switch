@@ -11,7 +11,7 @@
 
 #include "common_types.h"
 #include "libtelnet.h"
-#include "sockets.h"
+#include "lwip/sockets.h"
 #include "socks.h"
 
 #define MAX_USERS 64

@@ -11,9 +11,9 @@
 
 #include "common_types.h"
 #include "libtelnet.h"
-#include "sockets.h"
+#include "lwip/sockets.h"
 #include "socks.h"
-#include "netdb.h"
+#include "lwip/netdb.h"
 #include <termios.h>
 
 
