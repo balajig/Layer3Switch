@@ -12,6 +12,7 @@
 #include "defs.h"
 #include "cparser.h"
 #include "cparser_tree.h"
+#include <unistd.h>
 
 #define MAX_CLI_SESSION  8
 
@@ -45,7 +46,6 @@ void handle_segfault (int );
 int cli_init(const char *prmt);
 int cli_session_init(const char *prmt, int this_session, int fd);
 int start_cli_task(void);
-void install_signal_handler(int signo, void (*handler)(int));
 int set_prompt_internal(char *pmt, int len);
 int get_prompt(char *pmt);
 void print_prompt (void);
@@ -74,7 +74,8 @@ void cparser_telnet_io_config (cparser_t *parser);
 int cli_start_session (int session);
 void cparser_print_prompt (const cparser_t *parser);
 void cparser_feed (int session, int ch);
-
+int set_hostname (const char *Hostname);
+int telnet_prints (void *telnet, const char *buffer, int len);
 
 extern int show_users (void);
 int process_logout(void);
@@ -89,7 +90,7 @@ int cli_telnet_session_init (char *prmt, int fd, void *data);
 
 
 struct cli this_cli[MAX_CLI_SESSION];
-int clitskid = 0;
+tmtaskid_t clitskid = 0;
 static int gfd = 1;
 int login_sucessfull = 0;
 
@@ -235,14 +236,9 @@ void cparser_feed (int session, int ch)
 	cparser_input(&this_cli[session].parser, ch, 1);
 }
 
-void install_signal_handler (int signo, void (*handler)(int))
-{
-	signal (signo, handler);
-}
-
 static void spawn_cli_thread (int this_session)
 {
-	task_create ("CLI", 10, 3, 48000, cmdinterface, NULL, this_session, &clitskid);
+	task_create ("CLI", 10, 3, 48000, cmdinterface, NULL, (void *)this_session, &clitskid);
 }
 
 void *cmdinterface(void *unused)
@@ -335,10 +331,12 @@ void write_string (const char *str)
 
 void handle_segfault (int signo)
 {
-	write_string ("ooppppssssssss ....! System crashed ..."
-			"Am going to sleep for 10 secs debug the image\n");
-	sleep (10);
-	exit (0);
+	if (signo) {
+		write_string ("ooppppssssssss ....! System crashed ..."
+				"Am going to sleep for 10 secs debug the image\n");
+		tsk_sleep (10);
+		exit (0);
+	}
 }
 
 int get_curr_priv_level (void)
@@ -349,7 +347,7 @@ int get_curr_priv_level (void)
 	return this_cli[this_session].current_priv_level;
 }
 
-int get_curr_mode ()
+int get_curr_mode (void)
 {
 	int this_session = cli_get_cli_session_id ();
 	if (this_session  < 0)
@@ -371,7 +369,7 @@ void set_curr_priv_level (int level)
 {
 	int this_session = cli_get_cli_session_id ();
 	if (this_session  < 0)
-		return -1;
+		return;
 
 	this_cli[this_session].current_priv_level = level;
 }
@@ -400,12 +398,12 @@ void cli_set_port (int port)
 {
 	int this_session = cli_get_cli_session_id ();
 	if (this_session  < 0)
-		return -1;
+		return;
 
 	this_cli[this_session].port_no = port;
 }
 
-int cli_get_vlan_id ()
+int cli_get_vlan_id (void)
 {
 	int this_session = cli_get_cli_session_id ();
 	if (this_session  < 0)
@@ -417,10 +415,10 @@ void cli_set_vlan_id (int vlan_id)
 {
 	int this_session = cli_get_cli_session_id ();
 	if (this_session  < 0)
-		return -1;
+		return;
 	this_cli[this_session].vlanid = vlan_id;
 }
-int cli_get_port ()
+int cli_get_port (void)
 {
 	int this_session = cli_get_cli_session_id ();
 	if (this_session  < 0)
@@ -445,7 +443,7 @@ int set_current_user_name (char *user)
 	return 0;
 }
 
-char read_input ()
+char read_input (void)
 {
         char c = 0;
 	int this_session = cli_get_cli_session_id ();
@@ -531,6 +529,7 @@ int change_to_interface_mode (char **args)
 
 int change_config_mode (char **args)
 {
+	args = args;
 	set_prompt ("(config)");
 	set_curr_mode (GLOBAL_CONFIG_MODE);
 	return 0;
@@ -538,12 +537,13 @@ int change_config_mode (char **args)
 
 int end_mode (char **args)
 {
+	args = args;
 	set_prompt ("");
 	set_curr_mode (USER_EXEC_MODE);
 	return 0;
 }
 
-int exit_mode ()
+int exit_mode (void)
 {
         int mode = get_curr_mode ();
 
@@ -572,7 +572,7 @@ int cli_printf  (const char *fmt, ...)
 	va_list ap;
 
 	if ((p = malloc(size)) == NULL)
-		return NULL;
+		return 0;
 
 	while (1) {
 		/* Try to print in the allocated space. */
@@ -592,7 +592,7 @@ int cli_printf  (const char *fmt, ...)
 			size *= 2;  /* twice the old size */
 		if ((np = realloc (p, size)) == NULL) {
 			free(p);
-			return NULL;
+			return 0;
 		} else {
 			p = np;
 		}

@@ -147,6 +147,11 @@ static u8_t etharp_cached_entry;
   #error "ARP_TABLE_SIZE must fit in an s8_t, you have to reduce it in your lwipopts.h"
 #endif
 
+int etharp_init (void);
+static void arp_setup_timers (void);
+extern err_t low_level_output (struct interface *netif, struct pbuf *p);
+void ethernetif_init (struct interface *netif);
+
 
 #if ARP_QUEUEING
 /**
@@ -1422,7 +1427,7 @@ static void arp_timer (void *arg)
 }
 
 
-void arp_setup_timers (void)
+static void arp_setup_timers (void)
 {
 	setup_timer (&arptimer, arp_timer, NULL);
 	mod_timer (arptimer, ARP_TMR_INTERVAL * tm_get_ticks_per_second ());
@@ -1457,8 +1462,6 @@ int show_arp_entries (void)
 	return 0;
 
 }
-
-extern err_t low_level_output (struct interface *netif, struct pbuf *p);
 
 void ethernetif_init (struct interface *netif)
 {

@@ -138,13 +138,10 @@ static const struct zebra_desc_table route_types[] = {
 };
 
 
-static void zlog_debug (const char *p, ...)
-{
-}
+#define zlog_debug printf
+#define zlog_err   printf
 
-static void zlog_err (const char *format, ...)
-{
-
-}
+int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags);
+int connected_route_delete (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags);
 
 #endif

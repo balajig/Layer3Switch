@@ -22,6 +22,7 @@ struct dns_server_tbl {
 };
 
 extern struct dns_server_tbl  dns_servers[];
+int set_dns_server (uint32_t addr, int primary);
 
 cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context UNUSED_PARAM)
 {
@@ -34,8 +35,8 @@ cparser_result_t cparser_cmd_show_ip_dns(cparser_context_t *context UNUSED_PARAM
 	while (i < DNS_MAX_SERVERS) {
 		if (dns_servers[i].status) {
 			uint8_t  addr[4];
-			uint8_t  saddr[16];
-			uint32_2_ipstring (dns_servers[i].addr.addr, &addr);
+			char  saddr[16];
+			uint32_2_ipstring (dns_servers[i].addr.addr, &addr[0]);
 			sprintf (saddr, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
 			cli_printf ("%-20s    %-16s\n", saddr, !i? "primary":"");
 		}

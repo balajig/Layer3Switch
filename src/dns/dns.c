@@ -232,7 +232,7 @@ static TIMER_ID    dns_timer;
  * (DNS_SERVER_ADDRESS).
  */
 void
-dns_init()
+dns_init(void)
 {
   ip_addr_t dnsserver;
 

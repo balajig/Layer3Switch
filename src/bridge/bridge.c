@@ -24,8 +24,6 @@ int bridge_init (void)
 
 	stp_init ();
 
-	rstp_init ();
-
 	stpmgr_init ();
 
 	vlan_init ();

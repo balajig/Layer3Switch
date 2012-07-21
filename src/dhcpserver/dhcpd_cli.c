@@ -15,6 +15,8 @@
 #include "cparser.h"
 #include "cparser_tree.h"
 
+int dhcpd_start (void);
+
 cparser_result_t cparser_cmd_service_dhcp(cparser_context_t *context UNUSED_PARAM)
 {
 	if (dhcpd_start ())

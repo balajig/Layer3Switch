@@ -1,6 +1,5 @@
-#include <stdio.h>
+#include "common_types.h"
 #include "cparser.h"
-#include "cparser_token.h"
 #include "cparser_tree.h"
 #include "cli.h"
 
@@ -17,6 +16,8 @@ int   show_mem_pool           (void);
 int   show_cpu_usage          (void);
 int   show_mac_table          (void);
 int   debug_memory_pool       (int pool_id, int set);
+int   set_hostname            (const char *Hostname);
+cparser_result_t cparser_set_prompt (cparser_t *parser, const char *prompt);
 /**************************************************************/
 
 static cparser_result_t cparser_cmd_enter_privileged_mode (cparser_t *parser, char *buf, int buf_size);

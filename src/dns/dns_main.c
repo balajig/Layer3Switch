@@ -14,6 +14,8 @@
 #include "lwip/ip_addr.h"
 #include "lwip/dns.h"
 
+int set_dns_server (uint32_t addr, int primary);
+
 struct dns_server_tbl {
         ip_addr_t addr;
         uint32_t status;

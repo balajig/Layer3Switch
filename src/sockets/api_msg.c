@@ -743,7 +743,7 @@ static void
 lwip_netconn_do_close_internal(struct netconn *conn)
 {
   err_t err;
-  u8_t shut, shut_rx, shut_tx, close;
+  u8_t shut, shut_rx, shut_tx, clse;
 
   LWIP_ASSERT("invalid conn", (conn != NULL));
   LWIP_ASSERT("this is for tcp netconns only", (NETCONNTYPE_GROUP(conn->type) == NETCONN_TCP));
@@ -755,10 +755,10 @@ lwip_netconn_do_close_internal(struct netconn *conn)
   shut_rx = shut & NETCONN_SHUT_RD;
   shut_tx = shut & NETCONN_SHUT_WR;
   /* shutting down both ends is the same as closing */
-  close = shut == NETCONN_SHUT_RDWR;
+  clse = shut == NETCONN_SHUT_RDWR;
 
   /* Set back some callback pointers */
-  if (close) {
+  if (clse) {
     tcp_arg(conn->pcb.tcp, NULL);
   }
   if (conn->pcb.tcp->state == LISTEN) {
@@ -772,13 +772,13 @@ lwip_netconn_do_close_internal(struct netconn *conn)
     if (shut_tx) {
       tcp_sent(conn->pcb.tcp, NULL);
     }
-    if (close) {
+    if (clse) {
       tcp_poll(conn->pcb.tcp, NULL, 4);
       tcp_err(conn->pcb.tcp, NULL);
     }
   }
   /* Try to close the connection */
-  if (close) {
+  if (clse) {
     err = tcp_close(conn->pcb.tcp);
   } else {
     err = tcp_shutdown(conn->pcb.tcp, shut_rx, shut_tx);
@@ -788,7 +788,7 @@ lwip_netconn_do_close_internal(struct netconn *conn)
     conn->current_msg->err = ERR_OK;
     conn->current_msg = NULL;
     conn->state = NETCONN_NONE;
-    if (close) {
+    if (clse) {
       /* Set back some callback pointers as conn is going away */
       conn->pcb.tcp = NULL;
       /* Trigger select() in socket layer. Make sure everybody notices activity

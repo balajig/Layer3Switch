@@ -38,6 +38,10 @@
 #include "lwip/sockets.h"
 #include "socks.h"
 
+static void  * sntpd(void *arg UNUSED_PARAM);
+void init_sntpd(void);
+int set_sntp_server (char *host);
+
 #define NTP_EPOCH            (86400U * (365U * 70U + 17U))
 #define NTP_PORT             123
 #define MAX_NTP_SERVERS      16
@@ -73,10 +77,12 @@ struct ntp_packet
 	unsigned long transmit_timestamp_fraq;
 };
 
-static EVT_T sntp_event;
+//static EVT_T sntp_event;
 
 static struct ntp_server ntp_servers[MAX_NTP_SERVERS];
 static int num_ntp_servers;
+
+int sntp_get(struct ntp_server *srv, struct timeval *tv);
 
 int set_sntp_server (char *host)
 {
@@ -140,7 +146,7 @@ int sntp_get(struct ntp_server *srv, struct timeval *tv)
 	return 0;
 }
 
-void  sntpd(void *arg)
+static void  * sntpd(void *arg UNUSED_PARAM)
 {
 	int i, j;
 	struct ntp_server *srv;
@@ -184,16 +190,17 @@ void  sntpd(void *arg)
 		if (success)
 		{
 			settimeofday(&tv, NULL);
-			usleep(TIME_ADJUST_INTERVAL);
+			usleep (TIME_ADJUST_INTERVAL);
 		}
 		else
 		{
-			usleep(TIME_ADJUST_RETRY);
+			usleep (TIME_ADJUST_RETRY);
 		}
 	}
+	return NULL;
 }
 
-void init_sntpd()
+void init_sntpd(void)
 {
 	tmtaskid_t sntpdtaskid = -1;
 	int idx = 0;
@@ -212,6 +219,6 @@ void init_sntpd()
 	if (task_create ("sntp", 30, 3, 20 * 1024, sntpd, NULL, NULL,
 				&sntpdtaskid) == TSK_FAILURE) {
 		printf ("Task creation failed : %s\n", "sntp");
-		return -1;
+		return;
 	}
 }

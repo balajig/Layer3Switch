@@ -118,8 +118,6 @@ int stp_create_stp_instance (uint16_t vlan_id, struct stp_instance **p)
 
 int stp_delete_stp_instance (struct stp_instance *p)
 {
-	struct stp_port_entry *port = NULL, *next;
-
 	stp_disable (p);
 
 	list_del (&p->next);
@@ -206,11 +204,13 @@ struct stp_port_entry * stp_get_port_entry (uint16_t port)
 
 int validate_TC_bpdu (STP_BPDU_T *bpdu)
 {
+	bpdu = bpdu;
 	return 1;
 }
 
 int validate_config_bpdu (STP_BPDU_T *bpdu)
 {
+	bpdu = bpdu;
 	return 1;
 }
 

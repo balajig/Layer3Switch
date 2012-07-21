@@ -267,9 +267,6 @@ static u_char	packet[512];		/* last inbound (icmp) packet */
 static struct ip_hdr *outip;		/* last output ip packet */
 static u_char *outp;		/* last output inner protocol packet */
 
-/* loose source route gateway list (including room for final destination) */
-static u_int32_t gwlist[NGATEWAYS + 1];
-
 static int s;				/* receive (icmp) socket file descriptor */
 static int sndsock;			/* send (udp) socket file descriptor */
 
@@ -278,32 +275,25 @@ static struct sockaddr whereto;	/* Who to try to reach */
 static struct sockaddr wherefrom;	/* Who we are */
 static int packlen;			/* total length of packet */
 static int protlen;			/* length of protocol part of packet */
-static int minpacket;			/* min ip packet size */
-static int maxpacket = 32 * 1024;	/* max ip packet size */
+//static int minpacket;			/* min ip packet size */
+//static int maxpacket = 32 * 1024;	/* max ip packet size */
 static int pmtu;			/* Path MTU Discovery (RFC1191) */
 static u_int pausemsecs;
 
 static char *prog;
 static char *source;
-static char *device;
 static  const char devnull[] = "/dev/null";
 
 static int nprobes = 3;
 static int max_ttl;
 static int first_ttl = 1;
 static u_short ident;
-static u_short port;			/* protocol specific base "port" */
 
 static int options;			/* socket options */
 static int verbose;
 static int waittime = 5;		/* time to wait for response (in seconds) */
 static int nflag;			/* print addresses numerically */
 static int disable_seq = 0;
-#ifdef CANT_HACK_IPCKSUM
-static int doipcksum = 0;		/* don't calculate ip checksums by default */
-#else
-static int doipcksum = 1;		/* calculate ip checksums by default */
-#endif
 static int optlen;			/* length of ip options */
 
 extern int optind;
@@ -320,7 +310,7 @@ char	*inetname(struct in_addr);
 int	main(int, char **);
 u_short p_cksum(struct ip_hdr *, u_short *, int);
 int	packet_ok(u_char *, int, struct sockaddr_in *, int);
-char	*pr_type(u_char);
+const char	*pr_type(u_char);
 void	print(u_char *, int, struct sockaddr_in *);
 #ifdef	IPSEC
 int	setpolicy __P((int so, char *policy));
@@ -344,10 +334,17 @@ void	gen_prep(struct outdata *);
 int	gen_check(const u_char *, int);
 void	icmp_prep(struct outdata *);
 int	icmp_check(const u_char *, int);
+void    setsin(register struct sockaddr_in *sin, register u_int32_t addr);
+int     do_traceroute (char *trcdest);
+if_t *  route_lookup (uint32_t ip);
+/*FIXME: Fixme Don't use system call :(*/
+int gethostname(char *name, size_t len);
+struct hostent *gethostbyaddr(const void *addr,
+		socklen_t len, int type);
 
 /* Descriptor structure for each outgoing protocol we support */
 struct outproto {
-	char	*name;		/* name of protocol */
+	const char  *name;		/* name of protocol */
 	u_char	num;		/* IP protocol number */
 	u_short	hdrlen;		/* max size of protocol header */
 	u_short	port;		/* default base protocol-specific "port" */
@@ -409,21 +406,17 @@ struct	outproto *proto = &protos[0];
 
 int do_traceroute (char *trcdest)
 {
-	register int op, code, n;
-	register char *cp;
-	register const char *err;
-	register u_int32_t *ap;
+	register int code;
 	register struct sockaddr_in *from = (struct sockaddr_in *)&wherefrom;
 	register struct sockaddr_in *to = (struct sockaddr_in *)&whereto;
-	register struct hostinfo *hi;
 	int on = 1;
 	register int ttl, probe, i;
 	register int seq = 0;
 	int tos = 0, settos = 0;
+#if defined(IP_OPTIONS) && !defined(HAVE_RAW_OPTIONS)
 	register int lsrr = 0;
+#endif
 	register u_short off = 0;
-	char errbuf[132];
-	int requestPort = -1;
 	int sump = 0;
 	int sockerrno = 0;
 	if_t * netif = NULL;
@@ -470,7 +463,7 @@ int do_traceroute (char *trcdest)
 
 	IPH_VHL_SET(outip, IPVERSION, (outp - (u_char *)outip) >> 2);
 	IPH_TOS_SET(outip, 0);
-	ident = (getpid() & 0xffff) | 0x8000;
+	ident = (get_tsk_pid() & 0xffff) | 0x8000;
 
 	if (s < 0) {
 		errno = sockerrno;
@@ -754,7 +747,6 @@ wait_for_reply(register int sock, register struct sockaddr_in *fromp,
 	struct timeval now, wait;
 	struct timezone tz;
 	register int cc = 0;
-	register int error;
 	socklen_t fromlen = sizeof(*fromp);
 
 	nfds = howmany(sock + 1, NFDBITS);
@@ -862,7 +854,7 @@ deltaT(struct timeval *t1p, struct timeval *t2p)
 /*
  * Convert an ICMP "type" field to a printable string.
  */
-char *
+const char *
 pr_type(register u_char t)
 {
 	static const char *ttab[] = {
@@ -1202,7 +1194,7 @@ inetname(struct in_addr in)
 }
 
 struct hostinfo *
-gethostinfo(register char *hostname)
+gethostinfo(register char *hname)
 {
 	register int n;
 	register struct hostent *hp;
@@ -1210,38 +1202,38 @@ gethostinfo(register char *hostname)
 	register char **p;
 	register u_int32_t addr, *ap;
 
-	if (strlen(hostname) > 64) {
+	if (strlen(hname) > 64) {
 		Fprintf(stderr, "%s: hostname \"%.32s...\" is too long\n",
-		    prog, hostname);
-		return (1);
+		    prog, hname);
+		return NULL;
 	}
 	hi = calloc(1, sizeof(*hi));
 	if (hi == NULL) {
 		Fprintf(stderr, "%s: calloc %s\n", prog, strerror(errno));
-		return (1);
+		return NULL;
 	}
-	addr = inet_addr(hostname);
+	addr = inet_addr(hname);
 	if ((int32_t)addr != -1) {
-		hi->name = strdup(hostname);
+		hi->name = strdup(hname);
 		hi->n = 1;
 		hi->addrs = calloc(1, sizeof(hi->addrs[0]));
 		if (hi->addrs == NULL) {
 			Fprintf(stderr, "%s: calloc %s\n",
 			    prog, strerror(errno));
-			return (1);
+			return NULL;
 		}
 		hi->addrs[0] = addr;
 		return (hi);
 	}
 
-	hp = gethostbyname(hostname);
+	hp = gethostbyname(hname);
 	if (hp == NULL) {
-		Fprintf(stderr, "%s: unknown host %s\n", prog, hostname);
-		return (1);
+		Fprintf(stderr, "%s: unknown host %s\n", prog, hname);
+		return NULL;
 	}
 	if (hp->h_addrtype != AF_INET || hp->h_length != 4) {
-		Fprintf(stderr, "%s: bad host %s\n", prog, hostname);
-		return (1);
+		Fprintf(stderr, "%s: bad host %s\n", prog, hname);
+		return NULL;
 	}
 	hi->name = strdup(hp->h_name);
 	for (n = 0, p = hp->h_addr_list; *p != NULL; ++n, ++p)
@@ -1250,7 +1242,7 @@ gethostinfo(register char *hostname)
 	hi->addrs = calloc(n, sizeof(hi->addrs[0]));
 	if (hi->addrs == NULL) {
 		Fprintf(stderr, "%s: calloc %s\n", prog, strerror(errno));
-		return (1);
+		return NULL;
 	}
 	for (ap = hi->addrs, p = hp->h_addr_list; *p != NULL; ++ap, ++p)
 		memcpy(ap, *p, sizeof(*ap));
@@ -1269,11 +1261,11 @@ freehostinfo(register struct hostinfo *hi)
 }
 
 void
-getaddr(register u_int32_t *ap, register char *hostname)
+getaddr(register u_int32_t *ap, register char *hname)
 {
 	register struct hostinfo *hi;
 
-	hi = gethostinfo(hostname);
+	hi = gethostinfo(hname);
 	*ap = hi->addrs[0];
 	freehostinfo(hi);
 }

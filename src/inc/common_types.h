@@ -11,8 +11,10 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <getopt.h>
+#include <unistd.h>
 #include "os_defs.h"
 
+#define UNUSED_PARAM  __attribute__((unused))
 #ifndef STDIN_FILENO
 # define STDIN_FILENO    0
 #endif

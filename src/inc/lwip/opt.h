@@ -2421,4 +2421,6 @@
 #define IP6_DEBUG                       LWIP_DBG_OFF
 #endif
 
+
+#define LWIP_TIMERS (!NO_SYS || (NO_SYS && !NO_SYS_NO_TIMERS))
 #endif /* __LWIP_OPT_H__ */

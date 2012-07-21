@@ -9,14 +9,17 @@
 #include <mqueue.h>
 #include <stdint.h>
 #include <getopt.h>
+#include <unistd.h>
 #define LWIP_COMPAT_SOCKETS 0
 #include "common_types.h"
 #include "ifmgmt.h"
 #include "cli.h"
-#include "lwip/sockets.h"
+//#include "lwip/sockets.h"
 #include <mqueue.h>
 #include <stdint.h>
 #include <getopt.h>
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
 #include <net/ethernet.h> /* the L2 protocols */
 
 

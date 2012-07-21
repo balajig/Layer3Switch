@@ -1,5 +1,7 @@
 #include "lwip/opt.h"
 #include "lwip/init.h"
+#include "lwip/mem.h"
+#include "lwip/memp.h"
 
 int lib_init (void);
 int cli_init (const char *prmt);
@@ -13,6 +15,16 @@ int start_cli_task (void);
 void layer3switch_init (void);
 int etharp_init (void);
 int rtm_init (void);
+int ip_init (void);
+void udp_init(void);
+void tcp_init(void);
+void snmp_init(void);
+int dhcpd_init (void);
+void igmp_init(void);
+void dns_init(void);
+void init_sntpd(void);
+int telnet_init (void);
+
 
 #ifndef CONFIG_OPENSWITCH_TCP_IP
 #define etharp_init()
@@ -41,7 +53,6 @@ void layer3switch_init (void)
 #ifdef CONFIG_ZEBRA_RTM
 	rtm_init ();
 #endif  /* RTM_SUPPORT */
-	tcpip_init (NULL, NULL);
 
         port_init ();
 

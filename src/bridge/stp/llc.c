@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "stp_info.h"
+#include "lwip/def.h"
 
 int llc_mac_hdr_init (uint8_t *pkt, const uint8_t *daddr, const uint8_t *saddr, int type, int len)
 {
@@ -37,7 +38,7 @@ int llc_mac_hdr_init (uint8_t *pkt, const uint8_t *daddr, const uint8_t *saddr, 
         return -1;
 }
 
-void llc_pdu_header_init(uint8_t *pkt, uint8_t type, uint8_t ssap, uint8_t dsap, uint8_t cr)
+void llc_pdu_header_init(uint8_t *pkt, uint8_t type UNUSED_PARAM, uint8_t ssap, uint8_t dsap, uint8_t cr)
 {
         struct llc_pdu_un *pdu = (struct llc_pdu_un *)pkt;
         pdu->dsap = dsap;

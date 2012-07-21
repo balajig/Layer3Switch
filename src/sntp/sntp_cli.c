@@ -14,15 +14,19 @@
 #include "cparser.h"
 #include "cparser_tree.h"
 
-cparser_result_t cparser_cmd_show_ntp_associations(cparser_context_t *context )
-{
+int set_sntp_server (char *host);
 
-}
-cparser_result_t cparser_cmd_show_ntp_status(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_ntp_associations(cparser_context_t *context UNUSED_PARAM)
 {
-
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_show_clock(cparser_context_t *context)
+cparser_result_t cparser_cmd_show_ntp_status(cparser_context_t *context UNUSED_PARAM)
+{
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
+}
+cparser_result_t cparser_cmd_show_clock(cparser_context_t *context UNUSED_PARAM)
 {
 	char buf[64];                                                                   
 	struct timeval tv;                                                                 
@@ -32,18 +36,20 @@ cparser_result_t cparser_cmd_show_clock(cparser_context_t *context)
 	curtime = tv.tv_sec;                                                                 
 	strftime (buf, sizeof(buf), "%a %b %e %H:%M:%S %Z %Y", localtime(&curtime));                           
 	printf("%s\n", buf);                                               
-	return 0;          
+	return CPARSER_OK;          
 }
-cparser_result_t cparser_cmd_config_ntp_server_hostname_servername(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_ntp_server_hostname_servername(cparser_context_t *context UNUSED_PARAM,
  							   char **servername_ptr)
 {
-
+	*servername_ptr = *servername_ptr;
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_config_ntp_server_serveripaddr(cparser_context_t *context,
+cparser_result_t cparser_cmd_config_ntp_server_serveripaddr(cparser_context_t *context UNUSED_PARAM,
  							   uint32_t *serveripaddr_ptr)
 {
         uint8_t  addr[4];
-        uint8_t  str[10];
+        char  str[10];
 
         uint32_2_ipstring (ntohl(*serveripaddr_ptr), addr);
 
@@ -53,34 +59,43 @@ cparser_result_t cparser_cmd_config_ntp_server_serveripaddr(cparser_context_t *c
 		return CPARSER_NOT_OK;
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_config_ntp_source_portnum(cparser_context_t *context,
- 							int32_t *portnum_ptr)
+cparser_result_t cparser_cmd_config_ntp_source_portnum(cparser_context_t *context UNUSED_PARAM,
+ 							int32_t *portnum_ptr UNUSED_PARAM)
 {
-}
-cparser_result_t cparser_cmd_config_ntp_update_calendar(cparser_context_t *context)
-{
-}
-cparser_result_t cparser_cmd_config_clock_timezone_zone_hours_mintues(cparser_context_t *context,
- 								      char **zone_ptr,
-								      int32_t *hours_ptr,
-								       int32_t *mintues_ptr)
-{
-
-}
-cparser_result_t cparser_cmd_config_clock_set_hours_mintues_secs_date_month_year(cparser_context_t *context,
- 										 int32_t *hours_ptr,
- 										 int32_t *mintues_ptr,
-										 int32_t *secs_ptr,
-										 int32_t *date_ptr,
-										 int32_t *month_ptr,
-										 int32_t *year_ptr)
-{
-
-}
-cparser_result_t cparser_cmd_config_ntp_client_enable(cparser_context_t *context)
-{
+	cli_printf ("Not Implemented\n");
 	return CPARSER_OK;
 }
-cparser_result_t cparser_cmd_config_ntp_client_disable(cparser_context_t *context)
+cparser_result_t cparser_cmd_config_ntp_update_calendar(cparser_context_t *context UNUSED_PARAM)
 {
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
+}
+cparser_result_t cparser_cmd_config_clock_timezone_zone_hours_mintues(cparser_context_t *context UNUSED_PARAM,
+ 								      char **zone_ptr UNUSED_PARAM,
+								      int32_t *hours_ptr UNUSED_PARAM,
+								       int32_t *mintues_ptr UNUSED_PARAM)
+{
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
+}
+cparser_result_t cparser_cmd_config_clock_set_hours_mintues_secs_date_month_year(cparser_context_t *context UNUSED_PARAM,
+ 										 int32_t *hours_ptr UNUSED_PARAM,
+ 										 int32_t *mintues_ptr UNUSED_PARAM,
+										 int32_t *secs_ptr UNUSED_PARAM,
+										 int32_t *date_ptr UNUSED_PARAM,
+										 int32_t *month_ptr UNUSED_PARAM,
+										 int32_t *year_ptr UNUSED_PARAM)
+{
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
+}
+cparser_result_t cparser_cmd_config_ntp_client_enable(cparser_context_t *context UNUSED_PARAM)
+{
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
+}
+cparser_result_t cparser_cmd_config_ntp_client_disable(cparser_context_t *context UNUSED_PARAM)
+{
+	cli_printf ("Not Implemented\n");
+	return CPARSER_OK;
 }

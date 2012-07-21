@@ -18,6 +18,7 @@ PORTID stp_make_port_id(uint8_t priority, uint16_t port_no);
 struct stp_instance * get_this_bridge_entry (uint16_t vlan_id);
 static void stp_init_port(struct stp_port_entry *p);
 int stp_is_mac_learning_allowed (int port);
+int bridge_timer_relation (int fdelay, int max_age, int hello);
 
 extern struct stp_instance stp_global_instance;
 extern struct list_head  stp_instance_head;

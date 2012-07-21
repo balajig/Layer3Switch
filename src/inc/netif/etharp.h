@@ -212,6 +212,7 @@ err_t ethernet_input(struct pbuf *p, struct interface *netif);
 #define eth_addr_cmp(addr1, addr2) (memcmp((addr1)->addr, (addr2)->addr, ETHARP_HWADDR_LEN) == 0)
 
 extern const struct eth_addr ethbroadcast, ethzero;
+extern int show_arp_entries (void);
 
 #endif /* LWIP_ARP || LWIP_ETHERNET */
 
