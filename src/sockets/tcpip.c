@@ -70,6 +70,7 @@ sys_mutex_t lock_tcpip_core;
  *
  * @param arg unused argument
  */
+#if 0
 static void
 tcpip_thread(void *arg)
 {
@@ -153,7 +154,7 @@ tcpip_thread(void *arg)
     }
   }
 }
-
+#endif
 /**
  * Pass a received packet to tcpip_thread for input processing
  *
@@ -435,7 +436,7 @@ tcpip_trycallback(struct tcpip_callback_msg* msg)
 void
 tcpip_init(tcpip_init_done_fn initfunc, void *arg)
 {
-  tmtaskid_t tcpthread;
+  //tmtaskid_t tcpthread;
   //lwip_init();
 
   tcpip_init_done = initfunc;
@@ -449,7 +450,10 @@ tcpip_init(tcpip_init_done_fn initfunc, void *arg)
   }
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
+  return; 
+#if 0
   task_create (TCPIP_THREAD_NAME, TCPIP_THREAD_PRIO, 3, TCPIP_THREAD_STACKSIZE,tcpip_thread, NULL, NULL, &tcpthread);
+#endif
 }
 
 /**

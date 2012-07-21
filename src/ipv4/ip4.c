@@ -93,6 +93,7 @@
 #define IP_ACCEPT_LINK_LAYER_ADDRESSING 0
 #endif /* LWIP_DHCP */
 
+if_t *route_lookup (uint32_t ip);
 /** Global data for both IPv4 and IPv6 */
 struct ip_globals ip_data;
 
@@ -111,6 +112,7 @@ static u16_t ip_id;
 struct interface *
 ip_route(ip_addr_t *dest)
 {
+#if 0
   struct interface *netif;
 
 #ifdef LWIP_HOOK_IP4_ROUTE
@@ -120,7 +122,7 @@ ip_route(ip_addr_t *dest)
   }
 #endif
 
-#if 0
+
   /* iterate through netifs */
   for (netif = netif_list; netif != NULL; netif = netif->next) {
     /* network mask matches? */
@@ -239,6 +241,8 @@ ip_forward(struct pbuf *p, struct ip_hdr *iphdr, struct interface *inp)
     LWIP_DEBUGF(IP_DEBUG, ("ip_forward: not bouncing packets back on incoming interface.\n"));
     goto return_noroute;
   }
+#else
+  inp = inp;
 #endif /* IP_FORWARD_ALLOW_TX_ON_RX_NETIF */
 
   /* decrement TTL */

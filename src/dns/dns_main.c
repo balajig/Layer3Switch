@@ -30,8 +30,6 @@ void dns_db_init (void)
 {
 	memset (dns_servers, 0, sizeof(dns_servers));
 
-	/*Create UDP sock for DNS*/
-	dns_socket_init ();
 
 }
 

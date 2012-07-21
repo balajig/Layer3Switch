@@ -266,12 +266,12 @@ autoip_bind(struct interface *netif)
   IP4_ADDR(&sn_mask, 255, 255, 0, 0);
   IP4_ADDR(&gw_addr, 0, 0, 0, 0);
 
-  netif_set_ipaddr(netif, &autoip->llipaddr);
-  netif_set_netmask(netif, &sn_mask);
-  netif_set_gw(netif, &gw_addr);  
+  if_set_ipaddr(netif, &autoip->llipaddr);
+  if_set_netmask(netif, &sn_mask);
+  if_set_gw(netif, &gw_addr);  
 
   /* bring the interface up */
-  netif_set_up(netif);
+  if_set_up(netif);
 
   return ERR_OK;
 }
@@ -392,7 +392,7 @@ void
 autoip_tmr()
 {
   struct interface *netif = NULL;
-   int max_ports = get_max_phy_ports () , i = 0;
+   int max_ports = get_max_ports () , i = 0;
   /* loop through netif's */
   while (i < max_ports) {
      netif = &port_cdb[i];

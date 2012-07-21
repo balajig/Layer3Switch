@@ -347,20 +347,22 @@ static void ping(const char *host)
 
 	memset(&pingaddr, 0, sizeof(struct sockaddr_in));
 
-	if ((pingsock = socket (AF_INET, SOCK_RAW,IP_PROTO_ICMP)) < 0) {	/* 1 == ICMP */
-		return;
+	if (pingsock == -1) {
+		if ((pingsock = socket (AF_INET, SOCK_RAW,IP_PROTO_ICMP)) < 0) {	/* 1 == ICMP */
+			return;
+		}
+
+		/* enable broadcast pings */
+		sockopt = 1;
+		setsockopt(pingsock, SOL_SOCKET, SO_BROADCAST, (char *) &sockopt,
+				sizeof(sockopt));
+
+		/* set recv buf for broadcast pings */
+		sockopt = 48 * 1024;
+		setsockopt(pingsock, SOL_SOCKET, SO_RCVBUF, (char *) &sockopt,
+				sizeof(sockopt));
+
 	}
-
-	/* enable broadcast pings */
-	sockopt = 1;
-	setsockopt(pingsock, SOL_SOCKET, SO_BROADCAST, (char *) &sockopt,
-			sizeof(sockopt));
-
-	/* set recv buf for broadcast pings */
-	sockopt = 48 * 1024;
-	setsockopt(pingsock, SOL_SOCKET, SO_RCVBUF, (char *) &sockopt,
-			sizeof(sockopt));
-
 	pingaddr.sin_family = AF_INET;
 	if (!(h = gethostbyname(host))) {
 		cli_printf("ping: unknown host %s\n", host);
@@ -373,7 +375,6 @@ static void ping(const char *host)
 		close (pingsock);
 		return;
 	}
-
 	pingaddr.sin_family = AF_INET;	/* h->h_addrtype */
 	memcpy(&pingaddr.sin_addr, h->h_addr, sizeof(pingaddr.sin_addr));
 	strncpy(buf, h->h_name, sizeof(buf) - 1);
@@ -434,7 +435,7 @@ static void ping(const char *host)
 	}
 
 	pingstats (0);
-	close (pingsock);
+	//close (pingsock);
 }
 int ping_me (char *host)
 {

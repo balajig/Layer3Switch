@@ -2200,28 +2200,28 @@
  * API_LIB_DEBUG: Enable debugging in api_lib.c.
  */
 #ifndef API_LIB_DEBUG
-#define API_LIB_DEBUG                   LWIP_DBG_OFF
+#define API_LIB_DEBUG                   LWIP_DBG_ON
 #endif
 
 /**
  * API_MSG_DEBUG: Enable debugging in api_msg.c.
  */
 #ifndef API_MSG_DEBUG
-#define API_MSG_DEBUG                   LWIP_DBG_OFF
+#define API_MSG_DEBUG                   LWIP_DBG_ON
 #endif
 
 /**
  * SOCKETS_DEBUG: Enable debugging in sockets.c.
  */
 #ifndef SOCKETS_DEBUG
-#define SOCKETS_DEBUG                   LWIP_DBG_OFF
+#define SOCKETS_DEBUG                   LWIP_DBG_ON
 #endif
 
 /**
  * ICMP_DEBUG: Enable debugging in icmp.c.
  */
 #ifndef ICMP_DEBUG
-#define ICMP_DEBUG                      LWIP_DBG_OFF
+#define ICMP_DEBUG                      LWIP_DBG_ON
 #endif
 
 /**

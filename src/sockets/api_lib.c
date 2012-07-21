@@ -332,7 +332,7 @@ netconn_accept(struct netconn *conn, struct netconn **new_conn)
   /* Let the stack know that we have accepted the connection. */
   msg.msg.conn = conn;
   /* don't care for the return value of lwip_netconn_do_recv */
-  TCPIP_APIMSG_NOERR(&msg, lwip_netconn_do_recv);
+  lwip_netconn_do_recv(&msg.msg);
 #endif /* TCP_LISTEN_BACKLOG */
 
   *new_conn = newconn;
@@ -403,7 +403,7 @@ netconn_recv_data(struct netconn *conn, void **new_buf)
         msg.msg.msg.r.len = 1;
       }
       /* don't care for the return value of lwip_netconn_do_recv */
-      TCPIP_APIMSG_NOERR(&msg, lwip_netconn_do_recv);
+      lwip_netconn_do_recv(&msg.msg);
     }
 
     /* If we are closed, we indicate that we no longer wish to use the socket */
@@ -541,7 +541,7 @@ netconn_recved(struct netconn *conn, u32_t length)
     msg.msg.conn = conn;
     msg.msg.msg.r.len = length;
     /* don't care for the return value of lwip_netconn_do_recv */
-    TCPIP_APIMSG_NOERR(&msg, lwip_netconn_do_recv);
+    lwip_netconn_do_recv (&msg.msg);
   }
 #else /* LWIP_TCP */
   LWIP_UNUSED_ARG(conn);
@@ -780,7 +780,7 @@ netconn_gethostbyname(const char *name, ip_addr_t *addr)
   msg.err = &err;
   msg.sem = &sem;
 
-  tcpip_callback(lwip_netconn_do_gethostbyname, &msg);
+  lwip_netconn_do_gethostbyname(&msg);
   sys_sem_wait(&sem);
   sys_sem_free(&sem);
 
