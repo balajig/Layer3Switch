@@ -70,8 +70,14 @@ int change_to_interface_mode(char **args);
 int change_config_mode(char **args);
 int end_mode(char **args);
 int exit_mode(void);
+void cparser_telnet_io_config (cparser_t *parser);
+int cli_start_session (int session);
+void cparser_print_prompt (const cparser_t *parser);
+void cparser_feed (int session, int ch);
+
+
 extern int show_users (void);
-int process_logout();
+int process_logout(void);
 int process_lock (void);
 extern int show_cpu_usage (void);
 extern int show_mem_pool (void);
@@ -224,7 +230,7 @@ int cli_start_session (int session)
 	return 0;
 }
 
-cparser_feed (int session, int ch)
+void cparser_feed (int session, int ch)
 {
 	cparser_input(&this_cli[session].parser, ch, 1);
 }

@@ -49,7 +49,7 @@
 #define PACK_STRUCT_STRUCT __attribute__((packed))
 
 #define LWIP_PLATFORM_ASSERT(x) assert (x)
-
+#define LWIP_DHCP_BOOTP_FILE 0
 
 /*
    -----------------------------------------------
@@ -1670,6 +1670,7 @@
 #define IP6_FRAG_STATS                  0
 #define MLD6_STATS                      0
 #define ND6_STATS                       0
+#define ETHARP_STATS                    0
 
 #endif /* LWIP_STATS */
 
