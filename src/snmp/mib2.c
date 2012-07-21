@@ -117,7 +117,7 @@ static void snmp_get_object_def(u8_t ident_len, s32_t *ident, struct obj_def *od
 static void snmp_get_value(struct obj_def *od, u16_t len, void *value);
 static u8_t snmp_set_test(struct obj_def *od, u16_t len, void *value);
 static void snmp_set_value(struct obj_def *od, u16_t len, void *value);
-
+void objectidncpy(s32_t *dst, s32_t *src, u8_t n);
 
 /* snmp .1.3.6.1.2.1.11 */
 const mib_scalar_node snmp_scalar = {

@@ -106,6 +106,9 @@ snmp_ifindextonetif(s32_t ifindex, struct interface **netif)
     i++;
   }
   *netif = nif;
+#else
+	ifindex = ifindex;
+	netif = netif;
 #endif
 }
 
@@ -128,6 +131,9 @@ snmp_netiftoifindex(struct interface *netif, s32_t *ifidx)
     i++;
   }
   *ifidx = i+1;
+#else
+  netif = netif;
+  ifidx = ifidx;
 #endif
 }
 

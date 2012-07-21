@@ -86,7 +86,7 @@ void write_config_to_start_up (char *line);
 int user_db_init (void);
 struct cli * cli_get_new_session (void);
 int cli_get_cli_session_id (void);
-int cli_telnet_session_init (char *prmt, int fd, void *data);
+int cli_telnet_session_init (const char *prmt, int fd, void *data);
 
 
 struct cli this_cli[MAX_CLI_SESSION];
@@ -173,7 +173,7 @@ int cli_get_cli_session_id (void)
 
 }
 
-int cli_telnet_session_init (char *prmt, int fd, void *data)
+int cli_telnet_session_init (const char *prmt, int fd, void *data)
 {
 	struct cli *cli_session = NULL;
 

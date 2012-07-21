@@ -28,6 +28,12 @@ struct telnet_session_t {
 	char linebuf[256];
 	int linepos;
 };
+void cparser_feed (int session, int ch);
+static void  * telnet_task (void *arg);
+int cli_telnet_session_init (const char *prmt, int fd, void *data);
+int cli_start_session (int session);
+int telnet_init (void);
+static void * telnetd (void *arg) ;
 
 static void _send(int sock, const char *buffer, unsigned int size) {
 	int rs;
@@ -57,9 +63,9 @@ static void _send(int sock, const char *buffer, unsigned int size) {
 }
 
 /* process input line */
+#if 0
 static void _online(const char *line, int overflow, void *ud) {
 	struct telnet_session_t *user = (struct telnet_session_t*)ud;
-	int i;
 	/* if line is "quit" then, well, quit */
 	if (strcmp(line, "quit") == 0) {
 		close(user->sock);
@@ -67,10 +73,11 @@ static void _online(const char *line, int overflow, void *ud) {
 		return;
 	}
 }
-
+#endif
 static void _input(struct telnet_session_t *user, const char *buffer,
 		unsigned int size) {
 	unsigned int i;
+	user = user;
 	for (i = 0; i != size; ++i) {
 		if (buffer[i] != '\r' && (int)buffer[i] != 0)
 			cparser_feed (1, (char)buffer[i]);
@@ -107,7 +114,7 @@ static void _event_handler(telnet_t *telnet, telnet_event_t *ev,
 	}
 }
 
-void telnet_task (void *arg)
+static void  * telnet_task (void *arg)
 {
 	int s = (int) arg;
 	int session = -1;
@@ -121,7 +128,7 @@ void telnet_task (void *arg)
 	new->telnet = telnet;
 	new->sock = s;
 	if ((session = cli_telnet_session_init ("telent@OpenSwitch",  s, telnet)) < 0)
-		return -1;
+		return NULL;
 
 	telnet_negotiate(telnet, TELNET_WILL, TELNET_TELOPT_COMPRESS2);
 
@@ -144,15 +151,15 @@ void telnet_task (void *arg)
 #endif
 		}
 	}
+	return NULL;
 }
 
 
-void * telnetd (void *arg) 
+static void * telnetd (void *arg UNUSED_PARAM) 
 {
 	short listen_port;
 	int listen_sock;
 	int rs;
-	int i;
 	struct sockaddr_in addr;
 	socklen_t addrlen;
 	tmtaskid_t  hthread = -1;
@@ -162,7 +169,7 @@ void * telnetd (void *arg)
 	/* create listening socket */
 	if ((listen_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		fprintf(stderr, "socket() failed\n");
-		return 1;
+		return NULL;;
 	}
 
 	/* reuse address option */
@@ -176,13 +183,13 @@ void * telnetd (void *arg)
 	addr.sin_port = htons(listen_port);
 	if (bind(listen_sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
 		fprintf(stderr, "bind() failed\n");
-		return 1;
+		return NULL;
 	}
 
 	/* listen for clients */
 	if (listen(listen_sock, 5) == -1) {
 		fprintf(stderr, "listen() failed\n");
-		return 1;
+		return NULL;
 	}
 
 	/* loop for ever */
@@ -193,7 +200,7 @@ void * telnetd (void *arg)
 		if ((rs = accept(listen_sock, (struct sockaddr *)&addr,
 						&addrlen)) == -1) {
 			fprintf(stderr, "accept() failed\n");
-			return 1;
+			return NULL;
 		}
 
 		if (task_create ("telnet", 30, 3, 48 * 1024, telnet_task, NULL, (void *)rs, 
@@ -202,7 +209,7 @@ void * telnetd (void *arg)
 		}
 	}
 	/* not that we can reach this, but GCC will cry if it's not here */
-	return 0;
+	return NULL;
 }
 
 int telnet_init (void)
@@ -213,4 +220,5 @@ int telnet_init (void)
 		printf ("Task creation failed : %s\n", "telnetd");
 		return -1;
 	}
+	return 0;
 }
