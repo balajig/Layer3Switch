@@ -16,16 +16,16 @@ enum GET_IF {
 static struct interface * get_if (void *key, uint8_t key_type);
 
 /* Interface existance check by index. */
-struct interface * if_lookup_by_index (unsigned int index)
+struct interface * if_lookup_by_index (unsigned int idx)
 {
-	return get_if ((void *)index, GET_IF_BY_IFINDEX);
+	return get_if ((void *)idx, GET_IF_BY_IFINDEX);
 }
 
-const char * ifindex2ifname (unsigned int index)
+const char * ifindex2ifname (unsigned int idx)
 {
 	struct interface *ifp;
 
-	return ((ifp = if_lookup_by_index(index)) != NULL) ?
+	return ((ifp = if_lookup_by_index(idx)) != NULL) ?
 		ifp->ifDescr : "unknown";
 }
 
@@ -129,29 +129,25 @@ int if_is_operative (struct interface *ifp)
 /* Is this loopback interface ? */
 int if_is_loopback (struct interface *ifp)
 {
-	//return (ifp->flags & (IFF_LOOPBACK|IFF_NOXMIT|IFF_VIRTUAL));
-	return 0;
+	return ifp->flags & NETIF_FLAG_LOOPBACK;
 }
 
 /* Does this interface support broadcast ? */
 int if_is_broadcast (struct interface *ifp)
 {
-	//return ifp->flags & IFF_BROADCAST;
-	return 1;
+	return ifp->flags & NETIF_FLAG_BROADCAST;
 }
 
 /* Does this interface support broadcast ? */
 int if_is_pointopoint (struct interface *ifp)
 {
-	//return ifp->flags & IFF_POINTOPOINT;
-	return 1;
+	return ifp->flags & NETIF_FLAG_POINTTOPOINT;
 }
 
 /* Does this interface support multicast ? */
 int if_is_multicast (struct interface *ifp)
 {
-	//return ifp->flags & IFF_MULTICAST;
-	return 1;
+	return ifp->flags & NETIF_FLAG_MULTICAST;
 }
 
 static struct interface * get_if (void *key, uint8_t key_type)

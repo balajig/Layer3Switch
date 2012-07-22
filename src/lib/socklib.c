@@ -65,16 +65,24 @@ static int maxsockfd;
 
 static int udp_sock_register (struct sock_client *client);
 static SOCK_T * alloc_new_sock_layer  (void);
+int sock_mgr_init (void);
+static void  * sockmgr (void *arg UNUSED_PARAM);
+void sock_client_init (struct sock_client *client);
+int sock_client_register (struct sock_client *client);
+int tcp_sock_register (void);
+static int udp_sock_register (struct sock_client *client);
+int udp_v4_create (struct sockaddr_in *addr);
+int udp_v4_connect (int sock, struct sockaddr_in *addr);
+int udp_close (int sock);
+void release_sock_layer (SOCK_T *p);
 
-
-
-static sock_process_rfds (fd_set *sock_rfds)
+static void sock_process_rfds (fd_set *rfds)
 {
 	int i = 0;
 
 	while (i < MAX_SOCK_LAYER) {
 		if (sock_layer[i]) {
-			if (FD_ISSET (sock_layer[i]->sock_id, sock_rfds)) {
+			if (FD_ISSET (sock_layer[i]->sock_id, rfds)) {
 				void *buf = malloc (sock_layer[i]->client.datalen);
 				read (sock_layer[i]->sock_id, buf, sock_layer[i]->client.datalen); 
 				sock_layer[i]->client.sock_data_cb (buf, sock_layer[i]->client.arg); 
@@ -84,12 +92,11 @@ static sock_process_rfds (fd_set *sock_rfds)
 	}
 }
 
-static void sockmgr (void *arg)
+static void  * sockmgr (void *arg UNUSED_PARAM)
 {
 	fd_set rfds;
 	fd_set wfds;
 	fd_set efds;
-	struct timeval tv;
 	int retval;
 
 	while (1) {
@@ -114,6 +121,7 @@ static void sockmgr (void *arg)
 		sock_process_efds (&efds);
 #endif
 	}
+	return NULL;
 }
 
 int sock_mgr_init (void)
@@ -127,12 +135,13 @@ int sock_mgr_init (void)
 		printf ("Task creation failed : SockMgr\n");
 		return -1;
 	}
+	return 0;
 }
 
 void sock_client_init (struct sock_client *client)
 {
 	if (!client)
-		return 0;
+		return;
 	memset (client, 0, sizeof (*client));
 }
 
@@ -177,10 +186,9 @@ unlock:
 	return rval;
 }
 
-static int tcp_sock_register ()
+int tcp_sock_register (void)
 {
-
-
+	return 0;
 }
 
 static int udp_sock_register (struct sock_client *client)
@@ -246,7 +254,7 @@ static SOCK_T * alloc_new_sock_layer  (void)
 	return NULL;
 }
 
-static void release_sock_layer (SOCK_T *p)
+void release_sock_layer (SOCK_T *p)
 {
 	if (p) {
 		sock_layer[p->index] = NULL;
@@ -277,7 +285,7 @@ int udp_v4_create (struct sockaddr_in *addr)
 int udp_v4_connect (int sock, struct sockaddr_in *addr)
 {
 	int rval = -1;
-	int size = sizeof(struct sockaddr);
+	socklen_t size = sizeof(struct sockaddr);
 
 	if (!getsockname(sock, (struct sockaddr *) addr, &size))
 		if (!connect(sock, (struct sockaddr *) addr, sizeof(struct sockaddr)))

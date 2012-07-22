@@ -81,9 +81,11 @@
 #define NETIF_LINK_CALLBACK(n)
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
+
 void ethernetif_init (struct interface *netif);
 static int if_lo_init (void);
-
+err_t low_level_output (struct interface *netif, struct pbuf *p);
+int if_zebra_new_hook (struct interface *ifp);;
 
 #if LWIP_HAVE_LOOPIF
 static struct interface loop_if;
@@ -582,7 +584,7 @@ netif_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr)
 {
     struct pbuf        *r;
     err_t               err;
-    struct pbuf        *last;
+    //struct pbuf        *last;
 #if LWIP_LOOPBACK_MAX_PBUFS
     u8_t                clen = 0;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
@@ -820,7 +822,7 @@ static int if_lo_init (void)
 		netif->ifOutDiscards = 0;
 		netif->ifOutErrors = 0;
 		netif->pstp_info = NULL;
-		netif->flags = NETIF_FLAG_BROADCAST |  NETIF_FLAG_LINK_UP;
+		netif->flags = NETIF_FLAG_BROADCAST |  NETIF_FLAG_LINK_UP | NETIF_FLAG_LOOPBACK;
 
 		IP4_ADDR(&loop_gw, 127,0,0,1);
 		IP4_ADDR(&loop_ipaddr, 127,0,0,mini_index - CONFIG_MAX_PHY_PORTS + 2);
@@ -834,6 +836,7 @@ static int if_lo_init (void)
 
 		//if_connect_init (&port_cdb[idx]);
 	}
+	return 0;
 }
 #if LWIP_IPV6
 s8_t
@@ -860,14 +863,14 @@ netif_create_ip6_linklocal_address(struct interface * netif, u8_t from_mac_48bit
   /* Generate interface ID. */
   if (from_mac_48bit) {
     /* Assume hwaddr is a 48-bit IEEE 802 MAC. Convert to EUI-64 address. Complement Group bit. */
-    netif->ip6_addr[0].addr[2] = htonl((((u32_t)(netif->hwaddr[0] ^ 0x02)) << 24) |
-        ((u32_t)(netif->hwaddr[1]) << 16) |
-        ((u32_t)(netif->hwaddr[2]) << 8) |
+    netif->ip6_addr[0].addr[2] = htonl((((u32_t)(netif->ifPhysAddress[0] ^ 0x02)) << 24) |
+        ((u32_t)(netif->ifPhysAddress[1]) << 16) |
+        ((u32_t)(netif->ifPhysAddress[2]) << 8) |
         (0xff));
     netif->ip6_addr[0].addr[3] = htonl((0xfeul << 24) |
-        ((u32_t)(netif->hwaddr[3]) << 16) |
-        ((u32_t)(netif->hwaddr[4]) << 8) |
-        (netif->hwaddr[5]));
+        ((u32_t)(netif->ifPhysAddress[3]) << 16) |
+        ((u32_t)(netif->ifPhysAddress[4]) << 8) |
+        (netif->ifPhysAddress[5]));
   }
   else {
     /* Use hwaddr directly as interface ID. */
@@ -879,7 +882,7 @@ netif_create_ip6_linklocal_address(struct interface * netif, u8_t from_mac_48bit
       if (i == 4) {
         addr_index--;
       }
-      netif->ip6_addr[0].addr[addr_index] |= ((u32_t)(netif->hwaddr[netif->hwaddr_len - i - 1])) << (8 * (i & 0x03));
+      netif->ip6_addr[0].addr[addr_index] |= ((u32_t)(netif->ifPhysAddress[netif->ifPhysAddress_len - i - 1])) << (8 * (i & 0x03));
     }
   }
 

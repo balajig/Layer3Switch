@@ -88,7 +88,7 @@ extern void rb_augment_erase_end(struct rb_node *node,
 /* Find logical next and previous nodes in a tree */
 extern struct rb_node *rb_next(struct rb_node *);
 extern struct rb_node *rb_prev(struct rb_node *);
-extern struct rb_node *rb_first(const struct rb_root *);
+extern struct rb_node *rb_first(struct rb_root *);
 extern struct rb_node *rb_last(const struct rb_root *);
 
 /* Fast replacement of a single node without remove/rebalance/add/rebalance */

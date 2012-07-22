@@ -10,11 +10,13 @@
 
 
 #include "common_types.h"
+#include <netinet/in.h>
+#define DONT_USE_LWIP 1
 #include "ifmgmt.h"
-#define LWIP_COMPAT_SOCKETS 0
-#include "lwip/sockets.h"
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
 #include <mqueue.h>
 #include <stdint.h>
 #include <getopt.h>
@@ -49,27 +51,28 @@ int get_max_ports (void)
 	return idx;
 }
 
-static int new_port_init (int idx)
+static int new_port_init (int id)
 {
-	interface_init (&port_cdb[idx], NULL, NULL);
-	port_cdb[idx].ifType = 1;
-	port_cdb[idx].ifMtu = 1500;
-	port_cdb[idx].ifSpeed = 10;
-	port_cdb[idx].ifAdminStatus = IF_DOWN;
-	port_cdb[idx].ifOperStatus = IF_DOWN;
-	port_cdb[idx].ifLastChange = 0;
-	port_cdb[idx].ifInOctets = 0;
-	port_cdb[idx].ifInUcastPkts = 0;
-	port_cdb[idx].ifInDiscards = 0;
-	port_cdb[idx].ifInErrors = 0;
-	port_cdb[idx].ifInUnknownProtos = 0;
-	port_cdb[idx].ifOutOctets = 0;
-	port_cdb[idx].ifOutUcastPkts = 0;
-	port_cdb[idx].ifOutDiscards = 0;
-	port_cdb[idx].ifOutErrors = 0;
-	port_cdb[idx].pstp_info = NULL;
-	port_cdb[idx].flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
-	if_connect_init (&port_cdb[idx]);
+	interface_init (&port_cdb[id], NULL, NULL);
+	port_cdb[id].ifType = 1;
+	port_cdb[id].ifMtu = 1500;
+	port_cdb[id].ifSpeed = 10;
+	port_cdb[id].ifAdminStatus = IF_DOWN;
+	port_cdb[id].ifOperStatus = IF_DOWN;
+	port_cdb[id].ifLastChange = 0;
+	port_cdb[id].ifInOctets = 0;
+	port_cdb[id].ifInUcastPkts = 0;
+	port_cdb[id].ifInDiscards = 0;
+	port_cdb[id].ifInErrors = 0;
+	port_cdb[id].ifInUnknownProtos = 0;
+	port_cdb[id].ifOutOctets = 0;
+	port_cdb[id].ifOutUcastPkts = 0;
+	port_cdb[id].ifOutDiscards = 0;
+	port_cdb[id].ifOutErrors = 0;
+	port_cdb[id].pstp_info = NULL;
+	port_cdb[id].flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
+	if_connect_init (&port_cdb[id]);
+	return 0;
 }
 
 
@@ -368,7 +371,7 @@ int make_if_down (if_t *p)
 	return 0;
 }
 
-void * if_link_monitor (void *arg)
+void * if_link_monitor (void *arg UNUSED_PARAM)
 {
 	int max_ports = get_max_ports ();
 	struct ifreq ifr;

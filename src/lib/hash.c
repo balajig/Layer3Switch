@@ -67,14 +67,14 @@ void *
 hash_get (struct hash *hash, void *data, void * (*alloc_func) (void *))
 {
   unsigned int key;
-  unsigned int index;
+  unsigned int idx;
   void *newdata;
   struct hash_backet *backet;
 
   key = (*hash->hash_key) (data);
-  index = key % hash->size;
+  idx = key % hash->size;
 
-  for (backet = hash->index[index]; backet != NULL; backet = backet->next) 
+  for (backet = hash->index[idx]; backet != NULL; backet = backet->next) 
     if (backet->key == key && (*hash->hash_cmp) (backet->data, data))
       return backet->data;
 
@@ -87,8 +87,8 @@ hash_get (struct hash *hash, void *data, void * (*alloc_func) (void *))
       backet = XMALLOC (MTYPE_HASH_BACKET, sizeof (struct hash_backet));
       backet->data = newdata;
       backet->key = key;
-      backet->next = hash->index[index];
-      hash->index[index] = backet;
+      backet->next = hash->index[idx];
+      hash->index[idx] = backet;
       hash->count++;
       return backet->data;
     }
@@ -121,19 +121,19 @@ hash_release (struct hash *hash, void *data)
 {
   void *ret;
   unsigned int key;
-  unsigned int index;
+  unsigned int idx;
   struct hash_backet *backet;
   struct hash_backet *pp;
 
   key = (*hash->hash_key) (data);
-  index = key % hash->size;
+  idx = key % hash->size;
 
-  for (backet = pp = hash->index[index]; backet; backet = backet->next)
+  for (backet = pp = hash->index[idx]; backet; backet = backet->next)
     {
       if (backet->key == key && (*hash->hash_cmp) (backet->data, data)) 
 	{
 	  if (backet == pp) 
-	    hash->index[index] = backet->next;
+	    hash->index[idx] = backet->next;
 	  else 
 	    pp->next = backet->next;
 

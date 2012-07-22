@@ -6,7 +6,9 @@
 
 struct rib * rib_match_ipv4 (struct in_addr addr);
 void show_ip_route (struct route_node *rn, struct rib *rib);
-
+if_t *route_lookup (uint32_t ip);
+int  cli_show_ip_route (void);
+int route_add_gateway (uint32_t network, uint32_t mask, uint32_t gateway_addr);
 
 /*
  * Search the network interface and gateway address to forward the packet.
@@ -64,7 +66,6 @@ int  cli_show_ip_route (void)
 
 int route_add_gateway (uint32_t network, uint32_t mask, uint32_t gateway_addr)
 {
-	uint8_t addr[4];
 	char gateway[32];
 	char  prefix_str[32];
 

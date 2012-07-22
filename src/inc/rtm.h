@@ -1,5 +1,15 @@
 #ifndef __RTM__H__
 #define __RTM__H__
+#include <zebra.h>
+
+#include "prefix.h"
+#include "table.h"
+#include "memory.h"
+#include "sockunion.h"
+#include "linklist.h"
+#include "routemap.h"
+#include "rib.h"
+#include "vector.h"
 /* Connected address structure. */
 struct connected
 {
@@ -140,8 +150,11 @@ static const struct zebra_desc_table route_types[] = {
 
 #define zlog_debug printf
 #define zlog_err   printf
-
 int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags);
 int connected_route_delete (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags);
+void show_ip_route (struct route_node *rn, struct rib *rib);
+int if_subnet_delete (struct interface *ifp, struct connected *ifc);
+void connected_free (struct connected *connected);
+int if_subnet_add (struct interface *ifp, struct connected *ifc);
 
 #endif

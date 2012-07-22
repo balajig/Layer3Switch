@@ -19,9 +19,10 @@
 #include <unistd.h>
 #include <sys/syscall.h>   /* For SYS_xxx definitions */
 #include "common_types.h"
+#include "lwip/sys.h"
 #include "lwip/err.h"
 
-tmtaskid_t tsk_selfid ();
+tmtaskid_t tsk_selfid (void);
 tmtask_t           * get_tsk_info_frm_id (tmtaskid_t tskid);
 void * tsk_wrap (void *ptskarg);
 int init_task_cpu_usage_moniter_timer (void);
@@ -29,7 +30,6 @@ void track_cpu_usage (void *);
 int  show_cpu_usage (void);
 
 static TIMER_ID cpu_timer;
-typedef unsigned long sys_mbox_t;
 
 struct pstat_temp
 {
@@ -102,7 +102,6 @@ int sync_lock (sync_lock_t *slock)
 int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs)
 {
 	struct timespec abs_timeout;
-	int    err = 0;
 
 	clock_gettime(CLOCK_REALTIME, &abs_timeout);
 
@@ -170,7 +169,7 @@ retval_t start_task (tmtask_t * ptskinfo, tmtaskid_t * ptskid)
     return TSK_SUCCESS;
 }
 
-tmtaskid_t tsk_selfid ()
+tmtaskid_t tsk_selfid (void)
 {
     return pthread_self ();
 }
@@ -183,7 +182,7 @@ tsk_cancel (tmtaskid_t task_id)
 
 retval_t deinit_tsk_attr (tmtask_t * ptskinfo)
 {
-    pthread_attr_destroy (&ptskinfo->tsk_attr);
+    return pthread_attr_destroy (&ptskinfo->tsk_attr);
 }
 
 retval_t init_tsk_attr (tmtask_t * ptskinfo)
@@ -235,7 +234,7 @@ void tsk_mdelay (int msecs)
     usleep (msecs * 1000);
 }
 
-pid_t get_tsk_pid ()
+pid_t get_tsk_pid (void)
 {
     return syscall (SYS_gettid);
 }
@@ -386,7 +385,7 @@ static int get_usage(pid_t pid, struct pstat_temp* result)
 	char stat_filepath[30] = "/proc/self/task/";
 	int i =0;
 	FILE *fpstat = NULL;
-	FILE *fstat = NULL;
+	FILE *fpprocstat = NULL;
 	long unsigned int cpu_time[10];
 
 	memset(cpu_time, 0, sizeof(cpu_time));
@@ -401,9 +400,9 @@ static int get_usage(pid_t pid, struct pstat_temp* result)
 		return -1;
 	}
 
-	fstat = fopen("/proc/stat", "r");
-	if(!fstat){
-		fclose(fstat);
+	fpprocstat = fopen("/proc/stat", "r");
+	if(!fpprocstat){
+		fclose(fpprocstat);
 		return -1;
 	}
 	bzero(result, sizeof(struct pstat));
@@ -411,19 +410,19 @@ static int get_usage(pid_t pid, struct pstat_temp* result)
 	if(fscanf(fpstat, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %ld %ld", 
 		  &result->utime, &result->stime, &result->cutime, &result->cstime) == EOF){
 		fclose(fpstat);
-		fclose(fstat);
+		fclose(fpprocstat);
 		return -1;
 	}
 	fclose(fpstat);
 
 	//read+calc cpu total time from /proc/stat, on linux 2.6.35-23 x86_64 the cpu row has 10values could differ on different architectures :/
-	if(fscanf(fstat, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", 
+	if(fscanf(fpprocstat, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", 
 		         &cpu_time[0], &cpu_time[1], &cpu_time[2], &cpu_time[3], &cpu_time[4], &cpu_time[5], &cpu_time[6], 
 			&cpu_time[7], &cpu_time[8], &cpu_time[9]) == EOF){
-		fclose(fstat);
+		fclose(fpprocstat);
 		return -1;
 	}
-	fclose(fstat);
+	fclose(fpprocstat);
 
 	for(i=0; i < 10;i++){
 		result->tcpu += cpu_time[i];
@@ -479,7 +478,7 @@ int show_cpu_usage (void)
 	return 0;
 }
 
-void track_cpu_usage (void *unused)
+void track_cpu_usage (void *unused UNUSED_PARAM)
 {
 	register struct list_head *node = NULL;
 	register task_t  *tskinfo = NULL;
@@ -501,7 +500,7 @@ void track_cpu_usage (void *unused)
 	mod_timer (cpu_timer, 1 * tm_get_ticks_per_second ());
 }
 
-int sys_sem_new(sync_lock_t *slock, int count)
+err_t sys_sem_new(sync_lock_t *slock, u8_t count)
 {
 	if (!slock)
 		return -1;
@@ -511,16 +510,16 @@ int sys_sem_new(sync_lock_t *slock, int count)
 	}
 	return 0;
 }
-int sys_sem_signal (sync_lock_t *slock)
+void sys_sem_signal (sync_lock_t *slock)
 {
-	return sync_unlock (slock);
+	sync_unlock (slock);
 }
 
 int sys_sem_wait (sync_lock_t *slock)
 {
 	return sync_lock (slock);
 }
-int sys_arch_sem_wait(sync_lock_t *s, unsigned int msecs)
+u32_t sys_arch_sem_wait(sync_lock_t *s, uint32_t msecs)
 {
 	unsigned int nsecs = msecs * 1000 * 1000;
 	unsigned int secs = nsecs / (1000 * 1000 * 1000);
@@ -529,9 +528,9 @@ int sys_arch_sem_wait(sync_lock_t *s, unsigned int msecs)
 	return sync_lock_timed_wait (s, secs, nsecs);
 }
 
-int sys_sem_free(sync_lock_t *s) 
+void sys_sem_free(sync_lock_t *s) 
 {
-	return destroy_sync_lock (s);
+	destroy_sync_lock (s);
 }
 
 int sys_sem_valid(sync_lock_t *sem) 
@@ -540,9 +539,9 @@ int sys_sem_valid(sync_lock_t *sem)
 
 	return sem_getvalue(sem, &val);	
 }
-int sys_sem_set_invalid(sync_lock_t *sem)
+void sys_sem_set_invalid(sync_lock_t *sem)
 {
-
+	sem = sem;
 }
 #if 0
 sys_mutex_new(mu) ERR_OK
@@ -572,7 +571,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int max_msg)
  * @param msg message to post (ATTENTION: can be NULL) */
 void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
-	return msg_send (*mbox, msg, sizeof (unsigned long));
+	msg_send (*mbox, msg, sizeof (unsigned long));
 }
 /** Try to post a message to an mbox - may fail if full or ISR
  * @param mbox mbox to posts the message
@@ -588,9 +587,10 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
  * @return time (in milliseconds) waited for a message, may be 0 if not waited
            or SYS_ARCH_TIMEOUT on timeout
  *         The returned time has to be accurate to prevent timer jitter! */
-u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
+u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout UNUSED_PARAM)
 {
-	return msg_rcv (*mbox, msg, sizeof (unsigned long));
+	/*TODO: Implement based on timeout*/
+	return msg_rcv (*mbox, (char **)msg, sizeof (unsigned long));
 }
 /* Allow port to override with a macro, e.g. special timout for sys_arch_mbox_fetch() */
 #ifndef sys_arch_mbox_tryfetch
@@ -602,7 +602,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
  *         or SYS_MBOX_EMPTY if the mailbox is empty */
 u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
 {
-	return msg_rcv (*mbox, msg, sizeof (unsigned long));
+	return msg_rcv (*mbox, (char **)msg, sizeof (unsigned long));
 }
 #endif
 /** For now, we map straight to sys_arch implementation. */
@@ -625,5 +625,6 @@ int sys_mbox_valid(sys_mbox_t *mbox)
 /** Set an mbox invalid so that sys_mbox_valid returns 0 */
 void sys_mbox_set_invalid(sys_mbox_t *mbox)
 {
+	mbox = mbox;
 }
 #endif

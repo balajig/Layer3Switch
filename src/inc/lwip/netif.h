@@ -98,6 +98,9 @@ extern "C" {
  * Set by the netif driver in its init function. */
 #define NETIF_FLAG_IGMP         0x80U
 
+#define NETIF_FLAG_LOOPBACK     0x100U
+#define NETIF_FLAG_MULTICAST    0x200U
+
 /** Function prototype for netif init functions. Set up flags and output/linkoutput
  * callback functions in this function.
  *

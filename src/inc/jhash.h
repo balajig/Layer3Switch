@@ -44,6 +44,7 @@ uint32_t jhash_1word(uint32_t a, uint32_t initval);
  * of bytes.  No alignment or length assumptions are made about
  * the input key.
  */
+#ifdef JHASH
 static uint32_t jhash(const void *key, uint32_t length, uint32_t initval)
 {
 	uint32_t a, b, c, len;
@@ -83,10 +84,11 @@ static uint32_t jhash(const void *key, uint32_t length, uint32_t initval)
 
 	return c;
 }
-
+#endif
 /* A special optimized version that handles 1 or more of uint32_ts.
  * The length parameter here is the number of uint32_ts in the key.
  */
+#ifdef JHASH_2
 static  uint32_t jhash2(const uint32_t *k, uint32_t length, uint32_t initval)
 {
 	uint32_t a, b, c, len;
@@ -115,6 +117,7 @@ static  uint32_t jhash2(const uint32_t *k, uint32_t length, uint32_t initval)
 	return c;
 }
 
+#endif
 
 /* A special ultra-optimized versions that knows they are hashing exactly
  * 3, 2 or 1 word(s).
@@ -132,11 +135,12 @@ static  uint32_t jhash_3words(uint32_t a, uint32_t b, uint32_t c, uint32_t initv
 
 	return c;
 }
-
+#ifdef JHASH_2_WORDS
 static  uint32_t jhash_2words(uint32_t a, uint32_t b, uint32_t initval)
 {
 	return jhash_3words(a, b, 0, initval);
 }
+#endif
 
 uint32_t jhash_1word(uint32_t a, uint32_t initval)
 {

@@ -26,7 +26,7 @@ void * tsk_wrap (void *ptskarg);
  */
 
 retval_t task_create (const char tskname[], int tsk_prio, int sched_alg, int stk_size,
-		void *(*start_routine) (void *), void (*exit_routine) (),
+		void *(*start_routine) (void *), void (*exit_routine) (void),
 		void *arg, tmtaskid_t * rettskid)
 {
 	retval_t            Ret_val = TSK_FAILURE;
@@ -50,7 +50,7 @@ retval_t task_create (const char tskname[], int tsk_prio, int sched_alg, int stk
 
 
 void fill_tsk_info (const char *tskname, int tsk_prio, int sched_alg, int stk_size,
-               void *(*start_routine) (void *), void (*exit_routine) (),
+               void *(*start_routine) (void *), void (*exit_routine) (void),
                void *arg, tmtask_t * ptskinfo)
 {
     strcpy (ptskinfo->task_name, tskname);

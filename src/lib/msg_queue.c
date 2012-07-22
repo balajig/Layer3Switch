@@ -103,7 +103,7 @@ int msg_create_Q (const char *name, int maxmsg, int size)
 }
 
 
-int msg_rcv (int qid, char **msg, int size)
+int msg_rcv (int qid, char **msg, int size UNUSED_PARAM)
 {
 	struct msg * p = NULL;
 	
@@ -124,7 +124,7 @@ int msg_rcv (int qid, char **msg, int size)
 	return -1;
 }
 
-int msg_send (int qid, void *msg, int size)
+int msg_send (int qid, void *msg, int size UNUSED_PARAM)
 {
 	struct msg * p = NULL;
 
@@ -152,6 +152,7 @@ int msg_Q_delete (int qid)
 	Queue[qid].mpool_id = -1;
 	INIT_LIST_HEAD (&Queue[qid].msg_list);
 	Queue[qid].flags = MQ_FREE;
+	return 0;
 }
 int mq_vaild (int qid)
 {

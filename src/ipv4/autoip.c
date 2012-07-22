@@ -389,7 +389,7 @@ autoip_stop(struct interface *netif)
  * Has to be called in loop every AUTOIP_TMR_INTERVAL milliseconds
  */
 void
-autoip_tmr()
+autoip_tmr(void)
 {
   struct interface *netif = NULL;
    int max_ports = get_max_ports () , i = 0;

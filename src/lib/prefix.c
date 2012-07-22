@@ -36,6 +36,9 @@ static const u_char maskbit[] = {0x00, 0x80, 0xc0, 0xe0, 0xf0,
 #endif /* PNBBY */
 
 #define MASKBIT(offset)  ((0xff << (PNBBY - (offset))) & 0xff)
+void masklen2ip (int masklen, struct in_addr *netmask);
+u_char ip_masklen (struct in_addr netmask);
+in_addr_t ipv4_network_addr (in_addr_t hostaddr, int masklen);
 
 /* Address Famiy Identifier to Address Family converter. */
 int
@@ -194,7 +197,7 @@ prefix_family_str (const struct prefix *p)
 
 /* Allocate new prefix_ipv4 structure. */
 struct prefix_ipv4 *
-prefix_ipv4_new ()
+prefix_ipv4_new (void)
 {
   struct prefix_ipv4 *p;
 
@@ -317,21 +320,21 @@ void
 apply_mask_ipv4 (struct prefix_ipv4 *p)
 {
   u_char *pnt;
-  int index;
+  int idx;
   int offset;
 
-  index = p->prefixlen / 8;
+  idx = p->prefixlen / 8;
 
-  if (index < 4)
+  if (idx < 4)
     {
       pnt = (u_char *) &p->prefix;
       offset = p->prefixlen % 8;
 
-      pnt[index] &= maskbit[offset];
-      index++;
+      pnt[idx] &= maskbit[offset];
+      idx++;
 
-      while (index < 4)
-	pnt[index++] = 0;
+      while (idx < 4)
+	pnt[idx++] = 0;
     }
 }
 
@@ -456,21 +459,21 @@ void
 apply_mask_ipv6 (struct prefix_ipv6 *p)
 {
   u_char *pnt;
-  int index;
+  int idx;
   int offset;
 
-  index = p->prefixlen / 8;
+  idx = p->prefixlen / 8;
 
-  if (index < 16)
+  if (idx < 16)
     {
       pnt = (u_char *) &p->prefix;
       offset = p->prefixlen % 8;
 
-      pnt[index] &= maskbit[offset];
-      index++;
+      pnt[idx] &= maskbit[offset];
+      idx++;
 
-      while (index < 16)
-	pnt[index++] = 0;
+      while (idx < 16)
+	pnt[idx++] = 0;
     }
 }
 
@@ -557,7 +560,7 @@ prefix2str (const struct prefix *p, char *str, int size)
 }
 
 struct prefix *
-prefix_new ()
+prefix_new (void)
 {
   struct prefix *p;
 

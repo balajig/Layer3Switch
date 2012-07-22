@@ -78,8 +78,9 @@
  * @return the netif on which to send to reach dest
  */
 struct interface *
-ip6_route(struct ip6_addr *src, struct ip6_addr *dest)
+ip6_route(struct ip6_addr *src UNUSED_PARAM, struct ip6_addr *dest UNUSED_PARAM)
 {
+#if 0
   struct interface *netif;
   s8_t i;
 
@@ -143,6 +144,9 @@ ip6_route(struct ip6_addr *src, struct ip6_addr *dest)
 
   /* no matching netif found, use default netif */
   return netif_default;
+#else
+ return NULL;
+#endif
 }
 
 /**
@@ -295,11 +299,11 @@ ip6_forward(struct pbuf *p, struct ip6_hdr *iphdr, struct interface *inp)
     return;
   }
 
-  if (netif->mtu && (p->tot_len > netif->mtu)) {
+  if (netif->ifMtu && (p->tot_len > netif->ifMtu)) {
 #if LWIP_ICMP6
     /* Don't send ICMP messages in response to ICMP messages */
     if (IP6H_NEXTH(iphdr) != IP6_NEXTH_ICMP6) {
-      icmp6_packet_too_big(p, netif->mtu);
+      icmp6_packet_too_big(p, netif->ifMtu);
     }
 #endif /* LWIP_ICMP6 */
     IP6_STATS_INC(ip6.drop);
@@ -340,8 +344,9 @@ ip6_forward(struct pbuf *p, struct ip6_hdr *iphdr, struct interface *inp)
  *         processed, but currently always returns ERR_OK)
  */
 err_t
-ip6_input(struct pbuf *p, struct interface *inp)
+ip6_input(struct pbuf *p UNUSED_PARAM, struct interface *inp UNUSED_PARAM)
 {
+#if 0
   struct ip6_hdr *ip6hdr;
   struct interface *netif;
   u8_t nexth;
@@ -711,7 +716,7 @@ ip6_input_cleanup:
   ip_data.current_ip_header_tot_len = 0;
   ip6_addr_set_any(&ip_data.current_iphdr_src.ip6);
   ip6_addr_set_any(&ip_data.current_iphdr_dest.ip6);
-
+#endif
   return ERR_OK;
 }
 
@@ -808,8 +813,8 @@ ip6_output_if(struct pbuf *p, ip6_addr_t *src, ip6_addr_t *dest,
   }*/
 #endif /* ENABLE_LOOPBACK */
 #if LWIP_IPV6_FRAG
-  /* don't fragment if interface has mtu set to 0 [loopif] */
-  if (netif->mtu && (p->tot_len > nd6_get_destination_mtu(dest, netif))) {
+  /* don't fragment if interface has ifMtu set to 0 [loopif] */
+  if (netif->ifMtu && (p->tot_len > nd6_get_destination_mtu(dest, netif))) {
     return ip6_frag(p, netif, dest);
   }
 #endif /* LWIP_IPV6_FRAG */

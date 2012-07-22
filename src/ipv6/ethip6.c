@@ -104,8 +104,8 @@ ethip6_send(struct interface *netif, struct pbuf *p, struct eth_addr *src, struc
 {
   struct eth_hdr *ethhdr = (struct eth_hdr *)p->payload;
 
-  LWIP_ASSERT("netif->hwaddr_len must be 6 for ethip6!",
-              (netif->hwaddr_len == 6));
+  LWIP_ASSERT("netif->ifPhysAddress_len must be 6 for ethip6!",
+              (netif->ifPhysAddress_len == 6));
   SMEMCPY(&ethhdr->dest, dst, 6);
   SMEMCPY(&ethhdr->src, src, 6);
   ethhdr->type = PP_HTONS(ETHTYPE_IPV6);
@@ -157,7 +157,7 @@ ethip6_output(struct interface *netif, struct pbuf *q, ip6_addr_t *ip6addr)
     dest.addr[5] = ((u8_t *)(&(ip6addr->addr[3])))[3];
 
     /* Send out. */
-    return ethip6_send(netif, q, (struct eth_addr*)(netif->hwaddr), &dest);
+    return ethip6_send(netif, q, (struct eth_addr*)(netif->ifPhysAddress), &dest);
   }
 
   /* We have a unicast destination IP address */
@@ -182,7 +182,7 @@ ethip6_output(struct interface *netif, struct pbuf *q, ip6_addr_t *ip6addr)
 
     /* Send out. */
     SMEMCPY(dest.addr, neighbor_cache[i].lladdr, 6);
-    return ethip6_send(netif, q, (struct eth_addr*)(netif->hwaddr), &dest);
+    return ethip6_send(netif, q, (struct eth_addr*)(netif->ifPhysAddress), &dest);
   }
 
   /* We should queue packet on this interface. */

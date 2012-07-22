@@ -20,6 +20,7 @@
  * 02111-1307, USA.  
  */
 
+#include <err.h>
 #include "common_types.h"
 #include "ifmgmt.h"
 #include "zebra.h"
@@ -225,8 +226,8 @@ connected_add_ipv4 (struct interface *ifp, int flags, uint32_t *host_addr,
       if (CONNECTED_PEER(ifc))
         {
 	  if (IPV4_ADDR_SAME(host_addr,&bcast_addr))
-	    warn("warning: interface %s has same local and peer "
-		      "address , routing protocols may malfunction",
+	    warn ("warning: interface %s has same local and peer "
+		      "address %s, routing protocols may malfunction",
 		      ifp->ifDescr,inet_ntoa(p->prefix.s_addr));
         }
       else
@@ -258,9 +259,9 @@ connected_add_ipv4 (struct interface *ifp, int flags, uint32_t *host_addr,
 
       /* no broadcast or destination address was supplied */
       if ((prefixlen == IPV4_MAX_PREFIXLEN) && if_is_pointopoint(ifp))
-	warn("warning: PtP interface %s with addr ");
-	/*warn("warning: PtP interface %s with addr %s/%d needs a "
-		  "peer address",ifp->ifDescr,inet_ntoa(&host_addr),prefixlen); */
+	      warn("warning: PtP interface %s with addr ", ifp->ifDescr);
+      /*warn("warning: PtP interface %s with addr %s/%d needs a "
+	"peer address",ifp->ifDescr,inet_ntoa(&host_addr),prefixlen); */
     }
 
   /* Label of this address. */
@@ -300,8 +301,8 @@ connected_down_ipv4 (struct interface *ifp, struct connected *ifc)
 
 /* Delete connected IPv4 route to the interface. */
 int
-connected_delete_ipv4 (struct interface *ifp, int flags, struct in_addr *addr,
-		       u_char prefixlen, struct in_addr *broad)
+connected_delete_ipv4 (struct interface *ifp, int flags UNUSED_PARAM, struct in_addr *addr,
+		       u_char prefixlen, struct in_addr *broad UNUSED_PARAM)
 {
   struct prefix_ipv4 p;
   struct connected *ifc;

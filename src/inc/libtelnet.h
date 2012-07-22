@@ -661,6 +661,8 @@ extern void telnet_zmp_arg(telnet_t *telnet, const char *arg);
  */
 #define telnet_finish_zmp(telnet) telnet_finish_sb((telnet))
 
+int telnet_prints (telnet_t *telnet, const char *buffer, int len);
+
 /* C++ support */
 #if defined(__cplusplus)
 } /* extern "C" */

@@ -33,6 +33,8 @@
  */
 #include "common_types.h"
 #include "lwip/sockets.h"
+#include "lwip/inet6.h"
+#include "sockunion.h"
 #include "zebra.h"
 
 /* IPv4 and IPv6 unified prefix structure. */

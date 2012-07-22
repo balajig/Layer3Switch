@@ -48,6 +48,11 @@ void    *        tick_clock     (void *unused);
 int              init_timer_mgr (void);
 static inline void timer_expiry_action (TIMER_T * ptmr, int );
 static unsigned int get_ticks (void);
+static void free_timer (TIMER_T *p); 
+static void update_times (int cpu);
+static int tm_process_tick_and_update_timers (int cpu);
+static int timer_restart  (TIMER_T *p);
+static void handle_expired_timer (TIMER_T *ptmr);
 /****************************************************************/
 
 /************* Private Variable Declaration *********************/
@@ -247,12 +252,12 @@ static inline TIMER_T * alloc_timer (void)
 	return tm_calloc (1, sizeof(TIMER_T));
 }
 
-void free_timer (TIMER_T *p) 
+static void free_timer (TIMER_T *p) 
 {
 	tm_free (p, sizeof(*p));
 }
 
-void update_times (int cpu)
+static void update_times (int cpu)
 {
 	timer_lock (cpu);
 
@@ -263,7 +268,7 @@ void update_times (int cpu)
 	timer_unlock (cpu);
 }
 
-unsigned int sys_now ()
+unsigned int sys_now (void)
 {
 	return get_ticks ();
 }
@@ -290,11 +295,6 @@ void show_uptime (void)
 {
 	printf ("Uptime  %d hrs %d mins %d secs %d ticks\n",get_hrs(), 
 		 get_mins() % 60, get_secs() % 60, get_ticks() % tm_get_ticks_per_second ());
-}
-void tm_test_timers_latency (void *unused)
-{
-	show_uptime ();
-	start_timer (1 * tm_get_ticks_per_second (), NULL, tm_test_timers_latency , 0);
 }
 
 unsigned int tm_get_ticks_per_second (void) 
@@ -359,7 +359,7 @@ int init_timer_mgr (void)
 
 
 
-int timer_restart  (TIMER_T *p)
+static int timer_restart  (TIMER_T *p)
 {
 	int cpu = get_cpu ();
 
@@ -377,7 +377,7 @@ int timer_restart  (TIMER_T *p)
 }
 
 
-void handle_expired_timer (TIMER_T *ptmr)
+static void handle_expired_timer (TIMER_T *ptmr)
 {
 	if (ptmr->time_out_handler) {
 		ptmr->time_out_handler (ptmr->data);
@@ -400,9 +400,8 @@ static void timer_expiry_action (TIMER_T * ptmr, int cpu)
 }
 
 
-int tm_process_tick_and_update_timers (int cpu)
+static int tm_process_tick_and_update_timers (int cpu)
 {
-	int i = 0;
 	TIMER_T *p, *n;
 	struct list_head *head = &(tmr_mgr + cpu)->timers_list;
 

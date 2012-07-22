@@ -330,10 +330,12 @@ mld6_joingroup(ip6_addr_t *srcaddr, ip6_addr_t *groupaddr)
   struct interface      *netif;
   u8_t               match;
   u8_t               i;
+  int 	            tports = get_max_ports ();
+  int               port = 0;
 
   /* loop through netif's */
-  netif = netif_list;
-  while (netif != NULL) {
+  while (port < tports ) {
+    netif = &port_cdb[port];
     /* Should we join this interface ? */
     match = 0;
     if (ip6_addr_isany(srcaddr)) {
@@ -375,7 +377,7 @@ mld6_joingroup(ip6_addr_t *srcaddr, ip6_addr_t *groupaddr)
     }
 
     /* proceed to next network interface */
-    netif = netif->next;
+    port++;
   }
 
   return err;
@@ -397,10 +399,12 @@ mld6_leavegroup(ip6_addr_t *srcaddr, ip6_addr_t *groupaddr)
   struct interface      *netif;
   u8_t               match;
   u8_t               i;
+  int 	            tports = get_max_ports ();
+  int               port = 0;
 
   /* loop through netif's */
-  netif = netif_list;
-  while (netif != NULL) {
+  while (port < tports ) {
+    netif = &port_cdb[port];
     /* Should we leave this interface ? */
     match = 0;
     if (ip6_addr_isany(srcaddr)) {
@@ -443,7 +447,7 @@ mld6_leavegroup(ip6_addr_t *srcaddr, ip6_addr_t *groupaddr)
       }
     }
     /* proceed to next network interface */
-    netif = netif->next;
+   port++;
   }
 
   return err;

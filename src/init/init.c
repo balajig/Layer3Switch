@@ -24,6 +24,7 @@ void igmp_init(void);
 void dns_init(void);
 void init_sntpd(void);
 int telnet_init (void);
+void sys_timeouts_init(void);
 
 
 #ifndef CONFIG_OPENSWITCH_TCP_IP

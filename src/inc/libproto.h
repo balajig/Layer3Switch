@@ -53,6 +53,7 @@ void * start_timer (unsigned int ticks, void *data, void (*handler) (void *), in
 int timer_pending (void *p);
 unsigned int timer_get_remaining_time (void *p);
 unsigned int get_secs (void);
+unsigned int sys_now (void);
 
 /*HASH*/
 struct hash_table * create_hash_table (const char *, int ,int (*cmp)(const uint8_t *, const uint8_t *),
@@ -69,13 +70,15 @@ uint32_t jhash_1word(uint32_t a, uint32_t initval);
 int msg_create_Q (const char *name, int maxmsg, int size);
 int msg_rcv (int qid, char **msg, int size);
 int msg_send (int qid, void *msg, int size);
+int msg_Q_delete (int qid);
+int mq_vaild (int qid);
 
 /*LOCK*/
 int create_sync_lock (sync_lock_t *slock);
 int sync_lock (sync_lock_t *slock);
 int sync_unlock (sync_lock_t *slock);
 int destroy_sync_lock (sync_lock_t *slock);
-
+int sync_lock_timed_wait (sync_lock_t *slock, int secs, int nanosecs);
 
 uint32_t ip_2_uint32 (uint8_t *ipaddress, int byte_order);
 void uint32_2_ipstring (uint32_t ipAddress, uint8_t *addr);
@@ -116,6 +119,8 @@ u_char u32ip_masklen (uint32_t netmask);
 uint32_t u32ipv4_network_addr (uint32_t hostaddr, int masklen);
 char*  hex2bin(char *dst, const char *str, int count);
 void dump_stack (void);
+in_addr_t ipv4_broadcast_addr (in_addr_t hostaddr, int masklen);
+
 const char * inet_ntop(int af, const void *src, char *dst, size_t size);
 size_t strlcpy(char *dst, const char *src, size_t siz);
 
@@ -124,4 +129,6 @@ int get_cpu (void);
 long get_max_cpus (void);
 int cpu_bind (int cpu);
 
+
+/*Sock Layer*/
 #endif

@@ -33,6 +33,24 @@
 #include "memory.h"
 #include "table.h"
 
+int if_zebra_new_hook (struct interface *ifp);
+int if_zebra_delete_hook (struct interface *ifp);
+int if_cmp_func (struct interface *ifp1, struct interface *ifp2);
+void if_delete_retain (struct interface *ifp);
+struct connected * connected_delete_by_prefix (struct interface *ifp, struct prefix *p);
+struct connected * connected_lookup_address (struct interface *ifp, struct in_addr dst);
+struct connected * connected_new (void);
+struct connected * connected_add_by_prefix (struct interface *ifp, struct prefix *p, 
+                         struct prefix *destination);
+unsigned int if_nametoindex (const char *name);
+char * if_indextoname (unsigned int ifindex, char *name);
+void connected_add_ipv4 (struct interface *ifp, int flags, uint32_t *host_addr, 
+		    u_char prefixlen, uint32_t *bcast_addr, 
+		    const char *label);
+int
+connected_delete_ipv4 (struct interface *ifp, int flags, struct in_addr *addr,
+		       u_char prefixlen, struct in_addr *broad);
+
 /* For interface multicast configuration. */
 #define IF_ZEBRA_MULTICAST_UNSPEC 0
 #define IF_ZEBRA_MULTICAST_ON     1
@@ -90,7 +108,7 @@ int if_zebra_new_hook (struct interface *ifp)
 }
 
 /* Called when interface is deleted. */
-static int
+int
 if_zebra_delete_hook (struct interface *ifp)
 {
   struct zebra_if *zebra_if;
@@ -433,7 +451,7 @@ if_indextoname (unsigned int ifindex, char *name)
 }
 #endif
 
-int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags) 
+int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags UNUSED_PARAM) 
 {
 		int masklen = u32ip_masklen (*mask);
 		uint32_t  bcastaddr = ipv4_broadcast_addr(*addr, masklen);
@@ -441,11 +459,13 @@ int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask,
 		return 0;
 }
 
-int connected_route_delete (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags) 
+int connected_route_delete (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags UNUSED_PARAM) 
 {
 		int masklen = u32ip_masklen (*mask);
-		uint32_t  bcastaddr = ipv4_broadcast_addr(*addr, masklen);
-		if(connected_delete_ipv4 (ifp, ZEBRA_IFA_PEER, addr, masklen, &bcastaddr, NULL))
+		struct in_addr  bcastaddr, addr_s;
+		bcastaddr.s_addr = ipv4_broadcast_addr(*addr, masklen);
+		addr_s.s_addr = *addr;
+		if(connected_delete_ipv4 (ifp, ZEBRA_IFA_PEER, &addr_s, masklen, &bcastaddr))
 		  return 1;
 		return 0;
 }

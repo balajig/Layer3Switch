@@ -88,11 +88,6 @@ typedef unsigned long  mem_ptr_t;
 
 typedef uint32_t in_addr_t;
 
-struct in6_addr {
-	uint8_t  s6_addr[16];  /* IPv6 address */
-};
-
-
 # define SIN6_LEN
 
 struct sockaddr_ll
@@ -105,17 +100,6 @@ struct sockaddr_ll
     unsigned char sll_halen;
     unsigned char sll_addr[8];
   };
-
-
-
-struct sockaddr_in6 
-{ 
-	uint8_t sin6_len; /* length of this structure */ 
-	uint8_t sin6_family; /* AF_INET6 */ 
-	uint16_t sin6_port; /* Transport layer port # */ 
-	uint32_t sin6_flowinfo; /* IPv6 flow information */ 
-	struct in6_addr sin6_addr; /* IPv6 address */ 
-}; 
 
 
 #define MAX_PORT_NAME 16 

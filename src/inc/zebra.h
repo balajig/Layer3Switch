@@ -67,13 +67,13 @@ typedef unsigned char   u_int8_t;
 #ifndef CMSG_SPACE
 #define CMSG_SPACE(l)       (_CMSG_DATA_ALIGN(sizeof(struct cmsghdr)) + \
                               _CMSG_HDR_ALIGN(l))
-#warning "assuming 4-byte alignment for CMSG_SPACE"
+//#warning "assuming 4-byte alignment for CMSG_SPACE"
 #endif  /* CMSG_SPACE */
 
 
 #ifndef CMSG_LEN
 #define CMSG_LEN(l)         (_CMSG_DATA_ALIGN(sizeof(struct cmsghdr)) + (l))
-#warning "assuming 4-byte alignment for CMSG_LEN"
+//#warning "assuming 4-byte alignment for CMSG_LEN"
 #endif /* CMSG_LEN */
 
 

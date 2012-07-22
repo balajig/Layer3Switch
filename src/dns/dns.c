@@ -204,7 +204,7 @@ DNS_LOCAL_HOSTLIST_STORAGE_PRE struct local_hostlist_entry local_hostlist_static
 
 #endif /* DNS_LOCAL_HOSTLIST_IS_DYNAMIC */
 
-static void dns_init_local();
+static void dns_init_local(void);
 #endif /* DNS_LOCAL_HOSTLIST */
 
 
@@ -317,7 +317,7 @@ dns_tmr(void)
 
 #if DNS_LOCAL_HOSTLIST
 static void
-dns_init_local()
+dns_init_local(void)
 {
 #if DNS_LOCAL_HOSTLIST_IS_DYNAMIC && defined(DNS_LOCAL_HOSTLIST_INIT)
   int i;
@@ -974,7 +974,7 @@ dns_gethostbyname(const char *hostname, ip_addr_t *addr, dns_found_callback foun
   return dns_enqueue(hostname, found, callback_arg);
 }
 
-static void dns_timer_handler (void *arg)
+static void dns_timer_handler (void *arg UNUSED_PARAM)
 {
 	dns_check_entries ();
 	mod_timer (dns_timer, milli_secs_to_ticks (DNS_TMR_INTERVAL));

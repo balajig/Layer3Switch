@@ -72,7 +72,7 @@ static LIST_HEAD(hd_mcb);
 static unsigned long    pool_index;
 static int debug_all = 0;
 
-int mem_pool_create (const char *name, size_t size, int n_blks, int flags)
+int mem_pool_create (const char *name, size_t size, int n_blks, int flags UNUSED_PARAM)
 {
 	uint32_t           bytes = 0;
 	int                align = 0;
@@ -290,7 +290,7 @@ int free_blk (int memid, void *addr)
 	addr  = (uint8_t *)addr - sizeof (uint32_t); 
 
 	if (!in_range (p->saddr, (p->saddr + (p->size * p->nblks)), p->size, 
-		       (uint8_t *)addr)) 
+		       addr)) 
 		goto invalid_address;
 
 	offset = (((unsigned long)addr - (unsigned long)p->saddr));
@@ -310,7 +310,6 @@ int free_blk (int memid, void *addr)
 
 invalid_address:
 	printf ("%%ERROR : %s-MEM_POOL_MGR: Trying to free invaild address\n", p->pool_name);
-	dump_stack ();
 	sync_unlock (&p->lock);
 	return -1;
 }

@@ -48,9 +48,9 @@ vector_only_wrapper_free (vector v)
 }
 
 void
-vector_only_index_free (void *index)
+vector_only_index_free (void *idx)
 {
-  XFREE (index);
+  XFREE (idx);
 }
 
 void

@@ -150,7 +150,7 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout);
  * @param sem semaphore to delete */
 void sys_sem_free(sys_sem_t *sem);
 /** Wait for a semaphore - forever/no timeout */
-#define sys_sem_wait(sem)                  sys_arch_sem_wait(sem, 0)
+int sys_sem_wait (sync_lock_t *slock);
 #ifndef sys_sem_valid
 /** Check if a sempahore is valid/allocated: return 1 for valid, 0 for invalid */
 int sys_sem_valid(sys_sem_t *sem);

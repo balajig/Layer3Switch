@@ -198,7 +198,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
       i = nd6_find_neighbor_cache_entry(ip6_current_dest_addr());
       if (i >= 0) {
         if (na_hdr->flags & ND6_FLAG_OVERRIDE) {
-          MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->hwaddr_len);
+          MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->ifPhysAddress_len);
         }
       }
     }
@@ -234,7 +234,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
 
         lladdr_opt = (struct lladdr_option *)((u8_t*)p->payload + sizeof(struct na_header));
 
-        MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->hwaddr_len);
+        MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->ifPhysAddress_len);
       }
       neighbor_cache[i].state = ND6_REACHABLE;
 
@@ -317,7 +317,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
         /* We already have a record for the solicitor. */
         if (neighbor_cache[i].state == ND6_INCOMPLETE) {
           neighbor_cache[i].netif = inp;
-          MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->hwaddr_len);
+          MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->ifPhysAddress_len);
 
           /* Delay probe in case we get confirmation of reachability from upper layer (TCP). */
           neighbor_cache[i].state = ND6_DELAY;
@@ -338,7 +338,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
           return;
         }
         neighbor_cache[i].netif = inp;
-        MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->hwaddr_len);
+        MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->ifPhysAddress_len);
         ip6_addr_set(&(neighbor_cache[i].next_hop_address), ip6_current_src_addr());
 
         /* Receiving a message does not prove reachability: only in one direction.
@@ -430,7 +430,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
         lladdr_opt = (struct lladdr_option *)buffer;
         if ((default_router_list[i].neighbor_entry != NULL) &&
             (default_router_list[i].neighbor_entry->state == ND6_INCOMPLETE)) {
-          SMEMCPY(default_router_list[i].neighbor_entry->lladdr, lladdr_opt->addr, inp->hwaddr_len);
+          SMEMCPY(default_router_list[i].neighbor_entry->lladdr, lladdr_opt->addr, inp->ifPhysAddress_len);
           default_router_list[i].neighbor_entry->state = ND6_REACHABLE;
           default_router_list[i].neighbor_entry->counter.reachable_time = reachable_time;
         }
@@ -442,7 +442,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
         mtu_opt = (struct mtu_option *)buffer;
         if (mtu_opt->mtu >= 1280) {
 #if LWIP_ND6_ALLOW_RA_UPDATES
-          inp->mtu = mtu_opt->mtu;
+          inp->ifMtu = mtu_opt->mtu;
 #endif /* LWIP_ND6_ALLOW_RA_UPDATES */
         }
         break;
@@ -543,7 +543,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
           i = nd6_new_neighbor_cache_entry();
           if (i >= 0) {
             neighbor_cache[i].netif = inp;
-            MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->hwaddr_len);
+            MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->ifPhysAddress_len);
             ip6_addr_set(&(neighbor_cache[i].next_hop_address), ip6_current_src_addr());
 
             /* Receiving a message does not prove reachability: only in one direction.
@@ -554,7 +554,7 @@ nd6_input(struct pbuf *p, struct interface *inp)
         }
         if (i >= 0) {
           if (neighbor_cache[i].state == ND6_INCOMPLETE) {
-            MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->hwaddr_len);
+            MEMCPY(neighbor_cache[i].lladdr, lladdr_opt->addr, inp->ifPhysAddress_len);
             /* Receiving a message does not prove reachability: only in one direction.
              * Delay probe in case we get confirmation of reachability from upper layer (TCP). */
             neighbor_cache[i].state = ND6_DELAY;
@@ -623,6 +623,9 @@ nd6_tmr(void)
 {
   s8_t i, j;
   struct interface * netif;
+  int 	            tports = get_max_ports ();
+  int                 port = 0;
+
 
   /* Process neighbor entries. */
   for (i = 0; i < LWIP_ND6_NUM_NEIGHBORS; i++) {
@@ -746,7 +749,8 @@ nd6_tmr(void)
 
 
   /* Process our own addresses, if DAD configured. */
-  for (netif = netif_list; netif != NULL; netif = netif->next) {
+  for (; port < tports; port++) {
+    netif = &port_cdb[port];
     for (i = 0; i < LWIP_IPV6_NUM_ADDRESSES; ++i) {
       if (ip6_addr_istentative(netif->ip6_addr_state[i])) {
         if ((netif->ip6_addr_state[i] & 0x07) >= LWIP_IPV6_DUP_DETECT_ATTEMPTS) {
@@ -774,7 +778,8 @@ nd6_tmr(void)
 
 #if LWIP_IPV6_SEND_ROUTER_SOLICIT
   /* Send router solicitation messages, if necessary. */
-  for (netif = netif_list; netif != NULL; netif = netif->next) {
+  for (port = 0; port < tports; port++) {
+    netif = &port_cdb[port];
     if ((netif->rs_count > 0) && (netif->flags & NETIF_FLAG_UP)) {
       nd6_send_rs(netif);
       netif->rs_count--;
@@ -828,8 +833,8 @@ nd6_send_ns(struct interface * netif, ip6_addr_t * target_addr, u8_t flags)
   ip6_addr_set(&(ns_hdr->target_address), target_addr);
 
   lladdr_opt->type = ND6_OPTION_TYPE_SOURCE_LLADDR;
-  lladdr_opt->length = ((netif->hwaddr_len + 2) >> 3) + (((netif->hwaddr_len + 2) & 0x07) ? 1 : 0);
-  SMEMCPY(lladdr_opt->addr, netif->hwaddr, netif->hwaddr_len);
+  lladdr_opt->length = ((netif->ifPhysAddress_len + 2) >> 3) + (((netif->ifPhysAddress_len + 2) & 0x07) ? 1 : 0);
+  SMEMCPY(lladdr_opt->addr, netif->ifPhysAddress, netif->ifPhysAddress_len);
 
   /* Generate the solicited node address for the target address. */
   if (flags & ND6_SEND_FLAG_MULTICAST_DEST) {
@@ -893,8 +898,8 @@ nd6_send_na(struct interface * netif, ip6_addr_t * target_addr, u8_t flags)
   ip6_addr_set(&(na_hdr->target_address), target_addr);
 
   lladdr_opt->type = ND6_OPTION_TYPE_TARGET_LLADDR;
-  lladdr_opt->length = ((netif->hwaddr_len + 2) >> 3) + (((netif->hwaddr_len + 2) & 0x07) ? 1 : 0);
-  SMEMCPY(lladdr_opt->addr, netif->hwaddr, netif->hwaddr_len);
+  lladdr_opt->length = ((netif->ifPhysAddress_len + 2) >> 3) + (((netif->ifPhysAddress_len + 2) & 0x07) ? 1 : 0);
+  SMEMCPY(lladdr_opt->addr, netif->ifPhysAddress, netif->ifPhysAddress_len);
 
   /* Generate the solicited node address for the target address. */
   if (flags & ND6_SEND_FLAG_MULTICAST_DEST) {
@@ -972,8 +977,8 @@ nd6_send_rs(struct interface * netif)
     /* Include our hw address. */
     lladdr_opt = (struct lladdr_option *)((u8_t*)p->payload + sizeof(struct rs_header));
     lladdr_opt->type = ND6_OPTION_TYPE_SOURCE_LLADDR;
-    lladdr_opt->length = ((netif->hwaddr_len + 2) >> 3) + (((netif->hwaddr_len + 2) & 0x07) ? 1 : 0);
-    SMEMCPY(lladdr_opt->addr, netif->hwaddr, netif->hwaddr_len);
+    lladdr_opt->length = ((netif->ifPhysAddress_len + 2) >> 3) + (((netif->ifPhysAddress_len + 2) & 0x07) ? 1 : 0);
+    SMEMCPY(lladdr_opt->addr, netif->ifPhysAddress, netif->ifPhysAddress_len);
   }
 
   rs_hdr->chksum = ip6_chksum_pseudo(p, IP6_NEXTH_ICMP6, p->len, src_addr,
@@ -1020,7 +1025,7 @@ nd6_new_neighbor_cache_entry(void)
 {
   s8_t i;
   s8_t j;
-  u32_t time;
+  u32_t ltime;
 
 
   /* First, try to find an empty entry. */
@@ -1060,14 +1065,14 @@ nd6_new_neighbor_cache_entry(void)
   }
 
   /* Next, try to find the oldest reachable entry. */
-  time = 0xfffffffful;
+  ltime = 0xfffffffful;
   j = -1;
   for (i = 0; i < LWIP_ND6_NUM_NEIGHBORS; i++) {
     if ((neighbor_cache[i].state == ND6_REACHABLE) &&
         (!neighbor_cache[i].isrouter)) {
-      if (neighbor_cache[i].counter.reachable_time < time) {
+      if (neighbor_cache[i].counter.reachable_time < ltime) {
         j = i;
-        time = neighbor_cache[i].counter.reachable_time;
+        ltime = neighbor_cache[i].counter.reachable_time;
       }
     }
   }
@@ -1077,16 +1082,16 @@ nd6_new_neighbor_cache_entry(void)
   }
 
   /* Next, find oldest incomplete entry without queued packets. */
-  time = 0;
+  ltime = 0;
   j = -1;
   for (i = 0; i < LWIP_ND6_NUM_NEIGHBORS; i++) {
     if (
         (neighbor_cache[i].q == NULL) &&
         (neighbor_cache[i].state == ND6_INCOMPLETE) &&
         (!neighbor_cache[i].isrouter)) {
-      if (neighbor_cache[i].counter.probes_sent >= time) {
+      if (neighbor_cache[i].counter.probes_sent >= ltime) {
         j = i;
-        time = neighbor_cache[i].counter.probes_sent;
+        ltime = neighbor_cache[i].counter.probes_sent;
       }
     }
   }
@@ -1096,14 +1101,14 @@ nd6_new_neighbor_cache_entry(void)
   }
 
   /* Next, find oldest incomplete entry with queued packets. */
-  time = 0;
+  ltime = 0;
   j = -1;
   for (i = 0; i < LWIP_ND6_NUM_NEIGHBORS; i++) {
     if ((neighbor_cache[i].state == ND6_INCOMPLETE) &&
         (!neighbor_cache[i].isrouter)) {
-      if (neighbor_cache[i].counter.probes_sent >= time) {
+      if (neighbor_cache[i].counter.probes_sent >= ltime) {
         j = i;
-        time = neighbor_cache[i].counter.probes_sent;
+        ltime = neighbor_cache[i].counter.probes_sent;
       }
     }
   }
@@ -1463,7 +1468,7 @@ nd6_get_next_hop_entry(ip6_addr_t * ip6addr, struct interface * netif)
       if (ip6_addr_islinklocal(ip6addr) ||
           nd6_is_prefix_in_netif(ip6addr, netif)) {
         /* Destination in local link. */
-        destination_cache[nd6_cached_destination_index].pmtu = netif->mtu;
+        destination_cache[nd6_cached_destination_index].pmtu = netif->ifMtu;
         ip6_addr_copy(destination_cache[nd6_cached_destination_index].next_hop_addr, destination_cache[nd6_cached_destination_index].destination_addr);
       }
       else {
@@ -1474,7 +1479,7 @@ nd6_get_next_hop_entry(ip6_addr_t * ip6addr, struct interface * netif)
           ip6_addr_set_any(&(destination_cache[nd6_cached_destination_index].destination_addr));
           return ERR_RTE;
         }
-        destination_cache[nd6_cached_destination_index].pmtu = netif->mtu; /* Start with netif mtu, correct through ICMPv6 if necessary */
+        destination_cache[nd6_cached_destination_index].pmtu = netif->ifMtu; /* Start with netif mtu, correct through ICMPv6 if necessary */
         ip6_addr_copy(destination_cache[nd6_cached_destination_index].next_hop_addr, default_router_list[i].neighbor_entry->next_hop_address);
       }
     }
@@ -1730,7 +1735,7 @@ nd6_get_destination_mtu(ip6_addr_t * ip6addr, struct interface * netif)
   }
 
   if (netif != NULL) {
-    return netif->mtu;
+    return netif->ifMtu;
   }
 
   return 1280; /* Minimum MTU */

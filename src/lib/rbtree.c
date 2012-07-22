@@ -353,7 +353,7 @@ void rb_augment_erase_end(struct rb_node *node, rb_augment_f func, void *data)
 /*
  * This function returns the first node (in sort order) of the tree.
  */
-struct rb_node *rb_first(const struct rb_root *root)
+struct rb_node *rb_first(struct rb_root *root)
 {
 	struct rb_node	*n = NULL;
 

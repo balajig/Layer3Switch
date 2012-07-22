@@ -3,7 +3,9 @@
 #include "linklist.h"
 struct interface;
 #include "lwip/netif.h"
+#ifndef DONT_USE_LWIP
 #include "lwip/inet.h"
+#endif
 #define ZEBRA_INTERFACE_ACTIVE     (1 << 0)
 #define ZEBRA_INTERFACE_SUB        (1 << 1)
 #define ZEBRA_INTERFACE_LINKDETECTION (1 << 2)
@@ -134,6 +136,8 @@ struct interface {
 	u32_t ifoutucastpkts;
 	u32_t ifoutnucastpkts;
 	u32_t ifoutdiscards;
+	/** flags (see NETIF_FLAG_ above) */
+	u32_t flags;
 
 	/** IP address configuration in network byte order */
 	ip_addr_t ip_addr;
@@ -143,8 +147,6 @@ struct interface {
 	u8_t ifPhysAddress_len;
 	/** link level hardware address of this interface */
 	u8_t ifPhysAddress[NETIF_MAX_HWADDR_LEN];
-	/** flags (see NETIF_FLAG_ above) */
-	u8_t flags;
 	/** number of this interface */
 	u8_t num;
 #if LWIP_SNMP
@@ -206,4 +208,7 @@ int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask);
 void if_set_addr (struct interface *netif, ip_addr_t * ipaddr, ip_addr_t * netmask,
                 ip_addr_t * gw);
 int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags);
+void interface_init (struct interface *netif, void *state, netif_input_fn input);
+struct interface * if_connect_init (struct interface *ifp);
+err_t if_loopif_init(void);
 #endif

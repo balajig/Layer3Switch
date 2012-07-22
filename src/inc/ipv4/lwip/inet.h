@@ -48,7 +48,9 @@ struct in_addr {
 /** 255.255.255.255 */
 #define INADDR_NONE         IPADDR_NONE
 /** 127.0.0.1 */
+#ifndef INADDR_LOOPBACK
 #define INADDR_LOOPBACK     IPADDR_LOOPBACK
+#endif
 /** 0.0.0.0 */
 #define INADDR_ANY          IPADDR_ANY
 /** 255.255.255.255 */

@@ -15,6 +15,7 @@
 #include "lwip/dns.h"
 
 int set_dns_server (uint32_t addr, int primary);
+void dns_db_init (void);
 
 struct dns_server_tbl {
         ip_addr_t addr;

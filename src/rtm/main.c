@@ -20,6 +20,9 @@
  */
 
 #include "zebra.h"
+void rib_init (void);
+void rib_weed_tables (void);
+
 
 int rtm_init (void);
 int rtm_init (void)

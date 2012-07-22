@@ -487,7 +487,7 @@ static int _environ_telnet(telnet_t *telnet, unsigned char type,
 	telnet_event_t ev;
 	struct telnet_environ_t *values = 0;
 	char *c, *last, *out;
-	size_t index, count;
+	size_t idx, count;
 
 	/* if we have no data, just pass it through */
 	if (size == 0) {
@@ -556,9 +556,9 @@ static int _environ_telnet(telnet_t *telnet, unsigned char type,
 	/* parse argument array strings */
 	out = buffer;
 	c = buffer + 1;
-	for (index = 0; index != count; ++index) {
+	for (idx = 0; idx != count; ++idx) {
 		/* remember the variable type (will be VAR or USERVAR) */
-		values[index].type = *c++;
+		values[idx].type = *c++;
 
 		/* scan until we find an end-marker, and buffer up unescaped
 		 * bytes into our buffer */
@@ -581,8 +581,8 @@ static int _environ_telnet(telnet_t *telnet, unsigned char type,
 		*out++ = '\0';
 
 		/* store the variable name we have just received */
-		values[index].var = last;
-		values[index].value = "";
+		values[idx].var = last;
+		values[idx].value = (char *)"";
 
 		/* if we got a value, find the next end marker and
 		 * store the value; otherwise, store empty string */
@@ -606,7 +606,7 @@ static int _environ_telnet(telnet_t *telnet, unsigned char type,
 			*out++ = '\0';
 
 			/* store the variable value */
-			values[index].value = last;
+			values[idx].value = last;
 		}
 	}
 
@@ -1342,16 +1342,19 @@ void telnet_begin_compress2(telnet_t *telnet) {
 	ev.type = TELNET_EV_COMPRESS;
 	ev.compress.state = 1;
 	telnet->eh(telnet, &ev, telnet->ud);
-#endif /* defined(HAVE_ZLIB) */
+#else /* defined(HAVE_ZLIB) */
+	telnet = telnet;
+#endif
 }
 
 /* send formatted data with \r and \n translation in addition to IAC IAC */
 int telnet_prints (telnet_t *telnet, const char *buffer, int len) {
+	const char *output = buffer;
+#if 0
+	int i, l;
     static const char CRLF[] = { '\r', '\n' };
     static const char CRNUL[] = { '\r', '\0' };
-	char *output = buffer;
-	int i, l;
-#if 0
+
 	/* send */
 	for (l = i = 0; i != len; ++i) {
 		/* special characters */
@@ -1382,10 +1385,10 @@ int telnet_prints (telnet_t *telnet, const char *buffer, int len) {
 	telnet_send(telnet, output, len);
 	/* free allocated memory, if any */
 	if (output != buffer) {
-		free(output);
+		free((void*)output);
 	}
 
-	return i;
+	return len;
 }
 /* send formatted data with \r and \n translation in addition to IAC IAC */
 int telnet_printf(telnet_t *telnet, const char *fmt, ...) {
@@ -1479,6 +1482,7 @@ int telnet_raw_printf(telnet_t *telnet, const char *fmt, ...) {
 
 /* begin NEW-ENVIRON subnegotation */
 void telnet_begin_newenviron(telnet_t *telnet, unsigned char cmd) {
+	cmd = cmd;
 	telnet_begin_sb(telnet, TELNET_TELOPT_NEW_ENVIRON);
 }
 
