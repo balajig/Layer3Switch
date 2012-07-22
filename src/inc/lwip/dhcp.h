@@ -234,6 +234,10 @@ void dhcp_arp_reply(struct interface *netif, ip_addr_t *addr);
 #define DHCP_OVERLOAD_SNAME  2
 #define DHCP_OVERLOAD_SNAME_FILE 3
 
+int dhcp_setup_if_timers (struct interface *p);
+void dhcp_if_start_coarse_timer (struct interface *p);
+int dhcp_queue_packet (struct interface *netif, void *data);
+void dhcp_coarse_tmr (struct interface       *netif);
 #ifdef __cplusplus
 }
 #endif

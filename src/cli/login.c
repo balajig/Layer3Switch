@@ -23,12 +23,12 @@ int set_current_user_name(char *user);
 char read_input(void);
 
 
-int process_logout()
+int process_logout(void)
 {
 	return process_login ();
 }
 
-void show_login_prompt()
+void show_login_prompt(void)
 {     
 	cli_printf("************************************************************\n");
 	cli_printf("*       $$      Open Source Switch Solution     $$         *\n");

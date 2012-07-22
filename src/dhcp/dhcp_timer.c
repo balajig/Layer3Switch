@@ -12,7 +12,7 @@
 #include "ifmgmt.h"
 #include "lwip/dhcp.h"
 
-void         dhcp_timeout (struct interface *netif);
+void         dhcp_timeout (void *netif);
 static void dhcp_timer_coarse (void *arg)
 {
     struct interface *p = (struct interface *)arg;

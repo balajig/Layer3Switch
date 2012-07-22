@@ -16,9 +16,10 @@ static struct user_db * get_user_info (char *username);
 int validate_username_password (char *user, char *passwd);
 static int  update_user_info (char *username, char *password, int priv_level);
 static int password_validation (char *pswd);
+#if 0
 static char * encrypt_password (char *password);
 static char * decrypt_password (char *password);
-
+#endif
 
 struct user_db {
 	char user_name[MAX_USER_NAME];
@@ -178,16 +179,19 @@ int user_del (char *username)
 } 
 
 
+#if 0
 static char * encrypt_password (char *password)
 {
+	password = password;
 	return NULL;
 }
 
 static char * decrypt_password (char *password)
 {
+	password = password;
 	return NULL;
 }
-
+#endif
 int show_users (void)
 {
 	int  i = -1;

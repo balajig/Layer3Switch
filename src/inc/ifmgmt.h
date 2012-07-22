@@ -203,4 +203,7 @@ int if_is_multicast(struct interface *ifp);
 struct interface * get_loopback_if (void);
 err_t netif_loop_output (struct interface *netif, struct pbuf *p, ip_addr_t * ipaddr);
 int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask);
+void if_set_addr (struct interface *netif, ip_addr_t * ipaddr, ip_addr_t * netmask,
+                ip_addr_t * gw);
+int connected_route_add (struct interface *ifp,  uint32_t *addr, uint32_t *mask, int flags);
 #endif

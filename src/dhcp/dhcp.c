@@ -173,6 +173,7 @@ static void         dhcp_option_long (struct dhcp *dhcp, u32_t value);
 /* always add the DHCP options trailer to end and pad */
 static void         dhcp_option_trailer (struct dhcp *dhcp);
 int dhcp_queue_packet (struct interface *netif, void *data);
+void dhcp_process (struct interface *netif, struct pbuf *p);
 
 /**
  * Back-off the DHCP client (because of a received NAK response).
@@ -1176,7 +1177,7 @@ dhcp_bind (struct interface *netif)
 
     if_set_addr (netif, &dhcp->offered_ip_addr, &sn_mask, &gw_addr);
     {
-	    connected_route_add (netif, &dhcp->offered_ip_addr, &sn_mask);
+	    connected_route_add (netif, &dhcp->offered_ip_addr.addr, &sn_mask.addr, 0);
 	    #if 0
 	    /*FIXME: Does this require - SASI*/
 	    route_add_gateway (dhcp->offered_ip_addr.addr, sn_mask.addr, 

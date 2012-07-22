@@ -9,10 +9,13 @@
  */
 
 #include "common_types.h"
+#include "ifmgmt.h"
+#include "lwip/dhcp.h"
 
 
 int dhcp_init (void);
 void dhcp_process (struct interface *netif, void *p);
+static void * dhcp_task (void *arg);
 
 
 #define DHCP_RX_PKT      0x1
@@ -28,7 +31,7 @@ static tmtaskid_t dhcptaskid = -1;
 static int        dhcpqpool = -1;
 static unsigned long dhcp_pqid = -1;
 
-void * dhcp_task (void *arg)
+static void * dhcp_task (void *arg UNUSED_PARAM)
 {
 	struct dhcpd_msg *msg = NULL;
 	
@@ -44,6 +47,7 @@ void * dhcp_task (void *arg)
 		
 		free_blk (dhcpqpool, msg);
 	}
+	return NULL;
 }
 
 int dhcp_queue_packet (struct interface *netif, void *data)
