@@ -15,6 +15,7 @@ struct ether_addr
   u_int8_t ether_addr_octet[ETH_ALEN];
 } __attribute__ ((__packed__));
 
+struct ether_addr *ether_aton_r(const char *asc, struct ether_addr *addr);
 
 /* on these functions, make sure your datatype matches */
 static int FAST_FUNC read_str(const char *line, void *arg)
@@ -93,11 +94,11 @@ static const struct config_keyword keywords[] = {
 #define ARRAY_SIZE(k)  sizeof(k) / sizeof (k[0])
 #define KWS_WITH_DEFAULTS  (ARRAY_SIZE(keywords) - 6)
 
-void FAST_FUNC read_config(const char *file)
+void FAST_FUNC read_config(const char *file UNUSED_PARAM)
 {
-	const struct config_keyword *k;
+	//const struct config_keyword *k;
 	unsigned i;
-	char *token[2];
+	//char *token[2];
 
 	for (i = 0; i < KWS_WITH_DEFAULTS; i++)
 		keywords[i].handler(keywords[i].def, keywords[i].var);

@@ -256,7 +256,7 @@ int dhcprelay_main(int argc, char **argv)
 	char **iface_list;
 	int *fds;
 	int num_sockets, max_socket;
-	uint32_t our_nip;
+	uint32_t our_nip = 0x10007f;
 
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = htonl(INADDR_BROADCAST);

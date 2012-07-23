@@ -41,6 +41,8 @@
 #include "cparser_io.h"
 #include "cparser_fsm.h"
 
+void show_login_prompt(void);
+
 void
 cparser_print_prompt (const cparser_t *parser)
 {
@@ -397,7 +399,7 @@ cparser_complete_one_level (cparser_t *parser)
             if (parser->cur_node && parser->cur_node->children &&
                 !parser->cur_node->children->sibling &&
                 (CPARSER_NODE_KEYWORD == parser->cur_node->children->type)) {
-                ch_ptr = parser->cur_node->children->param;
+                ch_ptr = (char *)parser->cur_node->children->param;
                 while (*ch_ptr) {
                     rc = cparser_input(parser, *ch_ptr, CPARSER_CHAR_REGULAR);
                     assert(CPARSER_OK == rc);
@@ -446,7 +448,7 @@ cparser_complete_one_level (cparser_t *parser)
                  * is a parameter token in the match, we automatically abort.
                  */
                 offset = orig_offset = token->token_len;
-                ch_ptr = match->param + token->token_len;
+                ch_ptr = (char *)match->param + token->token_len;
                 while (('\0' != *ch_ptr) &&
                        (CPARSER_OK ==
                         cparser_match_prefix(parser, token->buf, token->token_len,
@@ -780,7 +782,7 @@ cparser_load_cmd (cparser_t *parser, char *filename)
             /* Examine the input characters to maintain indent level */
             if ('\n' == buf[n]) {
                 cparser_result_t rc;
-                char buf[128];
+                char tbuf[128];
 
                 line_num++;
                 indent = 0;
@@ -792,12 +794,12 @@ cparser_load_cmd (cparser_t *parser, char *filename)
                 parser->cfg.fd = fd;
                 switch (rc) {
                 case CPARSER_ERR_PARSE_ERR:
-                    snprintf(buf, sizeof(buf), "Line %d: Parse error.\n", line_num);
-                    parser->cfg.prints(parser, buf);
+                    snprintf(tbuf, sizeof(tbuf), "Line %d: Parse error.\n", line_num);
+                    parser->cfg.prints(parser, tbuf);
                     break;
                 case CPARSER_ERR_INCOMP_CMD:
-                    snprintf(buf, sizeof(buf), "Line %d: Incomplete command.\n", line_num);
-                    parser->cfg.prints(parser, buf);
+                    snprintf(tbuf, sizeof(tbuf), "Line %d: Incomplete command.\n", line_num);
+                    parser->cfg.prints(parser, tbuf);
                     break;
                 default:
                     assert(0);
@@ -900,6 +902,7 @@ static cparser_result_t
 cparser_help_pre_walker (cparser_t *parser, cparser_node_t *node, void *cookie)
 {
     help_stack_t *hs = (help_stack_t *)cookie;
+    parser = parser;
 
     assert(parser && node && hs);
     hs->nodes[hs->tos] = node;

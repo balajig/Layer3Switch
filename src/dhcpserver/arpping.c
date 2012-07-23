@@ -39,7 +39,12 @@ int FAST_FUNC arpping(uint32_t test_nip,
 		uint8_t *from_mac,
 		const char *interface)
 {
-
+	test_nip = test_nip;
+	safe_mac = safe_mac;
+	from_mac = from_mac;
+	from_ip = from_ip;
+	interface = interface;
 	/*Similar to dhcp_check*/
 	/*dhcp_check ();*/
+	return -1;
 }

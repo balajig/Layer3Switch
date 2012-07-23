@@ -52,8 +52,8 @@
  *     is ever called.
  */
 cparser_result_t 
-cparser_match_root (const char *token, const int token_len, 
-                    cparser_node_t *node, int *is_complete)
+cparser_match_root (const char *token UNUSED_PARAM, const int token_len UNUSED_PARAM, 
+                    cparser_node_t *node UNUSED_PARAM, int *is_complete UNUSED_PARAM)
 {
     assert(node && (CPARSER_NODE_ROOT == node->type));
     assert(0); /* we should never try to match a root node */
@@ -65,8 +65,8 @@ cparser_match_root (const char *token, const int token_len,
  *     parsing for end node. It always returns no match.
  */
 cparser_result_t 
-cparser_match_end (const char *token, const int token_len, 
-                   cparser_node_t *node, int *is_complete)
+cparser_match_end (const char *token UNUSED_PARAM, const int token_len UNUSED_PARAM, 
+                   cparser_node_t *node UNUSED_PARAM, int *is_complete UNUSED_PARAM)
 {
     assert(node && (CPARSER_NODE_END == node->type));
     return CPARSER_NOT_OK;
@@ -106,8 +106,8 @@ cparser_match_keyword (const char *token, const int token_len,
  *     no restriction on strings.
  */
 cparser_result_t
-cparser_match_string (const char *token, const int token_len, 
-                      cparser_node_t *node, int *is_complete)
+cparser_match_string (const char *token UNUSED_PARAM, const int token_len UNUSED_PARAM, 
+                      cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     assert(token && node && (CPARSER_NODE_STRING == node->type) && is_complete);
     *is_complete = 1;
@@ -120,7 +120,7 @@ cparser_match_string (const char *token, const int token_len,
  */
 cparser_result_t
 cparser_match_uint (const char *token, const int token_len, 
-                    cparser_node_t *node, int *is_complete)
+                    cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     int n, is_dec = 1;
  
@@ -174,7 +174,7 @@ cparser_match_uint (const char *token, const int token_len,
  */
 cparser_result_t
 cparser_match_int (const char *token, const int token_len, 
-                   cparser_node_t *node, int *is_complete)
+                   cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     int n;
 
@@ -207,7 +207,7 @@ cparser_match_int (const char *token, const int token_len,
  */
 cparser_result_t
 cparser_match_hex (const char *token, const int token_len, 
-                   cparser_node_t *node, int *is_complete)
+                   cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     int n;
 
@@ -234,7 +234,7 @@ cparser_match_hex (const char *token, const int token_len,
  */
 cparser_result_t
 cparser_match_float (const char *token, const int token_len, 
-                     cparser_node_t *node, int *is_complete)
+                     cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     int base = 0, has_dec_pt = 0, n;
     assert(token && node && (CPARSER_NODE_FLOAT == node->type) && is_complete);
@@ -283,7 +283,7 @@ cparser_match_float (const char *token, const int token_len,
  */
 cparser_result_t
 cparser_match_macaddr (const char *token, const int token_len, 
-                       cparser_node_t *node, int *is_complete)
+                       cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     int n, num_digit = 0, num_colon = 0;
 
@@ -318,7 +318,7 @@ cparser_match_macaddr (const char *token, const int token_len,
  */
 cparser_result_t
 cparser_match_ipv4addr (const char *token, const int token_len, 
-                        cparser_node_t *node, int *is_complete)
+                        cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     int n, num_digit = 0, num_dot = 0;
 
@@ -357,8 +357,8 @@ cparser_match_ipv4addr (const char *token, const int token_len,
  *     this like a string.
  */
 cparser_result_t
-cparser_match_file (const char *token, const int token_len, 
-                    cparser_node_t *node, int *is_complete)
+cparser_match_file (const char *token UNUSED_PARAM, const int token_len UNUSED_PARAM, 
+                    cparser_node_t *node UNUSED_PARAM, int *is_complete)
 {
     assert(token && node && (CPARSER_NODE_FILE == node->type) && is_complete);
     *is_complete = 1;
@@ -396,13 +396,13 @@ cparser_match_list (const char *token, const int token_len,
  ***********************************************************************/
 cparser_result_t
 cparser_complete_keyword (cparser_t *parser, const cparser_node_t *node,
-                          const char *token, const int token_len)
+                          const char *token UNUSED_PARAM, const int token_len)
 {
     int rc;
     char *ch_ptr;
 
     assert(parser && node && token && (CPARSER_NODE_KEYWORD == node->type));
-    ch_ptr = node->param + token_len;
+    ch_ptr = (char *)node->param + token_len;
     while (*ch_ptr) {
         rc = cparser_input(parser, *ch_ptr, CPARSER_CHAR_REGULAR);
         assert(CPARSER_OK == rc);
@@ -415,7 +415,7 @@ cparser_complete_keyword (cparser_t *parser, const cparser_node_t *node,
  * cparser_complete_file - Token complete function for a file path.
  */
 cparser_result_t
-cparser_complete_file (cparser_t *parser, const cparser_node_t *node,
+cparser_complete_file (cparser_t *parser, const cparser_node_t *node UNUSED_PARAM,
                        const char *token, const int token_len)
 {
     int rc, n;
@@ -455,7 +455,7 @@ cparser_complete_list (cparser_t *parser, const cparser_node_t *node,
 
     assert(parser && node && token && (CPARSER_NODE_LIST == node->type) && token_len);
     /* Find the longest common suffix if it exists */
-    for (lnode = node->param; NULL != lnode; lnode = lnode->next) {
+    for (lnode = (cparser_list_node_t *)node->param; NULL != lnode; lnode = lnode->next) {
         if (!strncmp(lnode->keyword, token, token_len)) {
             /* Prefix matches. See what is the longest suffix */
             if (-1 == match_len) {

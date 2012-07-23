@@ -36,7 +36,9 @@
 #include "dhcpc.h"
 #include "dhcpd.h"
 
-
+int udhcpd_init (void);
+uint8_t* FAST_FUNC udhcp_get_option(struct dhcp_packet *packet, int code);
+void dhcpd_process_packet (struct dhcp_packet *packet);
 /* Send a packet to a specific mac address and ip address by creating our own ip packet */
 static void send_packet_to_client(struct dhcp_packet *dhcp_pkt, int force_broadcast)
 {
@@ -295,14 +297,14 @@ struct dyn_lease *g_leases;
 /* struct server_config_t server_config is in bb_common_bufsiz1 */
 
 
-int dhcpd_process_packet (struct dhcp_packet *packet)
+void dhcpd_process_packet (struct dhcp_packet *packet)
 {
 	uint8_t *state;
-	unsigned timeout_end;
-	unsigned num_ips;
-	unsigned opt;
-	struct option_set *option;
-	uint8_t * server_id_opt, requested_ip_opt;
+	//unsigned timeout_end;
+	//unsigned num_ips;
+	//unsigned opt;
+	//struct option_set *option;
+	uint8_t * server_id_opt, *requested_ip_opt;
 	uint32_t static_lease_nip;
         struct dyn_lease *lease, fake_lease;
 	uint32_t requested_nip;
@@ -515,4 +517,5 @@ int dhcpd_process_packet (struct dhcp_packet *packet)
 int udhcpd_init (void)
 {
 	g_leases = malloc(server_config.max_leases * sizeof(g_leases[0]));
+	return 0;
 }

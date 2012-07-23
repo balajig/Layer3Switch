@@ -202,6 +202,7 @@ unsigned FAST_FUNC udhcp_option_idx(const char *name)
 		*d = '\0';
 		printf("unknown option '%s', known options: %s", name, buf);
 	}
+	return n;
 }
 
 /* Get an option with bounds checking (warning, result is not aligned) */
@@ -341,6 +342,9 @@ struct option_set* FAST_FUNC udhcp_find_option(struct option_set *opt_list, uint
 /* Parse string to IP in network order */
 int FAST_FUNC udhcp_str2nip(const char *str, void *arg)
 {
+	str = str;
+	arg = arg;
+	/*FIXME:*/
 #if 0
 	len_and_sockaddr *lsa;
 

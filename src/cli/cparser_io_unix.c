@@ -48,6 +48,12 @@
 #define IS_BACK_SPACE(c)  (c == 0x7f)
 #define IS_TAB(c)         (c == '\t')
 
+int telnet_prints (void *telnet, const char *buffer, int len);
+void cparser_telnet_unix_getch (cparser_t *parser, int *ch, cparser_char_t *type);
+int lwip_read (int fd, char *buf, int size);
+void cparser_telnet_io_config (cparser_t *parser);
+
+
 /**
  * \brief    Enable/disable canonical mode.
  * \details  Note that this call must be made first with enable=0.
@@ -173,7 +179,6 @@ static void
 cparser_telnet_unix_printc (const cparser_t *parser, const char ch)
 {
     ssize_t wsize;
-    char buf[4];
     assert(parser);
     wsize = telnet_prints (parser->session_data, &ch, 1);
 }
@@ -193,9 +198,9 @@ cparser_telnet_unix_getch (cparser_t *parser, int *ch, cparser_char_t *type)
     assert(VALID_PARSER(parser) && ch && type);
     *type = CPARSER_CHAR_UNKNOWN;
     if ('' == *ch) {
-            lwip_read (parser->cfg.fd, ch, 1);
+            lwip_read (parser->cfg.fd, (char *)ch, 1);
         if ('[' == *ch) {
-    	    lwip_read (parser->cfg.fd, ch, 1);
+    	    lwip_read (parser->cfg.fd, (char *)ch, 1);
             switch (*ch) {
                 case 'A':
                     *type = CPARSER_CHAR_UP_ARROW;
@@ -237,11 +242,13 @@ cparser_telnet_unix_getch (cparser_t *parser, int *ch, cparser_char_t *type)
 static void
 cparser_telnet_unix_io_init (cparser_t *parser)
 {
+	parser = parser;
 }
 
 static void
 cparser_telnet_unix_io_cleanup (cparser_t *parser)
 {
+	parser = parser;
 }
 
 void

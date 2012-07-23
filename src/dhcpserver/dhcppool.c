@@ -13,7 +13,10 @@
 #include "common.h"
 
 
+int dhcp_new_ip_pool (char *poolname);
+
 int dhcp_new_ip_pool (char *poolname)
 {
-
+	poolname = poolname;
+	return 0;
 }

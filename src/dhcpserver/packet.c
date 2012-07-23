@@ -302,7 +302,7 @@ int FAST_FUNC udhcp_send_kernel_packet(struct dhcp_packet *dhcp_pkt,
 
 /* 1. None of the callers expects it to ever fail */
 /* 2. ip was always INADDR_ANY */
-int FAST_FUNC udhcp_listen_socket(/*uint32_t ip,*/ int port, const char *inf)
+int FAST_FUNC udhcp_listen_socket(/*uint32_t ip,*/ int port, const char *inf UNUSED_PARAM)
 {
 	int fd;
 	struct sockaddr_in addr;

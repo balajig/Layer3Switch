@@ -140,6 +140,9 @@ cparser_ws_erase (cparser_t *parser, const char ch, int *ch_processed)
     cparser_token_t *token;
 
     assert(parser && ch_processed);
+    if (ch != '\b') {
+       return CPARSER_STATE_ERROR;
+    }
     if (parser->current_pos > 0) {
 	*ch_processed = 1;
         parser->current_pos--;
@@ -183,6 +186,9 @@ static cparser_state_t
 cparser_ws_space (cparser_t *parser, const char ch, int *ch_processed)
 {
     assert(parser && ch_processed);
+    parser = parser;
+    if (ch != ' ')
+       return CPARSER_STATE_ERROR;
     *ch_processed = 1;
     return CPARSER_STATE_WHITESPACE;
 }
@@ -241,7 +247,9 @@ static cparser_state_t
 cparser_tok_erase (cparser_t *parser, const char ch, int *ch_processed)
 {
     cparser_token_t *token;
-
+    if (ch != '\b') {
+       return CPARSER_STATE_ERROR;
+    }
     assert(parser && ch_processed);
     token = CUR_TOKEN(parser);
     DELETE_TOK_STK(token);
@@ -276,6 +284,8 @@ cparser_tok_space (cparser_t *parser, const char ch, int *ch_processed)
     cparser_token_t *token;
 
     assert(parser && (' ' == ch) && ch_processed);
+    if (ch != ' ')
+       return CPARSER_STATE_ERROR;
     *ch_processed = 1;
     token = CUR_TOKEN(parser);
     if ((1 <= cparser_match(parser, token->buf, token->token_len, 
@@ -357,6 +367,8 @@ cparser_err_erase (cparser_t *parser, const char ch, int *ch_processed)
     assert(0 < parser->current_pos); /* impossible to get to error state 
                                       * on an empty string.
                                       */
+    if (ch != ' ')
+        return CPARSER_STATE_ERROR;
     parser->current_pos--;
     if ((parser->last_good + 1) == parser->current_pos) {
         cparser_token_t *token;
@@ -382,9 +394,13 @@ cparser_err_erase (cparser_t *parser, const char ch, int *ch_processed)
  * \return   New parser state.
  */
 static cparser_state_t
-cparser_err_space (cparser_t *parser, const char ch, int *ch_processed)
+cparser_err_space (cparser_t *parser , const char ch , int *ch_processed)
 {
     assert(parser && ch_processed);
+    if (!parser)
+       return CPARSER_STATE_ERROR;
+    if (ch != ' ')
+       return CPARSER_STATE_ERROR;
     *ch_processed = 1;
     return CPARSER_STATE_ERROR;
 }
@@ -406,6 +422,8 @@ static cparser_state_t
 cparser_err_char (cparser_t *parser, const char ch, int *ch_processed)
 {
     assert(parser && ch_processed);
+    if (ch)
+        parser = parser;
     *ch_processed = 1;
     return CPARSER_STATE_ERROR;
 }

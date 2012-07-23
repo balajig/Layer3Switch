@@ -8,6 +8,10 @@
 #ifndef UDHCP_COMMON_H
 #define UDHCP_COMMON_H 1
 #include "common_types.h"
+#define ENABLE_FEATURE_UDHCP_RFC3397 1
+#define ENABLE_FEATURE_UDHCP_8021Q 1
+#define ENABLE_FEATURE_UDHCP_PORT 1
+#define ENABLE_FEATURE_UDHCPD_BASE_IP_ON_MAC 1
 #include "platform.h"
 #include "lwip/opt.h"
 #include "lwip/stats.h"
@@ -158,7 +162,7 @@ enum {
 //#define DHCP_WINS_SERVER      0x2c
 #define DHCP_REQUESTED_IP       0x32 /* sent by client if specific IP is wanted */
 #define DHCP_LEASE_TIME         0x33
-#define DHCP_OPTION_OVERLOAD    0x34
+//#define DHCP_OPTION_OVERLOAD    0x34
 #define DHCP_MESSAGE_TYPE       0x35
 #define DHCP_SERVER_ID          0x36 /* by default server's IP */
 #define DHCP_PARAM_REQ          0x37 /* list of options client wants */
@@ -336,4 +340,7 @@ int arpping(uint32_t test_nip,
 		const char *interface) FAST_FUNC;
 
 
+int FAST_FUNC index_in_strings(const char *strings, const char *key);
+void FAST_FUNC setsockopt_reuseaddr(int fd);
+int FAST_FUNC setsockopt_broadcast(int fd);
 #endif

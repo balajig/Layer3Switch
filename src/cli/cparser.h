@@ -674,7 +674,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
+#define UNUSED_PARAM __attribute__((unused))
 #include "cparser_options.h"
 
 /*
@@ -1089,6 +1089,12 @@ int cparser_is_user_input(cparser_t *parser, int *do_echo);
  */
 cparser_result_t cparser_last_command(cparser_t *parser, char **cmd,
                                       cparser_result_t *rc, int *is_priv);
+
+cparser_result_t
+cparser_set_prompt (cparser_t *parser, const char *prompt);
+void
+cparser_record_command (cparser_t *parser, cparser_result_t rc);
+
 
 #ifdef __cplusplus
 }
