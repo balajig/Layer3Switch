@@ -162,8 +162,6 @@ static void pingstats(int);
 static void unpack(char *, int, struct sockaddr_in *);
 static void set_pingexit (void);
 
-static void *pingtimer;
-
 /**************************************************************************/
 static int in_cksum(unsigned short *buf, int sz)
 {
@@ -191,7 +189,6 @@ static int in_cksum(unsigned short *buf, int sz)
 
 static void pingstats(int ign)
 {
-	//signal(SIGINT, SIG_IGN);
 	ign = 1;
 	
 	cli_printf("\n--- %s ping statistics ---\n", hostname);
@@ -236,19 +233,16 @@ static void sendping(int ign)
 	i = sendto(pingsock, packet, sizeof(packet), 0,
 			   (struct sockaddr *) &pingaddr, sizeof(struct sockaddr_in));
 
-#if 0
 	if (i < 0)
 		printf ("ping: sendto: %s\n", strerror(errno));
 	else if (i != sizeof(packet))
 		printf ("ping wrote %d chars; %d expected\n", i,
 			   (int)sizeof(packet));
-#endif
 
 	if (ntransmitted < pingcount) {	/* schedule next in 1s */
 		start_timer (PINGINTERVAL * tm_get_ticks_per_second (), NULL, (void (*) (void *))sendping, 0);
 	} else {					/* done, wait for the last ping to come back */
-		pingtimer = start_timer (5 * tm_get_ticks_per_second (), NULL, 
-					(void (*) (void *))set_pingexit, 0);
+		start_timer (5 * tm_get_ticks_per_second (), NULL, (void (*) (void *))set_pingexit, 0);
 	}
 }
 
@@ -362,6 +356,8 @@ static void ping(const char *host)
 		setsockopt(pingsock, SOL_SOCKET, SO_RCVBUF, (char *) &sockopt,
 				sizeof(sockopt));
 
+		fcntl(pingsock, F_SETFL, O_NONBLOCK);
+
 	}
 	pingaddr.sin_family = AF_INET;
 	if (!(h = gethostbyname(host))) {
@@ -386,7 +382,6 @@ static void ping(const char *host)
 		   datalen);
 
 	ping_exit = 0;
-	pingtimer = NULL;
 	ntransmitted = 0;
 	nreceived = 0; 
 	nrepeats = 0; 
@@ -398,6 +393,7 @@ static void ping(const char *host)
 
 	/* start the ping's going ... */
 	sendping(0);
+
 
 	/* listen for replies */
 	while (1) {
@@ -427,13 +423,13 @@ static void ping(const char *host)
 			if (errno == EINTR)
 				continue;
 		}
-		unpack(packet, c, &from);
+		if (c > 0)
+			unpack(packet, c, &from);
 
 		if (pingcount > 0 && nreceived >= pingcount) {
 			break;
 		}
 	}
-
 	pingstats (0);
 	//close (pingsock);
 }
@@ -441,7 +437,5 @@ int ping_me (char *host)
 {
 	myid = get_tsk_pid() & 0xFFFF;
 	ping(host);
-	if (pingtimer) 
-		del_timer (pingtimer);
 	return 0;
 }
