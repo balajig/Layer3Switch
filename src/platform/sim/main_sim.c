@@ -18,6 +18,7 @@ char switch_mac[6] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x00};
 void dump_task_info (void);
 void execute_system_call (char *arg);
 
+void layer3switch_init (void);
 void show_uptime (char *[]);
 
 void execute_system_call (char *arg)

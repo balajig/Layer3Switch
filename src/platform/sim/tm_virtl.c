@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netpacket/packet.h>
+#include <unistd.h>
 #include <net/ethernet.h> /* the L2 protocols */
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -20,7 +21,7 @@
 #include "task.h"
 #include "types_sim.h"
 #include <sys/ioctl.h>
-
+#define UNUSED_PARAM __attribute__((unused))
 #define ARPHRD_ETHER    1
 
 #define VERSION "0.1"
@@ -42,6 +43,11 @@ void process_pkt (void  *pkt, int len, uint16_t port);
 void tx_pkt_for_capture (uint8_t *buf, int len) ;
 int ifname_info (char *ifname);
 int create_communication_channel (void);
+void tsk_sleep (int secs);
+void send_packet (void *buf, uint16_t port, int len);
+retval_t task_create (const char tskname[], int tsk_prio, int sched_alg, int stk_size,
+		void *(*start_routine) (void *), void (*exit_routine) (void),
+		void *arg, tmtaskid_t * rettskid);
 
 
 #pragma pack(push)  /* push current alignment to stack */
@@ -59,7 +65,7 @@ static uint32_t tm_ifindex = 0;
 static uint32_t tm_inst = 0;
 static char     tm_ifname[IFNAMSIZ] = "lo";
 
-void * packet_processing_task (void *unused)
+void * packet_processing_task (void *unused UNUSED_PARAM)
 {
 	int len = 0;
 
@@ -91,7 +97,7 @@ void * packet_processing_task (void *unused)
 
 		if (!pkt_buf) {
 			printf ("Out of memory\n");
-			sleep (1); /*Sleep for some time*/
+			tsk_sleep (1); /*Sleep for some time*/
 			if (++retry == 3) {
 				write_string ("Out of Memory!\n");
 				exit (1);
@@ -120,7 +126,7 @@ void send_packet (void *buf, uint16_t port, int len)
 
 	memcpy (&pkt[2], buf, len);
 
-	tx_pkt_for_capture (&pkt[2], len);
+	tx_pkt_for_capture ((uint8_t *)&pkt[2], len);
 
 	tx_pkt (pkt, len + sizeof(inst_t));
 }
@@ -248,6 +254,8 @@ int rcv_pkt (void *buf)
 
 int parse_cmdline (int argc, char *argv[])
 {
+	if (argc != 2)
+		return -1;
 	tm_inst = atoi(argv[1]);
 
 	ifname_info (tm_ifname);
