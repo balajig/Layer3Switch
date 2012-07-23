@@ -32,7 +32,7 @@ struct zebra_t zebrad;
  * it is useful to able to set it otherwise for testing, hence exported
  * as global here for test-rig code.
  */
-int rib_process_hold_time = 10;
+int rib_process_hold_time = 2;
 
 void *rib_timer = NULL;
 
