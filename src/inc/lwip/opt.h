@@ -1713,14 +1713,14 @@
  * PAP_SUPPORT==1: Support PAP.
  */
 #ifndef PAP_SUPPORT
-#define PAP_SUPPORT                     0
+#define PAP_SUPPORT                     1
 #endif
 
 /**
  * CHAP_SUPPORT==1: Support CHAP.
  */
 #ifndef CHAP_SUPPORT
-#define CHAP_SUPPORT                    0
+#define CHAP_SUPPORT                    1
 #endif
 
 /**
@@ -1748,14 +1748,14 @@
  * VJ_SUPPORT==1: Support VJ header compression.
  */
 #ifndef VJ_SUPPORT
-#define VJ_SUPPORT                      0
+#define VJ_SUPPORT                      1
 #endif
 
 /**
  * MD5_SUPPORT==1: Support MD5 (see also CHAP).
  */
 #ifndef MD5_SUPPORT
-#define MD5_SUPPORT                     0
+#define MD5_SUPPORT                     1
 #endif
 
 /*

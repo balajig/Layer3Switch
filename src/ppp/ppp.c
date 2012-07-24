@@ -1318,10 +1318,10 @@ sifvjcomp(int pd, int vjcomp, u8_t cidcomp, u8_t maxcid)
 static err_t
 pppifNetifInit(struct interface *netif)
 {
-  netif->name[0] = 'p';
-  netif->name[1] = 'p';
+  netif->ifDescr[0] = 'p';
+  netif->ifDescr[1] = 'p';
   netif->output = pppifOutput;
-  netif->mtu = pppMTU((int)(size_t)netif->state);
+  netif->ifMtu = pppMTU((int)(size_t)netif->state);
   netif->flags = NETIF_FLAG_POINTTOPOINT | NETIF_FLAG_LINK_UP;
 #if LWIP_NETIF_HOSTNAME
   /* @todo: Initialize interface hostname */

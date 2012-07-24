@@ -90,4 +90,5 @@ void process_pkt (void  *pkt, int len, uint16_t port)
 	if (p)
 		ethernet_input (p, IF_INFO (port));
 #endif
+	free (pkt);
 }

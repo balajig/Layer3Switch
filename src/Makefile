@@ -8,6 +8,7 @@ obj-$(CONFIG_OPENSWITCH_TCP_IP) += ipv6/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += dns/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += sockets/
 obj-$(CONFIG_OPENSWITCH_TCP_IP) += snmp/
+obj-$(CONFIG_OPENSWITCH_TCP_IP) += ppp/
 
 obj-y += bridge/
 obj-y += init/
