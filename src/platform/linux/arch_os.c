@@ -587,10 +587,12 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
  * @return time (in milliseconds) waited for a message, may be 0 if not waited
            or SYS_ARCH_TIMEOUT on timeout
  *         The returned time has to be accurate to prevent timer jitter! */
-u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout UNUSED_PARAM)
+u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
 {
-	/*TODO: Implement based on timeout*/
-	return msg_rcv (*mbox, (char **)msg, sizeof (unsigned long));
+	if (timeout)
+		return msg_rcv_timed (*mbox, (char **)msg, sizeof (unsigned long), timeout);
+	else
+		return msg_rcv (*mbox, (char **)msg, sizeof (unsigned long));
 }
 /* Allow port to override with a macro, e.g. special timout for sys_arch_mbox_fetch() */
 #ifndef sys_arch_mbox_tryfetch

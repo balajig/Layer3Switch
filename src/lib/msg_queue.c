@@ -124,6 +124,27 @@ int msg_rcv (int qid, char **msg, int size UNUSED_PARAM)
 	return -1;
 }
 
+int msg_rcv_timed (int qid, char **msg, int size UNUSED_PARAM, unsigned int msecs)
+{
+	struct msg * p = NULL;
+	
+	EvtLock (&Queue[qid].q_evt);
+
+	while (1) {
+		if (!list_empty (&Queue[qid].msg_list)) {
+			p = list_first_entry (&Queue[qid].msg_list, struct msg,
+                                               next);
+			*msg = p->msg; 
+			list_del (&p->next);
+			free_blk (Queue[qid].mpool_id, p);
+			EvtUnLock (&Queue[qid].q_evt);
+			return 0;
+		}
+		EvtWaitOnTimed (&Queue[qid].q_evt, msecs / 1000, (msecs % 1000) * (1000 * 1000));
+	}
+	return -1;
+}
+
 int msg_send (int qid, void *msg, int size UNUSED_PARAM)
 {
 	struct msg * p = NULL;

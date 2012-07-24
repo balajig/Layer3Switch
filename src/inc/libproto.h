@@ -72,6 +72,7 @@ int msg_rcv (int qid, char **msg, int size);
 int msg_send (int qid, void *msg, int size);
 int msg_Q_delete (int qid);
 int mq_vaild (int qid);
+int msg_rcv_timed (int qid, char **msg, int size, unsigned int msecs);
 
 /*LOCK*/
 int create_sync_lock (sync_lock_t *slock);
