@@ -61,10 +61,14 @@ cparser_result_t cparser_cmd_show_ip_interface(cparser_context_t *context UNUSED
 			i++;
 			continue;
 		}
+		uint32_2_ipstring (port_cdb[i-1].ip_addr.addr, &addr[0]);
+		if (!addr[0]) {
+		  i++;
+		  continue;
+		}
 		cli_printf ("\n%s is administratively %s, line protocol is %s\n", IF_DESCR(i), State[IF_ADMIN_STATUS(i) - 1],
 				State[IF_OPER_STATUS(i) - 1]);
 		cli_printf  ("Internet address is ");
-		uint32_2_ipstring (port_cdb[i-1].ip_addr.addr, &addr[0]);
 		cli_printf("%u.%u.%u.%u", addr[0], addr[1],addr[2],addr[3]);
 		uint32_2_ipstring (port_cdb[i-1].netmask.addr, &Mask[0]);
 		cli_printf  (", subnet mask is ");
