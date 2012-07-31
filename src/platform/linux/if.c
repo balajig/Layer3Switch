@@ -48,6 +48,11 @@ static int idx = 0;
 
 int get_max_ports (void)
 {
+	return idx;
+}
+
+int get_max_port (void)
+{
 	return MAX_PORTS;
 }
 

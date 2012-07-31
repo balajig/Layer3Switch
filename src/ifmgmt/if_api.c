@@ -53,7 +53,7 @@ struct interface * if_lookup_exact_address (struct in_addr src)
 	struct connected *c;
         int idx = 0;
 
-        while (idx < get_max_ports ()) {
+        while (idx < get_max_port ()) {
 		for (ALL_LIST_ELEMENTS_RO (ifp->connected, cnode, c))
 		{
 			p = c->address;
@@ -84,7 +84,7 @@ struct interface * if_lookup_address (struct in_addr src)
 	addr.u.prefix4 = src;
 	addr.prefixlen = IPV4_MAX_BITLEN;
 
-        while (idx < get_max_ports ()) {
+        while (idx < get_max_port ()) {
 		for (ALL_LIST_ELEMENTS_RO (ifp->connected, cnode, c))
 		{
 			if (c->address && (c->address->family == AF_INET) &&
@@ -154,7 +154,7 @@ static struct interface * get_if (void *key, uint8_t key_type)
 {
 	int idx = 0;
 
-	while (idx < get_max_ports ()) {
+	while (idx < get_max_port ()) {
 		switch (key_type) {
 			case GET_IF_BY_NAME:
 				if (!strcmp ((char *)key, port_cdb[idx].ifDescr))
