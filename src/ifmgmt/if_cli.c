@@ -127,6 +127,7 @@ cparser_result_t cparser_cmd_interface_loopback_portnum(cparser_context_t *conte
         set_prompt (prompt);
 	get_prompt (prompt);
         set_curr_mode (INTERFACE_MODE);
+	if_lo_setup (*portnum_ptr);
 	return cparser_submode_enter(context->parser, NULL, prompt);
 }
 cparser_result_t cparser_cmd_iflo_enable(cparser_context_t *context UNUSED_PARAM)

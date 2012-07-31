@@ -83,9 +83,11 @@
 
 
 void ethernetif_init (struct interface *netif);
-static int if_lo_init (void);
+int if_lo_setup (int);
 err_t low_level_output (struct interface *netif, struct pbuf *p);
 int if_zebra_new_hook (struct interface *ifp);;
+
+static int mini_index = CONFIG_MAX_PHY_PORTS;
 
 #if LWIP_HAVE_LOOPIF
 static struct interface loop_if;
@@ -115,7 +117,7 @@ err_t if_loopif_init(void)
 
   if_set_addr (netif, &loop_ipaddr, &loop_netmask, &loop_gw);
 
-  if_lo_init ();
+  //if_lo_init ();
   return ERR_OK;
 }
 
@@ -797,14 +799,12 @@ int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask)
 	return 0;
 }
 
-static int if_lo_init (void)
+int if_lo_setup (int portnum)
 {
-	int mini_index = CONFIG_MAX_PHY_PORTS;
-
-	while (mini_index < (CONFIG_MAX_PHY_PORTS + MAX_LOOPBACK_PORTS)) {
+	if (mini_index < (CONFIG_MAX_PHY_PORTS + MAX_LOOPBACK_PORTS)) {
 		struct interface  *netif = &port_cdb[mini_index];
 		ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
-		sprintf ((char *)netif->ifDescr, "%s%d","lo", mini_index - CONFIG_MAX_PHY_PORTS + 1);
+		sprintf ((char *)netif->ifDescr, "%s%d","lo", portnum);
 		netif->ifIndex = mini_index + 1;
 		netif->ifType = 2;
 		netif->ifMtu = 16436;
@@ -823,18 +823,9 @@ static int if_lo_init (void)
 		netif->ifOutErrors = 0;
 		netif->pstp_info = NULL;
 		netif->flags = NETIF_FLAG_BROADCAST |  NETIF_FLAG_LINK_UP | NETIF_FLAG_LOOPBACK;
-
-		IP4_ADDR(&loop_gw, 127,0,0,1);
-		IP4_ADDR(&loop_ipaddr, 127,0,0,mini_index - CONFIG_MAX_PHY_PORTS + 2);
-		IP4_ADDR(&loop_netmask, 255,0,0,0);
-
-		netif->output = netif_loop_output;
-
-		if_set_addr (netif, &loop_ipaddr, &loop_netmask, &loop_gw);
-
+		if_zebra_new_hook (netif);
+		if_connect_init (&port_cdb[mini_index]);
 		mini_index++;
-
-		//if_connect_init (&port_cdb[idx]);
 	}
 	return 0;
 }
