@@ -48,7 +48,7 @@ static int idx = 0;
 
 int get_max_ports (void)
 {
-	return idx;
+	return MAX_PORTS;
 }
 
 static int new_port_init (int id)
