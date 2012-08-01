@@ -10,6 +10,11 @@ struct interface;
 #define ZEBRA_INTERFACE_SUB        (1 << 1)
 #define ZEBRA_INTERFACE_LINKDETECTION (1 << 2)
 
+/*FIXME Temproary place holder, Already defined in zebra.h  To be removed */
+#define CHECK_FLAG(V,F)      ((V) & (F))
+#define SET_FLAG(V,F)        (V) |= (F)
+#define UNSET_FLAG(V,F)      (V) &= ~(F)
+
 struct interface {
 	void      *platform;
 	struct stp_port_entry *pstp_info;

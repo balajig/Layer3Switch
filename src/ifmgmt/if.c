@@ -88,6 +88,7 @@ err_t low_level_output (struct interface *netif, struct pbuf *p);
 int if_zebra_new_hook (struct interface *ifp);;
 
 static int mini_index = CONFIG_MAX_PHY_PORTS;
+static unsigned char lo_if_flag;
 
 #if LWIP_HAVE_LOOPIF
 static struct interface loop_if;
@@ -801,7 +802,7 @@ int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask)
 
 int if_lo_setup (int portnum)
 {
-	if (mini_index < (CONFIG_MAX_PHY_PORTS + MAX_LOOPBACK_PORTS)) {
+	if ((mini_index < (CONFIG_MAX_PHY_PORTS + MAX_LOOPBACK_PORTS)) && (!CHECK_FLAG (lo_if_flag,portnum))) {
 		struct interface  *netif = &port_cdb[mini_index];
 		ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
 		sprintf ((char *)netif->ifDescr, "%s%d","lo", portnum);
@@ -825,6 +826,7 @@ int if_lo_setup (int portnum)
 		netif->flags = NETIF_FLAG_BROADCAST |  NETIF_FLAG_LINK_UP | NETIF_FLAG_LOOPBACK;
 		if_zebra_new_hook (netif);
 		if_connect_init (&port_cdb[mini_index]);
+		SET_FLAG (lo_if_flag,portnum);
 		mini_index++;
 	}
 	return 0;
