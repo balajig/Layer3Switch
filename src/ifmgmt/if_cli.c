@@ -122,6 +122,12 @@ cparser_result_t cparser_cmd_interface_loopback_portnum(cparser_context_t *conte
 {
 	char prompt[CPARSER_MAX_PROMPT];
 	/* Enter the submode */
+
+	if (*portnum_ptr < 1 || *portnum_ptr > MAX_LOOPBACK_PORTS) {
+		cli_printf ("Error: Invalid loopback port : %d, Valid range is 1  - %d\n", *portnum_ptr, MAX_LOOPBACK_PORTS);
+		return CPARSER_NOT_OK;
+	}
+
         cli_set_port (*portnum_ptr);
         sprintf (prompt, "%s%d%s","(config-if-lo", *portnum_ptr, ")");
         set_prompt (prompt);

@@ -87,9 +87,6 @@ int if_lo_setup (int);
 err_t low_level_output (struct interface *netif, struct pbuf *p);
 int if_zebra_new_hook (struct interface *ifp);;
 
-static int mini_index = CONFIG_MAX_PHY_PORTS;
-static unsigned char lo_if_flag;
-
 #if LWIP_HAVE_LOOPIF
 static struct interface loop_if;
 
@@ -802,33 +799,34 @@ int set_ip_address (uint32_t ifindex, uint32_t ipaddress, uint32_t ipmask)
 
 int if_lo_setup (int portnum)
 {
-	if ((mini_index < (CONFIG_MAX_PHY_PORTS + MAX_LOOPBACK_PORTS)) && (!CHECK_FLAG (lo_if_flag,portnum))) {
-		struct interface  *netif = &port_cdb[mini_index];
-		ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
-		sprintf ((char *)netif->ifDescr, "%s%d","lo", portnum);
-		netif->ifIndex = mini_index + 1;
-		netif->ifType = 2;
-		netif->ifMtu = 16436;
-		netif->ifSpeed = 10;
-		netif->ifAdminStatus = IF_UP;
-		netif->ifOperStatus = IF_UP;
-		netif->ifLastChange = 0;
-		netif->ifInOctets = 0;
-		netif->ifInUcastPkts = 0;
-		netif->ifInDiscards = 0;
-		netif->ifInErrors = 0;
-		netif->ifInUnknownProtos = 0;
-		netif->ifOutOctets = 0;
-		netif->ifOutUcastPkts = 0;
-		netif->ifOutDiscards = 0;
-		netif->ifOutErrors = 0;
-		netif->pstp_info = NULL;
-		netif->flags = NETIF_FLAG_BROADCAST |  NETIF_FLAG_LINK_UP | NETIF_FLAG_LOOPBACK;
-		if_zebra_new_hook (netif);
-		if_connect_init (&port_cdb[mini_index]);
-		SET_FLAG (lo_if_flag,portnum);
-		mini_index++;
-	}
+	int mini_index = CONFIG_MAX_PHY_PORTS + portnum - 1;
+	struct interface  *netif = &port_cdb[mini_index];
+
+	if (!netif || netif->ifIndex)
+		return -1;
+
+	ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
+	sprintf ((char *)netif->ifDescr, "%s%d","lo", portnum);
+	netif->ifIndex = mini_index + 1;
+	netif->ifType = 2;
+	netif->ifMtu = 16436;
+	netif->ifSpeed = 10;
+	netif->ifAdminStatus = IF_UP;
+	netif->ifOperStatus = IF_UP;
+	netif->ifLastChange = 0;
+	netif->ifInOctets = 0;
+	netif->ifInUcastPkts = 0;
+	netif->ifInDiscards = 0;
+	netif->ifInErrors = 0;
+	netif->ifInUnknownProtos = 0;
+	netif->ifOutOctets = 0;
+	netif->ifOutUcastPkts = 0;
+	netif->ifOutDiscards = 0;
+	netif->ifOutErrors = 0;
+	netif->pstp_info = NULL;
+	netif->flags = NETIF_FLAG_BROADCAST |  NETIF_FLAG_LINK_UP | NETIF_FLAG_LOOPBACK;
+	if_zebra_new_hook (netif);
+	if_connect_init (netif);
 	return 0;
 }
 #if LWIP_IPV6
