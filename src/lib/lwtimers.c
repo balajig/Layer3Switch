@@ -347,7 +347,9 @@ int init_timer_mgr (void)
 	tmr_mgr = tm_malloc (sizeof (struct timer_mgr) * max_cpus);
 
 	while (i < max_cpus) {
-		if (task_create ("TMR", 99, TSK_SCHED_RR, 32000,
+		char task_name[8];
+		sprintf (task_name, "TMR-%d", i);
+		if (task_create (task_name, 99, TSK_SCHED_RR, 32000,
 				tick_clock, NULL, (void *)i, &task_id) == TSK_FAILURE) {
 			return FAILURE;
 		}
