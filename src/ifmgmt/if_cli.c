@@ -11,6 +11,7 @@ int cli_show_interfaces (int port);
 int  cli_set_port_disable (void);
 void send_interface_enable_or_disable (int port , int state);
 static int cli_show_interfaces_all (void);
+int if_lo_setup (int portnum);
 
 cparser_result_t cparser_cmd_if_enable(cparser_context_t *context)
 {
