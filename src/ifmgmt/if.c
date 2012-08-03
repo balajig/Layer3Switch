@@ -805,7 +805,6 @@ int if_lo_setup (int portnum)
 	if (!netif || netif->ifIndex)
 		return -1;
 
-	ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
 	sprintf ((char *)netif->ifDescr, "%s%d","lo", portnum);
 	netif->ifIndex = mini_index + 1;
 	netif->ifType = 2;
