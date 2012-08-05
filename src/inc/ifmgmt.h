@@ -192,6 +192,10 @@ extern if_t port_cdb[];
 #define   IF_OUT_ERRORS(port)       port_cdb[port - 1].ifOutErrors
 #define   IF_STP_STATE(port)        port_cdb[port - 1].pstp_info->state
 #define   IF_STP_INFO(port)         port_cdb[port - 1].pstp_info
+#define   IF_IP_ADDRESS(port)	    port_cdb[port - 1].ip_addr.addr;
+#define   IF_IP_NETMASK(port)	    port_cdb[port - 1].netmask.addr;
+#define   IF_IP_GW(port)	    port_cdb[port - 1].gw.addr;
+
 
 struct interface *if_lookup_by_index(unsigned int index);
 const char *ifindex2ifname(unsigned int index);

@@ -143,6 +143,17 @@ cparser_result_t cparser_cmd_iflo_enable(cparser_context_t *context UNUSED_PARAM
 }
 cparser_result_t cparser_cmd_iflo_disable(cparser_context_t *context UNUSED_PARAM)
 {
+	int port = cli_get_port () + CONFIG_MAX_PHY_PORTS;
+	uint32_t ip_addr,netmask; 
+
+	ip_addr = IF_IP_ADDRESS (port);
+	netmask = IF_IP_NETMASK (port);
+
+	if (hal_interface_down (IF_INFO(port)) < 0) {
+		return -1;
+	}
+
+	connected_route_delete (IF_INFO (port), &ip_addr, &netmask, 0);
 	return CPARSER_OK;
 }
 cparser_result_t cparser_cmd_iflo_ip_address_addr_mask(cparser_context_t *context UNUSED_PARAM,

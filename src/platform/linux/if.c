@@ -347,6 +347,12 @@ int make_if_down (if_t *p)
 	struct ifreq ifr;
 	int  fd = -1;
 
+	if (p->flags & NETIF_FLAG_LOOPBACK) {
+	  p->ifAdminStatus = IF_DOWN;
+	  p->ifOperStatus = IF_DOWN;
+	  return 0;
+	}
+	  
 	fd =  socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd < 0)
 		return (-1);
