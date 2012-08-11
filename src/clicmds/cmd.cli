@@ -48,6 +48,8 @@ arp <IPV4ADDR:ipaddr> <MACADDR:hostmacaddr>
 // Remove a static ARP mapping.
 no arp <IPV4ADDR:ipaddr>
 
+no ip route <IPV4ADDR:network> <IPV4ADDR:mask> <IPV4ADDR:gateway>
+
 #include "src/clicmds/sntpcfg.cli"
 
 #endsubmode
