@@ -70,7 +70,8 @@ int process_login (void)
 
 retry:
 	if (u1count == MAX_TRY) {
-		process_lock ();
+		cli_printf("\n");
+		show_login_prompt ();
 		u1count = 0;
 		goto login;
 	}
