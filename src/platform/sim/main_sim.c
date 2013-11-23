@@ -21,6 +21,11 @@ void execute_system_call (char *arg);
 void layer3switch_init (void);
 void show_uptime (char *[]);
 
+int get_max_port ()
+{
+	return 12;
+}
+
 void execute_system_call (char *arg)
 {
 	system (arg);
